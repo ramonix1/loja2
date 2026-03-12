@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= produto.nome %> - Lojão</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<%- include("../partials/header") %>
+
+<div class="container">
+
+  <a href="/" style="color:#2563eb; font-size:14px; text-decoration:none; display:inline-block; margin-bottom:24px;">← Voltar para loja</a>
+
+  <div class="produto-detail">
+
+    <!-- GALERIA DE IMAGENS -->
+    <div>
+      <img
+        id="mainImage"
+        src="<%= imagens.length ? imagens[0].url : 'https://placehold.co/600x450/f3f4f6/9ca3af?text=Sem+Imagem' %>"
+        alt="<%= produto.nome %>"
+        class="produto-detail-img"
+        style="max-height:460px; object-fit:cover; width:100%;">
+
+      <% if(imagens.length > 1){ %>
+        <div class="galeria">
+          <% imagens.forEach(function(img){ %>
+            <img
+              src="<%= img.url %>"
+              alt="Imagem do produto"
+              onclick="trocarImagem('<%= img.url %>', this)">
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- DETALHES -->
+    <div style="display:flex; flex-direction:column; gap:20px;">
+
+      <div>
+        <h1 style="font-size:32px; font-weight:800; color:#111827; line-height:1.1;"><%= produto.nome %></h1>
+        <% if(produto.subtitulo){ %>
+          <p style="color:#6b7280; font-size:17px; margin-top:6px;"><%= produto.subtitulo %></p>
+        <% } %>
+      </div>
+
+      <!-- AVALIAÇÕES -->
+      <div style="display:flex; align-items:center; gap:8px; color:#f59e0b;">
+        ★★★★★ <span style="color:#9ca3af; font-size:13px;">(124 avaliações)</span>
+      </div>
+
+      <!-- PREÇO -->
+      <div style="font-size:38px; font-weight:900; color:#2563eb;">
+        R$ <%= Number(produto.valor).toFixed(2).replace('.', ',') %>
+      </div>
+
+      <!-- DESCRIÇÃO -->
+      <% if(produto.descricao){ %>
+        <p class="produto-descricao"><%= produto.descricao %></p>
+      <% } %>
+
+      <!-- QUANTIDADE -->
+      <div style="display:flex; align-items:center; gap:16px;">
+        <span style="font-weight:600; color:#374151;">Quantidade</span>
+        <input type="number" value="1" min="1"
+          style="width:80px; padding:8px; border:1.5px solid #e5e7eb; border-radius:8px; text-align:center;">
+      </div>
+
+      <!-- BOTÕES -->
+      <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:8px;">
+        <button class="btn btn-primary" style="font-size:15px; padding:14px 28px;">🛒 Adicionar ao Carrinho</button>
+        <button class="btn" style="background:#16a34a; color:white; font-size:15px; padding:14px 28px;">⚡ Comprar Agora</button>
+      </div>
+
+      <!-- GARANTIAS -->
+      <div style="border-top:1px solid #f3f4f6; padding-top:20px; display:flex; flex-direction:column; gap:8px;">
+        <div style="display:flex; align-items:center; gap:8px; font-size:14px; color:#4b5563;">
+          🚚 <span>Frete calculado no checkout</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; font-size:14px; color:#4b5563;">
+          🔄 <span>Troca garantida em até 7 dias</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; font-size:14px; color:#4b5563;">
+          🔒 <span>Pagamento 100% seguro</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<%- include("../partials/footer") %>
+
+<script>
+function trocarImagem(src, el) {
+  document.getElementById("mainImage").src = src;
+  document.querySelectorAll(".galeria img").forEach(i => i.style.borderColor = "transparent");
+  el.style.borderColor = "#2563eb";
+}
+</script>
+
+</body>
+</html>

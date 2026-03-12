@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lojão - Produtos de qualidade</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<%- include("../partials/header") %>
+
+<!-- Hero Banner -->
+<div class="hero">
+  <div class="hero-content">
+    <h1>Os melhores produtos, <br>para você.</h1>
+    <p>Qualidade garantida com entrega rápida em todo o Brasil.</p>
+    <a href="#produtos" class="btn btn-hero">Ver produtos ↓</a>
+  </div>
+</div>
+
+<div class="container" id="produtos">
+
+  <div class="section-title">
+    <h2>Nossos Produtos</h2>
+    <p>Encontre o que você precisa com os melhores preços</p>
+  </div>
+
+  <% if(produtos.length === 0){ %>
+    <div class="empty-state">
+      <div class="empty-icon">📦</div>
+      <h3>Nenhum produto cadastrado ainda</h3>
+      <p>Volte em breve ou <a href="/admin">acesse o painel admin</a> para cadastrar produtos.</p>
+    </div>
+  <% } else { %>
+    <div class="produtos-grid">
+      <% produtos.forEach(function(produto){ %>
+        <%- include("../partials/produto-card", {produto}) %>
+      <% }) %>
+    </div>
+  <% } %>
+
+</div>
+
+<%- include("../partials/footer") %>
+
+</body>
+</html>
