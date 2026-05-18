@@ -14,7 +14,19 @@ exports.home = async (req, res) => {
       FROM produtos p
       ORDER BY p.created_at DESC
     `);
-    res.render("pages/index", { produtos: produtos.rows });
+
+    let clientes = [];
+    try {
+      const clientesQuery = await db.query(
+        "SELECT * FROM clientes WHERE ativo = true ORDER BY ordem ASC, nome ASC"
+      );
+      clientes = clientesQuery.rows;
+    } catch (err) {
+      // Tabela de clientes não existe, continua sem erro
+      console.warn("Aviso: tabela de clientes não encontrada");
+    }
+
+    res.render("pages/index", { produtos: produtos.rows, clientes });
   } catch (error) {
     console.error("Erro ao carregar home:", error);
     res.status(500).render("pages/error", { message: "Erro ao carregar produtos" });

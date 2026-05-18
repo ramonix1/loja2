@@ -42,6 +42,31 @@
 
 </div>
 
+<!-- Seção de Clientes -->
+<% if(clientes && clientes.length > 0){ %>
+  <section class="py-16 bg-gray-50">
+    <div class="container">
+      <div class="section-title">
+        <h2>Nossos Clientes</h2>
+        <p>Empresas que confiam em nós</p>
+      </div>
+
+      <div class="overflow-hidden bg-white py-8 rounded-xl">
+        <div class="animate-scroll">
+          <!-- Duplicado para efeito de scroll infinito -->
+          <% for(let i = 0; i < 2; i++) { %>
+            <% clientes.forEach(function(cliente){ %>
+              <a href="<%= cliente.website || '#' %>" target="<%= cliente.website ? '_blank' : '_self' %>" class="flex-shrink-0 flex items-center justify-center h-20 hover:opacity-75 transition">
+                <img src="<%= cliente.logo %>" alt="<%= cliente.nome %>" class="max-h-14 max-w-xs object-contain px-4" title="<%= cliente.nome %>">
+              </a>
+            <% }) %>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </section>
+<% } %>
+
 <%- include("../partials/footer") %>
 
 </body>
