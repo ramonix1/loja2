@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pedido #<%= pedido.id %> - Lojão</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .resultado-hero {
+      text-align: center;
+      padding: 48px 24px 32px;
+    }
+    .resultado-icon { font-size: 72px; margin-bottom: 16px; }
+    .resultado-titulo { font-size: 28px; font-weight: 800; color: #111827; margin-bottom: 8px; }
+    .resultado-sub { font-size: 16px; color: #6b7280; }
+    .card { background: #fff; border-radius: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); padding: 24px; margin-bottom: 20px; }
+    .card h3 { font-size: 15px; font-weight: 700; color: #111827; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid #f3f4f6; }
+    .info-linha { display: flex; justify-content: space-between; font-size: 14px; padding: 6px 0; color: #374151; }
+    .info-linha strong { color: #111827; }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .status-pago { background: #dcfce7; color: #166534; }
+    .status-aguardando_pagamento { background: #fef9c3; color: #854d0e; }
+    .status-cancelado { background: #fee2e2; color: #991b1b; }
+    .status-em_separacao, .status-enviado { background: #dbeafe; color: #1e40af; }
+    .status-entregue { background: #d1fae5; color: #065f46; }
+    /* PIX */
+    .pix-box {
+      background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+      border: 2px solid #86efac;
+      border-radius: 14px;
+      padding: 28px;
+      text-align: center;
+    }
+    .pix-box h3 { border: none; color: #166534; font-size: 18px; margin-bottom: 8px; }
+    .pix-qr { max-width: 200px; margin: 16px auto; display: block; border-radius: 8px; border: 3px solid #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .pix-copia-cola {
+      background: #fff;
+      border: 1.5px solid #86efac;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-family: monospace;
+      font-size: 11px;
+      word-break: break-all;
+      color: #374151;
+      margin: 16px 0;
+      text-align: left;
+    }
+    .btn-copy {
+      background: #16a34a;
+      color: #fff;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-copy:hover { background: #15803d; }
+    /* Boleto */
+    .boleto-box {
+      background: #fffbeb;
+      border: 2px solid #fcd34d;
+      border-radius: 14px;
+      padding: 28px;
+      text-align: center;
+    }
+    .grid-resultado {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 800px) { .grid-resultado { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<%- include("../partials/header") %>
+
+<div class="container">
+
+  <!-- Header do resultado -->
+  <div class="resultado-hero">
+    <% if (pedido.status === 'pago') { %>
+      <div class="resultado-icon">✅</div>
+      <h1 class="resultado-titulo">Pagamento confirmado!</h1>
+      <p class="resultado-sub">Obrigado, <%= pedido.nome_entrega.split(' ')[0] %>! Seu pedido #<%= pedido.id %> foi aprovado.</p>
+    <% } else if (pedido.metodo_pagamento === 'pix') { %>
+      <div class="resultado-icon">⚡</div>
+      <h1 class="resultado-titulo">Pedido criado!</h1>
+      <p class="resultado-sub">Aguardando pagamento via PIX — pedido #<%= pedido.id %></p>
+    <% } else if (pedido.metodo_pagamento === 'boleto') { %>
+      <div class="resultado-icon">📄</div>
+      <h1 class="resultado-titulo">Boleto gerado!</h1>
+      <p class="resultado-sub">Pedido #<%= pedido.id %> — Pague até o vencimento para confirmar</p>
+    <% } else { %>
+      <div class="resultado-icon">⏳</div>
+      <h1 class="resultado-titulo">Pedido em análise</h1>
+      <p class="resultado-sub">Pedido #<%= pedido.id %> — Aguardando confirmação do pagamento</p>
+    <% } %>
+  </div>
+
+  <div class="grid-resultado">
+    <div>
+
+      <!-- PIX QR Code -->
+      <% if (pixInfo && pixInfo.qr_code) { %>
+        <div class="pix-box">
+          <h3>⚡ Pague com PIX agora</h3>
+          <p style="font-size:13px;color:#166534;margin-bottom:4px;">Escaneie o QR Code ou copie o código abaixo</p>
+          <% if (pixInfo.qr_code_base64) { %>
+            <img src="data:image/png;base64,<%= pixInfo.qr_code_base64 %>" alt="QR Code PIX" class="pix-qr">
+          <% } %>
+          <div class="pix-copia-cola" id="pixCode"><%= pixInfo.qr_code %></div>
+          <button class="btn-copy" onclick="copiarPix()">📋 Copiar código</button>
+          <% if (pixInfo.expiracao) { %>
+            <p style="font-size:12px;color:#6b7280;margin-top:12px;">Expira em: <%= new Date(pixInfo.expiracao).toLocaleString('pt-BR') %></p>
+          <% } %>
+        </div>
+      <% } %>
+
+      <!-- Boleto -->
+      <% if (boletoUrl) { %>
+        <div class="boleto-box">
+          <div style="font-size:48px;margin-bottom:12px;">📄</div>
+          <h3 style="border:none;color:#92400e;font-size:18px;">Seu boleto está pronto</h3>
+          <p style="font-size:13px;color:#92400e;margin-bottom:20px;">Vencimento em 3 dias úteis. Pague em qualquer banco ou lotérica.</p>
+          <a href="<%= boletoUrl %>" target="_blank" class="btn btn-primary" style="padding:12px 32px;font-size:15px;">Abrir boleto</a>
+        </div>
+      <% } %>
+
+      <!-- Itens do pedido -->
+      <div class="card" style="margin-top: <%= (pixInfo || boletoUrl) ? '20px' : '0' %>">
+        <h3>Itens do pedido</h3>
+        <% itens.forEach(function(item) { %>
+          <div class="info-linha">
+            <span><%= item.quantidade %>x <%= item.nome_produto %></span>
+            <strong>R$ <%= Number(item.subtotal).toFixed(2).replace('.',',') %></strong>
+          </div>
+        <% }) %>
+        <div style="border-top:2px solid #f3f4f6;margin-top:8px;padding-top:8px;">
+          <div class="info-linha">
+            <span>Total</span>
+            <strong style="color:#2563eb;font-size:16px;">R$ <%= Number(pedido.total).toFixed(2).replace('.',',') %></strong>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Resumo lateral -->
+    <div>
+      <div class="card">
+        <h3>Resumo do pedido</h3>
+        <div class="info-linha">
+          <span>Pedido</span>
+          <strong>#<%= pedido.id %></strong>
+        </div>
+        <div class="info-linha">
+          <span>Status</span>
+          <span class="status-badge status-<%= pedido.status %>">
+            <%= {
+              aguardando_pagamento: 'Aguardando pagamento',
+              pago: 'Pago',
+              em_separacao: 'Em separação',
+              enviado: 'Enviado',
+              entregue: 'Entregue',
+              cancelado: 'Cancelado'
+            }[pedido.status] || pedido.status %>
+          </span>
+        </div>
+        <div class="info-linha">
+          <span>Pagamento</span>
+          <strong>
+            <%= pedido.metodo_pagamento === 'pix' ? 'PIX' : pedido.metodo_pagamento === 'boleto' ? 'Boleto' : 'Cartão' %>
+          </strong>
+        </div>
+        <div class="info-linha">
+          <span>Data</span>
+          <strong><%= new Date(pedido.created_at).toLocaleDateString('pt-BR') %></strong>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Endereço de entrega</h3>
+        <div style="font-size:14px;color:#374151;line-height:1.8;">
+          <%= pedido.logradouro %>, <%= pedido.numero %><%= pedido.complemento ? ', ' + pedido.complemento : '' %><br>
+          <%= pedido.bairro %> — <%= pedido.cidade %>/<%= pedido.estado %><br>
+          CEP: <%= pedido.cep %>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <a href="/meus-pedidos" class="btn btn-outline" style="text-align:center;padding:12px;">Ver meus pedidos</a>
+        <a href="/" class="btn btn-primary" style="text-align:center;padding:12px;">Continuar comprando</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<%- include("../partials/footer") %>
+
+<script>
+function copiarPix() {
+  var code = document.getElementById('pixCode')?.textContent;
+  if (!code) return;
+  navigator.clipboard.writeText(code).then(function() {
+    var btn = document.querySelector('.btn-copy');
+    var orig = btn.textContent;
+    btn.textContent = '✅ Copiado!';
+    setTimeout(function() { btn.textContent = orig; }, 2000);
+  }).catch(function() {
+    // fallback
+    var ta = document.createElement('textarea');
+    ta.value = code;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+}
+</script>
+</body>
+</html>

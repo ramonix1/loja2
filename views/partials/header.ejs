@@ -4,6 +4,7 @@
     <a href="/">Home</a>
     <% if (locals.usuario) { %>
 
+      <a href="/meus-pedidos" style="color:#d1d5db;text-decoration:none;font-size:14px;font-weight:500;">Pedidos</a>
       <a href="/carrinho" class="cart-link" id="cartLink" title="Meu Carrinho">
         <span class="cart-icon">🛒</span>
         <span class="cart-badge" id="cartBadge" style="display:none;">0</span>
@@ -11,6 +12,7 @@
 
       <% if (locals.usuario.role === 'admin') { %>
         <a href="/admin">Admin</a>
+        <a href="/admin/pedidos" style="color:#d1d5db;text-decoration:none;font-size:14px;font-weight:500;">Pedidos</a>
       <% } %>
 
       <div style="display:flex;align-items:center;gap:12px;">

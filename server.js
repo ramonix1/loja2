@@ -12,6 +12,7 @@ const clienteRoutes = require('./routes/clienteRoutes');
 const bannerRoutes = require('./routes/bannerRoutes');
 const authRoutes = require('./routes/authRoutes');
 const carrinhoRoutes = require('./routes/carrinhoRoutes');
+const checkoutRoutes = require('./routes/checkoutRoutes');
 const initializeDatabase = require('./config/init-db');
 const { requireAuth, requireAdmin } = require('./middlewares/auth');
 
@@ -22,11 +23,11 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      connectSrc: ["'self'", 'https://viacep.com.br'],
+      connectSrc: ["'self'", 'https://viacep.com.br', 'https://api.mercadopago.com'],
       styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdn.tailwindcss.com'],
       fontSrc: ["'self'", 'https://fonts.gstatic.com'],
       imgSrc: ["'self'", 'data:', 'blob:', 'https://placehold.co'],
-      scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.tailwindcss.com'],
+      scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.tailwindcss.com', 'https://sdk.mercadopago.com'],
       scriptSrcAttr: ["'unsafe-inline'"],
     },
   },
@@ -83,8 +84,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// ── CSRF: valida em POST/PUT/DELETE ───────────────────────────────────────
-app.use(csrfSynchronisedProtection);
+// ── CSRF: valida em POST/PUT/DELETE (exceto webhook externo) ─────────────
+app.use((req, res, next) => {
+  if (req.path === '/webhook/mercadopago') return next();
+  csrfSynchronisedProtection(req, res, next);
+});
 
 // ── Rotas de autenticação (públicas) ──────────────────────────────────────
 app.use('/', authRoutes);
@@ -94,6 +98,7 @@ app.use('/', requireAuth, produtoRoutes);
 app.use('/', requireAdmin, clienteRoutes);
 app.use('/', requireAdmin, bannerRoutes);
 app.use('/', carrinhoRoutes);
+app.use('/', checkoutRoutes);
 
 // ── 404 ───────────────────────────────────────────────────────────────────
 app.use((req, res) => {

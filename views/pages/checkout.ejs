@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout - Lojão</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .checkout-grid {
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 32px;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .checkout-grid { grid-template-columns: 1fr; }
+    }
+    .checkout-card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+    .checkout-card h2 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    @media (max-width: 600px) {
+      .form-row, .form-row.cols-3 { grid-template-columns: 1fr; }
+    }
+    .form-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+    .metodo-pagamento {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .metodo-opcao {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 18px;
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .metodo-opcao:hover { border-color: #93c5fd; background: #f8faff; }
+    .metodo-opcao input[type=radio] { display: none; }
+    .metodo-opcao.selecionado { border-color: #2563eb; background: #eff6ff; }
+    .metodo-icon { font-size: 1.8rem; width: 40px; text-align: center; }
+    .metodo-info { flex: 1; }
+    .metodo-nome { font-weight: 700; color: #111827; font-size: 15px; }
+    .metodo-desc { font-size: 12px; color: #6b7280; margin-top: 2px; }
+    .metodo-badge {
+      background: #dcfce7;
+      color: #166534;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 12px;
+    }
+    .painel-pagamento { display: none; margin-top: 16px; }
+    .painel-pagamento.ativo { display: block; }
+    .resumo-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: #374151;
+      padding: 8px 0;
+      border-bottom: 1px solid #f3f4f6;
+    }
+    .resumo-total {
+      display: flex;
+      justify-content: space-between;
+      font-size: 20px;
+      font-weight: 800;
+      color: #111827;
+      padding: 16px 0 0;
+    }
+    .item-linha {
+      display: flex;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f9fafb;
+    }
+    .item-linha img { width: 52px; height: 52px; object-fit: cover; border-radius: 8px; background: #f3f4f6; }
+    .item-info { flex: 1; font-size: 13px; }
+    .item-info strong { display: block; color: #111827; }
+    .item-info span { color: #6b7280; }
+    .item-preco { font-weight: 700; color: #2563eb; font-size: 14px; white-space: nowrap; }
+    .erro-box {
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      color: #991b1b;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+    /* Cartão */
+    #card-form-mp { margin-top: 12px; }
+    #installments-select { display: none; margin-top: 12px; }
+    .btn-checkout {
+      width: 100%;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      background: #2563eb;
+      color: #fff;
+      transition: background 0.2s, transform 0.15s;
+      margin-top: 20px;
+    }
+    .btn-checkout:hover { background: #1d4ed8; transform: translateY(-1px); }
+    .btn-checkout:disabled { background: #93c5fd; cursor: not-allowed; transform: none; }
+  </style>
+</head>
+<body>
+<%- include("../partials/header") %>
+
+<div class="container">
+  <a href="/carrinho" style="color:#2563eb;font-size:14px;text-decoration:none;display:inline-block;margin-bottom:24px;">← Voltar ao carrinho</a>
+
+  <% if (locals.erro) { %>
+    <div class="erro-box">Erro ao processar pagamento. Tente novamente ou escolha outro método.</div>
+  <% } %>
+
+  <form id="checkoutForm" method="POST" action="/checkout">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <input type="hidden" name="mp_token" id="mp_token">
+    <input type="hidden" name="mp_installments" id="mp_installments" value="1">
+    <input type="hidden" name="mp_payment_method_id" id="mp_payment_method_id">
+
+    <div class="checkout-grid">
+
+      <!-- Coluna principal -->
+      <div>
+
+        <!-- 1. Dados de entrega -->
+        <div class="checkout-card">
+          <h2>1. Dados de entrega</h2>
+
+          <div class="form-group">
+            <label class="form-label">Nome completo *</label>
+            <input type="text" name="nome_entrega" required value="<%= usuario.nome %>" placeholder="Seu nome completo">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">E-mail *</label>
+              <input type="email" name="email_entrega" required value="<%= usuario.email %>">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Telefone</label>
+              <input type="text" name="telefone_entrega" id="telefoneInput" value="<%= usuario.telefone || '' %>" placeholder="(00) 00000-0000">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">CPF *</label>
+            <input type="text" name="cpf_entrega" id="cpfInput" required value="<%= usuario.cpf || '' %>" placeholder="000.000.000-00" maxlength="14">
+          </div>
+        </div>
+
+        <!-- 2. Endereço -->
+        <div class="checkout-card">
+          <h2>2. Endereço</h2>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">CEP *</label>
+              <input type="text" name="cep" id="cepInput" required value="<%= usuario.cep || '' %>" placeholder="00000-000" maxlength="9">
+            </div>
+            <div class="form-group" style="display:flex;align-items:flex-end;">
+              <button type="button" id="btnBuscarCep" class="btn btn-secondary" style="height:46px;width:100%;">Buscar CEP</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Logradouro *</label>
+            <input type="text" name="logradouro" id="logradouro" required value="<%= usuario.logradouro || '' %>">
+          </div>
+          <div class="form-row cols-3">
+            <div class="form-group">
+              <label class="form-label">Número *</label>
+              <input type="text" name="numero" required value="<%= usuario.numero || '' %>">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Complemento</label>
+              <input type="text" name="complemento" value="<%= usuario.complemento || '' %>">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bairro</label>
+              <input type="text" name="bairro" id="bairro" value="<%= usuario.bairro || '' %>">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Cidade *</label>
+              <input type="text" name="cidade" id="cidade" required value="<%= usuario.cidade || '' %>">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Estado *</label>
+              <select name="estado" id="estado" required>
+                <option value="">Selecione</option>
+                <% ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'].forEach(function(uf){ %>
+                  <option value="<%= uf %>" <%= (usuario.estado === uf) ? 'selected' : '' %>><%= uf %></option>
+                <% }) %>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Pagamento -->
+        <div class="checkout-card">
+          <h2>3. Forma de pagamento</h2>
+
+          <div class="metodo-pagamento">
+
+            <label class="metodo-opcao" id="opcao-pix">
+              <input type="radio" name="metodo_pagamento" value="pix" checked>
+              <div class="metodo-icon">⚡</div>
+              <div class="metodo-info">
+                <div class="metodo-nome">PIX</div>
+                <div class="metodo-desc">Aprovação instantânea, 24h por dia</div>
+              </div>
+              <span class="metodo-badge">Instantâneo</span>
+            </label>
+
+            <label class="metodo-opcao" id="opcao-cartao">
+              <input type="radio" name="metodo_pagamento" value="cartao">
+              <div class="metodo-icon">💳</div>
+              <div class="metodo-info">
+                <div class="metodo-nome">Cartão de Crédito / Débito</div>
+                <div class="metodo-desc">Visa, Mastercard, Elo, Hipercard e mais</div>
+              </div>
+            </label>
+
+            <label class="metodo-opcao" id="opcao-boleto">
+              <input type="radio" name="metodo_pagamento" value="boleto">
+              <div class="metodo-icon">📄</div>
+              <div class="metodo-info">
+                <div class="metodo-nome">Boleto Bancário</div>
+                <div class="metodo-desc">Vencimento em 3 dias úteis</div>
+              </div>
+            </label>
+
+          </div>
+
+          <!-- Painel: Cartão -->
+          <div class="painel-pagamento" id="painel-cartao">
+            <div id="card-form-mp">
+              <div class="form-group">
+                <label class="form-label">Número do cartão</label>
+                <div id="cardNumber" style="border:1.5px solid #e5e7eb;border-radius:8px;padding:12px 14px;"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Validade</label>
+                  <div id="expirationDate" style="border:1.5px solid #e5e7eb;border-radius:8px;padding:12px 14px;"></div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">CVV</label>
+                  <div id="securityCode" style="border:1.5px solid #e5e7eb;border-radius:8px;padding:12px 14px;"></div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Nome no cartão</label>
+                <input type="text" id="cardholderName" placeholder="Como aparece no cartão" style="text-transform:uppercase;">
+              </div>
+              <div id="installments-select" class="form-group">
+                <label class="form-label">Parcelas</label>
+                <select id="installments"></select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Painel: PIX / Boleto (sem campos extras) -->
+          <div class="painel-pagamento" id="painel-pix">
+            <div style="background:#f0fdf4;border-radius:10px;padding:16px;margin-top:4px;font-size:14px;color:#166534;">
+              <strong>Como funciona o PIX:</strong><br>
+              Após confirmar o pedido, você receberá um QR Code e código copia-e-cola para pagar instantaneamente.
+            </div>
+          </div>
+
+          <div class="painel-pagamento" id="painel-boleto">
+            <div style="background:#fffbeb;border-radius:10px;padding:16px;margin-top:4px;font-size:14px;color:#92400e;">
+              <strong>Atenção:</strong> O boleto vence em 3 dias úteis. O pedido é confirmado após a compensação bancária (1-2 dias úteis).
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Coluna: Resumo -->
+      <div>
+        <div class="checkout-card" style="position:sticky;top:80px;">
+          <h2>Resumo do pedido</h2>
+
+          <div>
+            <% itens.forEach(function(item) { %>
+              <div class="item-linha">
+                <img src="<%= item.imagem || '/images/sem-imagem.png' %>"
+                     alt="<%= item.nome %>"
+                     onerror="this.src='https://placehold.co/52x52/eee/aaa?text=?'">
+                <div class="item-info">
+                  <strong><%= item.nome %></strong>
+                  <span><%= item.quantidade %>x R$ <%= Number(item.preco_unitario).toFixed(2).replace('.',',') %></span>
+                </div>
+                <div class="item-preco">R$ <%= Number(item.subtotal).toFixed(2).replace('.',',') %></div>
+              </div>
+            <% }) %>
+          </div>
+
+          <div style="margin-top:16px;">
+            <div class="resumo-item">
+              <span>Subtotal (<%= itens.length %> item<%= itens.length > 1 ? 's' : '' %>)</span>
+              <span>R$ <%= Number(subtotal).toFixed(2).replace('.',',') %></span>
+            </div>
+            <div class="resumo-item">
+              <span>Frete</span>
+              <span style="color:#16a34a;">Grátis</span>
+            </div>
+            <div class="resumo-total">
+              <span>Total</span>
+              <span>R$ <%= Number(subtotal).toFixed(2).replace('.',',') %></span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-checkout" id="btnFinalizar">
+            Finalizar pedido →
+          </button>
+
+          <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:14px;font-size:12px;color:#9ca3af;">
+            🔒 Pagamento 100% seguro via Mercado Pago
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </form>
+</div>
+
+<%- include("../partials/footer") %>
+
+<script src="https://sdk.mercadopago.com/js/v2"></script>
+<script>
+(function() {
+  var mpPublicKey = '<%= mpPublicKey %>';
+  var mp, cardFields;
+
+  // ── Seleção de método ───────────────────────────────────────────────────
+  var metodos = document.querySelectorAll('.metodo-opcao');
+  var paineis = { pix: 'painel-pix', cartao: 'painel-cartao', boleto: 'painel-boleto' };
+  var opcoes  = { pix: 'opcao-pix', cartao: 'opcao-cartao', boleto: 'opcao-boleto' };
+
+  function ativarMetodo(valor) {
+    metodos.forEach(function(m) { m.classList.remove('selecionado'); });
+    document.getElementById(opcoes[valor])?.classList.add('selecionado');
+    Object.keys(paineis).forEach(function(k) {
+      var p = document.getElementById(paineis[k]);
+      if (p) p.classList.toggle('ativo', k === valor);
+    });
+    if (valor === 'cartao' && !cardFields) inicializarCartao();
+  }
+
+  ativarMetodo('pix');
+
+  document.querySelectorAll('input[name="metodo_pagamento"]').forEach(function(radio) {
+    radio.addEventListener('change', function() { ativarMetodo(this.value); });
+  });
+  metodos.forEach(function(label) {
+    label.addEventListener('click', function() {
+      var radio = this.querySelector('input[type=radio]');
+      if (radio) { radio.checked = true; ativarMetodo(radio.value); }
+    });
+  });
+
+  // ── SDK Mercado Pago: campos do cartão ─────────────────────────────────
+  function inicializarCartao() {
+    if (!mpPublicKey || mpPublicKey.startsWith('TEST-00000000')) return;
+    try {
+      mp = new MercadoPago(mpPublicKey, { locale: 'pt-BR' });
+      cardFields = mp.cardForm({
+        amount: '<%= Number(subtotal).toFixed(2) %>',
+        iframe: true,
+        form: {
+          id: 'checkoutForm',
+          cardNumber:      { id: 'cardNumber',      placeholder: '0000 0000 0000 0000' },
+          expirationDate:  { id: 'expirationDate',  placeholder: 'MM/AA' },
+          securityCode:    { id: 'securityCode',    placeholder: '000' },
+          cardholderName:  { id: 'cardholderName',  element: document.getElementById('cardholderName') },
+          installments:    { id: 'installments' },
+        },
+        callbacks: {
+          onFormMounted: function(err) { if (err) console.warn('MP mount error', err); },
+          onSubmit: function(e) {
+            e.preventDefault();
+            var data = cardFields.getCardFormData();
+            document.getElementById('mp_token').value = data.token;
+            document.getElementById('mp_installments').value = data.installments;
+            document.getElementById('mp_payment_method_id').value = data.paymentMethodId;
+            document.getElementById('checkoutForm').submit();
+          },
+          onFetching: function(r) {
+            var btn = document.getElementById('btnFinalizar');
+            btn.disabled = true;
+            return function() { btn.disabled = false; };
+          }
+        }
+      });
+      document.getElementById('installments-select').style.display = 'block';
+    } catch(e) { console.error('MP SDK error', e); }
+  }
+
+  // ── CEP ─────────────────────────────────────────────────────────────────
+  document.getElementById('cepInput').addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g,'').replace(/(\d{5})(\d)/,'$1-$2').substring(0,9);
+  });
+  document.getElementById('cpfInput').addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g,'').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2').substring(0,14);
+  });
+  document.getElementById('telefoneInput').addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g,'').replace(/(\d{2})(\d)/,'($1) $2').replace(/(\d{5})(\d)/,'$1-$2').substring(0,15);
+  });
+
+  document.getElementById('btnBuscarCep').addEventListener('click', function() {
+    var cep = document.getElementById('cepInput').value.replace(/\D/g,'');
+    if (cep.length !== 8) return;
+    fetch('https://viacep.com.br/ws/' + cep + '/json/')
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.erro) return alert('CEP não encontrado.');
+        document.getElementById('logradouro').value = d.logradouro || '';
+        document.getElementById('bairro').value = d.bairro || '';
+        document.getElementById('cidade').value = d.localidade || '';
+        document.getElementById('estado').value = d.uf || '';
+      })
+      .catch(function() { alert('Erro ao buscar CEP.'); });
+  });
+
+  // ── Submit do form (PIX e Boleto não precisam de token MP) ──────────────
+  document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+    var metodo = document.querySelector('input[name="metodo_pagamento"]:checked')?.value;
+    if (metodo === 'cartao') {
+      // A submissão é tratada pelo callback onSubmit do cardForm
+      if (cardFields) { e.preventDefault(); return; }
+    }
+  });
+})();
+</script>
+</body>
+</html>

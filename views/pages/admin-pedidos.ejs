@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pedidos - Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .status-badge { display:inline-block;padding:3px 10px;border-radius:16px;font-size:12px;font-weight:700; }
+    .status-pago { background:#dcfce7;color:#166534; }
+    .status-aguardando_pagamento { background:#fef9c3;color:#854d0e; }
+    .status-cancelado { background:#fee2e2;color:#991b1b; }
+    .status-em_separacao,.status-enviado { background:#dbeafe;color:#1e40af; }
+    .status-entregue { background:#d1fae5;color:#065f46; }
+  </style>
+</head>
+<body class="bg-gray-50">
+<%- include("../partials/header") %>
+
+<div class="container">
+  <div class="section-title">
+    <h2>Pedidos</h2>
+    <p>Gerencie todos os pedidos da loja</p>
+  </div>
+
+  <% if (pedidos.length === 0) { %>
+    <div class="empty-state">
+      <div class="empty-icon">🛍️</div>
+      <h3>Nenhum pedido ainda</h3>
+    </div>
+  <% } else { %>
+    <div class="overflow-x-auto">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Cliente</th>
+            <th>Itens</th>
+            <th>Total</th>
+            <th>Pagamento</th>
+            <th>Status</th>
+            <th>Data</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% pedidos.forEach(function(p) { %>
+            <tr>
+              <td><strong>#<%= p.id %></strong></td>
+              <td>
+                <div style="font-weight:600;font-size:14px;"><%= p.usuario_nome %></div>
+                <div style="font-size:12px;color:#6b7280;"><%= p.usuario_email %></div>
+              </td>
+              <td><%= p.total_itens %></td>
+              <td><strong>R$ <%= Number(p.total).toFixed(2).replace('.',',') %></strong></td>
+              <td><%= p.metodo_pagamento === 'pix' ? 'PIX' : p.metodo_pagamento === 'boleto' ? 'Boleto' : 'Cartão' %></td>
+              <td>
+                <span class="status-badge status-<%= p.status %>">
+                  <%= {aguardando_pagamento:'Aguardando',pago:'Pago',em_separacao:'Em separação',enviado:'Enviado',entregue:'Entregue',cancelado:'Cancelado'}[p.status] || p.status %>
+                </span>
+              </td>
+              <td style="font-size:13px;color:#6b7280;"><%= new Date(p.created_at).toLocaleDateString('pt-BR') %></td>
+              <td><a href="/admin/pedidos/<%= p.id %>" class="btn btn-outline" style="font-size:12px;padding:6px 12px;">Ver</a></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>
+
+<%- include("../partials/footer") %>
+</body>
+</html>

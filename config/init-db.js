@@ -124,6 +124,63 @@ async function initializeDatabase() {
       CREATE INDEX IF NOT EXISTS idx_banners_ordem ON banners(ordem ASC);
     `);
 
+    // Tabelas de pedidos e pagamentos
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS pedidos (
+        id SERIAL PRIMARY KEY,
+        usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
+        nome_entrega VARCHAR(255) NOT NULL,
+        email_entrega VARCHAR(255) NOT NULL,
+        telefone_entrega VARCHAR(20),
+        cpf_entrega VARCHAR(14),
+        cep VARCHAR(9),
+        logradouro VARCHAR(255),
+        numero VARCHAR(20),
+        complemento VARCHAR(100),
+        bairro VARCHAR(100),
+        cidade VARCHAR(100),
+        estado VARCHAR(2),
+        subtotal NUMERIC(10,2) NOT NULL,
+        frete NUMERIC(10,2) NOT NULL DEFAULT 0,
+        total NUMERIC(10,2) NOT NULL,
+        status VARCHAR(30) NOT NULL DEFAULT 'aguardando_pagamento'
+          CHECK (status IN ('aguardando_pagamento','pago','em_separacao','enviado','entregue','cancelado')),
+        metodo_pagamento VARCHAR(20),
+        mp_payment_id VARCHAR(100),
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_pedidos_usuario ON pedidos(usuario_id);
+      CREATE INDEX IF NOT EXISTS idx_pedidos_status ON pedidos(status);
+      CREATE INDEX IF NOT EXISTS idx_pedidos_mp ON pedidos(mp_payment_id);
+
+      CREATE TABLE IF NOT EXISTS pedido_itens (
+        id SERIAL PRIMARY KEY,
+        pedido_id INTEGER NOT NULL REFERENCES pedidos(id) ON DELETE CASCADE,
+        produto_id INTEGER REFERENCES produtos(id) ON DELETE SET NULL,
+        nome_produto VARCHAR(255) NOT NULL,
+        quantidade INTEGER NOT NULL,
+        preco_unitario NUMERIC(10,2) NOT NULL,
+        subtotal NUMERIC(10,2) NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS idx_pedido_itens_pedido ON pedido_itens(pedido_id);
+
+      CREATE TABLE IF NOT EXISTS pagamentos (
+        id SERIAL PRIMARY KEY,
+        pedido_id INTEGER NOT NULL REFERENCES pedidos(id) ON DELETE CASCADE,
+        mp_payment_id VARCHAR(100),
+        status VARCHAR(20) NOT NULL DEFAULT 'pendente',
+        status_mp VARCHAR(30),
+        valor NUMERIC(10,2) NOT NULL,
+        metodo VARCHAR(20),
+        resposta_json TEXT,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_pagamentos_pedido ON pagamentos(pedido_id);
+      CREATE INDEX IF NOT EXISTS idx_pagamentos_mp ON pagamentos(mp_payment_id);
+    `);
+
     console.log("✅ Tabelas verificadas/criadas");
 
     // Verificar se já existem clientes
