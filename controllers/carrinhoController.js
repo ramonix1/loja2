@@ -1,0 +1,108 @@
+const db = require('../config/db');
+
+async function getCarrinho(usuarioId) {
+  const r = await db.query(`
+    SELECT
+      ci.id, ci.quantidade, ci.preco_unitario,
+      ci.preco_unitario * ci.quantidade AS subtotal,
+      p.id AS produto_id, p.nome, p.subtitulo,
+      (SELECT url FROM produtos_imagens WHERE produto_id = p.id ORDER BY id LIMIT 1) AS imagem
+    FROM carrinho_itens ci
+    JOIN produtos p ON p.id = ci.produto_id
+    WHERE ci.usuario_id = $1
+    ORDER BY ci.created_at ASC
+  `, [usuarioId]);
+  return r.rows;
+}
+
+exports.exibirCarrinho = async (req, res) => {
+  try {
+    const itens = await getCarrinho(req.session.usuarioId);
+    const total = itens.reduce((s, i) => s + parseFloat(i.subtotal), 0);
+    res.render('pages/carrinho', { itens, total });
+  } catch (err) {
+    console.error('Erro ao carregar carrinho:', err);
+    res.render('pages/carrinho', { itens: [], total: 0 });
+  }
+};
+
+exports.adicionarItem = async (req, res) => {
+  const { produto_id, quantidade } = req.body;
+  const usuarioId = req.session.usuarioId;
+  const qtd = Math.max(1, parseInt(quantidade) || 1);
+
+  try {
+    const prod = await db.query('SELECT id, valor FROM produtos WHERE id = $1', [produto_id]);
+    if (!prod.rows[0]) return res.status(404).json({ erro: 'Produto não encontrado.' });
+
+    await db.query(`
+      INSERT INTO carrinho_itens (usuario_id, produto_id, quantidade, preco_unitario)
+      VALUES ($1, $2, $3, $4)
+      ON CONFLICT (usuario_id, produto_id) DO UPDATE
+        SET quantidade = carrinho_itens.quantidade + $3,
+            updated_at = NOW()
+    `, [usuarioId, produto_id, qtd, prod.rows[0].valor]);
+
+    const contagem = await contagemItens(usuarioId);
+    res.json({ sucesso: true, contagem });
+  } catch (err) {
+    console.error('Erro ao adicionar ao carrinho:', err);
+    res.status(500).json({ erro: 'Erro interno.' });
+  }
+};
+
+exports.atualizarItem = async (req, res) => {
+  const { id } = req.params;
+  const { quantidade } = req.body;
+  const qtd = parseInt(quantidade);
+
+  try {
+    if (!qtd || qtd < 1) {
+      await db.query('DELETE FROM carrinho_itens WHERE id = $1 AND usuario_id = $2', [id, req.session.usuarioId]);
+    } else {
+      await db.query(
+        'UPDATE carrinho_itens SET quantidade = $1, updated_at = NOW() WHERE id = $2 AND usuario_id = $3',
+        [qtd, id, req.session.usuarioId]
+      );
+    }
+
+    const itens = await getCarrinho(req.session.usuarioId);
+    const total = itens.reduce((s, i) => s + parseFloat(i.subtotal), 0);
+    const contagem = itens.reduce((s, i) => s + i.quantidade, 0);
+    res.json({ sucesso: true, contagem, total: total.toFixed(2) });
+  } catch (err) {
+    console.error('Erro ao atualizar carrinho:', err);
+    res.status(500).json({ erro: 'Erro interno.' });
+  }
+};
+
+exports.removerItem = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await db.query('DELETE FROM carrinho_itens WHERE id = $1 AND usuario_id = $2', [id, req.session.usuarioId]);
+    const itens = await getCarrinho(req.session.usuarioId);
+    const total = itens.reduce((s, i) => s + parseFloat(i.subtotal), 0);
+    const contagem = itens.reduce((s, i) => s + i.quantidade, 0);
+    res.json({ sucesso: true, contagem, total: total.toFixed(2) });
+  } catch (err) {
+    console.error('Erro ao remover item:', err);
+    res.status(500).json({ erro: 'Erro interno.' });
+  }
+};
+
+exports.contagem = async (req, res) => {
+  try {
+    const c = await contagemItens(req.session.usuarioId);
+    res.json({ contagem: c });
+  } catch {
+    res.json({ contagem: 0 });
+  }
+};
+
+async function contagemItens(usuarioId) {
+  const r = await db.query(
+    'SELECT COALESCE(SUM(quantidade), 0) AS total FROM carrinho_itens WHERE usuario_id = $1',
+    [usuarioId]
+  );
+  return parseInt(r.rows[0].total);
+}

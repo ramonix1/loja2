@@ -11,6 +11,7 @@ const produtoRoutes = require('./routes/produtoRoutes');
 const clienteRoutes = require('./routes/clienteRoutes');
 const bannerRoutes = require('./routes/bannerRoutes');
 const authRoutes = require('./routes/authRoutes');
+const carrinhoRoutes = require('./routes/carrinhoRoutes');
 const initializeDatabase = require('./config/init-db');
 const { requireAuth, requireAdmin } = require('./middlewares/auth');
 
@@ -92,6 +93,7 @@ app.use('/', authRoutes);
 app.use('/', requireAuth, produtoRoutes);
 app.use('/', requireAdmin, clienteRoutes);
 app.use('/', requireAdmin, bannerRoutes);
+app.use('/', carrinhoRoutes);
 
 // ── 404 ───────────────────────────────────────────────────────────────────
 app.use((req, res) => {

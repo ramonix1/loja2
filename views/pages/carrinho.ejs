@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meu Carrinho — Lojão</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .carrinho-wrap { max-width: 1100px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; align-items: start; }
+    .carrinho-titulo { font-size: 1.6rem; font-weight: 800; color: #111; margin-bottom: 24px; }
+    .carrinho-vazio { text-align: center; padding: 80px 20px; color: #6b7280; grid-column: 1/-1; }
+    .carrinho-vazio .icon { font-size: 4rem; margin-bottom: 16px; }
+    .carrinho-vazio h2 { font-size: 1.3rem; margin-bottom: 8px; color: #374151; }
+    .carrinho-vazio a { color: #3b82f6; text-decoration: none; font-weight: 600; }
+
+    /* Lista de itens */
+    .carrinho-lista { display: flex; flex-direction: column; gap: 16px; }
+    .carrinho-item {
+      background: #fff; border-radius: 14px; padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06); display: flex; gap: 18px; align-items: center;
+      transition: box-shadow 0.2s;
+    }
+    .carrinho-item:hover { box-shadow: 0 4px 18px rgba(0,0,0,0.10); }
+    .carrinho-item-img { width: 88px; height: 88px; object-fit: cover; border-radius: 10px; flex-shrink: 0; background: #f3f4f6; }
+    .carrinho-item-info { flex: 1; min-width: 0; }
+    .carrinho-item-nome { font-weight: 700; font-size: 1rem; color: #111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .carrinho-item-sub { font-size: 0.83rem; color: #6b7280; margin-top: 2px; }
+    .carrinho-item-preco { font-size: 0.9rem; color: #6b7280; margin-top: 6px; }
+    .carrinho-item-subtotal { font-size: 1.1rem; font-weight: 800; color: #2563eb; white-space: nowrap; }
+    .carrinho-item-acoes { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; flex-shrink: 0; }
+
+    /* Controle de quantidade */
+    .qty-ctrl { display: flex; align-items: center; gap: 0; border: 1.5px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
+    .qty-btn { background: #f9fafb; border: none; width: 34px; height: 34px; font-size: 1.1rem; cursor: pointer; color: #374151; transition: background 0.15s; }
+    .qty-btn:hover { background: #e5e7eb; }
+    .qty-input { width: 44px; height: 34px; border: none; border-left: 1.5px solid #e5e7eb; border-right: 1.5px solid #e5e7eb; text-align: center; font-size: 0.95rem; font-weight: 600; color: #111; background: #fff; }
+    .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    .btn-remover { background: none; border: none; color: #ef4444; font-size: 0.82rem; cursor: pointer; font-weight: 600; padding: 0; transition: color 0.15s; }
+    .btn-remover:hover { color: #b91c1c; }
+
+    /* Resumo */
+    .carrinho-resumo {
+      background: #fff; border-radius: 14px; padding: 28px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06); position: sticky; top: 90px;
+    }
+    .resumo-titulo { font-size: 1.1rem; font-weight: 700; color: #111; margin-bottom: 20px; }
+    .resumo-linha { display: flex; justify-content: space-between; font-size: 0.9rem; color: #6b7280; margin-bottom: 10px; }
+    .resumo-total { display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 800; color: #111; padding-top: 14px; border-top: 2px solid #f3f4f6; margin-top: 4px; }
+    .btn-checkout {
+      display: block; width: 100%; margin-top: 20px; padding: 14px;
+      background: #3b82f6; color: #fff; font-weight: 700; font-size: 1rem;
+      border: none; border-radius: 10px; cursor: pointer; text-align: center;
+      text-decoration: none; transition: background 0.2s;
+    }
+    .btn-checkout:hover { background: #2563eb; }
+    .btn-continuar {
+      display: block; width: 100%; margin-top: 10px; padding: 12px;
+      background: #f3f4f6; color: #374151; font-weight: 600; font-size: 0.9rem;
+      border: none; border-radius: 10px; cursor: pointer; text-align: center;
+      text-decoration: none; transition: background 0.2s;
+    }
+    .btn-continuar:hover { background: #e5e7eb; }
+
+    @media (max-width: 768px) {
+      .carrinho-wrap { grid-template-columns: 1fr; }
+      .carrinho-resumo { position: static; }
+      .carrinho-item { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+<%- include('../partials/header') %>
+
+<div class="carrinho-wrap">
+  <% if (itens.length === 0) { %>
+    <div class="carrinho-vazio">
+      <div class="icon">🛒</div>
+      <h2>Seu carrinho está vazio</h2>
+      <p style="margin-bottom:20px;">Explore nossa vitrine e adicione produtos.</p>
+      <a href="/" class="btn btn-primary" style="display:inline-block;padding:12px 28px;">Ver produtos</a>
+    </div>
+  <% } else { %>
+
+    <div>
+      <h1 class="carrinho-titulo">Meu Carrinho <span style="color:#6b7280;font-size:1rem;font-weight:400;">(<%= itens.length %> item<%= itens.length > 1 ? 's' : '' %>)</span></h1>
+
+      <div class="carrinho-lista" id="carrinhoLista">
+        <% itens.forEach(function(item) { %>
+          <div class="carrinho-item" id="item-<%= item.id %>">
+            <a href="/produto/<%= item.produto_id %>">
+              <img class="carrinho-item-img"
+                src="<%= item.imagem || 'https://placehold.co/88x88/f3f4f6/9ca3af?text=?' %>"
+                alt="<%= item.nome %>"
+                onerror="this.src='https://placehold.co/88x88/f3f4f6/9ca3af?text=?'">
+            </a>
+            <div class="carrinho-item-info">
+              <a href="/produto/<%= item.produto_id %>" style="text-decoration:none;color:inherit;">
+                <div class="carrinho-item-nome"><%= item.nome %></div>
+                <% if (item.subtitulo) { %><div class="carrinho-item-sub"><%= item.subtitulo %></div><% } %>
+              </a>
+              <div class="carrinho-item-preco">R$ <%= Number(item.preco_unitario).toFixed(2).replace('.',',') %> cada</div>
+            </div>
+            <div class="carrinho-item-acoes">
+              <div class="carrinho-item-subtotal" id="subtotal-<%= item.id %>">
+                R$ <%= Number(item.subtotal).toFixed(2).replace('.',',') %>
+              </div>
+              <div class="qty-ctrl">
+                <button class="qty-btn" data-id="<%= item.id %>" data-op="dec">−</button>
+                <input class="qty-input" type="number" value="<%= item.quantidade %>" min="1" max="99" data-id="<%= item.id %>" data-preco="<%= item.preco_unitario %>">
+                <button class="qty-btn" data-id="<%= item.id %>" data-op="inc">+</button>
+              </div>
+              <button class="btn-remover" data-id="<%= item.id %>">✕ Remover</button>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- Resumo -->
+    <div class="carrinho-resumo">
+      <div class="resumo-titulo">Resumo do pedido</div>
+      <div class="resumo-linha">
+        <span>Subtotal (<%= itens.reduce((s,i) => s + i.quantidade, 0) %> itens)</span>
+        <span id="resumoSubtotal">R$ <%= Number(total).toFixed(2).replace('.',',') %></span>
+      </div>
+      <div class="resumo-linha">
+        <span>Frete</span>
+        <span style="color:#16a34a;">Calculado no checkout</span>
+      </div>
+      <div class="resumo-total">
+        <span>Total</span>
+        <span id="resumoTotal">R$ <%= Number(total).toFixed(2).replace('.',',') %></span>
+      </div>
+      <a href="/checkout" class="btn-checkout">Finalizar compra →</a>
+      <a href="/" class="btn-continuar">← Continuar comprando</a>
+    </div>
+
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>
+
+<script>
+(function() {
+  var csrf = '<%= csrfToken %>';
+
+  function fmt(v) {
+    return 'R$ ' + parseFloat(v).toFixed(2).replace('.', ',');
+  }
+
+  function atualizarResumo(total, contagem) {
+    var el = document.getElementById('resumoTotal');
+    var sub = document.getElementById('resumoSubtotal');
+    if (el) el.textContent = fmt(total);
+    if (sub) sub.textContent = fmt(total);
+    atualizarBadge(contagem);
+  }
+
+  function atualizarBadge(n) {
+    var badge = document.getElementById('cartBadge');
+    if (!badge) return;
+    badge.textContent = n;
+    badge.style.display = n > 0 ? 'flex' : 'none';
+  }
+
+  // Botões de incremento/decremento
+  document.querySelectorAll('.qty-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var id = this.dataset.id;
+      var input = document.querySelector('.qty-input[data-id="' + id + '"]');
+      var qtd = parseInt(input.value) + (this.dataset.op === 'inc' ? 1 : -1);
+      if (qtd < 1) qtd = 1;
+      input.value = qtd;
+      salvarQtd(id, qtd, input.dataset.preco);
+    });
+  });
+
+  // Input de quantidade
+  document.querySelectorAll('.qty-input').forEach(function(input) {
+    input.addEventListener('change', function() {
+      var qtd = parseInt(this.value) || 1;
+      if (qtd < 1) { qtd = 1; this.value = 1; }
+      salvarQtd(this.dataset.id, qtd, this.dataset.preco);
+    });
+  });
+
+  function salvarQtd(id, qtd, preco) {
+    fetch('/carrinho/atualizar/' + id, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrf },
+      body: JSON.stringify({ quantidade: qtd })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (!d.sucesso) return;
+      var sub = document.getElementById('subtotal-' + id);
+      if (sub) sub.textContent = fmt(parseFloat(preco) * qtd);
+      atualizarResumo(d.total, d.contagem);
+    });
+  }
+
+  // Remover item
+  document.querySelectorAll('.btn-remover').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var id = this.dataset.id;
+      fetch('/carrinho/remover/' + id, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrf },
+        body: JSON.stringify({})
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (!d.sucesso) return;
+        var el = document.getElementById('item-' + id);
+        if (el) {
+          el.style.transition = 'opacity 0.25s, transform 0.25s';
+          el.style.opacity = '0';
+          el.style.transform = 'translateX(30px)';
+          setTimeout(function() {
+            el.remove();
+            atualizarResumo(d.total, d.contagem);
+            if (document.querySelectorAll('.carrinho-item').length === 0) {
+              location.reload();
+            }
+          }, 260);
+        }
+      });
+    });
+  });
+})();
+</script>
+</body>
+</html>

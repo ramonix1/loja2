@@ -66,14 +66,18 @@
       <!-- QUANTIDADE -->
       <div style="display:flex; align-items:center; gap:16px;">
         <span style="font-weight:600; color:#374151;">Quantidade</span>
-        <input type="number" value="1" min="1"
-          style="width:80px; padding:8px; border:1.5px solid #e5e7eb; border-radius:8px; text-align:center;">
+        <div style="display:flex;align-items:center;border:1.5px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+          <button id="btnDec" style="width:36px;height:36px;background:#f9fafb;border:none;font-size:1.1rem;cursor:pointer;color:#374151;">−</button>
+          <input type="number" id="qtdInput" value="1" min="1" max="99"
+            style="width:52px;height:36px;border:none;border-left:1.5px solid #e5e7eb;border-right:1.5px solid #e5e7eb;text-align:center;font-size:0.95rem;font-weight:600;">
+          <button id="btnInc" style="width:36px;height:36px;background:#f9fafb;border:none;font-size:1.1rem;cursor:pointer;color:#374151;">+</button>
+        </div>
       </div>
 
       <!-- BOTÕES -->
       <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:8px;">
-        <button class="btn btn-primary" style="font-size:15px; padding:14px 28px;">🛒 Adicionar ao Carrinho</button>
-        <button class="btn" style="background:#16a34a; color:white; font-size:15px; padding:14px 28px;">⚡ Comprar Agora</button>
+        <button class="btn btn-primary" id="btnAddCart" data-id="<%= produto.id %>" style="font-size:15px; padding:14px 28px;">🛒 Adicionar ao Carrinho</button>
+        <button class="btn" id="btnBuyNow" data-id="<%= produto.id %>" style="background:#16a34a; color:white; font-size:15px; padding:14px 28px;">⚡ Comprar Agora</button>
       </div>
 
       <!-- GARANTIAS -->
@@ -98,19 +102,82 @@
 
 <script>
 (function() {
+  // Galeria
   var galeria = document.getElementById('galeria');
-  if (!galeria) return;
-  galeria.addEventListener('click', function(e) {
-    var thumb = e.target.closest('img[data-url]');
-    if (!thumb) return;
-    document.getElementById('mainImage').src = thumb.dataset.url;
-    galeria.querySelectorAll('img').forEach(function(img) {
-      img.style.borderColor = 'transparent';
-      img.classList.remove('galeria-ativa');
+  if (galeria) {
+    galeria.addEventListener('click', function(e) {
+      var thumb = e.target.closest('img[data-url]');
+      if (!thumb) return;
+      document.getElementById('mainImage').src = thumb.dataset.url;
+      galeria.querySelectorAll('img').forEach(function(img) {
+        img.style.borderColor = 'transparent';
+        img.classList.remove('galeria-ativa');
+      });
+      thumb.style.borderColor = '#2563eb';
+      thumb.classList.add('galeria-ativa');
     });
-    thumb.style.borderColor = '#2563eb';
-    thumb.classList.add('galeria-ativa');
+  }
+
+  // Controle de quantidade
+  var qtdInput = document.getElementById('qtdInput');
+  document.getElementById('btnDec').addEventListener('click', function() {
+    var v = parseInt(qtdInput.value) - 1;
+    qtdInput.value = v < 1 ? 1 : v;
   });
+  document.getElementById('btnInc').addEventListener('click', function() {
+    var v = parseInt(qtdInput.value) + 1;
+    qtdInput.value = v > 99 ? 99 : v;
+  });
+
+  // Adicionar ao carrinho
+  function adicionarCarrinho(produtoId, redirecionar) {
+    var qtd = parseInt(qtdInput.value) || 1;
+    fetch('/carrinho/adicionar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-csrf-token': '<%= csrfToken %>' },
+      body: JSON.stringify({ produto_id: produtoId, quantidade: qtd })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.erro) { alert(d.erro); return; }
+      atualizarBadge(d.contagem);
+      if (redirecionar) {
+        window.location.href = '/carrinho';
+      } else {
+        mostrarToast('Produto adicionado ao carrinho!');
+      }
+    })
+    .catch(function() { alert('Erro ao adicionar. Tente novamente.'); });
+  }
+
+  function atualizarBadge(n) {
+    var badge = document.getElementById('cartBadge');
+    if (!badge) return;
+    badge.textContent = n > 99 ? '99+' : n;
+    badge.style.display = n > 0 ? 'flex' : 'none';
+  }
+
+  function mostrarToast(msg) {
+    var toast = document.getElementById('toastCarrinho');
+    var msgEl = document.getElementById('toastMsg');
+    if (!toast) return;
+    msgEl.textContent = msg;
+    toast.style.display = 'flex';
+    requestAnimationFrame(function() {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0)';
+    });
+    setTimeout(function() {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(20px)';
+      setTimeout(function() { toast.style.display = 'none'; }, 300);
+    }, 3000);
+  }
+
+  var btnAdd = document.getElementById('btnAddCart');
+  var btnBuy = document.getElementById('btnBuyNow');
+  if (btnAdd) btnAdd.addEventListener('click', function() { adicionarCarrinho(this.dataset.id, false); });
+  if (btnBuy) btnBuy.addEventListener('click', function() { adicionarCarrinho(this.dataset.id, true); });
 })();
 </script>
 

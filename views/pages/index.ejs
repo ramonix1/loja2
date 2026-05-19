@@ -261,5 +261,59 @@
 </script>
 <% } %>
 
+<% if (locals.usuario) { %>
+<script>
+(function() {
+  var csrf = '<%= csrfToken %>';
+
+  function atualizarBadge(n) {
+    var badge = document.getElementById('cartBadge');
+    if (!badge) return;
+    badge.textContent = n > 99 ? '99+' : n;
+    badge.style.display = n > 0 ? 'flex' : 'none';
+  }
+
+  function mostrarToast(msg) {
+    var toast = document.getElementById('toastCarrinho');
+    var msgEl = document.getElementById('toastMsg');
+    if (!toast) return;
+    msgEl.textContent = msg;
+    toast.style.display = 'flex';
+    requestAnimationFrame(function() {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0)';
+    });
+    setTimeout(function() {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(20px)';
+      setTimeout(function() { toast.style.display = 'none'; }, 300);
+    }, 3000);
+  }
+
+  document.querySelectorAll('.btn-add-cart').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      var id = this.dataset.id;
+      var self = this;
+      self.disabled = true;
+      fetch('/carrinho/adicionar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrf },
+        body: JSON.stringify({ produto_id: id, quantidade: 1 })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        self.disabled = false;
+        if (d.erro) { mostrarToast('Erro: ' + d.erro); return; }
+        atualizarBadge(d.contagem);
+        mostrarToast('Produto adicionado ao carrinho!');
+      })
+      .catch(function() { self.disabled = false; });
+    });
+  });
+})();
+</script>
+<% } %>
+
 </body>
 </html>

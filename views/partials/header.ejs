@@ -1,20 +1,60 @@
 <nav class="navbar">
   <a href="/" class="logo">🛒 Lojão</a>
-  <div class="nav-links">
+  <div class="nav-links" style="align-items:center;">
     <a href="/">Home</a>
     <% if (locals.usuario) { %>
+
+      <a href="/carrinho" class="cart-link" id="cartLink" title="Meu Carrinho">
+        <span class="cart-icon">🛒</span>
+        <span class="cart-badge" id="cartBadge" style="display:none;">0</span>
+      </a>
+
       <% if (locals.usuario.role === 'admin') { %>
         <a href="/admin">Admin</a>
       <% } %>
+
       <div style="display:flex;align-items:center;gap:12px;">
-        <span style="font-size:0.85rem;color:#6b7280;">Olá, <%= locals.usuario.nome.split(' ')[0] %></span>
+        <span style="font-size:0.85rem;color:#9ca3af;">Olá, <%= locals.usuario.nome.split(' ')[0] %></span>
         <form method="POST" action="/logout" style="margin:0;">
           <input type="hidden" name="_csrf" value="<%= locals.csrfToken %>">
-          <button type="submit" style="background:none;border:1px solid #d1d5db;color:#374151;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:0.85rem;">Sair</button>
+          <button type="submit" style="background:none;border:1px solid #374151;color:#9ca3af;padding:5px 13px;border-radius:6px;cursor:pointer;font-size:0.82rem;transition:all 0.2s;" onmouseover="this.style.borderColor='#9ca3af';this.style.color='#fff'" onmouseout="this.style.borderColor='#374151';this.style.color='#9ca3af'">Sair</button>
         </form>
       </div>
+
     <% } else { %>
       <a href="/login">Entrar</a>
     <% } %>
   </div>
 </nav>
+
+<% if (locals.usuario) { %>
+<script>
+(function() {
+  fetch('/carrinho/contagem')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      var badge = document.getElementById('cartBadge');
+      if (!badge) return;
+      if (d.contagem > 0) {
+        badge.textContent = d.contagem > 99 ? '99+' : d.contagem;
+        badge.style.display = 'flex';
+      }
+    })
+    .catch(function() {});
+})();
+</script>
+<% } %>
+
+<!-- Toast de notificação -->
+<div id="toastCarrinho" style="
+  position:fixed; bottom:28px; right:28px; z-index:9999;
+  background:#111827; color:#fff; padding:14px 20px; border-radius:12px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.25); font-size:0.9rem; font-weight:600;
+  display:none; align-items:center; gap:10px; max-width:320px;
+  transform:translateY(20px); transition:opacity 0.3s, transform 0.3s;
+  opacity:0;
+">
+  <span id="toastIcone">🛒</span>
+  <span id="toastMsg">Produto adicionado ao carrinho!</span>
+  <a href="/carrinho" style="color:#60a5fa;text-decoration:none;margin-left:8px;white-space:nowrap;">Ver →</a>
+</div>
