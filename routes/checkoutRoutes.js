@@ -9,6 +9,12 @@ router.get('/checkout/resultado/:id', requireAuth, checkout.exibirResultado);
 router.get('/meus-pedidos', requireAuth, checkout.meusPedidos);
 
 router.post('/webhook/mercadopago', checkout.webhook);
+router.post('/webhook/sumup', checkout.webhookSumup);
+
+// SumUp maquininha
+router.get('/checkout/aguardando-maquininha/:id', requireAuth, checkout.aguardandoMaquininha);
+router.get('/checkout/status-maquininha/:pedidoId/:tid', requireAuth, checkout.statusMaquininha);
+router.post('/checkout/cancelar-maquininha/:pedidoId/:tid', requireAuth, checkout.cancelarMaquininha);
 
 router.get('/admin/pedidos', requireAdmin, checkout.adminPedidos);
 router.get('/admin/pedidos/:id', requireAdmin, checkout.adminDetalhePedido);

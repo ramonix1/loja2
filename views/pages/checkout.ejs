@@ -257,6 +257,26 @@
               </div>
             </label>
 
+            <label class="metodo-opcao" id="opcao-sumup_online">
+              <input type="radio" name="metodo_pagamento" value="sumup_online">
+              <div class="metodo-icon">💳</div>
+              <div class="metodo-info">
+                <div class="metodo-nome">Cartão via SumUp</div>
+                <div class="metodo-desc">Pague com cartão na página segura da SumUp</div>
+              </div>
+              <span class="metodo-badge" style="background:#dbeafe;color:#1e40af;">SumUp</span>
+            </label>
+
+            <label class="metodo-opcao" id="opcao-sumup_maquininha">
+              <input type="radio" name="metodo_pagamento" value="sumup_maquininha">
+              <div class="metodo-icon">🖥️</div>
+              <div class="metodo-info">
+                <div class="metodo-nome">Maquininha SumUp</div>
+                <div class="metodo-desc">Pague presencialmente na leitora de cartão</div>
+              </div>
+              <span class="metodo-badge" style="background:#fef9c3;color:#854d0e;">Presencial</span>
+            </label>
+
           </div>
 
           <!-- Painel: Cartão -->
@@ -284,6 +304,21 @@
                 <label class="form-label">Parcelas</label>
                 <select id="installments"></select>
               </div>
+            </div>
+          </div>
+
+          <!-- Painéis SumUp -->
+          <div class="painel-pagamento" id="painel-sumup_online">
+            <div style="background:#eff6ff;border-radius:10px;padding:16px;margin-top:4px;font-size:14px;color:#1e40af;">
+              <strong>Checkout SumUp:</strong><br>
+              Após confirmar, você será redirecionado para a página segura da SumUp para inserir os dados do cartão.
+            </div>
+          </div>
+
+          <div class="painel-pagamento" id="painel-sumup_maquininha">
+            <div style="background:#fefce8;border-radius:10px;padding:16px;margin-top:4px;font-size:14px;color:#854d0e;">
+              <strong>Pagamento presencial na maquininha:</strong><br>
+              A leitora SumUp receberá o valor automaticamente. Após confirmar o pedido, aproxime ou insira o cartão na maquininha.
             </div>
           </div>
 
@@ -364,8 +399,14 @@
 
   // ── Seleção de método ───────────────────────────────────────────────────
   var metodos = document.querySelectorAll('.metodo-opcao');
-  var paineis = { pix: 'painel-pix', cartao: 'painel-cartao', boleto: 'painel-boleto' };
-  var opcoes  = { pix: 'opcao-pix', cartao: 'opcao-cartao', boleto: 'opcao-boleto' };
+  var paineis = {
+    pix: 'painel-pix', cartao: 'painel-cartao', boleto: 'painel-boleto',
+    sumup_online: 'painel-sumup_online', sumup_maquininha: 'painel-sumup_maquininha'
+  };
+  var opcoes = {
+    pix: 'opcao-pix', cartao: 'opcao-cartao', boleto: 'opcao-boleto',
+    sumup_online: 'opcao-sumup_online', sumup_maquininha: 'opcao-sumup_maquininha'
+  };
 
   function ativarMetodo(valor) {
     metodos.forEach(function(m) { m.classList.remove('selecionado'); });

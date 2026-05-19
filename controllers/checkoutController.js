@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const mp = require('../services/mercadoPagoService');
+const sumup = require('../services/sumupService');
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -108,6 +109,7 @@ exports.processarCheckout = async (req, res) => {
       descricao: `Lojão - Pedido #${pedidoId} (${itens.length} item${itens.length > 1 ? 's' : ''})`
     };
 
+    // ── Métodos Mercado Pago ──────────────────────────────────────────────
     if (metodo_pagamento === 'pix') {
       mpResult = await mp.criarPagamentoPix(dadosPagador);
     } else if (metodo_pagamento === 'boleto') {
@@ -122,6 +124,58 @@ exports.processarCheckout = async (req, res) => {
         parcelas: parseInt(mp_installments) || 1,
         metodoPagamento: mp_payment_method_id
       });
+
+    // ── Métodos SumUp ─────────────────────────────────────────────────────
+    } else if (metodo_pagamento === 'sumup_online') {
+      // Checkout hospedado na SumUp (cartão via página deles)
+      const checkoutSumup = await sumup.criarCheckoutOnline({
+        pedidoId,
+        valor: total,
+        descricao: dadosPagador.descricao,
+        email: email_entrega,
+        redirectUrl: `${process.env.APP_URL}/checkout/resultado/${pedidoId}`
+      });
+
+      await db.query(`
+        INSERT INTO pagamentos (pedido_id, mp_payment_id, status, status_mp, valor, metodo, resposta_json)
+        VALUES ($1, $2, 'pendente', 'PENDING', $3, 'sumup_online', $4)
+      `, [pedidoId, checkoutSumup.id, total, JSON.stringify(checkoutSumup)]);
+
+      await db.query(
+        "UPDATE pedidos SET status = 'aguardando_pagamento', mp_payment_id = $1 WHERE id = $2",
+        [checkoutSumup.id, pedidoId]
+      );
+
+      await db.query('DELETE FROM carrinho_itens WHERE usuario_id = $1', [usuarioId]);
+      await db.query('COMMIT');
+
+      // Redireciona para a página hospedada da SumUp
+      return res.redirect(checkoutSumup.hosted_checkout_url || checkoutSumup.checkout_url || `/checkout/resultado/${pedidoId}`);
+
+    } else if (metodo_pagamento === 'sumup_maquininha') {
+      // Aciona a maquininha física remotamente via Cloud API
+      const transacao = await sumup.criarTransacaoMaquininha({
+        pedidoId,
+        valor: total,
+        descricao: dadosPagador.descricao
+      });
+
+      await db.query(`
+        INSERT INTO pagamentos (pedido_id, mp_payment_id, status, status_mp, valor, metodo, resposta_json)
+        VALUES ($1, $2, 'pendente', $3, $4, 'sumup_maquininha', $5)
+      `, [pedidoId, transacao.client_transaction_id, transacao.status || 'in_progress', total, JSON.stringify(transacao)]);
+
+      await db.query(
+        "UPDATE pedidos SET status = 'aguardando_pagamento', mp_payment_id = $1 WHERE id = $2",
+        [transacao.client_transaction_id, pedidoId]
+      );
+
+      await db.query('DELETE FROM carrinho_itens WHERE usuario_id = $1', [usuarioId]);
+      await db.query('COMMIT');
+
+      // Vai para página de aguardo: o cliente paga na maquininha enquanto vê o status
+      return res.redirect(`/checkout/aguardando-maquininha/${pedidoId}?tid=${transacao.client_transaction_id}`);
+
     } else {
       await db.query('ROLLBACK');
       return res.redirect('/checkout?erro=metodo_invalido');
@@ -326,4 +380,113 @@ exports.adminAtualizarStatus = async (req, res) => {
 
   await db.query('UPDATE pedidos SET status = $1, updated_at = NOW() WHERE id = $2', [status, req.params.id]);
   res.redirect(`/admin/pedidos/${req.params.id}`);
+};
+
+// ── SumUp: aguardar pagamento na maquininha ───────────────────────────────────
+
+exports.aguardandoMaquininha = async (req, res) => {
+  try {
+    const pedidoRes = await db.query(
+      'SELECT * FROM pedidos WHERE id = $1 AND usuario_id = $2',
+      [req.params.id, req.session.usuarioId]
+    );
+    if (!pedidoRes.rows[0]) return res.redirect('/');
+    const pedido = pedidoRes.rows[0];
+    const tid = req.query.tid || '';
+    res.render('pages/checkout-maquininha', { pedido, tid });
+  } catch (err) {
+    console.error(err);
+    res.redirect('/');
+  }
+};
+
+// ── SumUp: polling de status da maquininha (chamado pelo front via AJAX) ──────
+
+exports.statusMaquininha = async (req, res) => {
+  try {
+    const { pedidoId, tid } = req.params;
+
+    const pedidoRes = await db.query(
+      'SELECT * FROM pedidos WHERE id = $1 AND usuario_id = $2',
+      [pedidoId, req.session.usuarioId]
+    );
+    if (!pedidoRes.rows[0]) return res.status(404).json({ erro: 'Pedido não encontrado.' });
+
+    // Consulta status na SumUp
+    const transacao = await sumup.consultarTransacaoMaquininha(null, tid);
+    const statusInterno = sumup.mapearStatus(transacao.status);
+
+    // Atualiza banco se mudou
+    if (statusInterno !== 'pendente') {
+      await db.query(
+        'UPDATE pagamentos SET status = $1, status_mp = $2 WHERE pedido_id = $3',
+        [statusInterno, transacao.status, pedidoId]
+      );
+      const novoStatusPedido = statusInterno === 'pago' ? 'pago'
+        : statusInterno === 'rejeitado' || statusInterno === 'cancelado' ? 'cancelado'
+        : 'aguardando_pagamento';
+      await db.query(
+        'UPDATE pedidos SET status = $1 WHERE id = $2',
+        [novoStatusPedido, pedidoId]
+      );
+    }
+
+    res.json({ status: transacao.status, statusInterno });
+  } catch (err) {
+    console.error('Erro ao consultar maquininha:', err);
+    res.json({ status: 'in_progress', statusInterno: 'pendente' });
+  }
+};
+
+// ── SumUp: cancelar transação maquininha ──────────────────────────────────────
+
+exports.cancelarMaquininha = async (req, res) => {
+  const { pedidoId, tid } = req.params;
+  try {
+    await sumup.cancelarTransacaoMaquininha(null, tid);
+    await db.query("UPDATE pedidos SET status = 'cancelado' WHERE id = $1 AND usuario_id = $2", [pedidoId, req.session.usuarioId]);
+    res.json({ sucesso: true });
+  } catch (err) {
+    console.error(err);
+    res.json({ erro: 'Não foi possível cancelar.' });
+  }
+};
+
+// ── SumUp: webhook ────────────────────────────────────────────────────────────
+
+exports.webhookSumup = async (req, res) => {
+  try {
+    const evento = req.body;
+    // SumUp envia eventos de transação
+    if (evento.event_type === 'CHECKOUT_STATUS_CHANGED' || evento.type === 'payment') {
+      const checkoutId = evento.id || evento.checkout_id;
+      if (checkoutId) {
+        const checkout = await sumup.consultarCheckout(checkoutId);
+        const statusInterno = sumup.mapearStatus(checkout.status);
+
+        await db.query(
+          'UPDATE pagamentos SET status = $1, status_mp = $2 WHERE mp_payment_id = $3',
+          [statusInterno, checkout.status, checkoutId]
+        );
+
+        const pedidoRes = await db.query(
+          "SELECT pedido_id FROM pagamentos WHERE mp_payment_id = $1",
+          [checkoutId]
+        );
+        if (pedidoRes.rows[0]) {
+          const novoStatus = statusInterno === 'pago' ? 'pago'
+            : statusInterno === 'rejeitado' ? 'cancelado'
+            : 'aguardando_pagamento';
+          await db.query(
+            'UPDATE pedidos SET status = $1 WHERE id = $2',
+            [novoStatus, pedidoRes.rows[0].pedido_id]
+          );
+        }
+      }
+    }
+    res.sendStatus(200);
+  } catch (err) {
+    console.error('Erro no webhook SumUp:', err);
+    res.sendStatus(200);
+  }
 };

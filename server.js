@@ -86,7 +86,7 @@ app.use((req, res, next) => {
 
 // ── CSRF: valida em POST/PUT/DELETE (exceto webhook externo) ─────────────
 app.use((req, res, next) => {
-  if (req.path === '/webhook/mercadopago') return next();
+  if (req.path === '/webhook/mercadopago' || req.path === '/webhook/sumup') return next();
   csrfSynchronisedProtection(req, res, next);
 });
 
