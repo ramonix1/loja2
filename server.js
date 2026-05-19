@@ -3,6 +3,7 @@ const path = require("path");
 
 const produtoRoutes = require("./routes/produtoRoutes");
 const clienteRoutes = require("./routes/clienteRoutes");
+const bannerRoutes = require("./routes/bannerRoutes");
 const initializeDatabase = require("./config/init-db");
 
 const app = express();
@@ -19,6 +20,7 @@ app.use(express.json());
 
 app.use("/", produtoRoutes);
 app.use("/", clienteRoutes);
+app.use("/", bannerRoutes);
 
 app.use((req,res)=>{
     res.status(404).render("pages/error",{message:"Página não encontrada"})

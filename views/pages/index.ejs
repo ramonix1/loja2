@@ -5,12 +5,163 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lojão - Produtos de qualidade</title>
   <link rel="stylesheet" href="/css/style.css">
+  <style>
+    /* ── Carrossel de Banners ── */
+    .banner-carousel {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      background: #111;
+    }
+    .banner-track {
+      display: flex;
+      transition: transform 0.5s ease;
+    }
+    .banner-slide {
+      min-width: 100%;
+      height: 480px;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .banner-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, rgba(0,0,0,0.65) 40%, rgba(0,0,0,0.15));
+    }
+    .banner-content {
+      position: relative;
+      z-index: 1;
+      padding: 0 80px;
+      max-width: 620px;
+    }
+    .banner-titulo {
+      font-size: 2.6rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: 14px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+    .banner-subtitulo {
+      font-size: 1.1rem;
+      color: rgba(255,255,255,0.85);
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+    .banner-cta {
+      display: inline-block;
+      background: #3b82f6;
+      color: #fff;
+      font-weight: 700;
+      padding: 14px 32px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: background 0.2s, transform 0.15s;
+      box-shadow: 0 4px 14px rgba(59,130,246,0.4);
+    }
+    .banner-cta:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+    }
+    .banner-prev, .banner-next {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.45);
+      color: #fff;
+      border: none;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      font-size: 1.5rem;
+      cursor: pointer;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .banner-prev:hover, .banner-next:hover { background: rgba(0,0,0,0.7); }
+    .banner-prev { left: 20px; }
+    .banner-next { right: 20px; }
+    .banner-dots {
+      position: absolute;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 10;
+    }
+    .banner-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.45);
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .banner-dot.active {
+      background: #fff;
+      transform: scale(1.25);
+    }
+    @media (max-width: 768px) {
+      .banner-slide { height: 320px; }
+      .banner-content { padding: 0 30px; }
+      .banner-titulo { font-size: 1.7rem; }
+      .banner-subtitulo { font-size: 0.95rem; }
+    }
+  </style>
 </head>
 <body>
 
 <%- include("../partials/header") %>
 
-<!-- Hero Banner -->
+<!-- Carrossel de Banners -->
+<% if (banners && banners.length > 0) { %>
+<div class="banner-carousel" id="bannerCarousel">
+  <div class="banner-track" id="bannerTrack">
+    <% banners.forEach(function(banner, i) { %>
+      <%
+        let ctaHref = '#produtos';
+        if (banner.produto_id) {
+          ctaHref = '/produto/' + banner.produto_id;
+        } else if (banner.cta_url) {
+          ctaHref = banner.cta_url;
+        }
+      %>
+      <div class="banner-slide <%= i === 0 ? 'active' : '' %>"
+           style="background-image: url('<%= banner.imagem %>');">
+        <div class="banner-overlay"></div>
+        <div class="banner-content">
+          <h1 class="banner-titulo"><%= banner.titulo %></h1>
+          <% if (banner.subtitulo) { %>
+            <p class="banner-subtitulo"><%= banner.subtitulo %></p>
+          <% } %>
+          <a href="<%= ctaHref %>" class="btn btn-hero banner-cta"><%= banner.cta_texto || 'Ver oferta' %></a>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+
+  <% if (banners.length > 1) { %>
+    <button class="banner-prev" onclick="moverBanner(-1)" aria-label="Anterior">&#8249;</button>
+    <button class="banner-next" onclick="moverBanner(1)" aria-label="Próximo">&#8250;</button>
+    <div class="banner-dots">
+      <% banners.forEach(function(_, i) { %>
+        <button class="banner-dot <%= i === 0 ? 'active' : '' %>" onclick="irParaBanner(<%= i %>)" aria-label="Banner <%= i+1 %>"></button>
+      <% }) %>
+    </div>
+  <% } %>
+</div>
+
+<% } else { %>
+<!-- Hero Banner padrão (sem banners cadastrados) -->
 <div class="hero">
   <div class="hero-content">
     <h1>Os melhores produtos, <br>para você.</h1>
@@ -18,6 +169,7 @@
     <a href="#produtos" class="btn btn-hero">Ver produtos ↓</a>
   </div>
 </div>
+<% } %>
 
 <div class="container" id="produtos">
 
@@ -68,6 +220,42 @@
 <% } %>
 
 <%- include("../partials/footer") %>
+
+<% if (banners && banners.length > 1) { %>
+<script>
+  (function() {
+    var total = <%= banners.length %>;
+    var atual = 0;
+    var autoplay;
+
+    function atualizar() {
+      document.getElementById('bannerTrack').style.transform = 'translateX(-' + (atual * 100) + '%)';
+      document.querySelectorAll('.banner-dot').forEach(function(d, i) {
+        d.classList.toggle('active', i === atual);
+      });
+    }
+
+    window.moverBanner = function(dir) {
+      atual = (atual + dir + total) % total;
+      atualizar();
+      reiniciarAutoplay();
+    };
+
+    window.irParaBanner = function(idx) {
+      atual = idx;
+      atualizar();
+      reiniciarAutoplay();
+    };
+
+    function reiniciarAutoplay() {
+      clearInterval(autoplay);
+      autoplay = setInterval(function() { window.moverBanner(1); }, 5000);
+    }
+
+    reiniciarAutoplay();
+  })();
+</script>
+<% } %>
 
 </body>
 </html>

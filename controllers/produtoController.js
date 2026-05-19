@@ -26,7 +26,19 @@ exports.home = async (req, res) => {
       console.warn("Aviso: tabela de clientes não encontrada");
     }
 
-    res.render("pages/index", { produtos: produtos.rows, clientes });
+    let banners = [];
+    try {
+      const bannersQuery = await db.query(
+        `SELECT b.*, p.id AS prod_id FROM banners b
+         LEFT JOIN produtos p ON p.id = b.produto_id
+         WHERE b.ativo = true ORDER BY b.ordem ASC, b.created_at ASC`
+      );
+      banners = bannersQuery.rows;
+    } catch (err) {
+      console.warn("Aviso: tabela de banners não encontrada");
+    }
+
+    res.render("pages/index", { produtos: produtos.rows, clientes, banners });
   } catch (error) {
     console.error("Erro ao carregar home:", error);
     res.status(500).render("pages/error", { message: "Erro ao carregar produtos" });
@@ -41,7 +53,14 @@ exports.dashboard = async (req, res) => {
   try {
     const result = await db.query("SELECT COUNT(*) FROM produtos");
     const totalProdutos = parseInt(result.rows[0].count);
-    res.render("pages/admin-dashboard", { totalProdutos });
+
+    let totalBanners = 0;
+    try {
+      const bResult = await db.query("SELECT COUNT(*) FROM banners WHERE ativo = true");
+      totalBanners = parseInt(bResult.rows[0].count);
+    } catch {}
+
+    res.render("pages/admin-dashboard", { totalProdutos, totalBanners });
   } catch (error) {
     console.error("Erro dashboard:", error);
     res.status(500).render("pages/error", { message: "Erro ao carregar painel" });

@@ -47,3 +47,18 @@ CREATE TABLE produtos (
 - Editar produto
 - Deletar produto
 - Listagem de produtos no site
+
+
+theme: {
+  extend: {
+    keyframes: {
+      scroll: {
+        '0%':   { transform: 'translateX(0)' },
+        '100%': { transform: 'translateX(-50%)' },
+      },
+    },
+    animation: {
+      scroll: 'scroll 20s linear infinite',
+    },
+  },
+},
