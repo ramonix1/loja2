@@ -373,6 +373,24 @@ exports.adminDetalhePedido = async (req, res) => {
   }
 };
 
+exports.sumupDiagnostico = async (req, res) => {
+  const resultado = {
+    api_key_configurada: !!process.env.SUMUP_API_KEY,
+    merchant_code_configurado: !!process.env.SUMUP_MERCHANT_CODE,
+    reader_id_configurado: !!process.env.SUMUP_READER_ID,
+    app_url: process.env.APP_URL,
+    leitoras: null,
+    erro: null
+  };
+  try {
+    resultado.leitoras = await sumup.listarLeitoras();
+  } catch (err) {
+    resultado.erro = err.message;
+    resultado.erro_detalhe = err.body;
+  }
+  res.json(resultado);
+};
+
 exports.adminAtualizarStatus = async (req, res) => {
   const { status } = req.body;
   const statusValidos = ['aguardando_pagamento', 'pago', 'em_separacao', 'enviado', 'entregue', 'cancelado'];
@@ -413,7 +431,7 @@ exports.statusMaquininha = async (req, res) => {
     if (!pedidoRes.rows[0]) return res.status(404).json({ erro: 'Pedido não encontrado.' });
 
     // Consulta status na SumUp
-    const transacao = await sumup.consultarTransacaoMaquininha(null, tid);
+    const transacao = await sumup.consultarTransacaoMaquininha(tid);
     const statusInterno = sumup.mapearStatus(transacao.status);
 
     // Atualiza banco se mudou
@@ -443,7 +461,7 @@ exports.statusMaquininha = async (req, res) => {
 exports.cancelarMaquininha = async (req, res) => {
   const { pedidoId, tid } = req.params;
   try {
-    await sumup.cancelarTransacaoMaquininha(null, tid);
+    await sumup.cancelarTransacaoMaquininha(tid);
     await db.query("UPDATE pedidos SET status = 'cancelado' WHERE id = $1 AND usuario_id = $2", [pedidoId, req.session.usuarioId]);
     res.json({ sucesso: true });
   } catch (err) {

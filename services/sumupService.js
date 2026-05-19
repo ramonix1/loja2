@@ -1,9 +1,7 @@
 const https = require('https');
 
-const BASE_URL = 'https://api.sumup.com';
-
-function apiRequest(method, path, body, apiKey) {
-  const key = apiKey || process.env.SUMUP_API_KEY;
+function apiRequest(method, path, body) {
+  const key = process.env.SUMUP_API_KEY;
   return new Promise((resolve, reject) => {
     const data = body ? JSON.stringify(body) : null;
     const opts = {
@@ -24,7 +22,7 @@ function apiRequest(method, path, body, apiKey) {
         try {
           const json = JSON.parse(d);
           if (res.statusCode >= 400) {
-            const err = new Error(json.message || `SumUp error ${res.statusCode}`);
+            const err = new Error(json.message || json.detail || `SumUp error ${res.statusCode}`);
             err.statusCode = res.statusCode;
             err.body = json;
             reject(err);
@@ -42,82 +40,103 @@ function apiRequest(method, path, body, apiKey) {
   });
 }
 
+function merchantCode() {
+  const code = process.env.SUMUP_MERCHANT_CODE;
+  if (!code) throw new Error('SUMUP_MERCHANT_CODE não configurado no .env');
+  return code;
+}
+
 // ── Online Checkout ───────────────────────────────────────────────────────────
 
 /**
- * Cria um checkout online (hosted page ou widget)
+ * Cria checkout hospedado — cliente é redirecionado para página da SumUp
  * Retorna { id, checkout_reference, hosted_checkout_url }
  */
 async function criarCheckoutOnline({ pedidoId, valor, descricao, email, redirectUrl }) {
   return apiRequest('POST', '/v0.1/checkouts', {
-    checkout_reference: `PEDIDO-${pedidoId}-${Date.now()}`,
+    checkout_reference: `LOJAO-${pedidoId}-${Date.now()}`,
     amount: parseFloat(valor),
     currency: 'BRL',
-    pay_to_email: process.env.SUMUP_MERCHANT_EMAIL || undefined,
-    merchant_code: process.env.SUMUP_MERCHANT_CODE || undefined,
+    merchant_code: merchantCode(),                     // obrigatório
     description: descricao || `Pedido #${pedidoId}`,
-    redirect_url: redirectUrl || `${process.env.APP_URL}/checkout/resultado/${pedidoId}`,
+    redirect_url: redirectUrl,                         // redireciona o cliente após pagar
+    return_url: `${process.env.APP_URL}/webhook/sumup`, // notificação backend
     customer_id: email,
-    return_url: redirectUrl || `${process.env.APP_URL}/checkout/resultado/${pedidoId}`,
   });
 }
 
 /**
- * Consulta status de um checkout pelo ID
+ * Consulta status de um checkout online pelo ID
  */
 async function consultarCheckout(checkoutId) {
   return apiRequest('GET', `/v0.1/checkouts/${checkoutId}`);
 }
 
-// ── Cloud API (Maquininha Remota) ─────────────────────────────────────────────
+// ── Cloud API — Maquininha Remota ─────────────────────────────────────────────
 
 /**
- * Lista as leitoras (readers) vinculadas à conta
+ * Lista as leitoras vinculadas à conta
  */
 async function listarLeitoras() {
-  return apiRequest('GET', '/v0.1/readers');
+  return apiRequest('GET', `/v0.1/merchants/${merchantCode()}/readers`);
 }
 
 /**
- * Cria uma transação remota na maquininha física
- * O leitor deve estar ligado, com boa sinal e vinculado
- * Retorna o objeto de transação com { client_transaction_id, status, ... }
+ * Envia cobrança para a maquininha física via Cloud API.
+ * A leitora deve estar ligada e conectada à internet.
+ *
+ * SumUp total_amount format:
+ *   value     — inteiro em centavos (ex: R$50,00 → 5000)
+ *   currency  — ISO 4217 (BRL)
+ *   minor_unit — casas decimais (2 para BRL)
  */
 async function criarTransacaoMaquininha({ pedidoId, valor, descricao, readerId }) {
-  const id = readerId || process.env.SUMUP_READER_ID;
-  if (!id) throw new Error('SUMUP_READER_ID não configurado.');
+  const rid = readerId || process.env.SUMUP_READER_ID;
+  if (!rid) throw new Error('SUMUP_READER_ID não configurado no .env');
 
-  return apiRequest('POST', `/v0.1/readers/${id}/checkout`, {
-    total_amount: {
-      minor_unit: Math.round(parseFloat(valor) * 100), // centavos
-      currency: 'BRL'
-    },
-    client_transaction_id: `pedido-${pedidoId}-${Date.now()}`,
-    description: descricao || `Pedido #${pedidoId}`,
-  });
+  return apiRequest(
+    'POST',
+    `/v0.1/merchants/${merchantCode()}/readers/${rid}/checkout`,
+    {
+      total_amount: {
+        value: Math.round(parseFloat(valor) * 100), // centavos, inteiro
+        currency: 'BRL',
+        minor_unit: 2
+      },
+      client_transaction_id: `lojao-${pedidoId}-${Date.now()}`,
+      description: descricao || `Pedido #${pedidoId}`,
+      return_url: `${process.env.APP_URL}/webhook/sumup`, // webhook de resultado
+    }
+  );
 }
 
 /**
- * Consulta o status de uma transação na maquininha
+ * Consulta o status de uma transação em andamento na maquininha
  */
-async function consultarTransacaoMaquininha(readerId, clientTransactionId) {
-  const id = readerId || process.env.SUMUP_READER_ID;
-  return apiRequest('GET', `/v0.1/readers/${id}/checkout/${clientTransactionId}`);
+async function consultarTransacaoMaquininha(clientTransactionId, readerId) {
+  const rid = readerId || process.env.SUMUP_READER_ID;
+  return apiRequest(
+    'GET',
+    `/v0.1/merchants/${merchantCode()}/readers/${rid}/checkout/${clientTransactionId}`
+  );
 }
 
 /**
  * Cancela uma transação pendente na maquininha
  */
-async function cancelarTransacaoMaquininha(readerId, clientTransactionId) {
-  const id = readerId || process.env.SUMUP_READER_ID;
-  return apiRequest('DELETE', `/v0.1/readers/${id}/checkout/${clientTransactionId}`);
+async function cancelarTransacaoMaquininha(clientTransactionId, readerId) {
+  const rid = readerId || process.env.SUMUP_READER_ID;
+  return apiRequest(
+    'DELETE',
+    `/v0.1/merchants/${merchantCode()}/readers/${rid}/checkout/${clientTransactionId}`
+  );
 }
 
-/**
- * Mapeia status SumUp → status interno
- */
+// ── Mapeamento de status ──────────────────────────────────────────────────────
+
 function mapearStatus(status) {
   const mapa = {
+    // Online checkout
     PAID: 'pago',
     SUCCESSFUL: 'pago',
     PENDING: 'pendente',
@@ -125,9 +144,10 @@ function mapearStatus(status) {
     FAILED: 'rejeitado',
     CANCELLED: 'cancelado',
     REFUNDED: 'estornado',
-    // Cloud API statuses
-    in_progress: 'pendente',
+    // Cloud API (maquininha)
     successful: 'pago',
+    in_progress: 'pendente',
+    pending: 'pendente',
     failed: 'rejeitado',
     timed_out: 'cancelado',
     cancelled: 'cancelado',
