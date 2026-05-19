@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nova senha — Lojão</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body { background: #f3f4f6; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    .auth-card {
+      background: #fff; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+      padding: 48px 40px 40px; width: 100%; max-width: 420px;
+    }
+    .auth-logo { text-align: center; margin-bottom: 28px; }
+    .auth-logo a { font-size: 1.8rem; font-weight: 800; color: #3b82f6; text-decoration: none; }
+    .auth-titulo { font-size: 1.3rem; font-weight: 700; color: #111; margin-bottom: 8px; text-align: center; }
+    .auth-sub { color: #6b7280; font-size: 0.88rem; text-align: center; margin-bottom: 28px; }
+    .form-grupo { margin-bottom: 18px; }
+    .form-grupo label { display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 6px; }
+    .senha-wrapper { position: relative; }
+    .senha-wrapper input {
+      width: 100%; padding: 11px 44px 11px 14px; border: 1.5px solid #d1d5db; border-radius: 8px;
+      font-size: 0.95rem; outline: none; transition: border 0.2s; box-sizing: border-box;
+    }
+    .senha-wrapper input:focus { border-color: #3b82f6; }
+    .toggle-senha {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: #9ca3af;
+    }
+    .forca-barra { height: 4px; border-radius: 4px; margin-top: 6px; transition: all 0.3s; background: #e5e7eb; }
+    .forca-label { font-size: 0.78rem; color: #6b7280; margin-top: 4px; }
+    .btn-salvar {
+      width: 100%; padding: 13px; background: #3b82f6; color: #fff; font-weight: 700;
+      font-size: 1rem; border: none; border-radius: 8px; cursor: pointer; transition: background 0.2s; margin-top: 6px;
+    }
+    .btn-salvar:hover { background: #2563eb; }
+    .alerta-erro { background: #fef2f2; border: 1px solid #fca5a5; color: #b91c1c; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: 0.9rem; }
+    .requisitos { font-size: 0.8rem; color: #6b7280; margin-top: 6px; }
+    .requisito { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
+    .requisito.ok { color: #16a34a; }
+    .requisito.nok { color: #9ca3af; }
+  </style>
+</head>
+<body>
+  <div class="auth-card">
+    <div class="auth-logo"><a href="/">🛒 Lojão</a></div>
+    <h1 class="auth-titulo">Criar nova senha</h1>
+    <p class="auth-sub">Escolha uma senha forte para proteger sua conta.</p>
+
+    <% if (erro) { %>
+      <div class="alerta-erro">⚠️ <%= erro %></div>
+    <% } %>
+
+    <form method="POST" action="/redefinir-senha/<%= token %>">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div class="form-grupo">
+        <label for="senha">Nova senha</label>
+        <div class="senha-wrapper">
+          <input type="password" id="senha" name="senha" placeholder="Mínimo 8 caracteres" required autocomplete="new-password" oninput="avaliarSenha(this.value)">
+          <button type="button" class="toggle-senha" onclick="toggleSenha('senha', this)">👁</button>
+        </div>
+        <div class="forca-barra" id="forcaBarra"></div>
+        <div class="forca-label" id="forcaLabel"></div>
+        <div class="requisitos" id="requisitos">
+          <div class="requisito nok" id="req-len">○ Mínimo 8 caracteres</div>
+          <div class="requisito nok" id="req-num">○ Pelo menos um número</div>
+          <div class="requisito nok" id="req-esp">○ Pelo menos uma letra maiúscula</div>
+        </div>
+      </div>
+
+      <div class="form-grupo">
+        <label for="confirmacao">Confirmar nova senha</label>
+        <div class="senha-wrapper">
+          <input type="password" id="confirmacao" name="confirmacao" placeholder="Repita a senha" required autocomplete="new-password">
+          <button type="button" class="toggle-senha" onclick="toggleSenha('confirmacao', this)">👁</button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-salvar">Salvar nova senha</button>
+    </form>
+  </div>
+
+  <script>
+    function toggleSenha(id, btn) {
+      const input = document.getElementById(id);
+      input.type = input.type === 'password' ? 'text' : 'password';
+      btn.textContent = input.type === 'password' ? '👁' : '🙈';
+    }
+
+    function avaliarSenha(senha) {
+      const temLen = senha.length >= 8;
+      const temNum = /\d/.test(senha);
+      const temMai = /[A-Z]/.test(senha);
+
+      setReq('req-len', temLen);
+      setReq('req-num', temNum);
+      setReq('req-esp', temMai);
+
+      const pontos = [temLen, temNum, temMai].filter(Boolean).length;
+      const cores = ['#ef4444', '#f97316', '#eab308', '#22c55e'];
+      const labels = ['Muito fraca', 'Fraca', 'Média', 'Forte'];
+      const barra = document.getElementById('forcaBarra');
+      const label = document.getElementById('forcaLabel');
+      if (senha.length === 0) { barra.style.width = '0'; label.textContent = ''; return; }
+      barra.style.width = (pontos * 25) + '%';
+      barra.style.background = cores[pontos - 1] || '#e5e7eb';
+      label.textContent = labels[pontos - 1] || '';
+      label.style.color = cores[pontos - 1] || '#6b7280';
+    }
+
+    function setReq(id, ok) {
+      const el = document.getElementById(id);
+      el.classList.toggle('ok', ok);
+      el.classList.toggle('nok', !ok);
+      el.textContent = (ok ? '✓ ' : '○ ') + el.textContent.slice(2);
+    }
+  </script>
+</body>
+</html>

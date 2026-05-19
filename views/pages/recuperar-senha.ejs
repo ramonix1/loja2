@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recuperar senha — Lojão</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body { background: #f3f4f6; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    .auth-card {
+      background: #fff; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+      padding: 48px 40px 40px; width: 100%; max-width: 440px;
+    }
+    .auth-logo { text-align: center; margin-bottom: 28px; }
+    .auth-logo a { font-size: 1.8rem; font-weight: 800; color: #3b82f6; text-decoration: none; }
+    .auth-titulo { font-size: 1.3rem; font-weight: 700; color: #111; margin-bottom: 8px; text-align: center; }
+    .auth-sub { color: #6b7280; font-size: 0.88rem; text-align: center; margin-bottom: 28px; line-height: 1.5; }
+    .form-grupo { margin-bottom: 18px; }
+    .form-grupo label { display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 6px; }
+    .form-grupo input {
+      width: 100%; padding: 11px 14px; border: 1.5px solid #d1d5db; border-radius: 8px;
+      font-size: 0.95rem; outline: none; transition: border 0.2s; box-sizing: border-box;
+    }
+    .form-grupo input:focus { border-color: #3b82f6; }
+    .canal-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+    .canal-tab {
+      flex: 1; padding: 10px; border: 2px solid #d1d5db; border-radius: 8px;
+      background: #fff; cursor: pointer; font-size: 0.9rem; font-weight: 600;
+      color: #6b7280; transition: all 0.2s; text-align: center;
+    }
+    .canal-tab.ativo { border-color: #3b82f6; color: #3b82f6; background: #eff6ff; }
+    .canal-tab:disabled { opacity: 0.45; cursor: not-allowed; }
+    .painel-canal { display: none; }
+    .painel-canal.ativo { display: block; }
+    .btn-enviar {
+      width: 100%; padding: 13px; background: #3b82f6; color: #fff; font-weight: 700;
+      font-size: 1rem; border: none; border-radius: 8px; cursor: pointer; transition: background 0.2s;
+    }
+    .btn-enviar:hover { background: #2563eb; }
+    .alerta-erro { background: #fef2f2; border: 1px solid #fca5a5; color: #b91c1c; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: 0.9rem; }
+    .alerta-info { background: #eff6ff; border: 1px solid #93c5fd; color: #1d4ed8; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; font-size: 0.9rem; }
+    .links-auth { text-align: center; margin-top: 22px; font-size: 0.88rem; color: #6b7280; }
+    .links-auth a { color: #3b82f6; text-decoration: none; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="auth-card">
+    <div class="auth-logo"><a href="/">🛒 Lojão</a></div>
+    <h1 class="auth-titulo">Recuperar senha</h1>
+    <p class="auth-sub">Informe seu email ou telefone cadastrado e enviaremos as instruções para redefinir sua senha.</p>
+
+    <% if (erro) { %>
+      <div class="alerta-erro">⚠️ <%= erro %></div>
+    <% } %>
+    <% if (info) { %>
+      <div class="alerta-info">✉️ <%= info %></div>
+    <% } %>
+
+    <% if (!info) { %>
+    <div class="canal-tabs">
+      <button type="button" class="canal-tab ativo" onclick="selecionarCanal('email', this)">📧 Email</button>
+      <button type="button" class="canal-tab <%= smsDisponivel ? '' : '' %>" onclick="selecionarCanal('sms', this)" <%= smsDisponivel ? '' : 'disabled title="SMS não configurado"' %>>
+        📱 SMS
+      </button>
+    </div>
+
+    <form method="POST" action="/recuperar-senha" id="formRecuperacao">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input type="hidden" name="canal" id="canalInput" value="email">
+
+      <div class="painel-canal ativo" id="painel-email">
+        <div class="form-grupo">
+          <label for="email">Email cadastrado</label>
+          <input type="email" id="email" name="email" placeholder="seu@email.com" autocomplete="email">
+        </div>
+      </div>
+
+      <div class="painel-canal" id="painel-sms">
+        <div class="form-grupo">
+          <label for="telefone">Telefone (com DDD)</label>
+          <input type="tel" id="telefone" name="telefone" placeholder="(11) 99999-9999" autocomplete="tel">
+        </div>
+      </div>
+
+      <button type="submit" class="btn-enviar">Enviar instruções</button>
+    </form>
+    <% } %>
+
+    <div class="links-auth">
+      <a href="/login">← Voltar ao login</a>
+    </div>
+  </div>
+
+  <script>
+    function selecionarCanal(canal, btn) {
+      document.querySelectorAll('.canal-tab').forEach(t => t.classList.remove('ativo'));
+      document.querySelectorAll('.painel-canal').forEach(p => p.classList.remove('ativo'));
+      btn.classList.add('ativo');
+      document.getElementById('painel-' + canal).classList.add('ativo');
+      document.getElementById('canalInput').value = canal;
+    }
+  </script>
+</body>
+</html>

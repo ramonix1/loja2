@@ -73,6 +73,7 @@
       <!-- Formulário de edição -->
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 max-w-2xl">
         <form action="/admin/clientes/atualizar/<%= cliente.id %>" method="POST" enctype="multipart/form-data" class="space-y-4">
+          <input type="hidden" name="_csrf" value="<%= locals.csrfToken %>">
 
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-1">Nome do Cliente *</label>

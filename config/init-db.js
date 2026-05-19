@@ -2,6 +2,70 @@ const db = require("./db");
 
 async function initializeDatabase() {
   try {
+    // Tabelas de autenticação
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS usuarios (
+        id SERIAL PRIMARY KEY,
+        nome VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        senha_hash TEXT NOT NULL,
+        role VARCHAR(20) NOT NULL DEFAULT 'usuario' CHECK (role IN ('usuario', 'admin')),
+        telefone VARCHAR(20),
+        ativo BOOLEAN DEFAULT true,
+        tentativas_falha INTEGER DEFAULT 0,
+        bloqueado_ate TIMESTAMP,
+        ultimo_acesso TIMESTAMP,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_usuarios_email ON usuarios(email);
+      CREATE INDEX IF NOT EXISTS idx_usuarios_role ON usuarios(role);
+
+      CREATE TABLE IF NOT EXISTS tentativas_login (
+        id SERIAL PRIMARY KEY,
+        ip VARCHAR(45) NOT NULL UNIQUE,
+        email VARCHAR(255),
+        tentativas INTEGER DEFAULT 0,
+        bloqueado_ate TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_tentativas_ip ON tentativas_login(ip);
+
+      CREATE TABLE IF NOT EXISTS tokens_recuperacao (
+        id SERIAL PRIMARY KEY,
+        usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+        token_hash TEXT NOT NULL,
+        canal VARCHAR(10) DEFAULT 'email' CHECK (canal IN ('email', 'sms')),
+        usado BOOLEAN DEFAULT false,
+        expira_em TIMESTAMP NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_tokens_hash ON tokens_recuperacao(token_hash);
+      CREATE INDEX IF NOT EXISTS idx_tokens_usuario ON tokens_recuperacao(usuario_id);
+
+      CREATE TABLE IF NOT EXISTS sessao (
+        sid VARCHAR NOT NULL COLLATE "default",
+        sess JSON NOT NULL,
+        expire TIMESTAMP(6) NOT NULL,
+        CONSTRAINT session_pkey PRIMARY KEY (sid)
+      );
+      CREATE INDEX IF NOT EXISTS idx_sessao_expire ON sessao(expire);
+    `);
+
+    // Criar admin padrão se não existir
+    const adminExiste = await db.query("SELECT id FROM usuarios WHERE role = 'admin' LIMIT 1");
+    if (adminExiste.rows.length === 0) {
+      const argon2 = require('argon2');
+      const senhaHash = await argon2.hash('Admin@1234', {
+        type: argon2.argon2id, memoryCost: 65536, timeCost: 3, parallelism: 4
+      });
+      await db.query(
+        "INSERT INTO usuarios (nome, email, senha_hash, role) VALUES ($1, $2, $3, 'admin')",
+        ['Administrador', 'admin@lojao.com', senhaHash]
+      );
+      console.log('✅ Admin padrão criado: admin@lojao.com / Admin@1234 (TROQUE EM PRODUÇÃO!)');
+    }
+
     // Criar tabelas base
     await db.query(`
       CREATE TABLE IF NOT EXISTS clientes (

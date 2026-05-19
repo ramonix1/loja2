@@ -2,6 +2,19 @@
   <a href="/" class="logo">🛒 Lojão</a>
   <div class="nav-links">
     <a href="/">Home</a>
-    <a href="/admin">Admin</a>
+    <% if (locals.usuario) { %>
+      <% if (locals.usuario.role === 'admin') { %>
+        <a href="/admin">Admin</a>
+      <% } %>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:0.85rem;color:#6b7280;">Olá, <%= locals.usuario.nome.split(' ')[0] %></span>
+        <form method="POST" action="/logout" style="margin:0;">
+          <input type="hidden" name="_csrf" value="<%= locals.csrfToken %>">
+          <button type="submit" style="background:none;border:1px solid #d1d5db;color:#374151;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:0.85rem;">Sair</button>
+        </form>
+      </div>
+    <% } else { %>
+      <a href="/login">Entrar</a>
+    <% } %>
   </div>
 </nav>

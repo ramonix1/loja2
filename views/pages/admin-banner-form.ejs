@@ -72,6 +72,7 @@
           enctype="multipart/form-data"
           class="space-y-6"
         >
+          <input type="hidden" name="_csrf" value="<%= locals.csrfToken %>">
 
           <!-- Imagem -->
           <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">

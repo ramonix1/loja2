@@ -78,6 +78,7 @@
             class="bg-gray-900 border border-gray-800 rounded-xl p-6 max-w-2xl">
 
         <input type="hidden" name="id" value="<%= produto.id %>">
+        <input type="hidden" name="_csrf" value="<%= locals.csrfToken %>">
 
         <div class="space-y-4">
 
