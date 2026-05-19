@@ -26,12 +26,13 @@
         style="max-height:460px; object-fit:cover; width:100%;">
 
       <% if(imagens.length > 1){ %>
-        <div class="galeria">
-          <% imagens.forEach(function(img){ %>
+        <div class="galeria" id="galeria">
+          <% imagens.forEach(function(img, i){ %>
             <img
               src="<%= img.url %>"
               alt="Imagem do produto"
-              onclick="trocarImagem('<%= img.url %>', this)">
+              data-url="<%= img.url %>"
+              class="<%= i === 0 ? 'galeria-ativa' : '' %>">
           <% }) %>
         </div>
       <% } %>
@@ -96,11 +97,21 @@
 <%- include("../partials/footer") %>
 
 <script>
-function trocarImagem(src, el) {
-  document.getElementById("mainImage").src = src;
-  document.querySelectorAll(".galeria img").forEach(i => i.style.borderColor = "transparent");
-  el.style.borderColor = "#2563eb";
-}
+(function() {
+  var galeria = document.getElementById('galeria');
+  if (!galeria) return;
+  galeria.addEventListener('click', function(e) {
+    var thumb = e.target.closest('img[data-url]');
+    if (!thumb) return;
+    document.getElementById('mainImage').src = thumb.dataset.url;
+    galeria.querySelectorAll('img').forEach(function(img) {
+      img.style.borderColor = 'transparent';
+      img.classList.remove('galeria-ativa');
+    });
+    thumb.style.borderColor = '#2563eb';
+    thumb.classList.add('galeria-ativa');
+  });
+})();
 </script>
 
 </body>

@@ -150,11 +150,11 @@
   </div>
 
   <% if (banners.length > 1) { %>
-    <button class="banner-prev" onclick="moverBanner(-1)" aria-label="Anterior">&#8249;</button>
-    <button class="banner-next" onclick="moverBanner(1)" aria-label="Próximo">&#8250;</button>
+    <button class="banner-prev" id="bannerPrev" aria-label="Anterior">&#8249;</button>
+    <button class="banner-next" id="bannerNext" aria-label="Próximo">&#8250;</button>
     <div class="banner-dots">
       <% banners.forEach(function(_, i) { %>
-        <button class="banner-dot <%= i === 0 ? 'active' : '' %>" onclick="irParaBanner(<%= i %>)" aria-label="Banner <%= i+1 %>"></button>
+        <button class="banner-dot <%= i === 0 ? 'active' : '' %>" data-idx="<%= i %>" aria-label="Banner <%= i+1 %>"></button>
       <% }) %>
     </div>
   <% } %>
@@ -235,22 +235,26 @@
       });
     }
 
-    window.moverBanner = function(dir) {
+    function mover(dir) {
       atual = (atual + dir + total) % total;
       atualizar();
       reiniciarAutoplay();
-    };
-
-    window.irParaBanner = function(idx) {
-      atual = idx;
-      atualizar();
-      reiniciarAutoplay();
-    };
+    }
 
     function reiniciarAutoplay() {
       clearInterval(autoplay);
-      autoplay = setInterval(function() { window.moverBanner(1); }, 5000);
+      autoplay = setInterval(function() { mover(1); }, 5000);
     }
+
+    document.getElementById('bannerPrev').addEventListener('click', function() { mover(-1); });
+    document.getElementById('bannerNext').addEventListener('click', function() { mover(1); });
+    document.querySelectorAll('.banner-dot').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        atual = parseInt(this.dataset.idx);
+        atualizar();
+        reiniciarAutoplay();
+      });
+    });
 
     reiniciarAutoplay();
   })();

@@ -21,10 +21,12 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
+      connectSrc: ["'self'", 'https://viacep.com.br'],
       styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdn.tailwindcss.com'],
       fontSrc: ["'self'", 'https://fonts.gstatic.com'],
       imgSrc: ["'self'", 'data:', 'blob:', 'https://placehold.co'],
       scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.tailwindcss.com'],
+      scriptSrcAttr: ["'unsafe-inline'"],
     },
   },
 }));
