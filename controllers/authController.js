@@ -241,37 +241,145 @@ exports.processarRedefinirSenha = async (req, res) => {
   }
 };
 
-// ── Registro (admin cria usuários) ────────────────────────────────────────
+// ── Cadastro público (usuário comum) ─────────────────────────────────────
 
-exports.criarUsuario = async (req, res) => {
-  const { nome, email, senha, role, telefone } = req.body;
+exports.exibirCadastro = (req, res) => {
+  res.render('pages/cadastro', { erros: [], dados: {} });
+};
 
-  if (!nome || !email || !senha) {
-    return res.status(400).json({ erro: 'Nome, email e senha são obrigatórios.' });
-  }
-  if (senha.length < 8) {
-    return res.status(400).json({ erro: 'Senha deve ter no mínimo 8 caracteres.' });
-  }
+exports.processarCadastro = async (req, res) => {
+  const {
+    nome, email, senha, confirmacao, telefone,
+    cep, logradouro, numero, complemento, bairro, cidade, estado,
+  } = req.body;
+
+  const erros = [];
+  const dados = req.body;
+
+  if (!nome || nome.trim().length < 3) erros.push('Nome deve ter pelo menos 3 caracteres.');
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) erros.push('Email inválido.');
+  if (!senha || senha.length < 8) erros.push('Senha deve ter no mínimo 8 caracteres.');
+  if (senha !== confirmacao) erros.push('As senhas não coincidem.');
+  if (!telefone || telefone.replace(/\D/g, '').length < 10) erros.push('Telefone inválido.');
+  if (!cep || cep.replace(/\D/g, '').length !== 8) erros.push('CEP inválido.');
+  if (!logradouro) erros.push('Logradouro obrigatório.');
+  if (!numero) erros.push('Número obrigatório.');
+  if (!bairro) erros.push('Bairro obrigatório.');
+  if (!cidade) erros.push('Cidade obrigatória.');
+  if (!estado) erros.push('Estado obrigatório.');
+
+  if (erros.length) return res.render('pages/cadastro', { erros, dados });
 
   try {
-    const existe = await db.query('SELECT id FROM usuarios WHERE email = $1', [email.toLowerCase()]);
-    if (existe.rows[0]) return res.status(409).json({ erro: 'Email já cadastrado.' });
+    const existe = await db.query('SELECT id FROM usuarios WHERE email = $1', [email.toLowerCase().trim()]);
+    if (existe.rows[0]) {
+      return res.render('pages/cadastro', { erros: ['Este email já está cadastrado.'], dados });
+    }
 
     const senhaHash = await argon2.hash(senha, ARGON2_OPTIONS);
+    const telLimpo = telefone.replace(/\D/g, '');
+    const cepLimpo = cep.replace(/\D/g, '').replace(/^(\d{5})(\d{3})$/, '$1-$2');
+
     await db.query(
-      `INSERT INTO usuarios (nome, email, senha_hash, role, telefone)
-       VALUES ($1, $2, $3, $4, $5)`,
-      [nome, email.toLowerCase().trim(), senhaHash, role || 'usuario', telefone || null]
+      `INSERT INTO usuarios
+         (nome, email, senha_hash, role, telefone, cep, logradouro, numero, complemento, bairro, cidade, estado)
+       VALUES ($1,$2,$3,'usuario',$4,$5,$6,$7,$8,$9,$10,$11)`,
+      [nome.trim(), email.toLowerCase().trim(), senhaHash, telLimpo,
+       cepLimpo, logradouro.trim(), numero.trim(), complemento?.trim() || null,
+       bairro.trim(), cidade.trim(), estado.toUpperCase()]
     );
 
     try { await enviarEmailBoasVindas(email, nome); } catch (_) {}
 
-    res.json({ sucesso: true, mensagem: 'Usuário criado com sucesso.' });
+    req.session.info = 'Cadastro realizado! Faça login para continuar.';
+    res.redirect('/login');
   } catch (err) {
-    console.error('Erro ao criar usuário:', err);
-    res.status(500).json({ erro: 'Erro interno.' });
+    console.error('Erro no cadastro:', err);
+    res.render('pages/cadastro', { erros: ['Erro interno. Tente novamente.'], dados });
   }
 };
+
+// ── Gestão de admins (tela de permissões) ─────────────────────────────────
+
+exports.exibirPermissoes = async (req, res) => {
+  const admins = await db.query(
+    "SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at FROM usuarios WHERE role = 'admin' ORDER BY created_at DESC"
+  );
+  res.render('pages/admin-permissoes', { admins: admins.rows, erro: null, sucesso: null });
+};
+
+exports.criarAdmin = async (req, res) => {
+  const { nome, email, senha, cpf } = req.body;
+
+  const erros = [];
+  if (!nome || nome.trim().length < 3) erros.push('Nome inválido.');
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) erros.push('Email inválido.');
+  if (!senha || senha.length < 8) erros.push('Senha deve ter no mínimo 8 caracteres.');
+  if (cpf && !validarCPF(cpf)) erros.push('CPF inválido.');
+
+  if (erros.length) {
+    const admins = await db.query("SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at FROM usuarios WHERE role = 'admin' ORDER BY created_at DESC");
+    return res.render('pages/admin-permissoes', { admins: admins.rows, erro: erros.join(' '), sucesso: null });
+  }
+
+  try {
+    const existe = await db.query('SELECT id FROM usuarios WHERE email = $1', [email.toLowerCase()]);
+    if (existe.rows[0]) {
+      const admins = await db.query("SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at FROM usuarios WHERE role = 'admin' ORDER BY created_at DESC");
+      return res.render('pages/admin-permissoes', { admins: admins.rows, erro: 'Email já cadastrado.', sucesso: null });
+    }
+
+    const cpfLimpo = cpf ? cpf.replace(/\D/g, '').replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4') : null;
+    const senhaHash = await argon2.hash(senha, ARGON2_OPTIONS);
+
+    await db.query(
+      "INSERT INTO usuarios (nome, email, senha_hash, role, cpf) VALUES ($1,$2,$3,'admin',$4)",
+      [nome.trim(), email.toLowerCase().trim(), senhaHash, cpfLimpo]
+    );
+
+    const admins = await db.query("SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at FROM usuarios WHERE role = 'admin' ORDER BY created_at DESC");
+    res.render('pages/admin-permissoes', { admins: admins.rows, erro: null, sucesso: 'Admin criado com sucesso.' });
+  } catch (err) {
+    console.error('Erro ao criar admin:', err);
+    const admins = await db.query("SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at FROM usuarios WHERE role = 'admin' ORDER BY created_at DESC");
+    res.render('pages/admin-permissoes', { admins: admins.rows, erro: 'Erro interno.', sucesso: null });
+  }
+};
+
+exports.toggleAdmin = async (req, res) => {
+  const { id } = req.params;
+  if (parseInt(id) === req.session.usuarioId) {
+    return res.redirect('/admin/permissoes');
+  }
+  await db.query('UPDATE usuarios SET ativo = NOT ativo WHERE id = $1 AND role = $2', [id, 'admin']);
+  res.redirect('/admin/permissoes');
+};
+
+exports.excluirAdmin = async (req, res) => {
+  const { id } = req.params;
+  if (parseInt(id) === req.session.usuarioId) {
+    return res.redirect('/admin/permissoes');
+  }
+  await db.query("DELETE FROM usuarios WHERE id = $1 AND role = 'admin'", [id]);
+  res.redirect('/admin/permissoes');
+};
+
+// ── Helpers internos ──────────────────────────────────────────────────────
+
+function validarCPF(cpf) {
+  const n = cpf.replace(/\D/g, '');
+  if (n.length !== 11 || /^(\d)\1+$/.test(n)) return false;
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += parseInt(n[i]) * (10 - i);
+  let r = (sum * 10) % 11;
+  if (r === 10 || r === 11) r = 0;
+  if (r !== parseInt(n[9])) return false;
+  sum = 0;
+  for (let i = 0; i < 10; i++) sum += parseInt(n[i]) * (11 - i);
+  r = (sum * 10) % 11;
+  if (r === 10 || r === 11) r = 0;
+  return r === parseInt(n[10]);
+}
 
 // ── Helpers internos ──────────────────────────────────────────────────────
 
