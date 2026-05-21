@@ -6,7 +6,7 @@ const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const { csrfSync } = require('csrf-sync');
 
-const db = require('./config/db');
+const masterDb = require('./config/masterDb');
 const produtoRoutes = require('./routes/produtoRoutes');
 const clienteRoutes = require('./routes/clienteRoutes');
 const bannerRoutes = require('./routes/bannerRoutes');
@@ -14,7 +14,8 @@ const authRoutes = require('./routes/authRoutes');
 const carrinhoRoutes = require('./routes/carrinhoRoutes');
 const checkoutRoutes = require('./routes/checkoutRoutes');
 const initializeDatabase = require('./config/init-db');
-const { requireAuth, requireAdmin } = require('./middlewares/auth');
+const { requireAuth } = require('./middlewares/auth');
+const tenantMiddleware = require('./middlewares/tenant');
 
 const app = express();
 
@@ -33,10 +34,10 @@ app.use(helmet({
   },
 }));
 
-// ── Sessão com armazenamento PostgreSQL ───────────────────────────────────
+// ── Sessão — armazenada no banco MASTER (compartilhado entre tenants) ─────
 app.use(session({
   store: new pgSession({
-    pool: db,
+    pool: masterDb,
     tableName: 'sessao',
     createTableIfMissing: false,
   }),
@@ -52,21 +53,15 @@ app.use(session({
   },
 }));
 
-// ── CSRF (Synchronizer Token Pattern — recomendado com sessões) ───────────
+// ── CSRF (Synchronizer Token Pattern) ─────────────────────────────────────
 const { csrfSynchronisedProtection, generateToken } = csrfSync({
   getTokenFromRequest: (req) => req.body?._csrf || req.headers['x-csrf-token'],
-});
-
-// Expor token CSRF para todas as views
-app.use((req, res, next) => {
-  res.locals.csrfToken = generateToken(req);
-  next();
 });
 
 // ── View engine ───────────────────────────────────────────────────────────
 app.set('view engine', 'ejs');
 
-// ── Inicializar banco de dados ────────────────────────────────────────────
+// ── Inicializar banco master ──────────────────────────────────────────────
 initializeDatabase();
 
 // ── Arquivos estáticos (sem autenticação) ─────────────────────────────────
@@ -76,6 +71,15 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// ── Identificar tenant e injetar req.db ──────────────────────────────────
+app.use(tenantMiddleware);
+
+// ── Token CSRF para todas as views ────────────────────────────────────────
+app.use((req, res, next) => {
+  res.locals.csrfToken = generateToken(req);
+  next();
+});
+
 // ── Variáveis globais para views ──────────────────────────────────────────
 app.use((req, res, next) => {
   res.locals.usuario = req.session.usuarioId
@@ -84,7 +88,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// ── CSRF: valida em POST/PUT/DELETE (exceto webhook externo) ─────────────
+// ── CSRF: valida em POST/PUT/DELETE (exceto webhooks externos) ────────────
 app.use((req, res, next) => {
   if (req.path === '/webhook/mercadopago' || req.path === '/webhook/sumup') return next();
   csrfSynchronisedProtection(req, res, next);
@@ -95,8 +99,8 @@ app.use('/', authRoutes);
 
 // ── Rotas protegidas ──────────────────────────────────────────────────────
 app.use('/', requireAuth, produtoRoutes);
-app.use('/', requireAdmin, clienteRoutes);
-app.use('/', requireAdmin, bannerRoutes);
+app.use('/', clienteRoutes);
+app.use('/', bannerRoutes);
 app.use('/', carrinhoRoutes);
 app.use('/', checkoutRoutes);
 

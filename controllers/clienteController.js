@@ -1,4 +1,3 @@
-const db = require("../config/db");
 const fs = require("fs").promises;
 const path = require("path");
 
@@ -11,7 +10,7 @@ function idValido(id) {
 // ======================
 exports.listar = async (req, res) => {
   try {
-    const clientes = await db.query(
+    const clientes = await req.db.query(
       "SELECT * FROM clientes WHERE ativo = true ORDER BY ordem ASC, nome ASC"
     );
     res.json(clientes.rows);
@@ -26,7 +25,7 @@ exports.listar = async (req, res) => {
 // ======================
 exports.admin = async (req, res) => {
   try {
-    const clientes = await db.query(
+    const clientes = await req.db.query(
       "SELECT * FROM clientes ORDER BY ordem ASC, nome ASC"
     );
     res.render("pages/admin-clientes", { clientes: clientes.rows });
@@ -48,7 +47,7 @@ exports.salvar = async (req, res) => {
   }
 
   try {
-    await db.query(
+    await req.db.query(
       `INSERT INTO clientes (nome, logo, website, ordem)
        VALUES ($1, $2, $3, $4)`,
       [nome, logo, website || null, ordem || 0]
@@ -70,7 +69,7 @@ exports.editar = async (req, res) => {
   }
 
   try {
-    const cliente = await db.query("SELECT * FROM clientes WHERE id = $1", [id]);
+    const cliente = await req.db.query("SELECT * FROM clientes WHERE id = $1", [id]);
     if (cliente.rows.length === 0) {
       return res.status(404).render("pages/error", { message: "Cliente não encontrado" });
     }
@@ -97,7 +96,7 @@ exports.atualizar = async (req, res) => {
   }
 
   try {
-    const cliente = await db.query("SELECT * FROM clientes WHERE id = $1", [id]);
+    const cliente = await req.db.query("SELECT * FROM clientes WHERE id = $1", [id]);
     if (cliente.rows.length === 0) {
       return res.status(404).render("pages/error", { message: "Cliente não encontrado" });
     }
@@ -116,7 +115,7 @@ exports.atualizar = async (req, res) => {
       logo = `/images/${req.file.filename}`;
     }
 
-    await db.query(
+    await req.db.query(
       `UPDATE clientes SET nome = $1, logo = $2, website = $3, ordem = $4, ativo = $5, updated_at = NOW()
        WHERE id = $6`,
       [nome, logo, website || null, ordem || 0, ativo === "true" || ativo === true, id]
@@ -140,7 +139,7 @@ exports.excluir = async (req, res) => {
   }
 
   try {
-    const cliente = await db.query("SELECT * FROM clientes WHERE id = $1", [id]);
+    const cliente = await req.db.query("SELECT * FROM clientes WHERE id = $1", [id]);
     if (cliente.rows.length === 0) {
       return res.status(404).render("pages/error", { message: "Cliente não encontrado" });
     }
@@ -153,7 +152,7 @@ exports.excluir = async (req, res) => {
       } catch {}
     }
 
-    await db.query("DELETE FROM clientes WHERE id = $1", [id]);
+    await req.db.query("DELETE FROM clientes WHERE id = $1", [id]);
     res.redirect("/admin/clientes");
   } catch (error) {
     console.error("Erro ao excluir cliente:", error);

@@ -72,65 +72,34 @@ async function consultarCheckout(checkoutId) {
   return apiRequest('GET', `/v0.1/checkouts/${checkoutId}`);
 }
 
-// ── Cloud API — Maquininha Remota ─────────────────────────────────────────────
-
-/**
- * Lista as leitoras vinculadas à conta
- */
+// ── Cloud API — Maquininha Remota (comentado para uso futuro) ──────────────────
+// Se você quiser ativar a maquininha no futuro, descomente o código abaixo
+/*
 async function listarLeitoras() {
   return apiRequest('GET', `/v0.1/merchants/${merchantCode()}/readers`);
 }
 
-/**
- * Envia cobrança para a maquininha física via Cloud API.
- * A leitora deve estar ligada e conectada à internet.
- *
- * SumUp total_amount format:
- *   value     — inteiro em centavos (ex: R$50,00 → 5000)
- *   currency  — ISO 4217 (BRL)
- *   minor_unit — casas decimais (2 para BRL)
- */
 async function criarTransacaoMaquininha({ pedidoId, valor, descricao, readerId }) {
   const rid = readerId || process.env.SUMUP_READER_ID;
   if (!rid) throw new Error('SUMUP_READER_ID não configurado no .env');
-
-  return apiRequest(
-    'POST',
-    `/v0.1/merchants/${merchantCode()}/readers/${rid}/checkout`,
-    {
-      total_amount: {
-        value: Math.round(parseFloat(valor) * 100), // centavos, inteiro
-        currency: 'BRL',
-        minor_unit: 2
-      },
-      client_transaction_id: `lojao-${pedidoId}-${Date.now()}`,
-      description: descricao || `Pedido #${pedidoId}`,
-      return_url: `${process.env.APP_URL}/webhook/sumup`, // webhook de resultado
-    }
-  );
+  return apiRequest('POST', `/v0.1/merchants/${merchantCode()}/readers/${rid}/checkout`, {
+    total_amount: { value: Math.round(parseFloat(valor) * 100), currency: 'BRL', minor_unit: 2 },
+    client_transaction_id: `lojao-${pedidoId}-${Date.now()}`,
+    description: descricao || `Pedido #${pedidoId}`,
+    return_url: `${process.env.APP_URL}/webhook/sumup`,
+  });
 }
 
-/**
- * Consulta o status de uma transação em andamento na maquininha
- */
 async function consultarTransacaoMaquininha(clientTransactionId, readerId) {
   const rid = readerId || process.env.SUMUP_READER_ID;
-  return apiRequest(
-    'GET',
-    `/v0.1/merchants/${merchantCode()}/readers/${rid}/checkout/${clientTransactionId}`
-  );
+  return apiRequest('GET', `/v0.1/merchants/${merchantCode()}/readers/${rid}/checkout/${clientTransactionId}`);
 }
 
-/**
- * Cancela uma transação pendente na maquininha
- */
 async function cancelarTransacaoMaquininha(clientTransactionId, readerId) {
   const rid = readerId || process.env.SUMUP_READER_ID;
-  return apiRequest(
-    'DELETE',
-    `/v0.1/merchants/${merchantCode()}/readers/${rid}/checkout/${clientTransactionId}`
-  );
+  return apiRequest('DELETE', `/v0.1/merchants/${merchantCode()}/readers/${rid}/checkout/${clientTransactionId}`);
 }
+*/
 
 // ── Mapeamento de status ──────────────────────────────────────────────────────
 
@@ -158,9 +127,5 @@ function mapearStatus(status) {
 module.exports = {
   criarCheckoutOnline,
   consultarCheckout,
-  listarLeitoras,
-  criarTransacaoMaquininha,
-  consultarTransacaoMaquininha,
-  cancelarTransacaoMaquininha,
   mapearStatus,
 };

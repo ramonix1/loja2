@@ -1,4 +1,3 @@
-const db = require("../config/db");
 const fs = require("fs").promises;
 const path = require("path");
 
@@ -7,7 +6,7 @@ const path = require("path");
 // ======================
 exports.admin = async (req, res) => {
   try {
-    const banners = await db.query(`
+    const banners = await req.db.query(`
       SELECT b.*, p.nome AS produto_nome
       FROM banners b
       LEFT JOIN produtos p ON p.id = b.produto_id
@@ -25,7 +24,7 @@ exports.admin = async (req, res) => {
 // ======================
 exports.novo = async (req, res) => {
   try {
-    const produtos = await db.query("SELECT id, nome FROM produtos ORDER BY nome ASC");
+    const produtos = await req.db.query("SELECT id, nome FROM produtos ORDER BY nome ASC");
     res.render("pages/admin-banner-form", {
       banner: null,
       produtos: produtos.rows,
@@ -49,7 +48,7 @@ exports.salvar = async (req, res) => {
     const produtoIdVal = produto_id && produto_id !== "" ? parseInt(produto_id) : null;
     const ctaUrl = cta_url && cta_url.trim() !== "" ? cta_url.trim() : null;
 
-    await db.query(
+    await req.db.query(
       `INSERT INTO banners (titulo, subtitulo, imagem, cta_texto, cta_url, produto_id, ativo, ordem)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [
@@ -76,11 +75,11 @@ exports.salvar = async (req, res) => {
 exports.editar = async (req, res) => {
   const { id } = req.params;
   try {
-    const banner = await db.query("SELECT * FROM banners WHERE id = $1", [id]);
+    const banner = await req.db.query("SELECT * FROM banners WHERE id = $1", [id]);
     if (banner.rows.length === 0) {
       return res.status(404).render("pages/error", { message: "Banner não encontrado" });
     }
-    const produtos = await db.query("SELECT id, nome FROM produtos ORDER BY nome ASC");
+    const produtos = await req.db.query("SELECT id, nome FROM produtos ORDER BY nome ASC");
     res.render("pages/admin-banner-form", {
       banner: banner.rows[0],
       produtos: produtos.rows,
@@ -103,19 +102,19 @@ exports.atualizar = async (req, res) => {
     const ativoVal = ativo === "on" || ativo === "true";
 
     if (req.file) {
-      const antigoBanner = await db.query("SELECT imagem FROM banners WHERE id=$1", [id]);
+      const antigoBanner = await req.db.query("SELECT imagem FROM banners WHERE id=$1", [id]);
       if (antigoBanner.rows.length > 0) {
         const caminho = path.join(__dirname, "..", "public", antigoBanner.rows[0].imagem);
         try { await fs.unlink(caminho); } catch {}
       }
-      await db.query(
+      await req.db.query(
         `UPDATE banners SET titulo=$1, subtitulo=$2, imagem=$3, cta_texto=$4, cta_url=$5,
          produto_id=$6, ativo=$7, ordem=$8, updated_at=NOW() WHERE id=$9`,
         [titulo, subtitulo || null, `/images/${req.file.filename}`, cta_texto || "Ver oferta",
          ctaUrl, produtoIdVal, ativoVal, parseInt(ordem) || 0, id]
       );
     } else {
-      await db.query(
+      await req.db.query(
         `UPDATE banners SET titulo=$1, subtitulo=$2, cta_texto=$3, cta_url=$4,
          produto_id=$5, ativo=$6, ordem=$7, updated_at=NOW() WHERE id=$8`,
         [titulo, subtitulo || null, cta_texto || "Ver oferta",
@@ -135,11 +134,11 @@ exports.atualizar = async (req, res) => {
 exports.excluir = async (req, res) => {
   const { id } = req.params;
   try {
-    const banner = await db.query("SELECT imagem FROM banners WHERE id=$1", [id]);
+    const banner = await req.db.query("SELECT imagem FROM banners WHERE id=$1", [id]);
     if (banner.rows.length > 0) {
       const caminho = path.join(__dirname, "..", "public", banner.rows[0].imagem);
       try { await fs.unlink(caminho); } catch {}
-      await db.query("DELETE FROM banners WHERE id=$1", [id]);
+      await req.db.query("DELETE FROM banners WHERE id=$1", [id]);
     }
     res.redirect("/admin/banners");
   } catch (error) {
@@ -154,7 +153,7 @@ exports.excluir = async (req, res) => {
 exports.toggleAtivo = async (req, res) => {
   const { id } = req.params;
   try {
-    await db.query("UPDATE banners SET ativo = NOT ativo, updated_at=NOW() WHERE id=$1", [id]);
+    await req.db.query("UPDATE banners SET ativo = NOT ativo, updated_at=NOW() WHERE id=$1", [id]);
     res.redirect("/admin/banners");
   } catch (error) {
     console.error("Erro ao alternar status:", error);

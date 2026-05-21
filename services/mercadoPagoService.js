@@ -23,7 +23,7 @@ async function criarPagamentoPix({ pedidoId, valor, email, nome, cpf, descricao 
       identification: { type: 'CPF', number: cpf?.replace(/\D/g, '') || '00000000000' }
     },
     external_reference: String(pedidoId),
-    notification_url: `${process.env.APP_URL}/webhook/mercadopago`
+    ...(process.env.NODE_ENV === 'production' && { notification_url: `${process.env.APP_URL}/webhook/mercadopago` })
   };
   return payment.create({ body });
 }
@@ -43,7 +43,7 @@ async function criarPagamentoCartao({ pedidoId, valor, token, parcelas, metodoPa
       identification: { type: 'CPF', number: cpf?.replace(/\D/g, '') || '00000000000' }
     },
     external_reference: String(pedidoId),
-    notification_url: `${process.env.APP_URL}/webhook/mercadopago`,
+    ...(process.env.NODE_ENV === 'production' && { notification_url: `${process.env.APP_URL}/webhook/mercadopago` }),
     statement_descriptor: 'LOJAO'
   };
   return payment.create({ body });
@@ -72,7 +72,7 @@ async function criarBoleto({ pedidoId, valor, email, nome, cpf, cep, logradouro,
       }
     },
     external_reference: String(pedidoId),
-    notification_url: `${process.env.APP_URL}/webhook/mercadopago`
+    ...(process.env.NODE_ENV === 'production' && { notification_url: `${process.env.APP_URL}/webhook/mercadopago` })
   };
   return payment.create({ body });
 }

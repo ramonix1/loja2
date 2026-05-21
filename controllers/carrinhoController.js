@@ -1,6 +1,4 @@
-const db = require('../config/db');
-
-async function getCarrinho(usuarioId) {
+async function getCarrinho(db, usuarioId) {
   const r = await db.query(`
     SELECT
       ci.id, ci.quantidade, ci.preco_unitario,
@@ -17,7 +15,7 @@ async function getCarrinho(usuarioId) {
 
 exports.exibirCarrinho = async (req, res) => {
   try {
-    const itens = await getCarrinho(req.session.usuarioId);
+    const itens = await getCarrinho(req.db, req.session.usuarioId);
     const total = itens.reduce((s, i) => s + parseFloat(i.subtotal), 0);
     res.render('pages/carrinho', { itens, total });
   } catch (err) {
@@ -32,10 +30,10 @@ exports.adicionarItem = async (req, res) => {
   const qtd = Math.max(1, parseInt(quantidade) || 1);
 
   try {
-    const prod = await db.query('SELECT id, valor FROM produtos WHERE id = $1', [produto_id]);
+    const prod = await req.db.query('SELECT id, valor FROM produtos WHERE id = $1', [produto_id]);
     if (!prod.rows[0]) return res.status(404).json({ erro: 'Produto não encontrado.' });
 
-    await db.query(`
+    await req.db.query(`
       INSERT INTO carrinho_itens (usuario_id, produto_id, quantidade, preco_unitario)
       VALUES ($1, $2, $3, $4)
       ON CONFLICT (usuario_id, produto_id) DO UPDATE
@@ -43,7 +41,7 @@ exports.adicionarItem = async (req, res) => {
             updated_at = NOW()
     `, [usuarioId, produto_id, qtd, prod.rows[0].valor]);
 
-    const contagem = await contagemItens(usuarioId);
+    const contagem = await contagemItens(req.db, usuarioId);
     res.json({ sucesso: true, contagem });
   } catch (err) {
     console.error('Erro ao adicionar ao carrinho:', err);
@@ -58,15 +56,15 @@ exports.atualizarItem = async (req, res) => {
 
   try {
     if (!qtd || qtd < 1) {
-      await db.query('DELETE FROM carrinho_itens WHERE id = $1 AND usuario_id = $2', [id, req.session.usuarioId]);
+      await req.db.query('DELETE FROM carrinho_itens WHERE id = $1 AND usuario_id = $2', [id, req.session.usuarioId]);
     } else {
-      await db.query(
+      await req.db.query(
         'UPDATE carrinho_itens SET quantidade = $1, updated_at = NOW() WHERE id = $2 AND usuario_id = $3',
         [qtd, id, req.session.usuarioId]
       );
     }
 
-    const itens = await getCarrinho(req.session.usuarioId);
+    const itens = await getCarrinho(req.db, req.session.usuarioId);
     const total = itens.reduce((s, i) => s + parseFloat(i.subtotal), 0);
     const contagem = itens.reduce((s, i) => s + i.quantidade, 0);
     res.json({ sucesso: true, contagem, total: total.toFixed(2) });
@@ -79,8 +77,8 @@ exports.atualizarItem = async (req, res) => {
 exports.removerItem = async (req, res) => {
   const { id } = req.params;
   try {
-    await db.query('DELETE FROM carrinho_itens WHERE id = $1 AND usuario_id = $2', [id, req.session.usuarioId]);
-    const itens = await getCarrinho(req.session.usuarioId);
+    await req.db.query('DELETE FROM carrinho_itens WHERE id = $1 AND usuario_id = $2', [id, req.session.usuarioId]);
+    const itens = await getCarrinho(req.db, req.session.usuarioId);
     const total = itens.reduce((s, i) => s + parseFloat(i.subtotal), 0);
     const contagem = itens.reduce((s, i) => s + i.quantidade, 0);
     res.json({ sucesso: true, contagem, total: total.toFixed(2) });
@@ -92,14 +90,14 @@ exports.removerItem = async (req, res) => {
 
 exports.contagem = async (req, res) => {
   try {
-    const c = await contagemItens(req.session.usuarioId);
+    const c = await contagemItens(req.db, req.session.usuarioId);
     res.json({ contagem: c });
   } catch {
     res.json({ contagem: 0 });
   }
 };
 
-async function contagemItens(usuarioId) {
+async function contagemItens(db, usuarioId) {
   const r = await db.query(
     'SELECT COALESCE(SUM(quantidade), 0) AS total FROM carrinho_itens WHERE usuario_id = $1',
     [usuarioId]

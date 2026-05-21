@@ -1,10 +1,9 @@
-const db = require('../config/db');
 const mp = require('../services/mercadoPagoService');
 const sumup = require('../services/sumupService');
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-async function getItensCarrinho(usuarioId) {
+async function getItensCarrinho(db, usuarioId) {
   const r = await db.query(`
     SELECT
       ci.id, ci.quantidade, ci.preco_unitario,
@@ -19,7 +18,7 @@ async function getItensCarrinho(usuarioId) {
   return r.rows;
 }
 
-async function getUsuario(id) {
+async function getUsuario(db, id) {
   const r = await db.query('SELECT * FROM usuarios WHERE id = $1', [id]);
   return r.rows[0];
 }
@@ -28,8 +27,8 @@ async function getUsuario(id) {
 
 exports.exibirCheckout = async (req, res) => {
   try {
-    const usuario = await getUsuario(req.session.usuarioId);
-    const itens = await getItensCarrinho(req.session.usuarioId);
+    const usuario = await getUsuario(req.db, req.session.usuarioId);
+    const itens = await getItensCarrinho(req.db, req.session.usuarioId);
 
     if (itens.length === 0) {
       return res.redirect('/carrinho');
@@ -50,10 +49,10 @@ exports.exibirCheckout = async (req, res) => {
 };
 
 // ── POST /checkout ────────────────────────────────────────────────────────────
-// Cria o pedido no banco e redireciona para o pagamento
 
 exports.processarCheckout = async (req, res) => {
   const usuarioId = req.session.usuarioId;
+  const db = req.db;
   const {
     nome_entrega, email_entrega, telefone_entrega, cpf_entrega,
     cep, logradouro, numero, complemento, bairro, cidade, estado,
@@ -61,20 +60,19 @@ exports.processarCheckout = async (req, res) => {
     mp_token, mp_installments, mp_payment_method_id
   } = req.body;
 
-  const client = await db.query('BEGIN');
+  await db.query('BEGIN');
 
   try {
-    const itens = await getItensCarrinho(usuarioId);
+    const itens = await getItensCarrinho(db, usuarioId);
     if (itens.length === 0) {
       await db.query('ROLLBACK');
       return res.redirect('/carrinho');
     }
 
     const subtotal = itens.reduce((s, i) => s + parseFloat(i.subtotal), 0);
-    const frete = 0; // calculado no futuro
+    const frete = 0;
     const total = subtotal + frete;
 
-    // Cria o pedido
     const pedidoRes = await db.query(`
       INSERT INTO pedidos
         (usuario_id, nome_entrega, email_entrega, telefone_entrega, cpf_entrega,
@@ -90,7 +88,6 @@ exports.processarCheckout = async (req, res) => {
 
     const pedidoId = pedidoRes.rows[0].id;
 
-    // Salva os itens do pedido
     for (const item of itens) {
       await db.query(`
         INSERT INTO pedido_itens (pedido_id, produto_id, nome_produto, quantidade, preco_unitario, subtotal)
@@ -98,7 +95,6 @@ exports.processarCheckout = async (req, res) => {
       `, [pedidoId, item.produto_id, item.nome, item.quantidade, item.preco_unitario, item.subtotal]);
     }
 
-    // Processa o pagamento imediatamente
     let mpResult;
     const dadosPagador = {
       pedidoId,
@@ -106,17 +102,13 @@ exports.processarCheckout = async (req, res) => {
       email: email_entrega,
       nome: nome_entrega,
       cpf: cpf_entrega,
-      descricao: `Lojão - Pedido #${pedidoId} (${itens.length} item${itens.length > 1 ? 's' : ''})`
+      descricao: `Pedido #${pedidoId} (${itens.length} item${itens.length > 1 ? 's' : ''})`
     };
 
-    // ── Métodos Mercado Pago ──────────────────────────────────────────────
     if (metodo_pagamento === 'pix') {
       mpResult = await mp.criarPagamentoPix(dadosPagador);
     } else if (metodo_pagamento === 'boleto') {
-      mpResult = await mp.criarBoleto({
-        ...dadosPagador,
-        cep, logradouro, numero, bairro, cidade, estado
-      });
+      mpResult = await mp.criarBoleto({ ...dadosPagador, cep, logradouro, numero, bairro, cidade, estado });
     } else if (metodo_pagamento === 'cartao') {
       mpResult = await mp.criarPagamentoCartao({
         ...dadosPagador,
@@ -125,9 +117,7 @@ exports.processarCheckout = async (req, res) => {
         metodoPagamento: mp_payment_method_id
       });
 
-    // ── Métodos SumUp ─────────────────────────────────────────────────────
     } else if (metodo_pagamento === 'sumup_online') {
-      // Checkout hospedado na SumUp (cartão via página deles)
       const checkoutSumup = await sumup.criarCheckoutOnline({
         pedidoId,
         valor: total,
@@ -149,32 +139,7 @@ exports.processarCheckout = async (req, res) => {
       await db.query('DELETE FROM carrinho_itens WHERE usuario_id = $1', [usuarioId]);
       await db.query('COMMIT');
 
-      // Redireciona para a página hospedada da SumUp
       return res.redirect(checkoutSumup.hosted_checkout_url || checkoutSumup.checkout_url || `/checkout/resultado/${pedidoId}`);
-
-    } else if (metodo_pagamento === 'sumup_maquininha') {
-      // Aciona a maquininha física remotamente via Cloud API
-      const transacao = await sumup.criarTransacaoMaquininha({
-        pedidoId,
-        valor: total,
-        descricao: dadosPagador.descricao
-      });
-
-      await db.query(`
-        INSERT INTO pagamentos (pedido_id, mp_payment_id, status, status_mp, valor, metodo, resposta_json)
-        VALUES ($1, $2, 'pendente', $3, $4, 'sumup_maquininha', $5)
-      `, [pedidoId, transacao.client_transaction_id, transacao.status || 'in_progress', total, JSON.stringify(transacao)]);
-
-      await db.query(
-        "UPDATE pedidos SET status = 'aguardando_pagamento', mp_payment_id = $1 WHERE id = $2",
-        [transacao.client_transaction_id, pedidoId]
-      );
-
-      await db.query('DELETE FROM carrinho_itens WHERE usuario_id = $1', [usuarioId]);
-      await db.query('COMMIT');
-
-      // Vai para página de aguardo: o cliente paga na maquininha enquanto vê o status
-      return res.redirect(`/checkout/aguardando-maquininha/${pedidoId}?tid=${transacao.client_transaction_id}`);
 
     } else {
       await db.query('ROLLBACK');
@@ -183,33 +148,20 @@ exports.processarCheckout = async (req, res) => {
 
     const statusInterno = mp.mapearStatus(mpResult.status);
 
-    // Salva o pagamento
     await db.query(`
       INSERT INTO pagamentos
         (pedido_id, mp_payment_id, status, status_mp, valor, metodo, resposta_json)
       VALUES ($1, $2, $3, $4, $5, $6, $7)
-    `, [
-      pedidoId,
-      String(mpResult.id),
-      statusInterno,
-      mpResult.status,
-      total,
-      metodo_pagamento,
-      JSON.stringify(mpResult)
-    ]);
+    `, [pedidoId, String(mpResult.id), statusInterno, mpResult.status, total, metodo_pagamento, JSON.stringify(mpResult)]);
 
-    // Atualiza status do pedido
     await db.query(
       "UPDATE pedidos SET status = $1, mp_payment_id = $2 WHERE id = $3",
       [statusInterno === 'pago' ? 'pago' : 'aguardando_pagamento', String(mpResult.id), pedidoId]
     );
 
-    // Limpa o carrinho
     await db.query('DELETE FROM carrinho_itens WHERE usuario_id = $1', [usuarioId]);
-
     await db.query('COMMIT');
 
-    // Redireciona para a página de resultado
     res.redirect(`/checkout/resultado/${pedidoId}`);
 
   } catch (err) {
@@ -223,7 +175,7 @@ exports.processarCheckout = async (req, res) => {
 
 exports.exibirResultado = async (req, res) => {
   try {
-    const pedidoRes = await db.query(`
+    const pedidoRes = await req.db.query(`
       SELECT p.*, u.nome AS usuario_nome
       FROM pedidos p
       JOIN usuarios u ON u.id = p.usuario_id
@@ -233,16 +185,8 @@ exports.exibirResultado = async (req, res) => {
     if (!pedidoRes.rows[0]) return res.redirect('/');
 
     const pedido = pedidoRes.rows[0];
-
-    const itensRes = await db.query(
-      'SELECT * FROM pedido_itens WHERE pedido_id = $1',
-      [pedido.id]
-    );
-
-    const pagamentoRes = await db.query(
-      'SELECT * FROM pagamentos WHERE pedido_id = $1 ORDER BY id DESC LIMIT 1',
-      [pedido.id]
-    );
+    const itensRes = await req.db.query('SELECT * FROM pedido_itens WHERE pedido_id = $1', [pedido.id]);
+    const pagamentoRes = await req.db.query('SELECT * FROM pagamentos WHERE pedido_id = $1 ORDER BY id DESC LIMIT 1', [pedido.id]);
 
     const pagamento = pagamentoRes.rows[0];
     let pixInfo = null;
@@ -261,13 +205,7 @@ exports.exibirResultado = async (req, res) => {
       }
     }
 
-    res.render('pages/checkout-resultado', {
-      pedido,
-      itens: itensRes.rows,
-      pagamento,
-      pixInfo,
-      boletoUrl
-    });
+    res.render('pages/checkout-resultado', { pedido, itens: itensRes.rows, pagamento, pixInfo, boletoUrl });
   } catch (err) {
     console.error('Erro ao exibir resultado:', err);
     res.redirect('/');
@@ -278,7 +216,7 @@ exports.exibirResultado = async (req, res) => {
 
 exports.meusPedidos = async (req, res) => {
   try {
-    const r = await db.query(`
+    const r = await req.db.query(`
       SELECT p.*, COUNT(pi.id) AS total_itens
       FROM pedidos p
       LEFT JOIN pedido_itens pi ON pi.pedido_id = p.id
@@ -306,7 +244,7 @@ exports.webhook = async (req, res) => {
       const pedidoId = mpData.external_reference;
 
       if (pedidoId) {
-        await db.query(
+        await req.db.query(
           'UPDATE pagamentos SET status = $1, status_mp = $2 WHERE mp_payment_id = $3',
           [statusInterno, mpData.status, String(data.id)]
         );
@@ -315,17 +253,14 @@ exports.webhook = async (req, res) => {
           : statusInterno === 'rejeitado' ? 'cancelado'
           : 'aguardando_pagamento';
 
-        await db.query(
-          'UPDATE pedidos SET status = $1 WHERE id = $2',
-          [novoStatus, pedidoId]
-        );
+        await req.db.query('UPDATE pedidos SET status = $1 WHERE id = $2', [novoStatus, pedidoId]);
       }
     }
 
     res.sendStatus(200);
   } catch (err) {
     console.error('Erro no webhook MP:', err);
-    res.sendStatus(200); // sempre 200 para o MP não reenviar
+    res.sendStatus(200);
   }
 };
 
@@ -333,7 +268,7 @@ exports.webhook = async (req, res) => {
 
 exports.adminPedidos = async (req, res) => {
   try {
-    const r = await db.query(`
+    const r = await req.db.query(`
       SELECT p.*, u.nome AS usuario_nome, u.email AS usuario_email,
              COUNT(pi.id) AS total_itens
       FROM pedidos p
@@ -343,7 +278,6 @@ exports.adminPedidos = async (req, res) => {
       ORDER BY p.created_at DESC
       LIMIT 100
     `);
-
     res.render('pages/admin-pedidos', { pedidos: r.rows });
   } catch (err) {
     console.error('Erro ao listar pedidos admin:', err);
@@ -353,7 +287,7 @@ exports.adminPedidos = async (req, res) => {
 
 exports.adminDetalhePedido = async (req, res) => {
   try {
-    const pedidoRes = await db.query(`
+    const pedidoRes = await req.db.query(`
       SELECT p.*, u.nome AS usuario_nome, u.email AS usuario_email
       FROM pedidos p
       JOIN usuarios u ON u.id = p.usuario_id
@@ -363,8 +297,8 @@ exports.adminDetalhePedido = async (req, res) => {
     if (!pedidoRes.rows[0]) return res.redirect('/admin/pedidos');
 
     const pedido = pedidoRes.rows[0];
-    const itens = (await db.query('SELECT * FROM pedido_itens WHERE pedido_id = $1', [pedido.id])).rows;
-    const pagamento = (await db.query('SELECT * FROM pagamentos WHERE pedido_id = $1 ORDER BY id DESC LIMIT 1', [pedido.id])).rows[0];
+    const itens = (await req.db.query('SELECT * FROM pedido_itens WHERE pedido_id = $1', [pedido.id])).rows;
+    const pagamento = (await req.db.query('SELECT * FROM pagamentos WHERE pedido_id = $1 ORDER BY id DESC LIMIT 1', [pedido.id])).rows[0];
 
     res.render('pages/admin-pedido-detalhe', { pedido, itens, pagamento });
   } catch (err) {
@@ -373,101 +307,13 @@ exports.adminDetalhePedido = async (req, res) => {
   }
 };
 
-exports.sumupDiagnostico = async (req, res) => {
-  const resultado = {
-    api_key_configurada: !!process.env.SUMUP_API_KEY,
-    merchant_code_configurado: !!process.env.SUMUP_MERCHANT_CODE,
-    reader_id_configurado: !!process.env.SUMUP_READER_ID,
-    app_url: process.env.APP_URL,
-    leitoras: null,
-    erro: null
-  };
-  try {
-    resultado.leitoras = await sumup.listarLeitoras();
-  } catch (err) {
-    resultado.erro = err.message;
-    resultado.erro_detalhe = err.body;
-  }
-  res.json(resultado);
-};
-
 exports.adminAtualizarStatus = async (req, res) => {
   const { status } = req.body;
   const statusValidos = ['aguardando_pagamento', 'pago', 'em_separacao', 'enviado', 'entregue', 'cancelado'];
   if (!statusValidos.includes(status)) return res.redirect('/admin/pedidos');
 
-  await db.query('UPDATE pedidos SET status = $1, updated_at = NOW() WHERE id = $2', [status, req.params.id]);
+  await req.db.query('UPDATE pedidos SET status = $1, updated_at = NOW() WHERE id = $2', [status, req.params.id]);
   res.redirect(`/admin/pedidos/${req.params.id}`);
-};
-
-// ── SumUp: aguardar pagamento na maquininha ───────────────────────────────────
-
-exports.aguardandoMaquininha = async (req, res) => {
-  try {
-    const pedidoRes = await db.query(
-      'SELECT * FROM pedidos WHERE id = $1 AND usuario_id = $2',
-      [req.params.id, req.session.usuarioId]
-    );
-    if (!pedidoRes.rows[0]) return res.redirect('/');
-    const pedido = pedidoRes.rows[0];
-    const tid = req.query.tid || '';
-    res.render('pages/checkout-maquininha', { pedido, tid });
-  } catch (err) {
-    console.error(err);
-    res.redirect('/');
-  }
-};
-
-// ── SumUp: polling de status da maquininha (chamado pelo front via AJAX) ──────
-
-exports.statusMaquininha = async (req, res) => {
-  try {
-    const { pedidoId, tid } = req.params;
-
-    const pedidoRes = await db.query(
-      'SELECT * FROM pedidos WHERE id = $1 AND usuario_id = $2',
-      [pedidoId, req.session.usuarioId]
-    );
-    if (!pedidoRes.rows[0]) return res.status(404).json({ erro: 'Pedido não encontrado.' });
-
-    // Consulta status na SumUp
-    const transacao = await sumup.consultarTransacaoMaquininha(tid);
-    const statusInterno = sumup.mapearStatus(transacao.status);
-
-    // Atualiza banco se mudou
-    if (statusInterno !== 'pendente') {
-      await db.query(
-        'UPDATE pagamentos SET status = $1, status_mp = $2 WHERE pedido_id = $3',
-        [statusInterno, transacao.status, pedidoId]
-      );
-      const novoStatusPedido = statusInterno === 'pago' ? 'pago'
-        : statusInterno === 'rejeitado' || statusInterno === 'cancelado' ? 'cancelado'
-        : 'aguardando_pagamento';
-      await db.query(
-        'UPDATE pedidos SET status = $1 WHERE id = $2',
-        [novoStatusPedido, pedidoId]
-      );
-    }
-
-    res.json({ status: transacao.status, statusInterno });
-  } catch (err) {
-    console.error('Erro ao consultar maquininha:', err);
-    res.json({ status: 'in_progress', statusInterno: 'pendente' });
-  }
-};
-
-// ── SumUp: cancelar transação maquininha ──────────────────────────────────────
-
-exports.cancelarMaquininha = async (req, res) => {
-  const { pedidoId, tid } = req.params;
-  try {
-    await sumup.cancelarTransacaoMaquininha(tid);
-    await db.query("UPDATE pedidos SET status = 'cancelado' WHERE id = $1 AND usuario_id = $2", [pedidoId, req.session.usuarioId]);
-    res.json({ sucesso: true });
-  } catch (err) {
-    console.error(err);
-    res.json({ erro: 'Não foi possível cancelar.' });
-  }
 };
 
 // ── SumUp: webhook ────────────────────────────────────────────────────────────
@@ -475,19 +321,18 @@ exports.cancelarMaquininha = async (req, res) => {
 exports.webhookSumup = async (req, res) => {
   try {
     const evento = req.body;
-    // SumUp envia eventos de transação
     if (evento.event_type === 'CHECKOUT_STATUS_CHANGED' || evento.type === 'payment') {
       const checkoutId = evento.id || evento.checkout_id;
       if (checkoutId) {
         const checkout = await sumup.consultarCheckout(checkoutId);
         const statusInterno = sumup.mapearStatus(checkout.status);
 
-        await db.query(
+        await req.db.query(
           'UPDATE pagamentos SET status = $1, status_mp = $2 WHERE mp_payment_id = $3',
           [statusInterno, checkout.status, checkoutId]
         );
 
-        const pedidoRes = await db.query(
+        const pedidoRes = await req.db.query(
           "SELECT pedido_id FROM pagamentos WHERE mp_payment_id = $1",
           [checkoutId]
         );
@@ -495,10 +340,7 @@ exports.webhookSumup = async (req, res) => {
           const novoStatus = statusInterno === 'pago' ? 'pago'
             : statusInterno === 'rejeitado' ? 'cancelado'
             : 'aguardando_pagamento';
-          await db.query(
-            'UPDATE pedidos SET status = $1 WHERE id = $2',
-            [novoStatus, pedidoRes.rows[0].pedido_id]
-          );
+          await req.db.query('UPDATE pedidos SET status = $1 WHERE id = $2', [novoStatus, pedidoRes.rows[0].pedido_id]);
         }
       }
     }

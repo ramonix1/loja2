@@ -1,6 +1,5 @@
 const argon2 = require('argon2');
 const crypto = require('crypto');
-const db = require('../config/db');
 const { enviarEmailRecuperacao, enviarEmailBoasVindas } = require('../services/emailService');
 const { enviarSmsCodigo, twilioDisponivel } = require('../services/smsService');
 
@@ -32,7 +31,7 @@ exports.processarLogin = async (req, res) => {
 
   try {
     // Verificar bloqueio por IP
-    const bloqIp = await db.query(
+    const bloqIp = await req.db.query(
       `SELECT * FROM tentativas_login WHERE ip = $1 AND bloqueado_ate > NOW()`,
       [ip]
     );
@@ -44,7 +43,7 @@ exports.processarLogin = async (req, res) => {
       });
     }
 
-    const resultado = await db.query(
+    const resultado = await req.db.query(
       'SELECT * FROM usuarios WHERE email = $1 AND ativo = true',
       [email.toLowerCase().trim()]
     );
@@ -63,10 +62,10 @@ exports.processarLogin = async (req, res) => {
     const senhaCorreta = usuario ? await argon2.verify(usuario.senha_hash, senha) : false;
 
     if (!senhaCorreta) {
-      await registrarTentativaFalha(ip, email);
-      if (usuario) await incrementarFalhaUsuario(usuario.id);
+      await registrarTentativaFalha(req.db, ip, email);
+      if (usuario) await incrementarFalhaUsuario(req.db, usuario.id);
 
-      const tentativas = await contarTentativasIp(ip);
+      const tentativas = await contarTentativasIp(req.db, ip);
       const restantes = MAX_TENTATIVAS - tentativas;
 
       return res.render('pages/login', {
@@ -78,7 +77,7 @@ exports.processarLogin = async (req, res) => {
     }
 
     // Login bem-sucedido — limpar tentativas
-    await limparTentativas(ip, usuario.id);
+    await limparTentativas(req.db, ip, usuario.id);
 
     // Regenerar sessão para prevenir session fixation
     await new Promise((resolve, reject) => {
@@ -90,8 +89,13 @@ exports.processarLogin = async (req, res) => {
     req.session.email = usuario.email;
     req.session.role = usuario.role;
 
+    // Salvar sessão antes de redirecionar
+    await new Promise((resolve, reject) => {
+      req.session.save((err) => (err ? reject(err) : resolve()));
+    });
+
     // Atualizar último acesso
-    await db.query('UPDATE usuarios SET ultimo_acesso = NOW() WHERE id = $1', [usuario.id]);
+    await req.db.query('UPDATE usuarios SET ultimo_acesso = NOW() WHERE id = $1', [usuario.id]);
 
     const destino = req.session.redirecionarPara || (usuario.role === 'admin' ? '/admin' : '/');
     delete req.session.redirecionarPara;
@@ -127,13 +131,13 @@ exports.processarRecuperarSenha = async (req, res) => {
     let usuario = null;
 
     if (canal === 'sms' && telefone) {
-      const r = await db.query(
+      const r = await req.db.query(
         'SELECT * FROM usuarios WHERE telefone = $1 AND ativo = true',
         [telefone.replace(/\D/g, '')]
       );
       usuario = r.rows[0];
     } else if (email) {
-      const r = await db.query(
+      const r = await req.db.query(
         'SELECT * FROM usuarios WHERE email = $1 AND ativo = true',
         [email.toLowerCase().trim()]
       );
@@ -150,7 +154,7 @@ exports.processarRecuperarSenha = async (req, res) => {
     }
 
     // Invalidar tokens anteriores
-    await db.query(
+    await req.db.query(
       'UPDATE tokens_recuperacao SET usado = true WHERE usuario_id = $1 AND usado = false',
       [usuario.id]
     );
@@ -159,7 +163,7 @@ exports.processarRecuperarSenha = async (req, res) => {
     const tokenHash = crypto.createHash('sha256').update(tokenBruto).digest('hex');
     const expiracao = new Date(Date.now() + TOKEN_EXP_MIN * 60 * 1000);
 
-    await db.query(
+    await req.db.query(
       `INSERT INTO tokens_recuperacao (usuario_id, token_hash, canal, expira_em)
        VALUES ($1, $2, $3, $4)`,
       [usuario.id, tokenHash, canal === 'sms' ? 'sms' : 'email', expiracao]
@@ -168,7 +172,7 @@ exports.processarRecuperarSenha = async (req, res) => {
     if (canal === 'sms') {
       const codigo = tokenBruto.slice(0, 6).toUpperCase();
       // Sobrescrever token com versão curta para SMS
-      await db.query('UPDATE tokens_recuperacao SET token_hash = $1 WHERE usuario_id = $2 AND usado = false AND expira_em = $3',
+      await req.db.query('UPDATE tokens_recuperacao SET token_hash = $1 WHERE usuario_id = $2 AND usado = false AND expira_em = $3',
         [crypto.createHash('sha256').update(codigo).digest('hex'), usuario.id, expiracao]);
       await enviarSmsCodigo(
         (usuario.telefone.startsWith('+') ? '' : '+55') + usuario.telefone,
@@ -189,7 +193,7 @@ exports.exibirRedefinirSenha = async (req, res) => {
   const { token } = req.params;
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
 
-  const r = await db.query(
+  const r = await req.db.query(
     `SELECT * FROM tokens_recuperacao
      WHERE token_hash = $1 AND usado = false AND expira_em > NOW()`,
     [tokenHash]
@@ -216,7 +220,7 @@ exports.processarRedefinirSenha = async (req, res) => {
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
 
   try {
-    const r = await db.query(
+    const r = await req.db.query(
       `SELECT * FROM tokens_recuperacao
        WHERE token_hash = $1 AND usado = false AND expira_em > NOW()`,
       [tokenHash]
@@ -228,10 +232,10 @@ exports.processarRedefinirSenha = async (req, res) => {
 
     const senhaHash = await argon2.hash(senha, ARGON2_OPTIONS);
 
-    await db.query('UPDATE usuarios SET senha_hash = $1, bloqueado_ate = NULL, tentativas_falha = 0 WHERE id = $2',
+    await req.db.query('UPDATE usuarios SET senha_hash = $1, bloqueado_ate = NULL, tentativas_falha = 0 WHERE id = $2',
       [senhaHash, r.rows[0].usuario_id]);
 
-    await db.query('UPDATE tokens_recuperacao SET usado = true WHERE id = $1', [r.rows[0].id]);
+    await req.db.query('UPDATE tokens_recuperacao SET usado = true WHERE id = $1', [r.rows[0].id]);
 
     req.session.info = 'Senha redefinida com sucesso! Faça login.';
     res.redirect('/login');
@@ -271,7 +275,7 @@ exports.processarCadastro = async (req, res) => {
   if (erros.length) return res.render('pages/cadastro', { erros, dados });
 
   try {
-    const existe = await db.query('SELECT id FROM usuarios WHERE email = $1', [email.toLowerCase().trim()]);
+    const existe = await req.db.query('SELECT id FROM usuarios WHERE email = $1', [email.toLowerCase().trim()]);
     if (existe.rows[0]) {
       return res.render('pages/cadastro', { erros: ['Este email já está cadastrado.'], dados });
     }
@@ -280,7 +284,7 @@ exports.processarCadastro = async (req, res) => {
     const telLimpo = telefone.replace(/\D/g, '');
     const cepLimpo = cep.replace(/\D/g, '').replace(/^(\d{5})(\d{3})$/, '$1-$2');
 
-    await db.query(
+    await req.db.query(
       `INSERT INTO usuarios
          (nome, email, senha_hash, role, telefone, cep, logradouro, numero, complemento, bairro, cidade, estado)
        VALUES ($1,$2,$3,'usuario',$4,$5,$6,$7,$8,$9,$10,$11)`,
@@ -302,7 +306,7 @@ exports.processarCadastro = async (req, res) => {
 // ── Gestão de admins (tela de permissões) ─────────────────────────────────
 
 exports.exibirPermissoes = async (req, res) => {
-  const admins = await db.query(
+  const admins = await req.db.query(
     "SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at FROM usuarios WHERE role = 'admin' ORDER BY created_at DESC"
   );
   res.render('pages/admin-permissoes', { admins: admins.rows, erro: null, sucesso: null });
@@ -318,30 +322,30 @@ exports.criarAdmin = async (req, res) => {
   if (cpf && !validarCPF(cpf)) erros.push('CPF inválido.');
 
   if (erros.length) {
-    const admins = await db.query("SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at FROM usuarios WHERE role = 'admin' ORDER BY created_at DESC");
+    const admins = await req.db.query("SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at FROM usuarios WHERE role = 'admin' ORDER BY created_at DESC");
     return res.render('pages/admin-permissoes', { admins: admins.rows, erro: erros.join(' '), sucesso: null });
   }
 
   try {
-    const existe = await db.query('SELECT id FROM usuarios WHERE email = $1', [email.toLowerCase()]);
+    const existe = await req.db.query('SELECT id FROM usuarios WHERE email = $1', [email.toLowerCase()]);
     if (existe.rows[0]) {
-      const admins = await db.query("SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at FROM usuarios WHERE role = 'admin' ORDER BY created_at DESC");
+      const admins = await req.db.query("SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at FROM usuarios WHERE role = 'admin' ORDER BY created_at DESC");
       return res.render('pages/admin-permissoes', { admins: admins.rows, erro: 'Email já cadastrado.', sucesso: null });
     }
 
     const cpfLimpo = cpf ? cpf.replace(/\D/g, '').replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4') : null;
     const senhaHash = await argon2.hash(senha, ARGON2_OPTIONS);
 
-    await db.query(
+    await req.db.query(
       "INSERT INTO usuarios (nome, email, senha_hash, role, cpf) VALUES ($1,$2,$3,'admin',$4)",
       [nome.trim(), email.toLowerCase().trim(), senhaHash, cpfLimpo]
     );
 
-    const admins = await db.query("SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at FROM usuarios WHERE role = 'admin' ORDER BY created_at DESC");
+    const admins = await req.db.query("SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at FROM usuarios WHERE role = 'admin' ORDER BY created_at DESC");
     res.render('pages/admin-permissoes', { admins: admins.rows, erro: null, sucesso: 'Admin criado com sucesso.' });
   } catch (err) {
     console.error('Erro ao criar admin:', err);
-    const admins = await db.query("SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at FROM usuarios WHERE role = 'admin' ORDER BY created_at DESC");
+    const admins = await req.db.query("SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at FROM usuarios WHERE role = 'admin' ORDER BY created_at DESC");
     res.render('pages/admin-permissoes', { admins: admins.rows, erro: 'Erro interno.', sucesso: null });
   }
 };
@@ -351,7 +355,7 @@ exports.toggleAdmin = async (req, res) => {
   if (parseInt(id) === req.session.usuarioId) {
     return res.redirect('/admin/permissoes');
   }
-  await db.query('UPDATE usuarios SET ativo = NOT ativo WHERE id = $1 AND role = $2', [id, 'admin']);
+  await req.db.query('UPDATE usuarios SET ativo = NOT ativo WHERE id = $1 AND role = $2', [id, 'admin']);
   res.redirect('/admin/permissoes');
 };
 
@@ -360,7 +364,7 @@ exports.excluirAdmin = async (req, res) => {
   if (parseInt(id) === req.session.usuarioId) {
     return res.redirect('/admin/permissoes');
   }
-  await db.query("DELETE FROM usuarios WHERE id = $1 AND role = 'admin'", [id]);
+  await req.db.query("DELETE FROM usuarios WHERE id = $1 AND role = 'admin'", [id]);
   res.redirect('/admin/permissoes');
 };
 
@@ -383,7 +387,7 @@ function validarCPF(cpf) {
 
 // ── Helpers internos ──────────────────────────────────────────────────────
 
-async function registrarTentativaFalha(ip, email) {
+async function registrarTentativaFalha(db, ip, email) {
   await db.query(
     `INSERT INTO tentativas_login (ip, email, tentativas, bloqueado_ate)
      VALUES ($1, $2, 1, NULL)
@@ -400,12 +404,12 @@ async function registrarTentativaFalha(ip, email) {
   );
 }
 
-async function contarTentativasIp(ip) {
+async function contarTentativasIp(db, ip) {
   const r = await db.query('SELECT tentativas FROM tentativas_login WHERE ip = $1', [ip]);
   return r.rows[0] ? r.rows[0].tentativas : 0;
 }
 
-async function incrementarFalhaUsuario(usuarioId) {
+async function incrementarFalhaUsuario(db, usuarioId) {
   await db.query(
     `UPDATE usuarios SET
        tentativas_falha = tentativas_falha + 1,
@@ -419,7 +423,7 @@ async function incrementarFalhaUsuario(usuarioId) {
   );
 }
 
-async function limparTentativas(ip, usuarioId) {
+async function limparTentativas(db, ip, usuarioId) {
   await db.query('DELETE FROM tentativas_login WHERE ip = $1', [ip]);
   if (usuarioId) {
     await db.query('UPDATE usuarios SET tentativas_falha = 0, bloqueado_ate = NULL WHERE id = $1', [usuarioId]);
