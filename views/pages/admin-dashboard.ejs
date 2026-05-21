@@ -33,56 +33,7 @@
   <!-- Sidebar + Layout -->
   <div class="flex min-h-screen">
 
-    <!-- Sidebar -->
-    <aside class="w-60 bg-gray-900 border-r border-gray-800 flex flex-col fixed h-full">
-      <div class="p-6 border-b border-gray-800">
-        <a href="/" class="flex items-center gap-3">
-          <span class="text-2xl">🛒</span>
-          <div>
-            <div class="font-bold text-white text-lg leading-tight">Lojão</div>
-            <div class="text-xs text-gray-400 font-medium">Painel Admin</div>
-          </div>
-        </a>
-      </div>
-
-      <nav class="flex-1 p-4 space-y-1">
-        <a href="/admin"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-600 text-white font-medium text-sm">
-          <span>🏠</span> Dashboard
-        </a>
-        <a href="/admin/produtos"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white font-medium text-sm transition">
-          <span>📦</span> Produtos
-        </a>
-        <a href="/admin/banners"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white font-medium text-sm transition">
-          <span>🖼️</span> Banners
-        </a>
-        <a href="/admin/clientes"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white font-medium text-sm transition">
-          <span>🏢</span> Clientes
-        </a>
-        <a href="/admin/permissoes"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white font-medium text-sm transition">
-          <span>🔐</span> Permissões
-        </a>
-        <div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 font-medium text-sm cursor-not-allowed">
-          <span>🏷️</span> Categorias
-          <span class="ml-auto bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded text-xs badge-soon">EM BREVE</span>
-        </div>
-        <div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 font-medium text-sm cursor-not-allowed">
-          <span>🛍️</span> Pedidos
-          <span class="ml-auto bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded text-xs badge-soon">EM BREVE</span>
-        </div>
-      </nav>
-
-      <div class="p-4 border-t border-gray-800">
-        <a href="/"
-           class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition px-3 py-2 rounded-lg hover:bg-gray-800">
-          ← Ver loja
-        </a>
-      </div>
-    </aside>
+    <%- include('../partials/admin-sidebar') %>
 
     <!-- Conteúdo principal -->
     <main class="ml-60 flex-1 p-8">
@@ -161,18 +112,18 @@
           </div>
         </div>
 
-        <!-- Pedidos (em breve) -->
-        <div class="module-card disabled bg-gray-900 border border-gray-800 rounded-xl p-6">
+        <!-- Pedidos (ativo) -->
+        <a href="/admin/pedidos" class="module-card bg-gray-900 border border-gray-800 hover:border-blue-500 rounded-xl p-6 block">
           <div class="flex items-start justify-between mb-4">
-            <div class="w-12 h-12 bg-gray-700 rounded-xl flex items-center justify-center text-2xl">🛍️</div>
-            <span class="text-xs bg-gray-800 text-gray-500 font-semibold px-2 py-1 rounded-full badge-soon">EM BREVE</span>
+            <div class="w-12 h-12 bg-yellow-600 rounded-xl flex items-center justify-center text-2xl">🛍️</div>
+            <span class="text-xs bg-green-900 text-green-400 font-semibold px-2 py-1 rounded-full">Ativo</span>
           </div>
-          <h3 class="font-bold text-gray-400 text-lg mb-1">Pedidos</h3>
-          <p class="text-gray-600 text-sm mb-4">Acompanhe e gerencie os pedidos realizados pelos clientes.</p>
-          <div class="flex items-center text-gray-600 text-sm font-medium">
-            Em desenvolvimento
+          <h3 class="font-bold text-white text-lg mb-1">Pedidos</h3>
+          <p class="text-gray-400 text-sm mb-4">Acompanhe e gerencie os pedidos realizados pelos clientes.</p>
+          <div class="flex items-center text-blue-400 text-sm font-medium">
+            Acessar módulo <span class="ml-1">→</span>
           </div>
-        </div>
+        </a>
 
         <!-- Clientes (ativo) -->
         <a href="/admin/clientes" class="module-card bg-gray-900 border border-gray-800 hover:border-blue-500 rounded-xl p-6 block">
@@ -187,18 +138,18 @@
           </div>
         </a>
 
-        <!-- Configurações (em breve) -->
-        <div class="module-card disabled bg-gray-900 border border-gray-800 rounded-xl p-6">
+        <!-- Configurações (ativo) -->
+        <a href="/admin/configuracoes" class="module-card bg-gray-900 border border-gray-800 hover:border-blue-500 rounded-xl p-6 block">
           <div class="flex items-start justify-between mb-4">
-            <div class="w-12 h-12 bg-gray-700 rounded-xl flex items-center justify-center text-2xl">⚙️</div>
-            <span class="text-xs bg-gray-800 text-gray-500 font-semibold px-2 py-1 rounded-full badge-soon">EM BREVE</span>
+            <div class="w-12 h-12 bg-orange-600 rounded-xl flex items-center justify-center text-2xl">⚙️</div>
+            <span class="text-xs bg-green-900 text-green-400 font-semibold px-2 py-1 rounded-full">Ativo</span>
           </div>
-          <h3 class="font-bold text-gray-400 text-lg mb-1">Configurações</h3>
-          <p class="text-gray-600 text-sm mb-4">Personalize nome da loja, contato, cores e outras configurações gerais.</p>
-          <div class="flex items-center text-gray-600 text-sm font-medium">
-            Em desenvolvimento
+          <h3 class="font-bold text-white text-lg mb-1">Configurações</h3>
+          <p class="text-gray-400 text-sm mb-4">Controle de estoque, reservas, e outras opções do sistema.</p>
+          <div class="flex items-center text-blue-400 text-sm font-medium">
+            Acessar módulo <span class="ml-1">→</span>
           </div>
-        </div>
+        </a>
 
       </div>
 

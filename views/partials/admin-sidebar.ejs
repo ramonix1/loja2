@@ -1,0 +1,60 @@
+<aside class="w-60 bg-gray-900 border-r border-gray-800 flex flex-col fixed h-full">
+  <div class="p-6 border-b border-gray-800">
+    <a href="/" class="flex items-center gap-3">
+      <span class="text-2xl">🛒</span>
+      <div>
+        <div class="font-bold text-white text-lg leading-tight">Lojão</div>
+        <div class="text-xs text-gray-400 font-medium">Painel Admin</div>
+      </div>
+    </a>
+  </div>
+
+  <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+    <a href="/admin"
+       class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition
+              <%= locals.activePage === 'dashboard' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+      <span>🏠</span> Dashboard
+    </a>
+    <a href="/admin/produtos"
+       class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition
+              <%= locals.activePage === 'produtos' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+      <span>📦</span> Produtos
+    </a>
+    <a href="/admin/banners"
+       class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition
+              <%= locals.activePage === 'banners' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+      <span>🖼️</span> Banners
+    </a>
+    <a href="/admin/clientes"
+       class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition
+              <%= locals.activePage === 'clientes' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+      <span>🏢</span> Clientes
+    </a>
+    <a href="/admin/pedidos"
+       class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition
+              <%= locals.activePage === 'pedidos' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+      <span>🛍️</span> Pedidos
+    </a>
+    <a href="/admin/permissoes"
+       class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition
+              <%= locals.activePage === 'permissoes' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+      <span>🔐</span> Permissões
+    </a>
+    <a href="/admin/configuracoes"
+       class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition
+              <%= locals.activePage === 'configuracoes' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
+      <span>⚙️</span> Configurações
+    </a>
+  </nav>
+
+  <div class="p-4 border-t border-gray-800 space-y-1">
+    <a href="/"
+       class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition px-3 py-2 rounded-lg hover:bg-gray-800">
+      ← Ver loja
+    </a>
+    <a href="/logout"
+       class="flex items-center gap-2 text-sm text-red-400 hover:text-red-300 transition px-3 py-2 rounded-lg hover:bg-gray-800">
+      Sair
+    </a>
+  </div>
+</aside>

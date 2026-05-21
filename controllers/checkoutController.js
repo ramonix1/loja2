@@ -95,6 +95,23 @@ exports.processarCheckout = async (req, res) => {
       `, [pedidoId, item.produto_id, item.nome, item.quantidade, item.preco_unitario, item.subtotal]);
     }
 
+    // Debitar estoque dos produtos (se controle ativo)
+    const cfgEstoqueRes = await db.query(
+      "SELECT valor FROM configuracoes WHERE chave = 'controla_estoque'"
+    ).catch(() => ({ rows: [] }));
+    if (cfgEstoqueRes.rows[0]?.valor === 'true') {
+      for (const item of itens) {
+        await db.query(
+          'UPDATE produtos SET estoque = GREATEST(0, estoque - $1), updated_at = NOW() WHERE id = $2 AND estoque IS NOT NULL',
+          [item.quantidade, item.produto_id]
+        );
+        await db.query(
+          'INSERT INTO movimentacoes_estoque (produto_id, tipo, quantidade, origem, origem_id) VALUES ($1, $2, $3, $4, $5)',
+          [item.produto_id, 'saida', item.quantidade, 'pedido', pedidoId]
+        );
+      }
+    }
+
     let mpResult;
     const dadosPagador = {
       pedidoId,

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configurações - Admin Lojão</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+
+<body class="bg-gray-950 min-h-screen text-white">
+<div class="flex min-h-screen">
+
+  <%- include('../partials/admin-sidebar') %>
+
+  <main class="ml-60 flex-1 p-8">
+
+    <div class="mb-6">
+      <div class="text-xs text-gray-500 mb-1">
+        <a href="/admin" class="hover:text-gray-300 transition">Dashboard</a>
+        <span class="mx-2">/</span>
+        <span class="text-gray-300">Configurações</span>
+      </div>
+      <h1 class="text-2xl font-bold text-white">⚙️ Configurações</h1>
+      <p class="text-gray-400 mt-1 text-sm">Gerencie as opções do sistema</p>
+    </div>
+
+    <% if (salvo) { %>
+      <div class="mb-6 bg-green-900/50 border border-green-700 text-green-300 rounded-xl px-4 py-3 text-sm">
+        ✅ Configurações salvas com sucesso.
+      </div>
+    <% } %>
+    <% if (erro) { %>
+      <div class="mb-6 bg-red-900/50 border border-red-700 text-red-300 rounded-xl px-4 py-3 text-sm">
+        ❌ Erro ao salvar configurações.
+      </div>
+    <% } %>
+
+    <form action="/admin/configuracoes" method="POST" class="space-y-6 max-w-2xl">
+      <input type="hidden" name="_csrf" value="<%= locals.csrfToken %>">
+
+      <!-- Estoque -->
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+        <h2 class="text-lg font-bold text-white mb-1">📦 Controle de Estoque</h2>
+        <p class="text-gray-400 text-sm mb-5">Configure como o estoque dos produtos será gerenciado.</p>
+
+        <div class="space-y-5">
+
+          <!-- Toggle: controla_estoque -->
+          <label class="flex items-start gap-4 cursor-pointer group">
+            <div class="mt-0.5">
+              <input type="checkbox" name="controla_estoque" id="controla_estoque"
+                     class="sr-only peer" <%= configs.controla_estoque === 'true' ? 'checked' : '' %>>
+              <div class="w-11 h-6 bg-gray-700 peer-checked:bg-blue-600 rounded-full relative transition
+                          after:content-[''] after:absolute after:top-0.5 after:left-0.5
+                          after:bg-white after:rounded-full after:h-5 after:w-5 after:transition
+                          peer-checked:after:translate-x-5"></div>
+            </div>
+            <div>
+              <div class="font-medium text-white text-sm">Ativar controle de estoque</div>
+              <div class="text-gray-400 text-xs mt-0.5">
+                Quando ativado, cada produto pode ter uma quantidade em estoque definida.
+                Produtos com estoque zerado serão marcados como esgotados na vitrine.
+              </div>
+            </div>
+          </label>
+
+          <!-- Toggle: reservar_estoque_carrinho -->
+          <label class="flex items-start gap-4 cursor-pointer group" id="reserva-row">
+            <div class="mt-0.5">
+              <input type="checkbox" name="reservar_estoque_carrinho" id="reservar_estoque_carrinho"
+                     class="sr-only peer" <%= configs.reservar_estoque_carrinho === 'true' ? 'checked' : '' %>>
+              <div class="w-11 h-6 bg-gray-700 peer-checked:bg-blue-600 rounded-full relative transition
+                          after:content-[''] after:absolute after:top-0.5 after:left-0.5
+                          after:bg-white after:rounded-full after:h-5 after:w-5 after:transition
+                          peer-checked:after:translate-x-5"></div>
+            </div>
+            <div>
+              <div class="font-medium text-white text-sm">Reservar estoque ao adicionar ao carrinho</div>
+              <div class="text-gray-400 text-xs mt-0.5">
+                <strong>Ativado:</strong> o estoque é bloqueado quando o cliente adiciona ao carrinho,
+                impedindo que dois clientes comprem o mesmo item simultaneamente.<br>
+                <strong>Desativado:</strong> o estoque só é debitado ao concluir o pagamento.
+                Pode haver concorrência entre clientes, mas o carrinho não bloqueia unidades.
+              </div>
+            </div>
+          </label>
+
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <button type="submit"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg text-sm font-semibold transition">
+          💾 Salvar Configurações
+        </button>
+      </div>
+    </form>
+
+  </main>
+</div>
+
+<script>
+  const toggleEstoque = document.getElementById('controla_estoque');
+  const reservaRow = document.getElementById('reserva-row');
+
+  function syncReserva() {
+    reservaRow.style.opacity = toggleEstoque.checked ? '1' : '0.4';
+    reservaRow.style.pointerEvents = toggleEstoque.checked ? 'auto' : 'none';
+  }
+
+  toggleEstoque.addEventListener('change', syncReserva);
+  syncReserva();
+</script>
+</body>
+</html>

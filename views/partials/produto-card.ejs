@@ -12,12 +12,24 @@
         <p class="produto-subtitle"><%= produto.subtitulo %></p>
       <% } %>
       <div class="produto-preco">R$ <%= Number(produto.valor).toFixed(2).replace('.',',') %></div>
+
+      <% const esgotado = locals.configs && locals.configs.controla_estoque === 'true' && produto.estoque !== null && produto.estoque !== undefined && produto.estoque <= 0; %>
+      <% const poucasUnidades = locals.configs && locals.configs.controla_estoque === 'true' && produto.estoque !== null && produto.estoque !== undefined && produto.estoque > 0 && produto.estoque <= 5; %>
+      <% if (esgotado) { %>
+        <div style="margin-top:6px; font-size:12px; font-weight:600; color:#ef4444;">Esgotado</div>
+      <% } else if (poucasUnidades) { %>
+        <div style="margin-top:6px; font-size:12px; font-weight:600; color:#f59e0b;">Últimas <%= produto.estoque %> unidades</div>
+      <% } %>
     </div>
   </a>
   <div class="produto-body" style="padding-top:0;">
     <div style="display:flex;gap:8px;margin-top:10px;">
       <a href="/produto/<%= produto.id %>" class="btn btn-outline" style="flex:1;font-size:12px;padding:8px;text-align:center;text-decoration:none;">Ver detalhes</a>
-      <button class="btn btn-primary btn-add-cart" data-id="<%= produto.id %>" style="flex:1;font-size:12px;padding:8px;">🛒 Adicionar</button>
+      <% if (esgotado) { %>
+        <button class="btn" disabled style="flex:1;font-size:12px;padding:8px;background:#374151;color:#9ca3af;cursor:not-allowed;">Esgotado</button>
+      <% } else { %>
+        <button class="btn btn-primary btn-add-cart" data-id="<%= produto.id %>" style="flex:1;font-size:12px;padding:8px;">🛒 Adicionar</button>
+      <% } %>
     </div>
   </div>
 </div>

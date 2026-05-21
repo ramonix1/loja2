@@ -1,18 +1,22 @@
 const fs = require("fs").promises;
 const path = require("path");
+const { getConfigs } = require('./configController');
 
 // ======================
 // HOME (loja pública)
 // ======================
 exports.home = async (req, res) => {
   try {
-    const produtos = await req.db.query(`
-      SELECT p.*,
-        (SELECT pi.url FROM produtos_imagens pi
-         WHERE pi.produto_id = p.id ORDER BY pi.id ASC LIMIT 1) AS primeira_imagem
-      FROM produtos p
-      ORDER BY p.created_at DESC
-    `);
+    const [produtosRes, configs] = await Promise.all([
+      req.db.query(`
+        SELECT p.*,
+          (SELECT pi.url FROM produtos_imagens pi
+           WHERE pi.produto_id = p.id ORDER BY pi.id ASC LIMIT 1) AS primeira_imagem
+        FROM produtos p
+        ORDER BY p.created_at DESC
+      `),
+      getConfigs(req.db),
+    ]);
 
     let clientes = [];
     try {
@@ -21,7 +25,6 @@ exports.home = async (req, res) => {
       );
       clientes = clientesQuery.rows;
     } catch (err) {
-      // Tabela de clientes não existe, continua sem erro
       console.warn("Aviso: tabela de clientes não encontrada");
     }
 
@@ -37,7 +40,7 @@ exports.home = async (req, res) => {
       console.warn("Aviso: tabela de banners não encontrada");
     }
 
-    res.render("pages/index", { produtos: produtos.rows, clientes, banners });
+    res.render("pages/index", { produtos: produtosRes.rows, clientes, banners, configs });
   } catch (error) {
     console.error("Erro ao carregar home:", error);
     res.status(500).render("pages/error", { message: "Erro ao carregar produtos" });
@@ -59,7 +62,7 @@ exports.dashboard = async (req, res) => {
       totalBanners = parseInt(bResult.rows[0].count);
     } catch {}
 
-    res.render("pages/admin-dashboard", { totalProdutos, totalBanners });
+    res.render("pages/admin-dashboard", { totalProdutos, totalBanners, activePage: 'dashboard' });
   } catch (error) {
     console.error("Erro dashboard:", error);
     res.status(500).render("pages/error", { message: "Erro ao carregar painel" });
@@ -72,14 +75,17 @@ exports.dashboard = async (req, res) => {
 // ======================
 exports.admin = async (req, res) => {
   try {
-    const produtos = await req.db.query(`
-      SELECT p.*,
-        (SELECT pi.url FROM produtos_imagens pi
-         WHERE pi.produto_id = p.id ORDER BY pi.id ASC LIMIT 1) AS primeira_imagem
-      FROM produtos p
-      ORDER BY p.created_at DESC
-    `);
-    res.render("pages/admin", { produtos: produtos.rows });
+    const [produtosRes, configs] = await Promise.all([
+      req.db.query(`
+        SELECT p.*,
+          (SELECT pi.url FROM produtos_imagens pi
+           WHERE pi.produto_id = p.id ORDER BY pi.id ASC LIMIT 1) AS primeira_imagem
+        FROM produtos p
+        ORDER BY p.created_at DESC
+      `),
+      getConfigs(req.db),
+    ]);
+    res.render("pages/admin", { produtos: produtosRes.rows, configs, activePage: 'produtos' });
   } catch (error) {
     console.error("Erro admin:", error);
     res.status(500).render("pages/error", { message: "Erro ao carregar painel" });
@@ -93,14 +99,15 @@ exports.admin = async (req, res) => {
 exports.detail = async (req, res) => {
   const id = req.params.id;
   try {
-    const produto = await req.db.query("SELECT * FROM produtos WHERE id = $1", [id]);
-    if (produto.rows.length === 0) {
+    const [produtoRes, imagensRes, configs] = await Promise.all([
+      req.db.query("SELECT * FROM produtos WHERE id = $1", [id]),
+      req.db.query("SELECT * FROM produtos_imagens WHERE produto_id = $1 ORDER BY id ASC", [id]),
+      getConfigs(req.db),
+    ]);
+    if (produtoRes.rows.length === 0) {
       return res.status(404).render("pages/error", { message: "Produto não encontrado" });
     }
-    const imagens = await req.db.query(
-      "SELECT * FROM produtos_imagens WHERE produto_id = $1 ORDER BY id ASC", [id]
-    );
-    res.render("pages/detail", { produto: produto.rows[0], imagens: imagens.rows });
+    res.render("pages/detail", { produto: produtoRes.rows[0], imagens: imagensRes.rows, configs });
   } catch (error) {
     console.error("Erro detail:", error);
     res.status(500).render("pages/error", { message: "Erro ao carregar produto" });
@@ -112,15 +119,16 @@ exports.detail = async (req, res) => {
 // SALVAR PRODUTO
 // ======================
 exports.salvar = async (req, res) => {
-  const { titulo, subtitulo, valor, descricao } = req.body;
+  const { titulo, subtitulo, valor, descricao, estoque } = req.body;
   try {
     const valorNumerico = parseFloat(
       (valor || "0").replace("R$", "").replace(/\./g, "").replace(",", ".").trim()
     );
+    const estoqueVal = estoque !== undefined && estoque !== '' ? parseInt(estoque) : null;
     const produto = await req.db.query(
-      `INSERT INTO produtos (nome, subtitulo, valor, descricao)
-       VALUES ($1, $2, $3, $4) RETURNING id`,
-      [titulo, subtitulo || null, valorNumerico, descricao || null]
+      `INSERT INTO produtos (nome, subtitulo, valor, descricao, estoque)
+       VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+      [titulo, subtitulo || null, valorNumerico, descricao || null, estoqueVal]
     );
     const produtoId = produto.rows[0].id;
     if (req.files && req.files.length > 0) {
@@ -145,14 +153,15 @@ exports.salvar = async (req, res) => {
 exports.editar = async (req, res) => {
   const id = req.params.id;
   try {
-    const produto = await req.db.query("SELECT * FROM produtos WHERE id = $1", [id]);
-    if (produto.rows.length === 0) {
+    const [produtoRes, imagensRes, configs] = await Promise.all([
+      req.db.query("SELECT * FROM produtos WHERE id = $1", [id]),
+      req.db.query("SELECT * FROM produtos_imagens WHERE produto_id = $1 ORDER BY id ASC", [id]),
+      getConfigs(req.db),
+    ]);
+    if (produtoRes.rows.length === 0) {
       return res.status(404).render("pages/error", { message: "Produto não encontrado" });
     }
-    const imagens = await req.db.query(
-      "SELECT * FROM produtos_imagens WHERE produto_id = $1 ORDER BY id ASC", [id]
-    );
-    res.render("pages/editar", { produto: produto.rows[0], imagens: imagens.rows });
+    res.render("pages/editar", { produto: produtoRes.rows[0], imagens: imagensRes.rows, configs, activePage: 'produtos' });
   } catch (error) {
     console.error("Erro ao abrir edição:", error);
     res.status(500).render("pages/error", { message: "Erro ao carregar edição" });
@@ -165,14 +174,15 @@ exports.editar = async (req, res) => {
 // ======================
 exports.atualizar = async (req, res) => {
   const id = req.params.id;
-  const { titulo, subtitulo, valor, descricao } = req.body;
+  const { titulo, subtitulo, valor, descricao, estoque } = req.body;
   try {
     const valorNumerico = parseFloat(
       (valor || "0").replace("R$", "").replace(/\./g, "").replace(",", ".").trim()
     );
+    const estoqueVal = estoque !== undefined && estoque !== '' ? parseInt(estoque) : null;
     await req.db.query(
-      `UPDATE produtos SET nome=$1, subtitulo=$2, valor=$3, descricao=$4 WHERE id=$5`,
-      [titulo, subtitulo || null, valorNumerico, descricao || null, id]
+      `UPDATE produtos SET nome=$1, subtitulo=$2, valor=$3, descricao=$4, estoque=$5, updated_at=NOW() WHERE id=$6`,
+      [titulo, subtitulo || null, valorNumerico, descricao || null, estoqueVal, id]
     );
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {

@@ -30,8 +30,46 @@ exports.adicionarItem = async (req, res) => {
   const qtd = Math.max(1, parseInt(quantidade) || 1);
 
   try {
-    const prod = await req.db.query('SELECT id, valor FROM produtos WHERE id = $1', [produto_id]);
+    const prod = await req.db.query('SELECT id, valor, estoque FROM produtos WHERE id = $1', [produto_id]);
     if (!prod.rows[0]) return res.status(404).json({ erro: 'Produto não encontrado.' });
+
+    // Verificar estoque se o controle estiver ativo
+    const configRes = await req.db.query(
+      "SELECT chave, valor FROM configuracoes WHERE chave IN ('controla_estoque', 'reservar_estoque_carrinho')"
+    ).catch(() => ({ rows: [] }));
+
+    const cfgMap = {};
+    configRes.rows.forEach(r => { cfgMap[r.chave] = r.valor; });
+
+    if (cfgMap.controla_estoque === 'true' && prod.rows[0].estoque !== null) {
+      const estoqueDisponivel = prod.rows[0].estoque;
+
+      if (cfgMap.reservar_estoque_carrinho === 'true') {
+        // Conta itens já em todos os carrinhos para este produto
+        const reservadoRes = await req.db.query(
+          'SELECT COALESCE(SUM(quantidade), 0) AS total FROM carrinho_itens WHERE produto_id = $1',
+          [produto_id]
+        );
+        const reservado = parseInt(reservadoRes.rows[0].total);
+        if (reservado + qtd > estoqueDisponivel) {
+          const disponivel = Math.max(0, estoqueDisponivel - reservado);
+          return res.status(400).json({ erro: disponivel === 0 ? 'Produto esgotado.' : `Apenas ${disponivel} unidade(s) disponível(is).` });
+        }
+      } else {
+        if (estoqueDisponivel <= 0) {
+          return res.status(400).json({ erro: 'Produto esgotado.' });
+        }
+        // Verifica se a quantidade solicitada ultrapassa o estoque
+        const noCarrinhoRes = await req.db.query(
+          'SELECT COALESCE(quantidade, 0) AS qtd FROM carrinho_itens WHERE usuario_id = $1 AND produto_id = $2',
+          [usuarioId, produto_id]
+        );
+        const noCarrinho = parseInt(noCarrinhoRes.rows[0]?.qtd || 0);
+        if (noCarrinho + qtd > estoqueDisponivel) {
+          return res.status(400).json({ erro: `Apenas ${Math.max(0, estoqueDisponivel - noCarrinho)} unidade(s) disponível(is).` });
+        }
+      }
+    }
 
     await req.db.query(`
       INSERT INTO carrinho_itens (usuario_id, produto_id, quantidade, preco_unitario)

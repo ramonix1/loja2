@@ -58,6 +58,23 @@
         R$ <%= Number(produto.valor).toFixed(2).replace('.', ',') %>
       </div>
 
+      <!-- ESTOQUE -->
+      <% if (locals.configs && locals.configs.controla_estoque === 'true' && produto.estoque !== null && produto.estoque !== undefined) { %>
+        <% if (produto.estoque <= 0) { %>
+          <div style="display:inline-block; background:#fee2e2; color:#dc2626; font-size:13px; font-weight:700; padding:4px 12px; border-radius:20px;">
+            Esgotado
+          </div>
+        <% } else if (produto.estoque <= 5) { %>
+          <div style="display:inline-block; background:#fef3c7; color:#d97706; font-size:13px; font-weight:700; padding:4px 12px; border-radius:20px;">
+            Últimas <%= produto.estoque %> unidade<%= produto.estoque > 1 ? 's' : '' %> disponível<%= produto.estoque > 1 ? 'is' : '' %>
+          </div>
+        <% } else { %>
+          <div style="display:inline-block; background:#dcfce7; color:#16a34a; font-size:13px; font-weight:600; padding:4px 12px; border-radius:20px;">
+            Em estoque (<%= produto.estoque %> un.)
+          </div>
+        <% } %>
+      <% } %>
+
       <!-- DESCRIÇÃO -->
       <% if(produto.descricao){ %>
         <p class="produto-descricao"><%= produto.descricao %></p>
@@ -75,9 +92,14 @@
       </div>
 
       <!-- BOTÕES -->
+      <% const esgotadoDetalhe = locals.configs && locals.configs.controla_estoque === 'true' && produto.estoque !== null && produto.estoque !== undefined && produto.estoque <= 0; %>
       <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:8px;">
-        <button class="btn btn-primary" id="btnAddCart" data-id="<%= produto.id %>" style="font-size:15px; padding:14px 28px;">🛒 Adicionar ao Carrinho</button>
-        <button class="btn" id="btnBuyNow" data-id="<%= produto.id %>" style="background:#16a34a; color:white; font-size:15px; padding:14px 28px;">⚡ Comprar Agora</button>
+        <% if (esgotadoDetalhe) { %>
+          <button class="btn" disabled style="font-size:15px; padding:14px 28px; background:#374151; color:#9ca3af; cursor:not-allowed;">Produto Esgotado</button>
+        <% } else { %>
+          <button class="btn btn-primary" id="btnAddCart" data-id="<%= produto.id %>" style="font-size:15px; padding:14px 28px;">🛒 Adicionar ao Carrinho</button>
+          <button class="btn" id="btnBuyNow" data-id="<%= produto.id %>" style="background:#16a34a; color:white; font-size:15px; padding:14px 28px;">⚡ Comprar Agora</button>
+        <% } %>
       </div>
 
       <!-- GARANTIAS -->

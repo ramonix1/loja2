@@ -1,23 +1,24 @@
 const { getPool } = require('../config/tenantDb');
 
 // Resolve o slug do tenant a partir da requisição.
-// Prioridade: subdomínio > header X-Tenant-Slug > env TENANT_SLUG
+// Prioridade: env TENANT_SLUG > header X-Tenant-Slug > subdomínio
+// TENANT_SLUG no .env tem prioridade máxima (útil para dev/ngrok/testes)
 function resolveSlug(req) {
+  // Se TENANT_SLUG está definido no ambiente, sempre usa ele
+  if (process.env.TENANT_SLUG) return process.env.TENANT_SLUG;
+
+  // Header explícito (útil para ferramentas como Postman)
+  if (req.headers['x-tenant-slug']) return req.headers['x-tenant-slug'];
+
+  // Em produção: subdomínio real (ex: sapataria-mario.sualoja.com.br)
   const hostname = req.hostname || '';
   const parts = hostname.split('.');
-
-  // Em produção: sapataria-mario.sualoja.com.br → partes[0] = "sapataria-mario"
-  // Em desenvolvimento com /etc/hosts: sapataria.localhost → partes[0] = "sapataria"
-  // Ignora "www" e hosts simples como "localhost" ou "127.0.0.1"
   const isIp = /^\d+\.\d+\.\d+\.\d+$/.test(hostname);
-  const hasSubdomain = !isIp && parts.length >= 2 && parts[0] !== 'www';
+  const hasSubdomain = !isIp && parts.length >= 2 && parts[0] !== 'www' && parts[0] !== 'localhost';
 
-  if (hasSubdomain && parts[0] !== 'localhost') {
-    return parts[0];
-  }
+  if (hasSubdomain) return parts[0];
 
-  // Fallback para desenvolvimento: header ou env
-  return req.headers['x-tenant-slug'] || process.env.TENANT_SLUG || null;
+  return null;
 }
 
 async function tenantMiddleware(req, res, next) {

@@ -13,11 +13,16 @@ const bannerRoutes = require('./routes/bannerRoutes');
 const authRoutes = require('./routes/authRoutes');
 const carrinhoRoutes = require('./routes/carrinhoRoutes');
 const checkoutRoutes = require('./routes/checkoutRoutes');
+const configRoutes = require('./routes/configRoutes');
 const initializeDatabase = require('./config/init-db');
-const { requireAuth } = require('./middlewares/auth');
+
+
 const tenantMiddleware = require('./middlewares/tenant');
 
 const app = express();
+
+// Necessário para funcionar corretamente atrás de proxies (ngrok, nginx, etc.)
+app.set('trust proxy', 1);
 
 // ── Segurança: headers HTTP ────────────────────────────────────────────────
 app.use(helmet({
@@ -55,7 +60,7 @@ app.use(session({
 
 // ── CSRF (Synchronizer Token Pattern) ─────────────────────────────────────
 const { csrfSynchronisedProtection, generateToken } = csrfSync({
-  getTokenFromRequest: (req) => req.body?._csrf || req.headers['x-csrf-token'],
+  getTokenFromRequest: (req) => req.body?._csrf || req.headers['x-csrf-token'] || req.query?._csrf,
 });
 
 // ── View engine ───────────────────────────────────────────────────────────
@@ -98,11 +103,12 @@ app.use((req, res, next) => {
 app.use('/', authRoutes);
 
 // ── Rotas protegidas ──────────────────────────────────────────────────────
-app.use('/', requireAuth, produtoRoutes);
+app.use('/', produtoRoutes);
 app.use('/', clienteRoutes);
 app.use('/', bannerRoutes);
 app.use('/', carrinhoRoutes);
 app.use('/', checkoutRoutes);
+app.use('/', configRoutes);
 
 // ── 404 ───────────────────────────────────────────────────────────────────
 app.use((req, res) => {

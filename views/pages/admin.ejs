@@ -8,232 +8,200 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     body { font-family: 'Inter', sans-serif; }
-    .badge-soon { font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
   </style>
 </head>
 
 <body class="bg-gray-950 min-h-screen text-white">
+<div class="flex min-h-screen">
 
-  <div class="flex min-h-screen">
+  <%- include('../partials/admin-sidebar') %>
 
-    <!-- Sidebar -->
-    <aside class="w-60 bg-gray-900 border-r border-gray-800 flex flex-col fixed h-full">
-      <div class="p-6 border-b border-gray-800">
-        <a href="/" class="flex items-center gap-3">
-          <span class="text-2xl">🛒</span>
-          <div>
-            <div class="font-bold text-white text-lg leading-tight">Lojão</div>
-            <div class="text-xs text-gray-400 font-medium">Painel Admin</div>
-          </div>
-        </a>
+  <main class="ml-60 flex-1 p-8">
+
+    <div class="mb-6">
+      <div class="text-xs text-gray-500 mb-1">
+        <a href="/admin" class="hover:text-gray-300 transition">Dashboard</a>
+        <span class="mx-2">/</span>
+        <span class="text-gray-300">Produtos</span>
       </div>
+      <h1 class="text-2xl font-bold text-white">📦 Produtos</h1>
+      <p class="text-gray-400 mt-1 text-sm">Cadastre, edite e remova produtos da loja</p>
+    </div>
 
-      <nav class="flex-1 p-4 space-y-1">
-        <a href="/admin"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white font-medium text-sm transition">
-          <span>🏠</span> Dashboard
-        </a>
-        <a href="/admin/produtos"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-600 text-white font-medium text-sm">
-          <span>📦</span> Produtos
-        </a>
-        <a href="/admin/banners"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white font-medium text-sm transition">
-          <span>🖼️</span> Banners
-        </a>
-        <a href="/admin/clientes"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white font-medium text-sm transition">
-          <span>🏢</span> Clientes
-        </a>
-        <a href="/admin/permissoes"
-           class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white font-medium text-sm transition">
-          <span>🔐</span> Permissões
-        </a>
-        <div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 font-medium text-sm cursor-not-allowed">
-          <span>🏷️</span> Categorias
-          <span class="ml-auto bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded text-xs badge-soon">EM BREVE</span>
-        </div>
-        <div class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 font-medium text-sm cursor-not-allowed">
-          <span>🛍️</span> Pedidos
-          <span class="ml-auto bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded text-xs badge-soon">EM BREVE</span>
-        </div>
-      </nav>
+    <!-- Formulário de cadastro -->
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 max-w-2xl mb-8">
+      <h2 class="text-lg font-bold text-white mb-5">Cadastrar Novo Produto</h2>
 
-      <div class="p-4 border-t border-gray-800">
-        <a href="/"
-           class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition px-3 py-2 rounded-lg hover:bg-gray-800">
-          ← Ver loja
-        </a>
-      </div>
-    </aside>
+      <form action="/salvar-produto?_csrf=<%= locals.csrfToken %>" method="POST" enctype="multipart/form-data" class="space-y-4">
 
-    <!-- Conteúdo -->
-    <main class="ml-60 flex-1 p-8">
-
-      <!-- Header -->
-      <div class="mb-6">
-        <div class="text-xs text-gray-500 mb-1">
-          <a href="/admin" class="hover:text-gray-300 transition">Dashboard</a>
-          <span class="mx-2">/</span>
-          <span class="text-gray-300">Produtos</span>
-        </div>
-        <h1 class="text-2xl font-bold text-white">📦 Produtos</h1>
-        <p class="text-gray-400 mt-1 text-sm">Cadastre, edite e remova produtos da loja</p>
-      </div>
-
-      <!-- Formulário de cadastro -->
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 max-w-2xl mb-8">
-        <h2 class="text-lg font-bold text-white mb-5">Cadastrar Novo Produto</h2>
-
-        <form action="/salvar-produto" method="POST" enctype="multipart/form-data" class="space-y-4">
-          <input type="hidden" name="_csrf" value="<%= locals.csrfToken %>">
-
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-1">Título *</label>
-            <input type="text" name="titulo" required
-              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              placeholder="Nome do produto">
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-1">Subtítulo</label>
-            <input type="text" name="subtitulo"
-              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              placeholder="Ex: Modelo XYZ, Cor Azul">
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-1">Valor *</label>
-            <input type="text" name="valor" id="valor" required
-              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              placeholder="R$ 0,00">
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-1">Descrição</label>
-            <textarea name="descricao" rows="3"
-              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
-              placeholder="Descrição detalhada (opcional)"></textarea>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-300 mb-1">Imagens *</label>
-            <input type="file" name="imagens" id="imagens" multiple accept="image/*" required
-              class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-gray-300 text-sm file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-600 file:text-white file:text-xs file:cursor-pointer hover:file:bg-blue-700">
-            <p class="text-xs text-gray-500 mt-1">JPG, PNG, WEBP — máx. 5MB cada</p>
-            <div id="previewArea" class="flex flex-wrap gap-2 mt-3"></div>
-          </div>
-
-          <button type="submit"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition">
-            ✅ Salvar Produto
-          </button>
-        </form>
-      </div>
-
-      <!-- Lista de produtos -->
-      <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <div class="flex justify-between items-center mb-5">
-          <h2 class="text-lg font-bold text-white">Produtos Cadastrados</h2>
-          <span class="text-sm text-gray-400"><%= produtos.length %> produto<%= produtos.length !== 1 ? 's' : '' %></span>
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-1">Título *</label>
+          <input type="text" name="titulo" required
+            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            placeholder="Nome do produto">
         </div>
 
-        <% if (produtos.length === 0) { %>
-          <div class="text-center py-16 bg-gray-800 rounded-xl">
-            <div class="text-5xl mb-3">📦</div>
-            <p class="text-gray-400 font-medium">Nenhum produto cadastrado</p>
-            <p class="text-gray-600 text-sm mt-1">Use o formulário acima para adicionar</p>
-          </div>
-        <% } else { %>
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead>
-                <tr class="border-b border-gray-800">
-                  <th class="pb-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Produto</th>
-                  <th class="pb-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Valor</th>
-                  <th class="pb-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Ações</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-800">
-                <% produtos.forEach(function(produto) { %>
-                  <tr class="hover:bg-gray-800/50 transition">
-                    <td class="py-3 pr-4">
-                      <div class="flex items-center gap-3">
-                        <img src="<%= produto.primeira_imagem || 'https://placehold.co/40x40/374151/9ca3af?text=?' %>"
-                             class="h-10 w-10 object-cover rounded-lg border border-gray-700"
-                             onerror="this.src='https://placehold.co/40x40/374151/9ca3af?text=?'">
-                        <div>
-                          <div class="font-medium text-white text-sm"><%= produto.nome %></div>
-                          <% if (produto.subtitulo) { %>
-                            <div class="text-xs text-gray-500"><%= produto.subtitulo %></div>
-                          <% } %>
-                        </div>
-                      </div>
-                    </td>
-                    <td class="py-3 pr-4">
-                      <span class="text-green-400 font-semibold text-sm">
-                        R$ <%= Number(produto.valor).toFixed(2).replace('.', ',') %>
-                      </span>
-                    </td>
-                    <td class="py-3">
-                      <div class="flex gap-2">
-                        <a href="/produto/<%= produto.id %>"
-                           class="bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1.5 rounded-lg text-xs font-medium transition">
-                          👁️ Ver
-                        </a>
-                        <a href="/editar/<%= produto.id %>"
-                           class="bg-yellow-600 hover:bg-yellow-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">
-                          ✏️ Editar
-                        </a>
-                        <a href="/excluir/<%= produto.id %>"
-                           class="bg-red-700 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition"
-                           onclick="return confirm('Excluir este produto permanentemente?')">
-                          🗑️ Excluir
-                        </a>
-                      </div>
-                    </td>
-                  </tr>
-                <% }) %>
-              </tbody>
-            </table>
-          </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-1">Subtítulo</label>
+          <input type="text" name="subtitulo"
+            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            placeholder="Ex: Modelo XYZ, Cor Azul">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-1">Valor *</label>
+          <input type="text" name="valor" id="valor" required
+            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            placeholder="R$ 0,00">
+        </div>
+
+        <% if (configs.controla_estoque === 'true') { %>
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-1">Estoque inicial</label>
+          <input type="number" name="estoque" min="0"
+            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            placeholder="Deixe em branco para ilimitado">
+          <p class="text-xs text-gray-500 mt-1">Deixe em branco para produto sem controle de estoque.</p>
+        </div>
         <% } %>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-1">Descrição</label>
+          <textarea name="descricao" rows="3"
+            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
+            placeholder="Descrição detalhada (opcional)"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-1">Imagens *</label>
+          <input type="file" name="imagens" id="imagens" multiple accept="image/*" required
+            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-gray-300 text-sm file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-600 file:text-white file:text-xs file:cursor-pointer hover:file:bg-blue-700">
+          <p class="text-xs text-gray-500 mt-1">JPG, PNG, WEBP — máx. 5MB cada</p>
+          <div id="previewArea" class="flex flex-wrap gap-2 mt-3"></div>
+        </div>
+
+        <button type="submit"
+          class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition">
+          ✅ Salvar Produto
+        </button>
+      </form>
+    </div>
+
+    <!-- Lista de produtos -->
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+      <div class="flex justify-between items-center mb-5">
+        <h2 class="text-lg font-bold text-white">Produtos Cadastrados</h2>
+        <span class="text-sm text-gray-400"><%= produtos.length %> produto<%= produtos.length !== 1 ? 's' : '' %></span>
       </div>
 
-    </main>
-  </div>
+      <% if (produtos.length === 0) { %>
+        <div class="text-center py-16 bg-gray-800 rounded-xl">
+          <div class="text-5xl mb-3">📦</div>
+          <p class="text-gray-400 font-medium">Nenhum produto cadastrado</p>
+          <p class="text-gray-600 text-sm mt-1">Use o formulário acima para adicionar</p>
+        </div>
+      <% } else { %>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-gray-800">
+                <th class="pb-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Produto</th>
+                <th class="pb-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Valor</th>
+                <% if (configs.controla_estoque === 'true') { %>
+                <th class="pb-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Estoque</th>
+                <% } %>
+                <th class="pb-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Ações</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-800">
+              <% produtos.forEach(function(produto) { %>
+                <tr class="hover:bg-gray-800/50 transition">
+                  <td class="py-3 pr-4">
+                    <div class="flex items-center gap-3">
+                      <img src="<%= produto.primeira_imagem || 'https://placehold.co/40x40/374151/9ca3af?text=?' %>"
+                           class="h-10 w-10 object-cover rounded-lg border border-gray-700"
+                           onerror="this.src='https://placehold.co/40x40/374151/9ca3af?text=?'">
+                      <div>
+                        <div class="font-medium text-white text-sm"><%= produto.nome %></div>
+                        <% if (produto.subtitulo) { %>
+                          <div class="text-xs text-gray-500"><%= produto.subtitulo %></div>
+                        <% } %>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-3 pr-4">
+                    <span class="text-green-400 font-semibold text-sm">
+                      R$ <%= Number(produto.valor).toFixed(2).replace('.', ',') %>
+                    </span>
+                  </td>
+                  <% if (configs.controla_estoque === 'true') { %>
+                  <td class="py-3 pr-4">
+                    <% if (produto.estoque === null || produto.estoque === undefined) { %>
+                      <span class="text-gray-500 text-xs">Ilimitado</span>
+                    <% } else if (produto.estoque === 0) { %>
+                      <span class="text-red-400 font-semibold text-sm">Esgotado</span>
+                    <% } else if (produto.estoque <= 5) { %>
+                      <span class="text-yellow-400 font-semibold text-sm"><%= produto.estoque %> un.</span>
+                    <% } else { %>
+                      <span class="text-gray-300 text-sm"><%= produto.estoque %> un.</span>
+                    <% } %>
+                  </td>
+                  <% } %>
+                  <td class="py-3">
+                    <div class="flex gap-2">
+                      <a href="/produto/<%= produto.id %>"
+                         class="bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1.5 rounded-lg text-xs font-medium transition">
+                        👁️ Ver
+                      </a>
+                      <a href="/editar/<%= produto.id %>"
+                         class="bg-yellow-600 hover:bg-yellow-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">
+                        ✏️ Editar
+                      </a>
+                      <a href="/excluir/<%= produto.id %>"
+                         class="bg-red-700 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition"
+                         onclick="return confirm('Excluir este produto permanentemente?')">
+                        🗑️ Excluir
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
 
-  <script>
-    // Preview múltiplas imagens
-    const inputImagens = document.getElementById("imagens");
-    const previewArea = document.getElementById("previewArea");
+  </main>
+</div>
 
-    inputImagens.addEventListener("change", function() {
-      previewArea.innerHTML = "";
-      Array.from(this.files).forEach(function(file) {
-        if (!file.type.startsWith("image/")) return;
-        if (file.size > 5 * 1024 * 1024) { alert("Arquivo muito grande: " + file.name); return; }
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const img = document.createElement("img");
-          img.src = e.target.result;
-          img.className = "h-16 w-16 object-cover rounded-lg border border-gray-700";
-          previewArea.appendChild(img);
-        };
-        reader.readAsDataURL(file);
-      });
+<script>
+  const inputImagens = document.getElementById("imagens");
+  const previewArea = document.getElementById("previewArea");
+  inputImagens.addEventListener("change", function() {
+    previewArea.innerHTML = "";
+    Array.from(this.files).forEach(function(file) {
+      if (!file.type.startsWith("image/")) return;
+      if (file.size > 5 * 1024 * 1024) { alert("Arquivo muito grande: " + file.name); return; }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = document.createElement("img");
+        img.src = e.target.result;
+        img.className = "h-16 w-16 object-cover rounded-lg border border-gray-700";
+        previewArea.appendChild(img);
+      };
+      reader.readAsDataURL(file);
     });
+  });
 
-    // Máscara monetária
-    const valorInput = document.getElementById("valor");
-    valorInput.addEventListener("input", function(e) {
-      let v = e.target.value.replace(/\D/g, "");
-      v = (v / 100).toFixed(2) + "";
-      v = v.replace(".", ",");
-      v = v.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-      e.target.value = "R$ " + v;
-    });
-  </script>
-
+  const valorInput = document.getElementById("valor");
+  valorInput.addEventListener("input", function(e) {
+    let v = e.target.value.replace(/\D/g, "");
+    v = (v / 100).toFixed(2) + "";
+    v = v.replace(".", ",");
+    v = v.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    e.target.value = "R$ " + v;
+  });
+</script>
 </body>
 </html>

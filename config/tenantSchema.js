@@ -60,9 +60,11 @@ async function initializeTenant(pool, adminEmail, adminSenha, adminNome = 'Admin
       subtitulo VARCHAR(255),
       valor NUMERIC(10,2) NOT NULL DEFAULT 0,
       descricao TEXT,
+      estoque INTEGER DEFAULT NULL,
       created_at TIMESTAMP DEFAULT NOW(),
       updated_at TIMESTAMP DEFAULT NOW()
     );
+    ALTER TABLE produtos ADD COLUMN IF NOT EXISTS estoque INTEGER DEFAULT NULL;
 
     CREATE TABLE IF NOT EXISTS produtos_imagens (
       id SERIAL PRIMARY KEY,
@@ -190,6 +192,34 @@ async function initializeTenant(pool, adminEmail, adminSenha, adminNome = 'Admin
     );
     CREATE INDEX IF NOT EXISTS idx_pagamentos_pedido ON pagamentos(pedido_id);
     CREATE INDEX IF NOT EXISTS idx_pagamentos_mp     ON pagamentos(mp_payment_id);
+  `);
+
+  // Movimentações de estoque
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS movimentacoes_estoque (
+      id SERIAL PRIMARY KEY,
+      produto_id INTEGER NOT NULL REFERENCES produtos(id) ON DELETE CASCADE,
+      tipo VARCHAR(20) NOT NULL CHECK (tipo IN ('entrada', 'saida', 'ajuste')),
+      quantidade INTEGER NOT NULL,
+      origem VARCHAR(30),
+      origem_id INTEGER,
+      observacao TEXT,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_movest_produto ON movimentacoes_estoque(produto_id);
+  `);
+
+  // Configurações da loja (chave-valor)
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS configuracoes (
+      chave VARCHAR(100) PRIMARY KEY,
+      valor TEXT,
+      updated_at TIMESTAMP DEFAULT NOW()
+    );
+    INSERT INTO configuracoes (chave, valor) VALUES
+      ('controla_estoque', 'false'),
+      ('reservar_estoque_carrinho', 'false')
+    ON CONFLICT (chave) DO NOTHING;
   `);
 
   // Admin inicial
