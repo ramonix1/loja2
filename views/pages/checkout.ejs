@@ -136,8 +136,16 @@
 <div class="container">
   <a href="/carrinho" style="color:#2563eb;font-size:14px;text-decoration:none;display:inline-block;margin-bottom:24px;">← Voltar ao carrinho</a>
 
-  <% if (locals.erro) { %>
-    <div class="erro-box">Erro ao processar pagamento. Tente novamente ou escolha outro método.</div>
+  <% if (erro === 'data_evento_obrigatoria') { %>
+    <div class="erro-box">⚠️ Selecione a data do evento antes de finalizar.</div>
+  <% } else if (erro === 'data_indisponivel') { %>
+    <div class="erro-box">❌ A data escolhida não tem vagas disponíveis. Por favor, selecione outra data.</div>
+  <% } else if (erro === 'metodo_invalido') { %>
+    <div class="erro-box">❌ Método de pagamento inválido. Selecione uma opção e tente novamente.</div>
+  <% } else if (erro === 'pagamento') { %>
+    <div class="erro-box">❌ Falha ao processar o pagamento. Verifique os dados e tente novamente. Se o problema persistir, escolha outro método.</div>
+  <% } else if (erro) { %>
+    <div class="erro-box">❌ Ocorreu um erro. Tente novamente.</div>
   <% } %>
 
   <form id="checkoutForm" method="POST" action="/checkout">
@@ -175,9 +183,43 @@
           </div>
         </div>
 
-        <!-- 2. Endereço -->
+        <% if (locals.moduloAgenda) { %>
+        <!-- 2. Data do evento -->
+        <div class="checkout-card" id="card-data-evento">
+          <h2>2. Data do Evento</h2>
+
+          <input type="hidden" name="data_evento" id="data_evento_input">
+
+          <div id="data-selecionada-box" style="display:none;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:14px 16px;margin-bottom:16px;">
+            <div style="font-size:13px;color:#1e40af;font-weight:600;">✅ Data selecionada:</div>
+            <div id="data-selecionada-label" style="font-size:18px;font-weight:800;color:#1e3a8a;margin-top:4px;"></div>
+            <div id="data-vagas-label" style="font-size:12px;color:#3b82f6;margin-top:2px;"></div>
+            <button type="button" onclick="limparDataEvento()" style="margin-top:8px;font-size:12px;color:#6b7280;background:none;border:none;cursor:pointer;padding:0;">Alterar data</button>
+          </div>
+
+          <div id="agenda-calendario">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <button type="button" id="cal-prev" style="background:#f3f4f6;border:none;cursor:pointer;padding:6px 12px;border-radius:8px;font-size:14px;">←</button>
+              <span id="cal-titulo" style="font-weight:700;font-size:15px;color:#111827;"></span>
+              <button type="button" id="cal-next" style="background:#f3f4f6;border:none;cursor:pointer;padding:6px 12px;border-radius:8px;font-size:14px;">→</button>
+            </div>
+
+            <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;"></div>
+
+            <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;font-size:11px;color:#6b7280;">
+              <span><span style="display:inline-block;width:10px;height:10px;background:#dcfce7;border-radius:3px;margin-right:4px;"></span>Disponível</span>
+              <span><span style="display:inline-block;width:10px;height:10px;background:#fef9c3;border-radius:3px;margin-right:4px;"></span>Poucos lugares</span>
+              <span><span style="display:inline-block;width:10px;height:10px;background:#fee2e2;border-radius:3px;margin-right:4px;"></span>Indisponível</span>
+            </div>
+          </div>
+
+          <p id="cal-loading" style="color:#6b7280;font-size:13px;text-align:center;padding:20px 0;">Carregando calendário...</p>
+        </div>
+        <% } %>
+
+        <!-- Endereço -->
         <div class="checkout-card">
-          <h2>2. Endereço</h2>
+          <h2><%= locals.moduloAgenda ? '3' : '2' %>. Endereço</h2>
 
           <div class="form-row">
             <div class="form-group">
@@ -223,9 +265,9 @@
           </div>
         </div>
 
-        <!-- 3. Pagamento -->
+        <!-- Pagamento -->
         <div class="checkout-card">
-          <h2>3. Forma de pagamento</h2>
+          <h2><%= locals.moduloAgenda ? '4' : '3' %>. Forma de pagamento</h2>
 
           <div class="metodo-pagamento">
 
@@ -257,6 +299,7 @@
               </div>
             </label>
 
+            <% if (sumupHabilitado) { %>
             <label class="metodo-opcao" id="opcao-sumup_online">
               <input type="radio" name="metodo_pagamento" value="sumup_online">
               <div class="metodo-icon">💳</div>
@@ -266,6 +309,19 @@
               </div>
               <span class="metodo-badge" style="background:#dbeafe;color:#1e40af;">SumUp</span>
             </label>
+            <% } %>
+
+            <% if (process.env.NODE_ENV !== 'production') { %>
+            <label class="metodo-opcao" id="opcao-teste">
+              <input type="radio" name="metodo_pagamento" value="teste">
+              <div class="metodo-icon">🧪</div>
+              <div class="metodo-info">
+                <div class="metodo-nome">Pagamento de Teste</div>
+                <div class="metodo-desc">Aprova o pedido instantaneamente — apenas em desenvolvimento</div>
+              </div>
+              <span class="metodo-badge" style="background:#fef3c7;color:#92400e;">DEV</span>
+            </label>
+            <% } %>
 
           </div>
 
@@ -302,6 +358,14 @@
             <div style="background:#eff6ff;border-radius:10px;padding:16px;margin-top:4px;font-size:14px;color:#1e40af;">
               <strong>Checkout SumUp:</strong><br>
               Após confirmar, você será redirecionado para a página segura da SumUp para inserir os dados do cartão.
+            </div>
+          </div>
+
+          <!-- Painel: Teste -->
+          <div class="painel-pagamento" id="painel-teste">
+            <div style="background:#fefce8;border-radius:10px;padding:16px;margin-top:4px;font-size:14px;color:#854d0e;">
+              <strong>🧪 Modo de Teste:</strong><br>
+              O pedido será criado e marcado como pago automaticamente, sem chamar nenhuma API de pagamento. Use apenas para testar o fluxo de checkout.
             </div>
           </div>
 
@@ -377,21 +441,23 @@
 <script src="https://sdk.mercadopago.com/js/v2"></script>
 <script>
 (function() {
-  var mpPublicKey = '<%= mpPublicKey %>';
+  var mpPublicKey = '<%= mpPublicKey || "" %>';
   var mp, cardFields;
+  var metodoAtual = 'pix';
 
   // ── Seleção de método ───────────────────────────────────────────────────
   var metodos = document.querySelectorAll('.metodo-opcao');
   var paineis = {
     pix: 'painel-pix', cartao: 'painel-cartao', boleto: 'painel-boleto',
-    sumup_online: 'painel-sumup_online'
+    sumup_online: 'painel-sumup_online', teste: 'painel-teste'
   };
   var opcoes = {
     pix: 'opcao-pix', cartao: 'opcao-cartao', boleto: 'opcao-boleto',
-    sumup_online: 'opcao-sumup_online'
+    sumup_online: 'opcao-sumup_online', teste: 'opcao-teste'
   };
 
   function ativarMetodo(valor) {
+    metodoAtual = valor;
     metodos.forEach(function(m) { m.classList.remove('selecionado'); });
     document.getElementById(opcoes[valor])?.classList.add('selecionado');
     Object.keys(paineis).forEach(function(k) {
@@ -415,7 +481,7 @@
 
   // ── SDK Mercado Pago: campos do cartão ─────────────────────────────────
   function inicializarCartao() {
-    if (!mpPublicKey || mpPublicKey.startsWith('TEST-00000000')) return;
+    if (!mpPublicKey) return;
     try {
       mp = new MercadoPago(mpPublicKey, { locale: 'pt-BR' });
       cardFields = mp.cardForm({
@@ -433,21 +499,42 @@
           onFormMounted: function(err) { if (err) console.warn('MP mount error', err); },
           onSubmit: function(e) {
             e.preventDefault();
-            var data = cardFields.getCardFormData();
-            document.getElementById('mp_token').value = data.token;
-            document.getElementById('mp_installments').value = data.installments;
-            document.getElementById('mp_payment_method_id').value = data.paymentMethodId;
-            document.getElementById('checkoutForm').submit();
+            // MP intercepta o submit do form inteiro — só processa se for cartão
+            if (metodoAtual !== 'cartao') {
+              document.getElementById('checkoutForm').submit();
+              return;
+            }
+            try {
+              var data = cardFields.getCardFormData();
+              document.getElementById('mp_token').value = data.token || '';
+              document.getElementById('mp_installments').value = data.installments || '1';
+              document.getElementById('mp_payment_method_id').value = data.paymentMethodId || '';
+              document.getElementById('checkoutForm').submit();
+            } catch(err) {
+              console.error('Erro ao tokenizar cartão:', err);
+              setBtnNormal();
+            }
           },
-          onFetching: function(r) {
-            var btn = document.getElementById('btnFinalizar');
-            btn.disabled = true;
-            return function() { btn.disabled = false; };
+          onFetching: function() {
+            setBtnLoading();
+            return setBtnNormal;
           }
         }
       });
       document.getElementById('installments-select').style.display = 'block';
     } catch(e) { console.error('MP SDK error', e); }
+  }
+
+  // ── Estado do botão ─────────────────────────────────────────────────────
+  function setBtnLoading() {
+    var btn = document.getElementById('btnFinalizar');
+    btn.disabled = true;
+    btn.textContent = 'Processando...';
+  }
+  function setBtnNormal() {
+    var btn = document.getElementById('btnFinalizar');
+    btn.disabled = false;
+    btn.textContent = 'Finalizar pedido →';
   }
 
   // ── CEP ─────────────────────────────────────────────────────────────────
@@ -476,15 +563,173 @@
       .catch(function() { alert('Erro ao buscar CEP.'); });
   });
 
-  // ── Submit do form (PIX e Boleto não precisam de token MP) ──────────────
+  // ── Submit ──────────────────────────────────────────────────────────────
   document.getElementById('checkoutForm').addEventListener('submit', function(e) {
-    var metodo = document.querySelector('input[name="metodo_pagamento"]:checked')?.value;
-    if (metodo === 'cartao') {
-      // A submissão é tratada pelo callback onSubmit do cardForm
-      if (cardFields) { e.preventDefault(); return; }
+    <% if (moduloAgenda) { %>
+    if (!document.getElementById('data_evento_input').value) {
+      e.preventDefault();
+      document.getElementById('card-data-evento').scrollIntoView({ behavior: 'smooth' });
+      alert('Selecione a data do evento para continuar.');
+      return;
     }
+    <% } %>
+    // Para cartão sem MP inicializado, bloqueia
+    if (metodoAtual === 'cartao' && !cardFields) {
+      e.preventDefault();
+      alert('Preencha os dados do cartão.');
+      return;
+    }
+    // Para cartão com MP: o onSubmit do cardForm cuida do envio
+    if (metodoAtual === 'cartao' && cardFields) {
+      e.preventDefault();
+      return;
+    }
+    // PIX, Boleto, SumUp: feedback visual e deixa submeter normalmente
+    setBtnLoading();
   });
 })();
 </script>
+<% if (locals.moduloAgenda && locals.agendaConfig) { %>
+<script>
+(function() {
+  var agendaConfig = <%- JSON.stringify(agendaConfig) %>;
+  var hoje = new Date();
+  hoje.setHours(0,0,0,0);
+
+  var minData = new Date(hoje);
+  minData.setDate(minData.getDate() + (agendaConfig.antecedencia_minima_dias || 1));
+  var maxData = new Date(hoje);
+  maxData.setDate(maxData.getDate() + (agendaConfig.antecedencia_maxima_dias || 180));
+
+  var mesAtual = new Date(minData.getFullYear(), minData.getMonth(), 1);
+  var disponibilidadeCache = {};
+  var nomesMes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  var diasSemana = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+
+  function mesStr(d) {
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  }
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function carregarMes(mes, cb) {
+    if (disponibilidadeCache[mes]) { cb(disponibilidadeCache[mes]); return; }
+    fetch('/api/agenda/disponibilidade?mes=' + mes)
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.ok) { disponibilidadeCache[mes] = d.disponibilidade; cb(d.disponibilidade); }
+        else cb({});
+      })
+      .catch(function() { cb({}); });
+  }
+
+  function renderizarCalendario(disp) {
+    var grid = document.getElementById('cal-grid');
+    grid.innerHTML = '';
+
+    // Cabeçalho dias da semana
+    diasSemana.forEach(function(d) {
+      var th = document.createElement('div');
+      th.textContent = d;
+      th.style.cssText = 'font-size:11px;font-weight:700;color:#6b7280;padding:4px 0;';
+      grid.appendChild(th);
+    });
+
+    var primeiroDia = mesAtual;
+    var offset = (primeiroDia.getDay() + 6) % 7;
+    for (var i = 0; i < offset; i++) {
+      grid.appendChild(document.createElement('div'));
+    }
+
+    var ano = mesAtual.getFullYear();
+    var mes = mesAtual.getMonth();
+    var lastDay = new Date(ano, mes + 1, 0).getDate();
+
+    for (var dia = 1; dia <= lastDay; dia++) {
+      var dataStr = ano + '-' + pad(mes + 1) + '-' + pad(dia);
+      var dataObj = new Date(ano, mes, dia);
+      var cell = document.createElement('div');
+      cell.style.cssText = 'border-radius:6px;padding:6px 2px;font-size:12px;font-weight:600;text-align:center;min-height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;';
+
+      var d = disp[dataStr];
+      var passado = dataObj < minData || dataObj > maxData;
+
+      if (passado || !d) {
+        cell.style.background = '#f9fafb';
+        cell.style.color = '#d1d5db';
+      } else if (d.bloqueado || !d.disponivel) {
+        cell.style.background = '#fee2e2';
+        cell.style.color = '#ef4444';
+      } else if (d.vagas_livres <= Math.ceil(d.vagas_total * 0.3)) {
+        cell.style.background = '#fef9c3';
+        cell.style.color = '#92400e';
+        cell.style.cursor = 'pointer';
+      } else {
+        cell.style.background = '#dcfce7';
+        cell.style.color = '#166534';
+        cell.style.cursor = 'pointer';
+      }
+
+      var span = document.createElement('span');
+      span.textContent = dia;
+      cell.appendChild(span);
+
+      if (!passado && d && d.disponivel) {
+        (function(ds, dobj, info) {
+          cell.addEventListener('click', function() { selecionarData(ds, dobj, info); });
+        })(dataStr, dataObj, d);
+      }
+
+      grid.appendChild(cell);
+    }
+
+    document.getElementById('cal-loading').style.display = 'none';
+    document.getElementById('cal-grid').style.display = 'grid';
+    document.getElementById('cal-titulo').textContent = nomesMes[mes] + ' ' + ano;
+  }
+
+  function atualizarCalendario() {
+    document.getElementById('cal-loading').style.display = 'block';
+    document.getElementById('cal-grid').style.display = 'none';
+    carregarMes(mesStr(mesAtual), renderizarCalendario);
+
+    // Controles prev/next
+    var mesMin = new Date(minData.getFullYear(), minData.getMonth(), 1);
+    var mesMax = new Date(maxData.getFullYear(), maxData.getMonth(), 1);
+    document.getElementById('cal-prev').disabled = mesAtual <= mesMin;
+    document.getElementById('cal-next').disabled = mesAtual >= mesMax;
+    document.getElementById('cal-prev').style.opacity = mesAtual <= mesMin ? '0.3' : '1';
+    document.getElementById('cal-next').style.opacity = mesAtual >= mesMax ? '0.3' : '1';
+  }
+
+  function selecionarData(dataStr, dataObj, info) {
+    document.getElementById('data_evento_input').value = dataStr;
+    var nomesMesArr = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+    var label = dataObj.getDate() + ' de ' + nomesMesArr[dataObj.getMonth()] + ' de ' + dataObj.getFullYear();
+    document.getElementById('data-selecionada-label').textContent = label;
+    document.getElementById('data-vagas-label').textContent = info.vagas_livres + ' vaga' + (info.vagas_livres > 1 ? 's' : '') + ' disponível' + (info.vagas_livres > 1 ? 'is' : '');
+    document.getElementById('data-selecionada-box').style.display = 'block';
+    document.getElementById('agenda-calendario').style.display = 'none';
+  }
+
+  window.limparDataEvento = function() {
+    document.getElementById('data_evento_input').value = '';
+    document.getElementById('data-selecionada-box').style.display = 'none';
+    document.getElementById('agenda-calendario').style.display = 'block';
+  };
+
+  document.getElementById('cal-prev').addEventListener('click', function() {
+    mesAtual = new Date(mesAtual.getFullYear(), mesAtual.getMonth() - 1, 1);
+    atualizarCalendario();
+  });
+  document.getElementById('cal-next').addEventListener('click', function() {
+    mesAtual = new Date(mesAtual.getFullYear(), mesAtual.getMonth() + 1, 1);
+    atualizarCalendario();
+  });
+
+  atualizarCalendario();
+})();
+</script>
+<% } %>
 </body>
 </html>

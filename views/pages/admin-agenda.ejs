@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agenda - Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .day-cell { min-height: 60px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; transition: box-shadow .15s, opacity .15s; }
+    .day-cell:not(.past) { cursor: pointer; }
+    .day-cell:not(.past):hover { box-shadow: 0 0 0 2px rgba(255,255,255,.3); }
+    .day-cell.selected { box-shadow: 0 0 0 2px #fff !important; }
+  </style>
+</head>
+
+<body class="bg-gray-950 min-h-screen text-white">
+<div class="flex min-h-screen">
+
+  <%- include('../partials/admin-sidebar') %>
+
+  <main class="ml-60 flex-1 p-8">
+
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-white">📅 Agenda</h1>
+      <p class="text-gray-400 mt-1 text-sm">Gerencie disponibilidade de datas para eventos</p>
+    </div>
+
+    <% if (salvo) { %>
+      <div class="mb-4 bg-green-900/50 border border-green-700 text-green-300 rounded-xl px-4 py-3 text-sm">
+        ✅ Salvo com sucesso.
+      </div>
+    <% } %>
+    <% if (erro) { %>
+      <div class="mb-4 bg-red-900/50 border border-red-700 text-red-300 rounded-xl px-4 py-3 text-sm">
+        ❌ Erro ao salvar. Tente novamente.
+      </div>
+    <% } %>
+
+    <%
+      const hoje = new Date().toISOString().slice(0, 10);
+      const pad = n => String(n).padStart(2, '0');
+      const especiaisMap = {};
+      especiais.forEach(e => { especiaisMap[e.data] = e; });
+      const primeiroDiaSemana = (new Date(ano, mesNum - 1, 1).getDay() + 6) % 7;
+      const prevMes = mesNum === 1 ? `${ano - 1}-12` : `${ano}-${pad(mesNum - 1)}`;
+      const nextMes = mesNum === 12 ? `${ano + 1}-01` : `${ano}-${pad(mesNum + 1)}`;
+      const nomesMes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    %>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+      <!-- ── Calendário ──────────────────────────────────────────────────── -->
+      <div class="xl:col-span-2 space-y-4">
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+
+          <!-- Navegação mês -->
+          <div class="flex items-center justify-between mb-5">
+            <a href="?mes=<%= prevMes %>"
+               class="bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm transition">← Anterior</a>
+            <h2 class="text-lg font-bold text-white"><%= nomesMes[mesNum - 1] %> <%= ano %></h2>
+            <a href="?mes=<%= nextMes %>"
+               class="bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm transition">Próximo →</a>
+          </div>
+
+          <!-- Cabeçalhos dos dias -->
+          <div class="grid grid-cols-7 gap-1 mb-1">
+            <% ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].forEach(d => { %>
+              <div class="text-center text-xs font-semibold text-gray-500 py-2"><%= d %></div>
+            <% }) %>
+          </div>
+
+          <!-- Células do calendário -->
+          <div class="grid grid-cols-7 gap-1" id="calendario-grid">
+
+            <!-- Células vazias iniciais -->
+            <% for (let i = 0; i < primeiroDiaSemana; i++) { %>
+              <div class="day-cell"></div>
+            <% } %>
+
+            <% for (let dia = 1; dia <= lastDay; dia++) {
+              const dataStr = `${ano}-${pad(mesNum)}-${pad(dia)}`;
+              const e = especiaisMap[dataStr];
+              const usados = agendadosMap[dataStr] || 0;
+              let capDia = config.capacidade_diaria;
+              let bloqueado = false;
+              let motivo = '';
+              let isEspecial = !!e;
+
+              if (e) {
+                motivo = (e.motivo || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                if (e.capacidade === null || parseInt(e.capacidade) === 0) {
+                  bloqueado = true; capDia = 0;
+                } else {
+                  capDia = e.capacidade;
+                }
+              }
+
+              const passado = dataStr < hoje;
+              const ehHoje = dataStr === hoje;
+              const livres = bloqueado ? 0 : Math.max(0, capDia - usados);
+
+              let cellCls, label;
+              if (passado) { cellCls = 'bg-gray-800 text-gray-500 past'; label = ''; }
+              else if (bloqueado) { cellCls = 'bg-gray-950 border border-gray-700 text-gray-600'; label = 'Fechado'; }
+              else if (livres === 0) { cellCls = 'bg-red-900/70 text-red-200'; label = `${usados}/${capDia}`; }
+              else if (usados > 0) { cellCls = 'bg-yellow-900/60 text-yellow-100'; label = `${usados}/${capDia}`; }
+              else { cellCls = 'bg-green-900/60 text-green-100'; label = `${capDia} vaga${capDia > 1 ? 's' : ''}`; }
+
+              if (ehHoje) cellCls += ' ring-2 ring-blue-400';
+            %>
+            <div class="day-cell <%= cellCls %>"
+                 data-data="<%= dataStr %>"
+                 data-usados="<%= usados %>"
+                 data-cap="<%= capDia %>"
+                 data-bloqueado="<%= bloqueado %>"
+                 data-especial="<%= isEspecial %>"
+                 data-motivo="<%= motivo %>">
+              <span class="font-semibold text-sm"><%= dia %></span>
+              <% if (!passado && label) { %><span class="text-xs opacity-80"><%= label %></span><% } %>
+            </div>
+            <% } %>
+
+          </div>
+
+          <!-- Legenda -->
+          <div class="flex flex-wrap gap-4 mt-5 text-xs text-gray-400">
+            <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded bg-green-900/60"></div> Disponível</div>
+            <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded bg-yellow-900/60"></div> Parcialmente ocupado</div>
+            <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded bg-red-900/70"></div> Lotado</div>
+            <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded bg-gray-950 border border-gray-700"></div> Fechado (folga)</div>
+            <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded ring-2 ring-blue-400 bg-green-900/60"></div> Hoje</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── Painel direito ──────────────────────────────────────────────── -->
+      <div class="space-y-4">
+
+        <!-- Configurações gerais -->
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+          <h2 class="font-bold text-white mb-4 text-sm uppercase tracking-wider">⚙️ Configurações</h2>
+          <form action="/admin/agenda/config" method="POST" class="space-y-4">
+            <input type="hidden" name="_csrf" value="<%= locals.csrfToken %>">
+            <input type="hidden" name="mes" value="<%= mes %>">
+
+            <div>
+              <label class="block text-xs font-medium text-gray-400 mb-1">Vagas por dia (padrão)</label>
+              <input type="number" name="capacidade_diaria" min="1" value="<%= config.capacidade_diaria %>"
+                class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
+              <p class="text-xs text-gray-600 mt-1">Quantos eventos por dia o buffet atende</p>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-gray-400 mb-1">Antecedência mínima (dias)</label>
+              <input type="number" name="antecedencia_minima_dias" min="0" value="<%= config.antecedencia_minima_dias %>"
+                class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-gray-400 mb-1">Antecedência máxima (dias)</label>
+              <input type="number" name="antecedencia_maxima_dias" min="1" value="<%= config.antecedencia_maxima_dias %>"
+                class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
+            </div>
+
+            <button type="submit"
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-sm transition">
+              💾 Salvar Configurações
+            </button>
+          </form>
+        </div>
+
+        <!-- Painel de edição de dia (aparece ao clicar) -->
+        <div id="painel-dia" class="hidden bg-gray-900 border border-blue-700 rounded-xl p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-white text-sm">📌 Configurar dia</h3>
+            <button onclick="fecharPainel()" class="text-gray-500 hover:text-white text-xl leading-none">&times;</button>
+          </div>
+
+          <div class="bg-gray-800 rounded-lg px-3 py-2 mb-4">
+            <p class="text-xs text-gray-400">Data</p>
+            <p id="painel-data-label" class="font-semibold text-white"></p>
+            <p class="text-xs text-gray-400 mt-1">Agendamentos: <span id="painel-usados" class="text-white font-medium"></span> / <span id="painel-cap" class="text-white font-medium"></span></p>
+          </div>
+
+          <form action="/admin/agenda/dia" method="POST" class="space-y-3">
+            <input type="hidden" name="_csrf" value="<%= locals.csrfToken %>">
+            <input type="hidden" name="mes" value="<%= mes %>">
+            <input type="hidden" name="data" id="painel-data-input">
+
+            <div>
+              <label class="block text-xs font-medium text-gray-400 mb-1">
+                Capacidade especial
+              </label>
+              <input type="number" name="capacidade" id="painel-capacidade" min="0" placeholder="Vazio = padrão | 0 = fechar"
+                class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
+              <p class="text-xs text-gray-600 mt-1">Deixe vazio para usar o padrão. Use <strong>0</strong> para bloquear o dia.</p>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-gray-400 mb-1">Motivo (opcional)</label>
+              <input type="text" name="motivo" id="painel-motivo" placeholder="Ex: Feriado, Férias..."
+                class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
+            </div>
+
+            <div class="flex gap-2">
+              <button type="submit"
+                class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 py-2 rounded-lg text-sm transition">
+                Salvar
+              </button>
+              <button type="button" id="btn-remover-dia"
+                class="hidden bg-red-900/70 hover:bg-red-800 text-red-200 font-semibold px-3 py-2 rounded-lg text-sm transition"
+                onclick="removerDia()">
+                Remover
+              </button>
+            </div>
+          </form>
+
+          <!-- Form separado para o POST de remoção -->
+          <form id="form-remover-dia" action="" method="POST" class="hidden">
+            <input type="hidden" name="_csrf" value="<%= locals.csrfToken %>">
+          </form>
+        </div>
+
+        <!-- Dias especiais deste mês -->
+        <% if (especiais.length > 0) { %>
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+          <h3 class="font-bold text-white text-sm uppercase tracking-wider mb-3">📋 Dias especiais do mês</h3>
+          <div class="space-y-2">
+            <% especiais.forEach(e => {
+              const cap = e.capacidade;
+              const fechado = cap === null || parseInt(cap) === 0;
+            %>
+            <div class="flex items-center gap-2 text-sm">
+              <span class="w-2 h-2 rounded-full flex-shrink-0 <%= fechado ? 'bg-gray-600' : 'bg-yellow-500' %>"></span>
+              <span class="text-gray-300 font-mono text-xs flex-1"><%= e.data %></span>
+              <span class="text-xs <%= fechado ? 'text-gray-500' : 'text-yellow-300' %>">
+                <%= fechado ? 'Fechado' : cap + ' vaga' + (cap > 1 ? 's' : '') %>
+              </span>
+              <% if (e.motivo) { %>
+                <span class="text-xs text-gray-500 truncate max-w-[80px]" title="<%= e.motivo %>"><%= e.motivo %></span>
+              <% } %>
+            </div>
+            <% }) %>
+          </div>
+        </div>
+        <% } %>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+(function() {
+  var configPadrao = <%= config.capacidade_diaria %>;
+
+  // Ligar eventos de clique nas células
+  document.querySelectorAll('.day-cell[data-data]').forEach(function(cell) {
+    if (cell.classList.contains('past')) return;
+    cell.addEventListener('click', function() {
+      var d = this.dataset;
+      abrirDia(d.data, parseInt(d.usados), parseInt(d.cap), d.bloqueado === 'true', d.especial === 'true', d.motivo || '');
+      document.querySelectorAll('.day-cell').forEach(c => c.classList.remove('selected'));
+      this.classList.add('selected');
+    });
+  });
+
+  function abrirDia(data, usados, cap, bloqueado, isEspecial, motivo) {
+    var nomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    var partes = data.split('-');
+    var dataFormatada = parseInt(partes[2]) + ' de ' + nomes[parseInt(partes[1]) - 1] + ' de ' + partes[0];
+
+    document.getElementById('painel-data-label').textContent = dataFormatada;
+    document.getElementById('painel-data-input').value = data;
+    document.getElementById('painel-usados').textContent = usados;
+    document.getElementById('painel-cap').textContent = bloqueado ? '0 (fechado)' : cap;
+
+    var inputCap = document.getElementById('painel-capacidade');
+    if (bloqueado) {
+      inputCap.value = '0';
+    } else if (isEspecial && cap !== configPadrao) {
+      inputCap.value = String(cap);
+    } else {
+      inputCap.value = '';
+    }
+
+    document.getElementById('painel-motivo').value = motivo;
+
+    var btnRemover = document.getElementById('btn-remover-dia');
+    if (isEspecial) {
+      btnRemover.classList.remove('hidden');
+    } else {
+      btnRemover.classList.add('hidden');
+    }
+
+    document.getElementById('form-remover-dia').action = '/admin/agenda/dia/' + data + '/remover';
+
+    var painel = document.getElementById('painel-dia');
+    painel.classList.remove('hidden');
+    painel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  window.fecharPainel = function() {
+    document.getElementById('painel-dia').classList.add('hidden');
+    document.querySelectorAll('.day-cell').forEach(c => c.classList.remove('selected'));
+  };
+
+  window.removerDia = function() {
+    if (confirm('Remover configuração especial deste dia?')) {
+      document.getElementById('form-remover-dia').submit();
+    }
+  };
+})();
+</script>
+</body>
+</html>

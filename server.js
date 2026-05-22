@@ -14,6 +14,7 @@ const authRoutes = require('./routes/authRoutes');
 const carrinhoRoutes = require('./routes/carrinhoRoutes');
 const checkoutRoutes = require('./routes/checkoutRoutes');
 const configRoutes = require('./routes/configRoutes');
+const agendaRoutes = require('./routes/agendaRoutes');
 const initializeDatabase = require('./config/init-db');
 
 
@@ -109,6 +110,7 @@ app.use('/', bannerRoutes);
 app.use('/', carrinhoRoutes);
 app.use('/', checkoutRoutes);
 app.use('/', configRoutes);
+app.use('/', agendaRoutes);
 
 // ── 404 ───────────────────────────────────────────────────────────────────
 app.use((req, res) => {

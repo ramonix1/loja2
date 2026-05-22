@@ -194,6 +194,39 @@ async function initializeTenant(pool, adminEmail, adminSenha, adminNome = 'Admin
     CREATE INDEX IF NOT EXISTS idx_pagamentos_mp     ON pagamentos(mp_payment_id);
   `);
 
+  // Módulo Agenda (buffet / eventos)
+  await pool.query(`
+    ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS data_evento DATE;
+
+    CREATE TABLE IF NOT EXISTS agenda_config (
+      id INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+      capacidade_diaria INTEGER NOT NULL DEFAULT 1,
+      antecedencia_minima_dias INTEGER NOT NULL DEFAULT 1,
+      antecedencia_maxima_dias INTEGER NOT NULL DEFAULT 180,
+      updated_at TIMESTAMP DEFAULT NOW()
+    );
+    INSERT INTO agenda_config (id, capacidade_diaria, antecedencia_minima_dias, antecedencia_maxima_dias)
+    VALUES (1, 1, 1, 180) ON CONFLICT (id) DO NOTHING;
+
+    CREATE TABLE IF NOT EXISTS agenda_dias_especiais (
+      data DATE PRIMARY KEY,
+      capacidade INTEGER,
+      motivo VARCHAR(255),
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS agendamentos (
+      id SERIAL PRIMARY KEY,
+      pedido_id INTEGER NOT NULL REFERENCES pedidos(id) ON DELETE CASCADE,
+      data_evento DATE NOT NULL,
+      status VARCHAR(20) NOT NULL DEFAULT 'confirmado'
+        CHECK (status IN ('confirmado', 'cancelado')),
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_agendamentos_data   ON agendamentos(data_evento);
+    CREATE INDEX IF NOT EXISTS idx_agendamentos_pedido ON agendamentos(pedido_id);
+  `);
+
   // Movimentações de estoque
   await pool.query(`
     CREATE TABLE IF NOT EXISTS movimentacoes_estoque (
@@ -218,7 +251,9 @@ async function initializeTenant(pool, adminEmail, adminSenha, adminNome = 'Admin
     );
     INSERT INTO configuracoes (chave, valor) VALUES
       ('controla_estoque', 'false'),
-      ('reservar_estoque_carrinho', 'false')
+      ('reservar_estoque_carrinho', 'false'),
+      ('modulo_agenda', 'false'),
+      ('habilitar_sumup', 'false')
     ON CONFLICT (chave) DO NOTHING;
   `);
 

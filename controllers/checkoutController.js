@@ -1,5 +1,7 @@
 const mp = require('../services/mercadoPagoService');
 const sumup = require('../services/sumupService');
+const { getConfigs } = require('./configController');
+const { getAgendaConfig, getDisponibilidade } = require('./agendaController');
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -35,12 +37,20 @@ exports.exibirCheckout = async (req, res) => {
     }
 
     const subtotal = itens.reduce((s, i) => s + parseFloat(i.subtotal), 0);
+    const configs = await getConfigs(req.db);
+    const moduloAgenda = configs.modulo_agenda === 'true';
+    const agendaConfig = moduloAgenda ? await getAgendaConfig(req.db) : null;
+    const sumupHabilitado = configs.habilitar_sumup === 'true';
 
     res.render('pages/checkout', {
       usuario,
       itens,
       subtotal,
-      mpPublicKey: process.env.MP_PUBLIC_KEY
+      mpPublicKey: process.env.MP_PUBLIC_KEY || '',
+      moduloAgenda,
+      agendaConfig,
+      sumupHabilitado,
+      erro: req.query.erro || null,
     });
   } catch (err) {
     console.error('Erro no checkout:', err);
@@ -56,9 +66,24 @@ exports.processarCheckout = async (req, res) => {
   const {
     nome_entrega, email_entrega, telefone_entrega, cpf_entrega,
     cep, logradouro, numero, complemento, bairro, cidade, estado,
-    metodo_pagamento,
+    metodo_pagamento, data_evento,
     mp_token, mp_installments, mp_payment_method_id
   } = req.body;
+
+  console.log(`[Checkout] POST recebido — método: ${metodo_pagamento}, usuário: ${usuarioId}`);
+
+  // Verificar agenda antes de iniciar transação
+  const cfgsAgenda = await getConfigs(db);
+  const moduloAgenda = cfgsAgenda.modulo_agenda === 'true';
+  if (moduloAgenda) {
+    if (!data_evento || !/^\d{4}-\d{2}-\d{2}$/.test(data_evento)) {
+      return res.redirect('/checkout?erro=data_evento_obrigatoria');
+    }
+    const disp = await getDisponibilidade(db, data_evento);
+    if (!disp.disponivel) {
+      return res.redirect('/checkout?erro=data_indisponivel');
+    }
+  }
 
   await db.query('BEGIN');
 
@@ -93,6 +118,15 @@ exports.processarCheckout = async (req, res) => {
         INSERT INTO pedido_itens (pedido_id, produto_id, nome_produto, quantidade, preco_unitario, subtotal)
         VALUES ($1, $2, $3, $4, $5, $6)
       `, [pedidoId, item.produto_id, item.nome, item.quantidade, item.preco_unitario, item.subtotal]);
+    }
+
+    // Registrar agendamento (se módulo ativo)
+    if (moduloAgenda && data_evento) {
+      await db.query(
+        'INSERT INTO agendamentos (pedido_id, data_evento) VALUES ($1, $2)',
+        [pedidoId, data_evento]
+      );
+      await db.query('UPDATE pedidos SET data_evento = $1 WHERE id = $2', [data_evento, pedidoId]);
     }
 
     // Debitar estoque dos produtos (se controle ativo)
@@ -158,6 +192,21 @@ exports.processarCheckout = async (req, res) => {
 
       return res.redirect(checkoutSumup.hosted_checkout_url || checkoutSumup.checkout_url || `/checkout/resultado/${pedidoId}`);
 
+    } else if (metodo_pagamento === 'teste' && process.env.NODE_ENV !== 'production') {
+      await db.query(`
+        INSERT INTO pagamentos (pedido_id, mp_payment_id, status, status_mp, valor, metodo, resposta_json)
+        VALUES ($1, $2, 'pago', 'approved', $3, 'teste', $4)
+      `, [pedidoId, `TESTE-${pedidoId}`, total, JSON.stringify({ test: true })]);
+
+      await db.query(
+        "UPDATE pedidos SET status = 'pago', mp_payment_id = $1 WHERE id = $2",
+        [`TESTE-${pedidoId}`, pedidoId]
+      );
+
+      await db.query('DELETE FROM carrinho_itens WHERE usuario_id = $1', [usuarioId]);
+      await db.query('COMMIT');
+      return res.redirect(`/checkout/resultado/${pedidoId}`);
+
     } else {
       await db.query('ROLLBACK');
       return res.redirect('/checkout?erro=metodo_invalido');
@@ -182,8 +231,13 @@ exports.processarCheckout = async (req, res) => {
     res.redirect(`/checkout/resultado/${pedidoId}`);
 
   } catch (err) {
-    await db.query('ROLLBACK');
-    console.error('Erro ao processar checkout:', err);
+    await db.query('ROLLBACK').catch(() => {});
+    console.error('\n━━━ ERRO NO CHECKOUT ━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.error('Mensagem:', err.message);
+    if (err.cause) console.error('Causa:', err.cause);
+    if (err.statusCode) console.error('HTTP Status:', err.statusCode);
+    if (err.body) console.error('Resposta API:', JSON.stringify(err.body, null, 2));
+    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     res.redirect('/checkout?erro=pagamento');
   }
 };

@@ -92,11 +92,69 @@
         </div>
       </div>
 
-      <div class="flex gap-3">
+      <!-- SumUp -->
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+        <h2 class="text-lg font-bold text-white mb-1">💳 SumUp</h2>
+        <p class="text-gray-400 text-sm mb-5">
+          Habilite apenas se sua conta SumUp tiver o módulo de pagamento online ativo.
+          Requer <code class="text-xs bg-gray-800 px-1 rounded">SUMUP_API_KEY</code> e
+          <code class="text-xs bg-gray-800 px-1 rounded">SUMUP_MERCHANT_CODE</code> configurados no servidor.
+        </p>
+
+        <label class="flex items-start gap-4 cursor-pointer group">
+          <div class="mt-0.5">
+            <input type="checkbox" name="habilitar_sumup" id="habilitar_sumup"
+                   class="sr-only peer" <%= configs.habilitar_sumup === 'true' ? 'checked' : '' %>>
+            <div class="w-11 h-6 bg-gray-700 peer-checked:bg-blue-600 rounded-full relative transition
+                        after:content-[''] after:absolute after:top-0.5 after:left-0.5
+                        after:bg-white after:rounded-full after:h-5 after:w-5 after:transition
+                        peer-checked:after:translate-x-5"></div>
+          </div>
+          <div>
+            <div class="font-medium text-white text-sm">Exibir opção de pagamento via SumUp no checkout</div>
+            <div class="text-gray-400 text-xs mt-0.5">
+              Quando desativado, a opção SumUp não aparece para o cliente, mesmo que as credenciais estejam configuradas.
+            </div>
+          </div>
+        </label>
+      </div>
+
+      <!-- Módulo Agenda -->
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+        <h2 class="text-lg font-bold text-white mb-1">📅 Módulo Agenda (Buffet)</h2>
+        <p class="text-gray-400 text-sm mb-5">
+          Quando ativado, o cliente precisa escolher uma data de evento no checkout.
+          Configure as vagas e dias disponíveis em <a href="/admin/agenda" class="text-blue-400 hover:underline">Agenda</a>.
+        </p>
+
+        <label class="flex items-start gap-4 cursor-pointer group">
+          <div class="mt-0.5">
+            <input type="checkbox" name="modulo_agenda" id="modulo_agenda"
+                   class="sr-only peer" <%= configs.modulo_agenda === 'true' ? 'checked' : '' %>>
+            <div class="w-11 h-6 bg-gray-700 peer-checked:bg-blue-600 rounded-full relative transition
+                        after:content-[''] after:absolute after:top-0.5 after:left-0.5
+                        after:bg-white after:rounded-full after:h-5 after:w-5 after:transition
+                        peer-checked:after:translate-x-5"></div>
+          </div>
+          <div>
+            <div class="font-medium text-white text-sm">Ativar módulo de agendamento</div>
+            <div class="text-gray-400 text-xs mt-0.5">
+              Exibe um calendário no checkout para o cliente selecionar a data do evento.
+              Bloqueia a compra se não houver vagas disponíveis no dia escolhido.
+            </div>
+          </div>
+        </label>
+      </div>
+
+        <div class="flex gap-3 items-center">
         <button type="submit"
           class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg text-sm font-semibold transition">
           💾 Salvar Configurações
         </button>
+        <a href="/admin/diagnostico"
+           class="text-sm text-gray-400 hover:text-white transition">
+          🔧 Diagnóstico de pagamentos →
+        </a>
       </div>
     </form>
 
