@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Tenants</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-950 min-h-screen text-white p-8">
+
+  <div class="max-w-5xl mx-auto">
+
+    <!-- Header -->
+    <div class="mb-8 flex items-center justify-between">
+      <div>
+        <div class="text-xs text-yellow-500 font-bold uppercase tracking-wider mb-1">⚠️ Modo Desenvolvimento</div>
+        <h1 class="text-3xl font-bold text-white">Gestão de Tenants</h1>
+        <p class="text-gray-400 mt-1 text-sm">
+          Tenant ativo na sessão:
+          <% if (tenantAtual) { %>
+            <span class="text-blue-400 font-semibold"><%= tenantAtual %></span>
+          <% } else { %>
+            <span class="text-gray-500 italic">nenhum</span>
+          <% } %>
+        </p>
+      </div>
+      <a href="/" class="text-sm text-gray-400 hover:text-white transition bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg">
+        ← Acessar loja
+      </a>
+    </div>
+
+    <!-- Alertas -->
+    <% if (mensagem) { %>
+      <div class="mb-6 bg-green-900/50 border border-green-700 text-green-300 rounded-xl px-4 py-3 text-sm">
+        ✅ <%= mensagem %>
+      </div>
+    <% } %>
+    <% if (erro) { %>
+      <div class="mb-6 bg-red-900/50 border border-red-700 text-red-300 rounded-xl px-4 py-3 text-sm">
+        ❌ <%= erro %>
+      </div>
+    <% } %>
+
+    <!-- Cards de tenants -->
+    <div class="grid grid-cols-1 gap-4">
+      <% tenants.forEach(function(t) { %>
+        <div class="bg-gray-900 border <%= t.ativo ? 'border-gray-700' : 'border-gray-800 opacity-60' %> rounded-xl p-5
+                    <%= tenantAtual === t.slug ? 'ring-2 ring-blue-500' : '' %>">
+          <div class="flex items-start justify-between gap-4">
+
+            <!-- Info principal -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-3 mb-2">
+                <span class="text-lg font-bold text-white"><%= t.nome || t.slug %></span>
+                <span class="text-xs font-mono bg-gray-800 text-gray-400 px-2 py-0.5 rounded"><%= t.slug %></span>
+                <% if (tenantAtual === t.slug) { %>
+                  <span class="text-xs bg-blue-900/60 text-blue-300 border border-blue-700 px-2 py-0.5 rounded font-medium">ATIVO</span>
+                <% } %>
+                <% if (!t.ativo) { %>
+                  <span class="text-xs bg-red-900/60 text-red-400 border border-red-800 px-2 py-0.5 rounded">INATIVO</span>
+                <% } %>
+              </div>
+
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-1 text-xs text-gray-500">
+                <div><span class="text-gray-600">Banco:</span> <span class="text-gray-300 font-mono"><%= t.db_name %></span></div>
+                <div><span class="text-gray-600">Host:</span> <span class="text-gray-300 font-mono"><%= t.db_host %>:<%= t.db_port || 5432 %></span></div>
+                <div><span class="text-gray-600">Usuário DB:</span> <span class="text-gray-300 font-mono"><%= t.db_user %></span></div>
+                <div><span class="text-gray-600">Plano:</span> <span class="text-gray-300"><%= t.plano || '—' %></span></div>
+                <% if (t.url_propria) { %>
+                  <div class="col-span-2"><span class="text-gray-600">URL:</span> <span class="text-gray-300 font-mono"><%= t.url_propria %></span></div>
+                <% } %>
+              </div>
+            </div>
+
+            <!-- Ações -->
+            <div class="flex flex-col gap-2 shrink-0">
+
+              <!-- Acessar (troca sessão e vai para /) -->
+              <a href="/_tenants/acessar/<%= t.slug %>"
+                 class="text-center text-xs font-semibold px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition">
+                🚀 Acessar
+              </a>
+
+              <!-- Selecionar (só troca sessão, fica no painel) -->
+              <form method="POST" action="/_tenants/switch/<%= t.slug %>">
+                <button type="submit"
+                        class="w-full text-xs font-semibold px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition">
+                  🔄 Selecionar
+                </button>
+              </form>
+
+              <!-- Reset da conexão -->
+              <form method="POST" action="/_tenants/reset/<%= t.slug %>">
+                <button type="submit"
+                        class="w-full text-xs font-semibold px-4 py-2 rounded-lg bg-orange-900/50 hover:bg-orange-800/60 text-orange-300 border border-orange-800 transition">
+                  ⚡ Reset pool
+                </button>
+              </form>
+
+              <!-- Ativar/Desativar -->
+              <form method="POST" action="/_tenants/toggle/<%= t.slug %>">
+                <button type="submit"
+                        class="w-full text-xs font-semibold px-4 py-2 rounded-lg transition
+                               <%= t.ativo
+                                   ? 'bg-red-900/40 hover:bg-red-900/70 text-red-400 border border-red-900'
+                                   : 'bg-green-900/40 hover:bg-green-900/70 text-green-400 border border-green-900' %>">
+                  <%= t.ativo ? '🔴 Desativar' : '🟢 Ativar' %>
+                </button>
+              </form>
+
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+
+    <% if (tenants.length === 0) { %>
+      <div class="text-center text-gray-500 py-16">Nenhum tenant cadastrado no banco master.</div>
+    <% } %>
+
+    <!-- Rodapé info -->
+    <div class="mt-8 text-xs text-gray-600 border-t border-gray-800 pt-4">
+      Esta página só é acessível em <code class="text-gray-500">NODE_ENV=development</code>.
+      Para trocar de tenant em produção, configure o subdomínio correto ou a variável <code class="text-gray-500">TENANT_SLUG</code>.
+    </div>
+
+  </div>
+</body>
+</html>

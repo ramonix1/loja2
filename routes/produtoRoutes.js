@@ -18,5 +18,6 @@ router.get("/editar/:id", requireAdmin, produtoController.editar);
 router.post("/atualizar/:id", requireAdmin, upload.array("imagens", 10), produtoController.atualizar);
 router.get("/excluir/:id", requireAdmin, produtoController.excluir);
 router.get("/excluir-imagem/:id", requireAdmin, produtoController.excluirImagem);
+router.post("/admin/produtos/:id/estoque", requireAdmin, produtoController.atualizarEstoque);
 
 module.exports = router;

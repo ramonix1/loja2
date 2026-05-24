@@ -28,7 +28,7 @@ exports.admin = async (req, res) => {
     const clientes = await req.db.query(
       "SELECT * FROM clientes ORDER BY ordem ASC, nome ASC"
     );
-    res.render("pages/admin-clientes", { clientes: clientes.rows });
+    res.render("pages/admin-clientes", { clientes: clientes.rows, activePage: 'clientes' });
   } catch (error) {
     console.error("Erro ao carregar admin de clientes:", error);
     res.status(500).render("pages/error", { message: "Erro ao carregar clientes" });

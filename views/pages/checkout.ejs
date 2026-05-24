@@ -152,6 +152,8 @@
   <form id="checkoutForm" method="POST" action="/checkout">
     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
     <input type="hidden" name="stripe_payment_method_id" id="stripe_payment_method_id">
+    <input type="hidden" name="frete_valor"   id="frete_valor"   value="">
+    <input type="hidden" name="frete_servico" id="frete_servico" value="">
 
     <div class="checkout-grid">
 
@@ -264,9 +266,23 @@
           </div>
         </div>
 
+        <!-- Frete -->
+        <div class="checkout-card" id="card-frete">
+          <h2><%= locals.moduloAgenda ? '4' : '3' %>. Frete</h2>
+
+          <div id="frete-placeholder" style="font-size:13px;color:#9ca3af;margin:0;">
+            Preencha o CEP acima para calcular o frete.
+          </div>
+          <div id="frete-loading" style="display:none;font-size:13px;color:#6b7280;">
+            ⏳ Calculando opções de frete...
+          </div>
+          <div id="frete-erro" style="display:none;background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:10px 14px;border-radius:8px;font-size:13px;"></div>
+          <div id="frete-opcoes" class="metodo-pagamento" style="display:none;"></div>
+        </div>
+
         <!-- Pagamento -->
         <div class="checkout-card">
-          <h2><%= locals.moduloAgenda ? '4' : '3' %>. Forma de pagamento</h2>
+          <h2><%= locals.moduloAgenda ? '5' : '4' %>. Forma de pagamento</h2>
 
           <div class="metodo-pagamento">
 
@@ -409,11 +425,11 @@
             </div>
             <div class="resumo-item">
               <span>Frete</span>
-              <span style="color:#16a34a;">Grátis</span>
+              <span id="freteValorDisplay" style="color:#9ca3af;">—</span>
             </div>
             <div class="resumo-total">
               <span>Total</span>
-              <span>R$ <%= Number(subtotal).toFixed(2).replace('.',',') %></span>
+              <span id="totalValorDisplay">—</span>
             </div>
           </div>
 
@@ -549,6 +565,12 @@
     }
     <% } %>
 
+    if (document.getElementById('frete_valor').value === '') {
+      document.getElementById('card-frete').scrollIntoView({ behavior: 'smooth' });
+      alert('Aguarde o cálculo do frete ou verifique seu CEP.');
+      return;
+    }
+
     if (metodoAtual === 'cartao') {
       if (!stripeObj || !cardMounted) {
         alert('Preencha os dados do cartão.');
@@ -580,6 +602,130 @@
   });
 })();
 </script>
+<script>
+(function() {
+  var subtotalVal   = parseFloat('<%= Number(subtotal) %>');
+  var csrfFrete     = '<%= csrfToken %>';
+  var ultimoCepCalc = '';
+
+  function fmt(v) { return 'R$ ' + v.toFixed(2).replace('.', ','); }
+
+  function atualizarResumo(freteVal) {
+    var fd = document.getElementById('freteValorDisplay');
+    var td = document.getElementById('totalValorDisplay');
+    if (freteVal === 0) {
+      fd.innerHTML = '<span style="color:#16a34a;font-weight:700;">Grátis</span>';
+    } else {
+      fd.style.color = '#374151';
+      fd.textContent = fmt(freteVal);
+    }
+    td.textContent = fmt(subtotalVal + freteVal);
+  }
+
+  function selecionarOpcao(opcao, label) {
+    document.querySelectorAll('#frete-opcoes .metodo-opcao').forEach(function(el) {
+      el.classList.remove('selecionado');
+    });
+    label.classList.add('selecionado');
+    document.getElementById('frete_valor').value   = opcao.valor.toFixed(2);
+    document.getElementById('frete_servico').value = opcao.id + ':' + opcao.nome;
+    atualizarResumo(opcao.valor);
+  }
+
+  function renderOpcoes(opcoes) {
+    var container = document.getElementById('frete-opcoes');
+    container.innerHTML = '';
+    opcoes.forEach(function(opcao, i) {
+      var label = document.createElement('label');
+      label.className = 'metodo-opcao';
+      var prazoHtml = opcao.prazo
+        ? '<div class="metodo-desc">' + opcao.prazo + ' dias úteis</div>'
+        : '';
+      var transportadoraHtml = opcao.transportadora
+        ? ' <span style="font-size:12px;color:#6b7280;">— ' + opcao.transportadora + '</span>'
+        : '';
+      var precoHtml = opcao.valor === 0
+        ? '<span style="color:#16a34a;font-weight:700;font-size:15px;">Grátis</span>'
+        : '<span style="font-weight:700;font-size:15px;">' + fmt(opcao.valor) + '</span>';
+
+      label.innerHTML =
+        '<div class="metodo-icon">📦</div>' +
+        '<div class="metodo-info">' +
+          '<div class="metodo-nome">' + opcao.nome + transportadoraHtml + '</div>' +
+          prazoHtml +
+        '</div>' +
+        precoHtml;
+
+      label.style.cursor = 'pointer';
+      label.addEventListener('click', function() { selecionarOpcao(opcao, label); });
+      container.appendChild(label);
+
+      if (i === 0) {
+        setTimeout(function() { selecionarOpcao(opcao, label); }, 0);
+      }
+    });
+    container.style.display = 'flex';
+    document.getElementById('frete-placeholder').style.display = 'none';
+  }
+
+  window.calcularFrete = function(cep) {
+    cep = (cep || '').replace(/\D/g, '');
+    if (cep.length !== 8 || cep === ultimoCepCalc) return;
+    ultimoCepCalc = cep;
+
+    document.getElementById('frete-loading').style.display = 'block';
+    document.getElementById('frete-opcoes').style.display  = 'none';
+    document.getElementById('frete-erro').style.display    = 'none';
+    document.getElementById('frete-placeholder').style.display = 'none';
+    document.getElementById('frete_valor').value   = '';
+    document.getElementById('frete_servico').value = '';
+    document.getElementById('freteValorDisplay').textContent = '—';
+    document.getElementById('freteValorDisplay').style.color = '#9ca3af';
+    document.getElementById('totalValorDisplay').textContent = '—';
+
+    fetch('/frete/calcular', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfFrete },
+      body: JSON.stringify({ cep_destino: cep, subtotal: subtotalVal }),
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      document.getElementById('frete-loading').style.display = 'none';
+      if (data.ok && data.opcoes && data.opcoes.length > 0) {
+        renderOpcoes(data.opcoes);
+      } else {
+        var erroEl = document.getElementById('frete-erro');
+        erroEl.textContent = data.erro || 'Não foi possível calcular o frete para este CEP.';
+        erroEl.style.display = 'block';
+        ultimoCepCalc = '';
+      }
+    })
+    .catch(function() {
+      document.getElementById('frete-loading').style.display = 'none';
+      document.getElementById('frete-erro').textContent = 'Erro de conexão ao calcular frete.';
+      document.getElementById('frete-erro').style.display = 'block';
+      ultimoCepCalc = '';
+    });
+  };
+
+  // Auto-calcula ao sair do campo CEP
+  document.getElementById('cepInput').addEventListener('blur', function() {
+    calcularFrete(this.value);
+  });
+
+  // Recalcula após buscar CEP (aguarda o preenchimento do endereço)
+  var btnBuscar = document.getElementById('btnBuscarCep');
+  var origClick = btnBuscar.onclick;
+  btnBuscar.addEventListener('click', function() {
+    setTimeout(function() { calcularFrete(document.getElementById('cepInput').value); }, 800);
+  });
+
+  // Auto-calcula no carregamento se CEP já preenchido
+  var cepInicial = document.getElementById('cepInput').value.replace(/\D/g, '');
+  if (cepInicial.length === 8) calcularFrete(cepInicial);
+})();
+</script>
+
 <% if (locals.moduloAgenda && locals.agendaConfig) { %>
 <script>
 (function() {

@@ -79,11 +79,15 @@ exports.processarLogin = async (req, res) => {
     // Login bem-sucedido — limpar tentativas
     await limparTentativas(req.db, ip, usuario.id);
 
+    // Preservar tenantSlug antes de regenerar (regenerate apaga toda a sessão)
+    const tenantSlug = req.session.tenantSlug;
+
     // Regenerar sessão para prevenir session fixation
     await new Promise((resolve, reject) => {
       req.session.regenerate((err) => (err ? reject(err) : resolve()));
     });
 
+    if (tenantSlug) req.session.tenantSlug = tenantSlug;
     req.session.usuarioId = usuario.id;
     req.session.nome = usuario.nome;
     req.session.email = usuario.email;
@@ -110,10 +114,16 @@ exports.processarLogin = async (req, res) => {
 // ── Logout ─────────────────────────────────────────────────────────────────
 
 exports.logout = (req, res) => {
-  req.session.destroy(() => {
-    res.clearCookie('connect.sid');
-    res.redirect('/login');
-  });
+  // Preservar tenantSlug para não perder o contexto de dev após logout
+  const tenantSlug = req.session.tenantSlug;
+  req.session.usuarioId = null;
+  req.session.nome = null;
+  req.session.email = null;
+  req.session.role = null;
+  req.session.redirecionarPara = null;
+  req.session.info = null;
+  if (tenantSlug) req.session.tenantSlug = tenantSlug;
+  req.session.save(() => res.redirect('/login'));
 };
 
 // ── Recuperação de senha ───────────────────────────────────────────────────
@@ -309,7 +319,7 @@ exports.exibirPermissoes = async (req, res) => {
   const admins = await req.db.query(
     "SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at FROM usuarios WHERE role = 'admin' ORDER BY created_at DESC"
   );
-  res.render('pages/admin-permissoes', { admins: admins.rows, erro: null, sucesso: null });
+  res.render('pages/admin-permissoes', { admins: admins.rows, erro: null, sucesso: null, activePage: 'permissoes' });
 };
 
 exports.criarAdmin = async (req, res) => {
@@ -323,14 +333,14 @@ exports.criarAdmin = async (req, res) => {
 
   if (erros.length) {
     const admins = await req.db.query("SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at FROM usuarios WHERE role = 'admin' ORDER BY created_at DESC");
-    return res.render('pages/admin-permissoes', { admins: admins.rows, erro: erros.join(' '), sucesso: null });
+    return res.render('pages/admin-permissoes', { admins: admins.rows, erro: erros.join(' '), sucesso: null, activePage: 'permissoes' });
   }
 
   try {
     const existe = await req.db.query('SELECT id FROM usuarios WHERE email = $1', [email.toLowerCase()]);
     if (existe.rows[0]) {
       const admins = await req.db.query("SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at FROM usuarios WHERE role = 'admin' ORDER BY created_at DESC");
-      return res.render('pages/admin-permissoes', { admins: admins.rows, erro: 'Email já cadastrado.', sucesso: null });
+      return res.render('pages/admin-permissoes', { admins: admins.rows, erro: 'Email já cadastrado.', sucesso: null, activePage: 'permissoes' });
     }
 
     const cpfLimpo = cpf ? cpf.replace(/\D/g, '').replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4') : null;
@@ -342,11 +352,11 @@ exports.criarAdmin = async (req, res) => {
     );
 
     const admins = await req.db.query("SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at FROM usuarios WHERE role = 'admin' ORDER BY created_at DESC");
-    res.render('pages/admin-permissoes', { admins: admins.rows, erro: null, sucesso: 'Admin criado com sucesso.' });
+    res.render('pages/admin-permissoes', { admins: admins.rows, erro: null, sucesso: 'Admin criado com sucesso.', activePage: 'permissoes' });
   } catch (err) {
     console.error('Erro ao criar admin:', err);
     const admins = await req.db.query("SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at FROM usuarios WHERE role = 'admin' ORDER BY created_at DESC");
-    res.render('pages/admin-permissoes', { admins: admins.rows, erro: 'Erro interno.', sucesso: null });
+    res.render('pages/admin-permissoes', { admins: admins.rows, erro: 'Erro interno.', sucesso: null, activePage: 'permissoes' });
   }
 };
 

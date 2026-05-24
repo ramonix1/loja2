@@ -125,13 +125,27 @@ exports.diagnostico = async (req, res) => {
 };
 
 exports.salvarConfiguracoes = async (req, res) => {
-  const { controla_estoque, reservar_estoque_carrinho, modulo_agenda, habilitar_sumup } = req.body;
+  const {
+    controla_estoque, reservar_estoque_carrinho, modulo_agenda, habilitar_sumup,
+    frete_cep_origem, frete_fixo, frete_gratis_acima,
+    melhor_envio_token, melhor_envio_sandbox,
+    frete_peso_padrao, frete_altura, frete_largura, frete_comprimento,
+  } = req.body;
   try {
     const pares = [
-      ['controla_estoque', controla_estoque === 'on' ? 'true' : 'false'],
+      ['controla_estoque',          controla_estoque === 'on' ? 'true' : 'false'],
       ['reservar_estoque_carrinho', reservar_estoque_carrinho === 'on' ? 'true' : 'false'],
-      ['modulo_agenda', modulo_agenda === 'on' ? 'true' : 'false'],
-      ['habilitar_sumup', habilitar_sumup === 'on' ? 'true' : 'false'],
+      ['modulo_agenda',             modulo_agenda === 'on' ? 'true' : 'false'],
+      ['habilitar_sumup',           habilitar_sumup === 'on' ? 'true' : 'false'],
+      ['frete_cep_origem',          (frete_cep_origem || '').replace(/\D/g, '').replace(/^(\d{5})(\d{3})$/, '$1-$2')],
+      ['frete_fixo',                String(parseFloat(frete_fixo) || 0)],
+      ['frete_gratis_acima',        String(parseFloat(frete_gratis_acima) || 0)],
+      ['melhor_envio_token',        (melhor_envio_token || '').trim()],
+      ['melhor_envio_sandbox',      melhor_envio_sandbox === 'on' ? 'true' : 'false'],
+      ['frete_peso_padrao',         String(parseInt(frete_peso_padrao) || 300)],
+      ['frete_altura',              String(parseFloat(frete_altura) || 4)],
+      ['frete_largura',             String(parseFloat(frete_largura) || 12)],
+      ['frete_comprimento',         String(parseFloat(frete_comprimento) || 17)],
     ];
     for (const [chave, valor] of pares) {
       await req.db.query(`

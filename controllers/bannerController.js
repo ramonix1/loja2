@@ -12,7 +12,7 @@ exports.admin = async (req, res) => {
       LEFT JOIN produtos p ON p.id = b.produto_id
       ORDER BY b.ordem ASC, b.created_at DESC
     `);
-    res.render("pages/admin-banners", { banners: banners.rows });
+    res.render("pages/admin-banners", { banners: banners.rows, activePage: 'banners' });
   } catch (error) {
     console.error("Erro ao listar banners:", error);
     res.status(500).render("pages/error", { message: "Erro ao carregar banners" });
@@ -28,6 +28,7 @@ exports.novo = async (req, res) => {
     res.render("pages/admin-banner-form", {
       banner: null,
       produtos: produtos.rows,
+      activePage: 'banners',
     });
   } catch (error) {
     console.error("Erro ao abrir form banner:", error);
@@ -83,6 +84,7 @@ exports.editar = async (req, res) => {
     res.render("pages/admin-banner-form", {
       banner: banner.rows[0],
       produtos: produtos.rows,
+      activePage: 'banners',
     });
   } catch (error) {
     console.error("Erro ao abrir edição banner:", error);

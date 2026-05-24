@@ -85,19 +85,45 @@
         <form method="POST" action="/admin/pedidos/<%= pedido.id %>/status">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>">
           <div class="form-group">
-            <select name="status">
+            <select name="status" id="statusSelect" onchange="toggleRastreio(this.value)">
               <% ['aguardando_pagamento','pago','em_separacao','enviado','entregue','cancelado'].forEach(function(s) { %>
-                <option value="<%= s %>" <%= pedido.status === s ? 'selected' : '' %>><%= {aguardando_pagamento:'Aguardando pagamento',pago:'Pago',em_separacao:'Em separação',enviado:'Enviado',entregue:'Entregue',cancelado:'Cancelado'}[s] %></option>
+                <option value="<%= s %>" <%= pedido.status === s ? 'selected' : '' %>>
+                  <%= {aguardando_pagamento:'Aguardando pagamento',pago:'Pago',em_separacao:'Em separação',enviado:'Enviado',entregue:'Entregue',cancelado:'Cancelado'}[s] %>
+                </option>
               <% }) %>
             </select>
           </div>
-          <button type="submit" class="btn btn-primary" style="width:100%;">Salvar status</button>
+
+          <div id="rastreioBox" style="display:<%= pedido.status === 'enviado' ? 'block' : 'none' %>;">
+            <div class="form-group" style="margin-top:10px;">
+              <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Código de rastreio</label>
+              <input type="text" name="codigo_rastreio" value="<%= pedido.codigo_rastreio || '' %>"
+                     placeholder="Ex: BR123456789BR"
+                     style="width:100%;border:1px solid #d1d5db;border-radius:6px;padding:8px 10px;font-size:14px;box-sizing:border-box;">
+              <span style="font-size:11px;color:#6b7280;">Ao salvar como "Enviado" com código, o comprador recebe email automaticamente.</span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width:100%;margin-top:10px;">Salvar</button>
         </form>
       </div>
+
+      <% if (pedido.codigo_rastreio) { %>
+      <div class="card" style="background:#eff6ff;border:1px solid #bfdbfe;">
+        <h3 style="color:#1d4ed8;">Rastreio</h3>
+        <div style="font-size:20px;font-weight:800;color:#1e3a8a;letter-spacing:.08em;margin-bottom:6px;"><%= pedido.codigo_rastreio %></div>
+        <a href="https://www.correios.com.br/rastreamento" target="_blank" style="font-size:12px;color:#2563eb;">Verificar nos Correios ↗</a>
+      </div>
+      <% } %>
     </div>
   </div>
 </div>
 
 <%- include("../partials/footer") %>
+<script>
+  function toggleRastreio(status) {
+    document.getElementById('rastreioBox').style.display = status === 'enviado' ? 'block' : 'none';
+  }
+</script>
 </body>
 </html>

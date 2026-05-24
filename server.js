@@ -17,8 +17,10 @@ const configRoutes = require('./routes/configRoutes');
 const agendaRoutes = require('./routes/agendaRoutes');
 const categoriaRoutes = require('./routes/categoriaRoutes');
 const aparenciaRoutes = require('./routes/aparenciaRoutes');
+const freteRoutes = require('./routes/freteRoutes');
+const relatorioRoutes = require('./routes/relatorioRoutes');
+const tenantManagementRoutes = require('./routes/tenantManagementRoutes');
 const initializeDatabase = require('./config/init-db');
-
 
 const tenantMiddleware = require('./middlewares/tenant');
 
@@ -80,6 +82,9 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// ── Painel de gestão de tenants (dev only, antes do tenant middleware) ────
+app.use('/_tenants', tenantManagementRoutes);
+
 // ── Identificar tenant e injetar req.db ──────────────────────────────────
 app.use(tenantMiddleware);
 
@@ -138,6 +143,8 @@ app.use('/', configRoutes);
 app.use('/', agendaRoutes);
 app.use('/', categoriaRoutes);
 app.use('/', aparenciaRoutes);
+app.use('/', freteRoutes);
+app.use('/', relatorioRoutes);
 
 // ── 404 ───────────────────────────────────────────────────────────────────
 app.use((req, res) => {

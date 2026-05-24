@@ -232,6 +232,40 @@ exports.atualizar = async (req, res) => {
 
 
 // ======================
+// AJUSTE RÁPIDO DE ESTOQUE
+// ======================
+exports.atualizarEstoque = async (req, res) => {
+  const { id } = req.params;
+  const { estoque, observacao } = req.body;
+  try {
+    const estoqueAnteriorRes = await req.db.query('SELECT estoque FROM produtos WHERE id = $1', [id]);
+    const estoqueAnterior = estoqueAnteriorRes.rows[0]?.estoque ?? null;
+    const estoqueNovo = estoque === '' || estoque === null || estoque === undefined
+      ? null
+      : Math.max(0, parseInt(estoque));
+
+    await req.db.query(
+      'UPDATE produtos SET estoque = $1, updated_at = NOW() WHERE id = $2',
+      [estoqueNovo, id]
+    );
+
+    if (estoqueNovo !== null) {
+      const diff = estoqueAnterior !== null ? estoqueNovo - estoqueAnterior : estoqueNovo;
+      const tipo = diff >= 0 ? 'ajuste' : 'saida';
+      await req.db.query(
+        'INSERT INTO movimentacoes_estoque (produto_id, tipo, quantidade, origem, observacao) VALUES ($1,$2,$3,$4,$5)',
+        [id, tipo, Math.abs(diff), 'admin_ajuste', observacao || 'Ajuste manual']
+      ).catch(() => {});
+    }
+
+    res.redirect('/admin/produtos');
+  } catch (err) {
+    console.error('Erro ao atualizar estoque:', err);
+    res.redirect('/admin/produtos');
+  }
+};
+
+// ======================
 // EXCLUIR PRODUTO
 // ======================
 exports.excluir = async (req, res) => {

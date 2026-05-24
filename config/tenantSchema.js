@@ -211,6 +211,8 @@ async function initializeTenant(pool, adminEmail, adminSenha, adminNome = 'Admin
   // Módulo Agenda (buffet / eventos)
   await pool.query(`
     ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS data_evento DATE;
+    ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS codigo_rastreio VARCHAR(100);
+    ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS frete_servico VARCHAR(100);
 
     CREATE TABLE IF NOT EXISTS agenda_config (
       id INTEGER PRIMARY KEY DEFAULT 1 CHECK (id = 1),
@@ -268,6 +270,15 @@ async function initializeTenant(pool, adminEmail, adminSenha, adminNome = 'Admin
       ('reservar_estoque_carrinho', 'false'),
       ('modulo_agenda', 'false'),
       ('habilitar_sumup', 'false'),
+      ('frete_cep_origem', ''),
+      ('frete_fixo', '0'),
+      ('frete_gratis_acima', '0'),
+      ('melhor_envio_token', ''),
+      ('melhor_envio_sandbox', 'true'),
+      ('frete_peso_padrao', '300'),
+      ('frete_altura', '4'),
+      ('frete_largura', '12'),
+      ('frete_comprimento', '17'),
       ('loja_nome', 'Lojão'),
       ('loja_slogan', ''),
       ('loja_logo', ''),

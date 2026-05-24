@@ -2,8 +2,28 @@ const stripeService = require('../services/stripeService');
 const sumup = require('../services/sumupService');
 const { getConfigs } = require('./configController');
 const { getAgendaConfig, getDisponibilidade } = require('./agendaController');
+const { enviarNotificacaoPedidoPago, enviarEmailRastreio } = require('../services/emailService');
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
+
+async function getLojaInfo(db) {
+  const r = await db.query("SELECT chave, valor FROM configuracoes WHERE chave IN ('loja_nome','loja_email')").catch(() => ({ rows: [] }));
+  const cfg = {};
+  r.rows.forEach(row => { cfg[row.chave] = row.valor; });
+  return { nome: cfg.loja_nome || 'Lojão', email: cfg.loja_email || '' };
+}
+
+async function notificarPedidoPago(db, pedidoId, itens) {
+  try {
+    const loja = await getLojaInfo(db);
+    if (!loja.email) return;
+    const pedidoRes = await db.query('SELECT * FROM pedidos WHERE id = $1', [pedidoId]);
+    if (!pedidoRes.rows[0]) return;
+    await enviarNotificacaoPedidoPago({ lojaNome: loja.nome, lojaEmail: loja.email, pedido: pedidoRes.rows[0], itens });
+  } catch (err) {
+    console.error('[Email] Falha ao notificar pedido pago:', err.message);
+  }
+}
 
 async function getItensCarrinho(db, usuarioId) {
   const r = await db.query(`
@@ -95,20 +115,21 @@ exports.processarCheckout = async (req, res) => {
     }
 
     const subtotal = itens.reduce((s, i) => s + parseFloat(i.subtotal), 0);
-    const frete = 0;
+    const frete = Math.max(0, parseFloat(req.body.frete_valor) || 0);
+    const frete_servico = (req.body.frete_servico || '').slice(0, 100);
     const total = subtotal + frete;
 
     const pedidoRes = await db.query(`
       INSERT INTO pedidos
         (usuario_id, nome_entrega, email_entrega, telefone_entrega, cpf_entrega,
          cep, logradouro, numero, complemento, bairro, cidade, estado,
-         subtotal, frete, total, status, metodo_pagamento)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,'aguardando_pagamento',$16)
+         subtotal, frete, frete_servico, total, status, metodo_pagamento)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,'aguardando_pagamento',$17)
       RETURNING id
     `, [
       usuarioId, nome_entrega, email_entrega, telefone_entrega, cpf_entrega,
       cep, logradouro, numero, complemento, bairro, cidade, estado,
-      subtotal, frete, total, metodo_pagamento
+      subtotal, frete, frete_servico, total, metodo_pagamento
     ]);
 
     const pedidoId = pedidoRes.rows[0].id;
@@ -209,6 +230,7 @@ exports.processarCheckout = async (req, res) => {
 
       await db.query('DELETE FROM carrinho_itens WHERE usuario_id = $1', [usuarioId]);
       await db.query('COMMIT');
+      notificarPedidoPago(db, pedidoId, itens);
       return res.redirect(`/checkout/resultado/${pedidoId}`);
 
     } else {
@@ -239,6 +261,8 @@ exports.processarCheckout = async (req, res) => {
 
     await db.query('DELETE FROM carrinho_itens WHERE usuario_id = $1', [usuarioId]);
     await db.query('COMMIT');
+
+    if (statusInterno === 'pago') notificarPedidoPago(db, pedidoId, itens);
 
     res.redirect(`/checkout/resultado/${pedidoId}`);
 
@@ -367,10 +391,10 @@ exports.adminPedidos = async (req, res) => {
       ORDER BY p.created_at DESC
       LIMIT 100
     `);
-    res.render('pages/admin-pedidos', { pedidos: r.rows });
+    res.render('pages/admin-pedidos', { pedidos: r.rows, activePage: 'pedidos' });
   } catch (err) {
     console.error('Erro ao listar pedidos admin:', err);
-    res.render('pages/admin-pedidos', { pedidos: [] });
+    res.render('pages/admin-pedidos', { pedidos: [], activePage: 'pedidos' });
   }
 };
 
@@ -397,12 +421,31 @@ exports.adminDetalhePedido = async (req, res) => {
 };
 
 exports.adminAtualizarStatus = async (req, res) => {
-  const { status } = req.body;
+  const { status, codigo_rastreio } = req.body;
+  const pedidoId = req.params.id;
   const statusValidos = ['aguardando_pagamento', 'pago', 'em_separacao', 'enviado', 'entregue', 'cancelado'];
   if (!statusValidos.includes(status)) return res.redirect('/admin/pedidos');
 
-  await req.db.query('UPDATE pedidos SET status = $1, updated_at = NOW() WHERE id = $2', [status, req.params.id]);
-  res.redirect(`/admin/pedidos/${req.params.id}`);
+  const rastreio = codigo_rastreio?.trim() || null;
+
+  await req.db.query(
+    'UPDATE pedidos SET status = $1, codigo_rastreio = COALESCE($2, codigo_rastreio), updated_at = NOW() WHERE id = $3',
+    [status, rastreio, pedidoId]
+  );
+
+  if (status === 'enviado' && rastreio) {
+    try {
+      const loja = await getLojaInfo(req.db);
+      const pedidoRes = await req.db.query('SELECT * FROM pedidos WHERE id = $1', [pedidoId]);
+      if (pedidoRes.rows[0]) {
+        await enviarEmailRastreio({ lojaNome: loja.nome, lojaEmail: loja.email, pedido: pedidoRes.rows[0], codigoRastreio: rastreio });
+      }
+    } catch (err) {
+      console.error('[Email] Falha ao enviar rastreio:', err.message);
+    }
+  }
+
+  res.redirect(`/admin/pedidos/${pedidoId}`);
 };
 
 // ── SumUp: webhook ────────────────────────────────────────────────────────────
