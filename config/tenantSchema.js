@@ -52,6 +52,19 @@ async function initializeTenant(pool, adminEmail, adminSenha, adminNome = 'Admin
     CREATE INDEX IF NOT EXISTS idx_tokens_usuario ON tokens_recuperacao(usuario_id);
   `);
 
+  // Categorias
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS categorias (
+      id SERIAL PRIMARY KEY,
+      nome VARCHAR(255) NOT NULL,
+      ordem INTEGER DEFAULT 0,
+      ativo BOOLEAN DEFAULT true,
+      created_at TIMESTAMP DEFAULT NOW(),
+      updated_at TIMESTAMP DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_categorias_ordem ON categorias(ordem ASC);
+  `);
+
   // Produtos
   await pool.query(`
     CREATE TABLE IF NOT EXISTS produtos (
@@ -61,6 +74,7 @@ async function initializeTenant(pool, adminEmail, adminSenha, adminNome = 'Admin
       valor NUMERIC(10,2) NOT NULL DEFAULT 0,
       descricao TEXT,
       estoque INTEGER DEFAULT NULL,
+      categoria_id INTEGER REFERENCES categorias(id) ON DELETE SET NULL,
       created_at TIMESTAMP DEFAULT NOW(),
       updated_at TIMESTAMP DEFAULT NOW()
     );
@@ -253,7 +267,15 @@ async function initializeTenant(pool, adminEmail, adminSenha, adminNome = 'Admin
       ('controla_estoque', 'false'),
       ('reservar_estoque_carrinho', 'false'),
       ('modulo_agenda', 'false'),
-      ('habilitar_sumup', 'false')
+      ('habilitar_sumup', 'false'),
+      ('loja_nome', 'Lojão'),
+      ('loja_slogan', ''),
+      ('loja_logo', ''),
+      ('loja_favicon', ''),
+      ('loja_cor_primaria', '#2563eb'),
+      ('loja_rodape', ''),
+      ('loja_email', ''),
+      ('loja_whatsapp', '')
     ON CONFLICT (chave) DO NOTHING;
   `);
 

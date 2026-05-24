@@ -1,37 +1,45 @@
 <footer class="footer">
+  <div class="footer-container">
 
-    <div class="footer-container">
-
-        <div class="footer-col">
-            <h3>Lojão</h3>
-            <p>
-                Loja virtual criada com Node.js.
-                Produtos de qualidade com entrega rápida.
-            </p>
-        </div>
-
-        <div class="footer-col">
-            <h4>Links</h4>
-
-            <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/admin/produtos">Admin</a></li>
-            </ul>
-        </div>
-
-        <div class="footer-col">
-            <h4>Contato</h4>
-
-            <ul>
-                <li>Email: contato@lojao.com</li>
-                <li>Whatsapp: (85) 99999-9999</li>
-            </ul>
-        </div>
-
+    <div class="footer-col">
+      <% if (locals.loja?.logo) { %>
+        <img src="<%= locals.loja.logo %>" alt="<%= locals.loja.nome %>"
+             style="height:36px;object-fit:contain;margin-bottom:10px;display:block;">
+      <% } else { %>
+        <h3><%= locals.loja?.nome || 'Lojão' %></h3>
+      <% } %>
+      <% if (locals.loja?.slogan) { %>
+        <p><%= locals.loja.slogan %></p>
+      <% } else { %>
+        <p>Produtos de qualidade com entrega rápida.</p>
+      <% } %>
     </div>
 
-    <div class="footer-bottom">
-        © <%= new Date().getFullYear() %> Lojão - Todos os direitos reservados
+    <div class="footer-col">
+      <h4>Links</h4>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/meus-pedidos">Meus pedidos</a></li>
+      </ul>
     </div>
 
+    <% if (locals.loja?.email || locals.loja?.whatsapp) { %>
+    <div class="footer-col">
+      <h4>Contato</h4>
+      <ul>
+        <% if (locals.loja.email) { %><li>Email: <%= locals.loja.email %></li><% } %>
+        <% if (locals.loja.whatsapp) { %><li>WhatsApp: <%= locals.loja.whatsapp %></li><% } %>
+      </ul>
+    </div>
+    <% } %>
+
+  </div>
+
+  <div class="footer-bottom">
+    <% if (locals.loja?.rodape) { %>
+      <%= locals.loja.rodape %>
+    <% } else { %>
+      © <%= new Date().getFullYear() %> <%= locals.loja?.nome || 'Lojão' %> — Todos os direitos reservados
+    <% } %>
+  </div>
 </footer>

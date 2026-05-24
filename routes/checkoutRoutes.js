@@ -8,7 +8,7 @@ router.post('/checkout', requireAuth, checkout.processarCheckout);
 router.get('/checkout/resultado/:id', requireAuth, checkout.exibirResultado);
 router.get('/meus-pedidos', requireAuth, checkout.meusPedidos);
 
-router.post('/webhook/mercadopago', checkout.webhook);
+router.post('/webhook/stripe', checkout.webhookStripe);
 router.post('/webhook/sumup', checkout.webhookSumup);
 
 router.get('/admin/pedidos', requireAdmin, checkout.adminPedidos);

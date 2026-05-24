@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Checkout - Lojão</title>
   <link rel="stylesheet" href="/css/style.css">
+  <script src="https://js.stripe.com/v3/"></script>
   <style>
     .checkout-grid {
       display: grid;
@@ -150,9 +151,7 @@
 
   <form id="checkoutForm" method="POST" action="/checkout">
     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-    <input type="hidden" name="mp_token" id="mp_token">
-    <input type="hidden" name="mp_installments" id="mp_installments" value="1">
-    <input type="hidden" name="mp_payment_method_id" id="mp_payment_method_id">
+    <input type="hidden" name="stripe_payment_method_id" id="stripe_payment_method_id">
 
     <div class="checkout-grid">
 
@@ -346,10 +345,6 @@
                 <label class="form-label">Nome no cartão</label>
                 <input type="text" id="cardholderName" placeholder="Como aparece no cartão" style="text-transform:uppercase;">
               </div>
-              <div id="installments-select" class="form-group">
-                <label class="form-label">Parcelas</label>
-                <select id="installments"></select>
-              </div>
             </div>
           </div>
 
@@ -427,7 +422,7 @@
           </button>
 
           <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:14px;font-size:12px;color:#9ca3af;">
-            🔒 Pagamento 100% seguro via Mercado Pago
+            🔒 Pagamento 100% seguro via Stripe
           </div>
         </div>
       </div>
@@ -438,11 +433,11 @@
 
 <%- include("../partials/footer") %>
 
-<script src="https://sdk.mercadopago.com/js/v2"></script>
 <script>
 (function() {
-  var mpPublicKey = '<%= mpPublicKey || "" %>';
-  var mp, cardFields;
+  var stripePublicKey = '<%= stripePublicKey || "" %>';
+  var stripeObj, stripeElements, cardNumberEl, cardExpiryEl, cardCvcEl;
+  var cardMounted = false;
   var metodoAtual = 'pix';
 
   // ── Seleção de método ───────────────────────────────────────────────────
@@ -464,7 +459,7 @@
       var p = document.getElementById(paineis[k]);
       if (p) p.classList.toggle('ativo', k === valor);
     });
-    if (valor === 'cartao' && !cardFields) inicializarCartao();
+    if (valor === 'cartao' && !cardMounted) inicializarCartao();
   }
 
   ativarMetodo('pix');
@@ -479,50 +474,29 @@
     });
   });
 
-  // ── SDK Mercado Pago: campos do cartão ─────────────────────────────────
+  // ── Stripe Elements: campos do cartão ──────────────────────────────────
   function inicializarCartao() {
-    if (!mpPublicKey) return;
+    if (!stripePublicKey || cardMounted) return;
     try {
-      mp = new MercadoPago(mpPublicKey, { locale: 'pt-BR' });
-      cardFields = mp.cardForm({
-        amount: '<%= Number(subtotal).toFixed(2) %>',
-        iframe: true,
-        form: {
-          id: 'checkoutForm',
-          cardNumber:      { id: 'cardNumber',      placeholder: '0000 0000 0000 0000' },
-          expirationDate:  { id: 'expirationDate',  placeholder: 'MM/AA' },
-          securityCode:    { id: 'securityCode',    placeholder: '000' },
-          cardholderName:  { id: 'cardholderName',  element: document.getElementById('cardholderName') },
-          installments:    { id: 'installments' },
+      stripeObj = Stripe(stripePublicKey);
+      stripeElements = stripeObj.elements();
+      var style = {
+        base: {
+          fontSize: '15px',
+          color: '#374151',
+          fontFamily: 'Inter, sans-serif',
+          '::placeholder': { color: '#9ca3af' }
         },
-        callbacks: {
-          onFormMounted: function(err) { if (err) console.warn('MP mount error', err); },
-          onSubmit: function(e) {
-            e.preventDefault();
-            // MP intercepta o submit do form inteiro — só processa se for cartão
-            if (metodoAtual !== 'cartao') {
-              document.getElementById('checkoutForm').submit();
-              return;
-            }
-            try {
-              var data = cardFields.getCardFormData();
-              document.getElementById('mp_token').value = data.token || '';
-              document.getElementById('mp_installments').value = data.installments || '1';
-              document.getElementById('mp_payment_method_id').value = data.paymentMethodId || '';
-              document.getElementById('checkoutForm').submit();
-            } catch(err) {
-              console.error('Erro ao tokenizar cartão:', err);
-              setBtnNormal();
-            }
-          },
-          onFetching: function() {
-            setBtnLoading();
-            return setBtnNormal;
-          }
-        }
-      });
-      document.getElementById('installments-select').style.display = 'block';
-    } catch(e) { console.error('MP SDK error', e); }
+        invalid: { color: '#ef4444' }
+      };
+      cardNumberEl = stripeElements.create('cardNumber', { style: style, placeholder: '0000 0000 0000 0000' });
+      cardExpiryEl = stripeElements.create('cardExpiry', { style: style });
+      cardCvcEl    = stripeElements.create('cardCvc',    { style: style });
+      cardNumberEl.mount('#cardNumber');
+      cardExpiryEl.mount('#expirationDate');
+      cardCvcEl.mount('#securityCode');
+      cardMounted = true;
+    } catch(e) { console.error('Stripe init error', e); }
   }
 
   // ── Estado do botão ─────────────────────────────────────────────────────
@@ -537,7 +511,7 @@
     btn.textContent = 'Finalizar pedido →';
   }
 
-  // ── CEP ─────────────────────────────────────────────────────────────────
+  // ── Máscaras ─────────────────────────────────────────────────────────────
   document.getElementById('cepInput').addEventListener('input', function() {
     this.value = this.value.replace(/\D/g,'').replace(/(\d{5})(\d)/,'$1-$2').substring(0,9);
   });
@@ -565,27 +539,44 @@
 
   // ── Submit ──────────────────────────────────────────────────────────────
   document.getElementById('checkoutForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
     <% if (moduloAgenda) { %>
     if (!document.getElementById('data_evento_input').value) {
-      e.preventDefault();
       document.getElementById('card-data-evento').scrollIntoView({ behavior: 'smooth' });
       alert('Selecione a data do evento para continuar.');
       return;
     }
     <% } %>
-    // Para cartão sem MP inicializado, bloqueia
-    if (metodoAtual === 'cartao' && !cardFields) {
-      e.preventDefault();
-      alert('Preencha os dados do cartão.');
+
+    if (metodoAtual === 'cartao') {
+      if (!stripeObj || !cardMounted) {
+        alert('Preencha os dados do cartão.');
+        return;
+      }
+      setBtnLoading();
+      var self = this;
+      stripeObj.createPaymentMethod({
+        type: 'card',
+        card: cardNumberEl,
+        billing_details: { name: document.getElementById('cardholderName').value }
+      }).then(function(result) {
+        if (result.error) {
+          setBtnNormal();
+          alert(result.error.message);
+          return;
+        }
+        document.getElementById('stripe_payment_method_id').value = result.paymentMethod.id;
+        self.submit();
+      }).catch(function(err) {
+        setBtnNormal();
+        console.error('Stripe error:', err);
+      });
       return;
     }
-    // Para cartão com MP: o onSubmit do cardForm cuida do envio
-    if (metodoAtual === 'cartao' && cardFields) {
-      e.preventDefault();
-      return;
-    }
-    // PIX, Boleto, SumUp: feedback visual e deixa submeter normalmente
+
     setBtnLoading();
+    this.submit();
   });
 })();
 </script>

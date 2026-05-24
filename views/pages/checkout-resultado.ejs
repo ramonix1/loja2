@@ -114,8 +114,8 @@
         <div class="pix-box">
           <h3>⚡ Pague com PIX agora</h3>
           <p style="font-size:13px;color:#166534;margin-bottom:4px;">Escaneie o QR Code ou copie o código abaixo</p>
-          <% if (pixInfo.qr_code_base64) { %>
-            <img src="data:image/png;base64,<%= pixInfo.qr_code_base64 %>" alt="QR Code PIX" class="pix-qr">
+          <% if (pixInfo.qr_code_url) { %>
+            <img src="<%= pixInfo.qr_code_url %>" alt="QR Code PIX" class="pix-qr">
           <% } %>
           <div class="pix-copia-cola" id="pixCode"><%= pixInfo.qr_code %></div>
           <button class="btn-copy" onclick="copiarPix()">📋 Copiar código</button>

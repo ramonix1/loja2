@@ -15,6 +15,8 @@ const carrinhoRoutes = require('./routes/carrinhoRoutes');
 const checkoutRoutes = require('./routes/checkoutRoutes');
 const configRoutes = require('./routes/configRoutes');
 const agendaRoutes = require('./routes/agendaRoutes');
+const categoriaRoutes = require('./routes/categoriaRoutes');
+const aparenciaRoutes = require('./routes/aparenciaRoutes');
 const initializeDatabase = require('./config/init-db');
 
 
@@ -30,12 +32,13 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      connectSrc: ["'self'", 'https://viacep.com.br', 'https://api.mercadopago.com'],
+      connectSrc: ["'self'", 'https://viacep.com.br', 'https://api.stripe.com', 'https://hooks.stripe.com'],
       styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdn.tailwindcss.com'],
       fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-      imgSrc: ["'self'", 'data:', 'blob:', 'https://placehold.co'],
-      scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.tailwindcss.com', 'https://sdk.mercadopago.com'],
+      imgSrc: ["'self'", 'data:', 'blob:', 'https://placehold.co', 'https://*.stripe.com'],
+      scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.tailwindcss.com', 'https://js.stripe.com'],
       scriptSrcAttr: ["'unsafe-inline'"],
+      frameSrc: ["'self'", 'https://js.stripe.com', 'https://hooks.stripe.com'],
     },
   },
 }));
@@ -94,9 +97,31 @@ app.use((req, res, next) => {
   next();
 });
 
+// ── Identidade visual da loja (injetada em todas as views) ────────────────
+app.use(async (req, res, next) => {
+  const defaults = { nome: 'Lojão', slogan: '', logo: '', favicon: '', cor_primaria: '#2563eb', rodape: '', email: '', whatsapp: '' };
+  if (!req.db) { res.locals.loja = defaults; return next(); }
+  try {
+    const r = await req.db.query("SELECT chave, valor FROM configuracoes WHERE chave LIKE 'loja_%'");
+    const cfg = {};
+    r.rows.forEach(row => { cfg[row.chave] = row.valor; });
+    res.locals.loja = {
+      nome:          cfg.loja_nome          || 'Lojão',
+      slogan:        cfg.loja_slogan        || '',
+      logo:          cfg.loja_logo          || '',
+      favicon:       cfg.loja_favicon       || '',
+      cor_primaria:  cfg.loja_cor_primaria  || '#2563eb',
+      rodape:        cfg.loja_rodape        || '',
+      email:         cfg.loja_email         || '',
+      whatsapp:      cfg.loja_whatsapp      || '',
+    };
+  } catch { res.locals.loja = defaults; }
+  next();
+});
+
 // ── CSRF: valida em POST/PUT/DELETE (exceto webhooks externos) ────────────
 app.use((req, res, next) => {
-  if (req.path === '/webhook/mercadopago' || req.path === '/webhook/sumup') return next();
+  if (req.path === '/webhook/stripe' || req.path === '/webhook/sumup') return next();
   csrfSynchronisedProtection(req, res, next);
 });
 
@@ -111,6 +136,8 @@ app.use('/', carrinhoRoutes);
 app.use('/', checkoutRoutes);
 app.use('/', configRoutes);
 app.use('/', agendaRoutes);
+app.use('/', categoriaRoutes);
+app.use('/', aparenciaRoutes);
 
 // ── 404 ───────────────────────────────────────────────────────────────────
 app.use((req, res) => {

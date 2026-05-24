@@ -1,4 +1,4 @@
-const mp = require('../services/mercadoPagoService');
+const stripeService = require('../services/stripeService');
 const sumup = require('../services/sumupService');
 const { getConfigs } = require('./configController');
 const { getAgendaConfig, getDisponibilidade } = require('./agendaController');
@@ -46,7 +46,7 @@ exports.exibirCheckout = async (req, res) => {
       usuario,
       itens,
       subtotal,
-      mpPublicKey: process.env.MP_PUBLIC_KEY || '',
+      stripePublicKey: process.env.STRIPE_PUBLIC_KEY || '',
       moduloAgenda,
       agendaConfig,
       sumupHabilitado,
@@ -67,7 +67,7 @@ exports.processarCheckout = async (req, res) => {
     nome_entrega, email_entrega, telefone_entrega, cpf_entrega,
     cep, logradouro, numero, complemento, bairro, cidade, estado,
     metodo_pagamento, data_evento,
-    mp_token, mp_installments, mp_payment_method_id
+    stripe_payment_method_id
   } = req.body;
 
   console.log(`[Checkout] POST recebido — método: ${metodo_pagamento}, usuário: ${usuarioId}`);
@@ -146,7 +146,7 @@ exports.processarCheckout = async (req, res) => {
       }
     }
 
-    let mpResult;
+    let stripeResult;
     const dadosPagador = {
       pedidoId,
       valor: total,
@@ -157,15 +157,19 @@ exports.processarCheckout = async (req, res) => {
     };
 
     if (metodo_pagamento === 'pix') {
-      mpResult = await mp.criarPagamentoPix(dadosPagador);
+      stripeResult = await stripeService.criarPagamentoPix(dadosPagador);
     } else if (metodo_pagamento === 'boleto') {
-      mpResult = await mp.criarBoleto({ ...dadosPagador, cep, logradouro, numero, bairro, cidade, estado });
+      stripeResult = await stripeService.criarBoleto({
+        ...dadosPagador, cep, logradouro, numero, bairro, cidade, estado
+      });
     } else if (metodo_pagamento === 'cartao') {
-      mpResult = await mp.criarPagamentoCartao({
+      if (!stripe_payment_method_id) {
+        await db.query('ROLLBACK');
+        return res.redirect('/checkout?erro=metodo_invalido');
+      }
+      stripeResult = await stripeService.criarPagamentoCartao({
         ...dadosPagador,
-        token: mp_token,
-        parcelas: parseInt(mp_installments) || 1,
-        metodoPagamento: mp_payment_method_id
+        paymentMethodId: stripe_payment_method_id
       });
 
     } else if (metodo_pagamento === 'sumup_online') {
@@ -212,18 +216,26 @@ exports.processarCheckout = async (req, res) => {
       return res.redirect('/checkout?erro=metodo_invalido');
     }
 
-    const statusInterno = mp.mapearStatus(mpResult.status);
+    const statusInterno = stripeService.mapearStatus(stripeResult.status);
 
     await db.query(`
       INSERT INTO pagamentos
         (pedido_id, mp_payment_id, status, status_mp, valor, metodo, resposta_json)
       VALUES ($1, $2, $3, $4, $5, $6, $7)
-    `, [pedidoId, String(mpResult.id), statusInterno, mpResult.status, total, metodo_pagamento, JSON.stringify(mpResult)]);
+    `, [pedidoId, stripeResult.id, statusInterno, stripeResult.status, total, metodo_pagamento, JSON.stringify(stripeResult)]);
 
     await db.query(
       "UPDATE pedidos SET status = $1, mp_payment_id = $2 WHERE id = $3",
-      [statusInterno === 'pago' ? 'pago' : 'aguardando_pagamento', String(mpResult.id), pedidoId]
+      [statusInterno === 'pago' ? 'pago' : 'aguardando_pagamento', stripeResult.id, pedidoId]
     );
+
+    // Cartão com 3DS: redireciona para página de autenticação do Stripe
+    if (metodo_pagamento === 'cartao' && stripeResult.status === 'requires_action' &&
+        stripeResult.next_action?.type === 'redirect_to_url') {
+      await db.query('DELETE FROM carrinho_itens WHERE usuario_id = $1', [usuarioId]);
+      await db.query('COMMIT');
+      return res.redirect(stripeResult.next_action.redirect_to_url.url);
+    }
 
     await db.query('DELETE FROM carrinho_itens WHERE usuario_id = $1', [usuarioId]);
     await db.query('COMMIT');
@@ -266,13 +278,14 @@ exports.exibirResultado = async (req, res) => {
     if (pagamento) {
       const resp = JSON.parse(pagamento.resposta_json || '{}');
       if (pedido.metodo_pagamento === 'pix') {
+        const pix = resp.next_action?.pix_display_qr_code;
         pixInfo = {
-          qr_code: resp.point_of_interaction?.transaction_data?.qr_code,
-          qr_code_base64: resp.point_of_interaction?.transaction_data?.qr_code_base64,
-          expiracao: resp.date_of_expiration
+          qr_code: pix?.data,
+          qr_code_url: pix?.image_url_png,
+          expiracao: pix?.expires_at ? new Date(pix.expires_at * 1000) : null,
         };
       } else if (pedido.metodo_pagamento === 'boleto') {
-        boletoUrl = resp.transaction_details?.external_resource_url;
+        boletoUrl = resp.next_action?.boleto_display_details?.hosted_voucher_url;
       }
     }
 
@@ -303,34 +316,39 @@ exports.meusPedidos = async (req, res) => {
   }
 };
 
-// ── POST /webhook/mercadopago ─────────────────────────────────────────────────
+// ── POST /webhook/stripe ──────────────────────────────────────────────────────
 
-exports.webhook = async (req, res) => {
+exports.webhookStripe = async (req, res) => {
   try {
-    const { type, data } = req.body;
+    const event = req.body;
 
-    if (type === 'payment' && data?.id) {
-      const mpData = await mp.consultarPagamento(data.id);
-      const statusInterno = mp.mapearStatus(mpData.status);
-      const pedidoId = mpData.external_reference;
-
-      if (pedidoId) {
+    if (event.type === 'payment_intent.succeeded') {
+      const pi = event.data?.object;
+      if (pi?.id) {
         await req.db.query(
-          'UPDATE pagamentos SET status = $1, status_mp = $2 WHERE mp_payment_id = $3',
-          [statusInterno, mpData.status, String(data.id)]
+          "UPDATE pagamentos SET status = 'pago', status_mp = $1 WHERE mp_payment_id = $2",
+          [pi.status, pi.id]
         );
-
-        const novoStatus = statusInterno === 'pago' ? 'pago'
-          : statusInterno === 'rejeitado' ? 'cancelado'
-          : 'aguardando_pagamento';
-
-        await req.db.query('UPDATE pedidos SET status = $1 WHERE id = $2', [novoStatus, pedidoId]);
+        const r = await req.db.query(
+          "SELECT pedido_id FROM pagamentos WHERE mp_payment_id = $1 LIMIT 1", [pi.id]
+        );
+        if (r.rows[0]) {
+          await req.db.query("UPDATE pedidos SET status = 'pago' WHERE id = $1", [r.rows[0].pedido_id]);
+        }
+      }
+    } else if (event.type === 'payment_intent.payment_failed') {
+      const pi = event.data?.object;
+      if (pi?.id) {
+        await req.db.query(
+          "UPDATE pagamentos SET status = 'rejeitado', status_mp = $1 WHERE mp_payment_id = $2",
+          [pi.status, pi.id]
+        );
       }
     }
 
     res.sendStatus(200);
   } catch (err) {
-    console.error('Erro no webhook MP:', err);
+    console.error('Erro no webhook Stripe:', err);
     res.sendStatus(200);
   }
 };

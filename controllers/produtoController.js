@@ -7,40 +7,55 @@ const { getConfigs } = require('./configController');
 // ======================
 exports.home = async (req, res) => {
   try {
-    const [produtosRes, configs] = await Promise.all([
+    const [categoriasRes, produtosSemCatRes, configs] = await Promise.all([
+      req.db.query(`
+        SELECT c.id AS cat_id, c.nome AS cat_nome, c.ordem AS cat_ordem,
+               p.id, p.nome, p.subtitulo, p.valor, p.estoque, p.created_at,
+               (SELECT pi.url FROM produtos_imagens pi WHERE pi.produto_id = p.id ORDER BY pi.id ASC LIMIT 1) AS primeira_imagem
+        FROM categorias c
+        JOIN produtos p ON p.categoria_id = c.id
+        WHERE c.ativo = true
+        ORDER BY c.ordem ASC, c.nome ASC, p.created_at DESC
+      `).catch(() => ({ rows: [] })),
       req.db.query(`
         SELECT p.*,
-          (SELECT pi.url FROM produtos_imagens pi
-           WHERE pi.produto_id = p.id ORDER BY pi.id ASC LIMIT 1) AS primeira_imagem
+               (SELECT pi.url FROM produtos_imagens pi WHERE pi.produto_id = p.id ORDER BY pi.id ASC LIMIT 1) AS primeira_imagem
         FROM produtos p
+        WHERE p.categoria_id IS NULL
         ORDER BY p.created_at DESC
       `),
       getConfigs(req.db),
     ]);
 
+    // Agrupar produtos por categoria
+    const categoriaMap = new Map();
+    for (const row of categoriasRes.rows) {
+      if (!categoriaMap.has(row.cat_id)) {
+        categoriaMap.set(row.cat_id, { id: row.cat_id, nome: row.cat_nome, ordem: row.cat_ordem, produtos: [] });
+      }
+      categoriaMap.get(row.cat_id).produtos.push(row);
+    }
+    const categorias = [...categoriaMap.values()];
+    const produtosSemCategoria = produtosSemCatRes.rows;
+    const produtos = [...categoriasRes.rows, ...produtosSemCategoria];
+
     let clientes = [];
     try {
-      const clientesQuery = await req.db.query(
+      clientes = (await req.db.query(
         "SELECT * FROM clientes WHERE ativo = true ORDER BY ordem ASC, nome ASC"
-      );
-      clientes = clientesQuery.rows;
-    } catch (err) {
-      console.warn("Aviso: tabela de clientes não encontrada");
-    }
+      )).rows;
+    } catch {}
 
     let banners = [];
     try {
-      const bannersQuery = await req.db.query(
+      banners = (await req.db.query(
         `SELECT b.*, p.id AS prod_id FROM banners b
          LEFT JOIN produtos p ON p.id = b.produto_id
          WHERE b.ativo = true ORDER BY b.ordem ASC, b.created_at ASC`
-      );
-      banners = bannersQuery.rows;
-    } catch (err) {
-      console.warn("Aviso: tabela de banners não encontrada");
-    }
+      )).rows;
+    } catch {}
 
-    res.render("pages/index", { produtos: produtosRes.rows, clientes, banners, configs });
+    res.render("pages/index", { produtos, categorias, produtosSemCategoria, clientes, banners, configs });
   } catch (error) {
     console.error("Erro ao carregar home:", error);
     res.status(500).render("pages/error", { message: "Erro ao carregar produtos" });
@@ -53,16 +68,32 @@ exports.home = async (req, res) => {
 // ======================
 exports.dashboard = async (req, res) => {
   try {
-    const result = await req.db.query("SELECT COUNT(*) FROM produtos");
-    const totalProdutos = parseInt(result.rows[0].count);
+    const [
+      prodRes, bannerRes, catRes, pedidosRes, receitaRes, pedidosRecentesRes
+    ] = await Promise.allSettled([
+      req.db.query("SELECT COUNT(*) FROM produtos"),
+      req.db.query("SELECT COUNT(*) FROM banners WHERE ativo = true"),
+      req.db.query("SELECT COUNT(*) FROM categorias"),
+      req.db.query("SELECT COUNT(*) FROM pedidos"),
+      req.db.query("SELECT COALESCE(SUM(total),0) AS total FROM pedidos WHERE status = 'pago'"),
+      req.db.query(`
+        SELECT p.id, p.status, p.total, p.created_at, p.metodo_pagamento,
+               u.nome AS cliente_nome
+        FROM pedidos p
+        JOIN usuarios u ON u.id = p.usuario_id
+        ORDER BY p.created_at DESC LIMIT 5
+      `),
+    ]);
 
-    let totalBanners = 0;
-    try {
-      const bResult = await req.db.query("SELECT COUNT(*) FROM banners WHERE ativo = true");
-      totalBanners = parseInt(bResult.rows[0].count);
-    } catch {}
-
-    res.render("pages/admin-dashboard", { totalProdutos, totalBanners, activePage: 'dashboard' });
+    res.render("pages/admin-dashboard", {
+      totalProdutos:   prodRes.status === 'fulfilled'   ? parseInt(prodRes.value.rows[0].count)    : 0,
+      totalBanners:    bannerRes.status === 'fulfilled'  ? parseInt(bannerRes.value.rows[0].count)  : 0,
+      totalCategorias: catRes.status === 'fulfilled'     ? parseInt(catRes.value.rows[0].count)     : 0,
+      totalPedidos:    pedidosRes.status === 'fulfilled' ? parseInt(pedidosRes.value.rows[0].count) : 0,
+      receitaTotal:    receitaRes.status === 'fulfilled' ? parseFloat(receitaRes.value.rows[0].total) : 0,
+      pedidosRecentes: pedidosRecentesRes.status === 'fulfilled' ? pedidosRecentesRes.value.rows : [],
+      activePage: 'dashboard',
+    });
   } catch (error) {
     console.error("Erro dashboard:", error);
     res.status(500).render("pages/error", { message: "Erro ao carregar painel" });
