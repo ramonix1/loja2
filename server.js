@@ -154,6 +154,33 @@ app.use((req, res, next) => {
 // ── Rotas de autenticação (públicas) ──────────────────────────────────────
 app.use('/', authRoutes);
 
+// ── Painel de Faturamento do Cliente ──────────────────────────────────────
+app.get('/dashboard/billing', async (req, res) => {
+  try {
+    if (!req.session.usuarioId) {
+      return res.redirect('/login');
+    }
+
+    const BillingService = require('./services/billingService');
+    const tenantId = req.session.tenant_id;
+
+    // Buscar dados de billing
+    const [billing, invoices] = await Promise.all([
+      BillingService.getBillingReport(tenantId).catch(() => ({})),
+      BillingService.listInvoices(tenantId).catch(() => [])
+    ]);
+
+    res.render('pages/cliente-billing', {
+      billing,
+      invoices,
+      usuario: req.session.usuarioId ? { id: req.session.usuarioId, nome: req.session.nome } : null
+    });
+  } catch (err) {
+    console.error('Erro ao carregar painel de billing:', err);
+    res.status(500).render('pages/error', { message: 'Erro ao carregar dados de faturamento' });
+  }
+});
+
 // ── Rotas protegidas ──────────────────────────────────────────────────────
 app.use('/', produtoRoutes);
 app.use('/', clienteRoutes);
