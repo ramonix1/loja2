@@ -9,7 +9,11 @@
     "test": "jest --coverage",
     "test:watch": "jest --watch",
     "test:unit": "jest tests/unit",
-    "test:integration": "jest tests/integration"
+    "test:integration": "jest tests/integration",
+    "migrate:billing": "node scripts/migrations-billing.js up",
+    "migrate:billing:down": "node scripts/migrations-billing.js down",
+    "seed:billing": "node scripts/seed-billing.js",
+    "invoices:generate": "node scripts/generate-invoices.js"
   },
   "keywords": [],
   "author": "",

@@ -4,6 +4,7 @@ const { getConfigs } = require('./configController');
 const { getAgendaConfig, getDisponibilidade } = require('./agendaController');
 const { enviarNotificacaoPedidoPago, enviarEmailRastreio } = require('../services/emailService');
 const { validateCheckoutData } = require('../middlewares/validation');
+const BillingService = require('../services/billingService');
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
