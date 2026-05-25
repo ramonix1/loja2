@@ -46,14 +46,14 @@ async function seed() {
     for (const plan of plans) {
       await db.query(`
         INSERT INTO billing_plans (name, slug, description, price, billing_type, commission_percentage, features)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        VALUES ($1, $2, $3, $4, $5, $6, $7::text[])
         ON CONFLICT (slug) DO UPDATE SET
           name = $1,
           description = $3,
           price = $4,
           billing_type = $5,
           commission_percentage = $6,
-          features = $7,
+          features = $7::text[],
           updated_at = NOW()
       `, [
         plan.name,
@@ -62,7 +62,7 @@ async function seed() {
         plan.price,
         plan.billing_type,
         plan.commission_percentage,
-        JSON.stringify(plan.features)
+        plan.features
       ]);
       console.log(`  ✅ ${plan.name}`);
     }

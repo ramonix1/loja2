@@ -22,7 +22,7 @@ const migrations = [
       -- Tabela de configuração de billing por tenant
       CREATE TABLE IF NOT EXISTS tenant_billing (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+        tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
         plan_id UUID NOT NULL REFERENCES billing_plans(id),
         billing_type VARCHAR(50) NOT NULL,  -- 'fixed', 'revenue_share'
         monthly_fee DECIMAL(10, 2),
@@ -38,7 +38,7 @@ const migrations = [
       -- Tabela de faturas/invoices
       CREATE TABLE IF NOT EXISTS invoices (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+        tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
         invoice_number VARCHAR(50) UNIQUE NOT NULL,
         month_year VARCHAR(7) NOT NULL,  -- '2026-05'
         billing_type VARCHAR(50) NOT NULL,
@@ -69,7 +69,7 @@ const migrations = [
       -- Tabela de transações de comissão
       CREATE TABLE IF NOT EXISTS commission_transactions (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+        tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
         invoice_id UUID REFERENCES invoices(id),
         pedido_id UUID,  -- referência ao pedido que gerou a comissão
 

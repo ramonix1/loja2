@@ -20,6 +20,7 @@ const aparenciaRoutes = require('./routes/aparenciaRoutes');
 const freteRoutes = require('./routes/freteRoutes');
 const relatorioRoutes = require('./routes/relatorioRoutes');
 const tenantManagementRoutes = require('./routes/tenantManagementRoutes');
+const billingRoutes = require('./routes/billingRoutes');
 const initializeDatabase = require('./config/init-db');
 
 const tenantMiddleware = require('./middlewares/tenant');
@@ -101,6 +102,9 @@ app.use(express.json());
 
 // ── Painel de gestão de tenants (dev only, antes do tenant middleware) ────
 app.use('/_tenants', tenantManagementRoutes);
+
+// ── Rotas de Billing (Super Admin + APIs) ────────────────────────────────
+app.use('/', billingRoutes);
 
 // ── Identificar tenant e injetar req.db ──────────────────────────────────
 app.use(tenantMiddleware);
