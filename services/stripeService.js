@@ -1,8 +1,12 @@
 const Stripe = require('stripe');
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) throw new Error('STRIPE_SECRET_KEY não configurado');
+  return Stripe(process.env.STRIPE_SECRET_KEY);
+}
 
 async function criarPagamentoPix({ pedidoId, valor, descricao }) {
-  return stripe.paymentIntents.create({
+  return getStripe().paymentIntents.create({
     amount: Math.round(parseFloat(valor) * 100),
     currency: 'brl',
     payment_method_types: ['pix'],
@@ -15,7 +19,7 @@ async function criarPagamentoPix({ pedidoId, valor, descricao }) {
 }
 
 async function criarPagamentoCartao({ pedidoId, valor, paymentMethodId, descricao }) {
-  return stripe.paymentIntents.create({
+  return getStripe().paymentIntents.create({
     amount: Math.round(parseFloat(valor) * 100),
     currency: 'brl',
     payment_method_types: ['card'],
@@ -28,7 +32,7 @@ async function criarPagamentoCartao({ pedidoId, valor, paymentMethodId, descrica
 }
 
 async function criarBoleto({ pedidoId, valor, nome, email, cpf, cep, logradouro, numero, cidade, estado, descricao }) {
-  return stripe.paymentIntents.create({
+  return getStripe().paymentIntents.create({
     amount: Math.round(parseFloat(valor) * 100),
     currency: 'brl',
     payment_method_types: ['boleto'],
@@ -54,7 +58,7 @@ async function criarBoleto({ pedidoId, valor, nome, email, cpf, cep, logradouro,
 }
 
 async function consultarPagamento(paymentIntentId) {
-  return stripe.paymentIntents.retrieve(paymentIntentId);
+  return getStripe().paymentIntents.retrieve(paymentIntentId);
 }
 
 function mapearStatus(stripeStatus) {
