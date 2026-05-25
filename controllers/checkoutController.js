@@ -3,6 +3,7 @@ const sumup = require('../services/sumupService');
 const { getConfigs } = require('./configController');
 const { getAgendaConfig, getDisponibilidade } = require('./agendaController');
 const { enviarNotificacaoPedidoPago, enviarEmailRastreio } = require('../services/emailService');
+const { validateCheckoutData } = require('../middlewares/validation');
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -87,8 +88,23 @@ exports.processarCheckout = async (req, res) => {
     nome_entrega, email_entrega, telefone_entrega, cpf_entrega,
     cep, logradouro, numero, complemento, bairro, cidade, estado,
     metodo_pagamento, data_evento,
-    stripe_payment_method_id
+    stripe_payment_method_id, frete_valor, frete_servico
   } = req.body;
+
+  // Validar todos os dados de entrada
+  const errosValidacao = validateCheckoutData(req.body);
+  if (errosValidacao.length > 0) {
+    await db.query('ROLLBACK').catch(() => {});
+    console.warn('Validação de checkout falhou:', errosValidacao);
+    return res.redirect(`/checkout?erro=dados_invalidos`);
+  }
+
+  // Validar frete
+  const freteNum = frete_valor ? parseFloat(frete_valor) : NaN;
+  if (isNaN(freteNum) || freteNum < 0) {
+    await db.query('ROLLBACK').catch(() => {});
+    return res.redirect('/checkout?erro=frete_invalido');
+  }
 
   console.log(`[Checkout] POST recebido — método: ${metodo_pagamento}, usuário: ${usuarioId}`);
 
@@ -115,8 +131,8 @@ exports.processarCheckout = async (req, res) => {
     }
 
     const subtotal = itens.reduce((s, i) => s + parseFloat(i.subtotal), 0);
-    const frete = Math.max(0, parseFloat(req.body.frete_valor) || 0);
-    const frete_servico = (req.body.frete_servico || '').slice(0, 100);
+    const frete = Math.max(0, freteNum);
+    const frete_servico_limpo = (frete_servico || '').slice(0, 100);
     const total = subtotal + frete;
 
     const pedidoRes = await db.query(`
@@ -129,7 +145,7 @@ exports.processarCheckout = async (req, res) => {
     `, [
       usuarioId, nome_entrega, email_entrega, telefone_entrega, cpf_entrega,
       cep, logradouro, numero, complemento, bairro, cidade, estado,
-      subtotal, frete, frete_servico, total, metodo_pagamento
+      subtotal, frete, frete_servico_limpo, total, metodo_pagamento
     ]);
 
     const pedidoId = pedidoRes.rows[0].id;
@@ -151,9 +167,15 @@ exports.processarCheckout = async (req, res) => {
     }
 
     // Debitar estoque dos produtos (se controle ativo)
-    const cfgEstoqueRes = await db.query(
-      "SELECT valor FROM configuracoes WHERE chave = 'controla_estoque'"
-    ).catch(() => ({ rows: [] }));
+    let cfgEstoqueRes;
+    try {
+      cfgEstoqueRes = await db.query(
+        "SELECT valor FROM configuracoes WHERE chave = 'controla_estoque'"
+      );
+    } catch (err) {
+      console.warn('⚠️ Erro ao verificar controle de estoque:', err.message);
+      cfgEstoqueRes = { rows: [] };
+    }
     if (cfgEstoqueRes.rows[0]?.valor === 'true') {
       for (const item of itens) {
         await db.query(
@@ -267,7 +289,11 @@ exports.processarCheckout = async (req, res) => {
     res.redirect(`/checkout/resultado/${pedidoId}`);
 
   } catch (err) {
-    await db.query('ROLLBACK').catch(() => {});
+    try {
+      await db.query('ROLLBACK');
+    } catch (rollbackErr) {
+      console.error('⚠️ Erro ao fazer ROLLBACK:', rollbackErr.message);
+    }
     console.error('\n━━━ ERRO NO CHECKOUT ━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.error('Mensagem:', err.message);
     if (err.cause) console.error('Causa:', err.cause);

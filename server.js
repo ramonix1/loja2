@@ -43,7 +43,24 @@ app.use(helmet({
       frameSrc: ["'self'", 'https://js.stripe.com', 'https://hooks.stripe.com'],
     },
   },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true,
+  },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  noSniff: true,
+  xssFilter: true,
 }));
+
+// ── Proteção adicional contra ataques ──────────────────────────────────────
+app.disable('x-powered-by');
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  next();
+});
 
 // ── Sessão — armazenada no banco MASTER (compartilhado entre tenants) ─────
 app.use(session({

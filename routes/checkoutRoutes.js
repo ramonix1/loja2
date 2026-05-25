@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const checkout = require('../controllers/checkoutController');
 const { requireAuth, requireAdmin } = require('../middlewares/auth');
+const { checkoutLimiter } = require('../middlewares/rateLimiter');
 
 router.get('/checkout', requireAuth, checkout.exibirCheckout);
-router.post('/checkout', requireAuth, checkout.processarCheckout);
+router.post('/checkout', requireAuth, checkoutLimiter, checkout.processarCheckout);
 router.get('/checkout/resultado/:id', requireAuth, checkout.exibirResultado);
 router.get('/meus-pedidos', requireAuth, checkout.meusPedidos);
 

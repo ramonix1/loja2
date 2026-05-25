@@ -17,4 +17,21 @@ const recuperacaoLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-module.exports = { loginLimiter, recuperacaoLimiter };
+const checkoutLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 10,
+  message: { erro: 'Muitas solicitações. Aguarde antes de tentar novamente.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: false,
+});
+
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 100,
+  message: { erro: 'Limite de requisições excedido.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+module.exports = { loginLimiter, recuperacaoLimiter, checkoutLimiter, apiLimiter };

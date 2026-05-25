@@ -5,7 +5,11 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "test:unit": "jest tests/unit",
+    "test:integration": "jest tests/integration"
   },
   "keywords": [],
   "author": "",
@@ -31,6 +35,8 @@
     "twilio": "^6.0.2"
   },
   "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
     "tailwindcss": "^4.3.0"
   }
 }

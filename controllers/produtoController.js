@@ -252,10 +252,14 @@ exports.atualizarEstoque = async (req, res) => {
     if (estoqueNovo !== null) {
       const diff = estoqueAnterior !== null ? estoqueNovo - estoqueAnterior : estoqueNovo;
       const tipo = diff >= 0 ? 'ajuste' : 'saida';
-      await req.db.query(
-        'INSERT INTO movimentacoes_estoque (produto_id, tipo, quantidade, origem, observacao) VALUES ($1,$2,$3,$4,$5)',
-        [id, tipo, Math.abs(diff), 'admin_ajuste', observacao || 'Ajuste manual']
-      ).catch(() => {});
+      try {
+        await req.db.query(
+          'INSERT INTO movimentacoes_estoque (produto_id, tipo, quantidade, origem, observacao) VALUES ($1,$2,$3,$4,$5)',
+          [id, tipo, Math.abs(diff), 'admin_ajuste', observacao || 'Ajuste manual']
+        );
+      } catch (logErr) {
+        console.error('⚠️ Falha ao registrar movimentação de estoque:', logErr.message);
+      }
     }
 
     res.redirect('/admin/produtos');

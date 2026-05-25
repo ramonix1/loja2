@@ -1,5 +1,14 @@
 const { getConfigs } = require('./configController');
 
+// Validação segura de filtros de estoque
+const FILTROS_ESTOQUE_VALIDOS = {
+  todos: '',
+  esgotado: 'WHERE p.estoque = 0',
+  baixo: 'WHERE p.estoque > 0 AND p.estoque <= 5',
+  ok: 'WHERE p.estoque > 5',
+  ilimitado: 'WHERE p.estoque IS NULL',
+};
+
 const STATUS_LABEL = {
   aguardando_pagamento: 'Aguardando pagamento',
   pago: 'Pago',
@@ -224,11 +233,11 @@ async function getDadosVendas(db, dataInicio, dataFim) {
 }
 
 async function getDadosEstoque(db, filtro) {
-  let condicao = '';
-  if (filtro === 'esgotado')   condicao = 'WHERE p.estoque = 0';
-  if (filtro === 'baixo')      condicao = 'WHERE p.estoque > 0 AND p.estoque <= 5';
-  if (filtro === 'ok')         condicao = 'WHERE p.estoque > 5';
-  if (filtro === 'ilimitado')  condicao = 'WHERE p.estoque IS NULL';
+  // Whitelist validation — rejeita valores não esperados
+  const condicao = FILTROS_ESTOQUE_VALIDOS[filtro] || FILTROS_ESTOQUE_VALIDOS['todos'];
+  if (!FILTROS_ESTOQUE_VALIDOS.hasOwnProperty(filtro)) {
+    console.warn(`⚠️ Filtro de estoque inválido recebido: ${filtro}`);
+  }
 
   const [produtosRes, resumoRes] = await Promise.all([
     db.query(`
