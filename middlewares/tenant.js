@@ -41,6 +41,7 @@ async function tenantMiddleware(req, res, next) {
     next();
   } catch (err) {
     console.error(`[Tenant] Erro ao conectar tenant "${slug}":`, err.message);
+    if (!res.locals.loja) res.locals.loja = { nome: 'Lojão', slogan: '', logo: '', favicon: '', cor_primaria: '#2563eb', rodape: '', email: '', whatsapp: '' };
     res.status(404).render('pages/error', { message: 'Loja não encontrada.' });
   }
 }

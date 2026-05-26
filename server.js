@@ -196,11 +196,14 @@ app.use('/', relatorioRoutes);
 
 // ── 404 ───────────────────────────────────────────────────────────────────
 app.use((req, res) => {
+  if (!res.locals.loja) res.locals.loja = { nome: 'Lojão', slogan: '', logo: '', favicon: '', cor_primaria: '#2563eb', rodape: '', email: '', whatsapp: '' };
   res.status(404).render('pages/error', { message: 'Página não encontrada' });
 });
 
 // ── Error handler ─────────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
+  if (res.headersSent) return res.end();
+  if (!res.locals.loja) res.locals.loja = { nome: 'Lojão', slogan: '', logo: '', favicon: '', cor_primaria: '#2563eb', rodape: '', email: '', whatsapp: '' };
   if (err.code === 'EBADCSRFTOKEN' || err.status === 403) {
     return res.status(403).render('pages/error', { message: 'Token de segurança inválido. Recarregue a página.' });
   }
