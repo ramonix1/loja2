@@ -29,7 +29,6 @@ async function initializeDatabase() {
 
     console.log('✅ Banco master inicializado (tenants + sessao)');
 
-    // Auto-provisiona tenant quando TENANT_SLUG + DATABASE_URL estão definidos (ex: Render)
     await autoProvisionarTenant();
   } catch (err) {
     console.error('⚠️  Erro ao inicializar banco master:', err.message);
@@ -39,10 +38,33 @@ async function initializeDatabase() {
 async function autoProvisionarTenant() {
   const slug = process.env.TENANT_SLUG;
   const dbUrl = process.env.DATABASE_URL;
-  if (!slug || !dbUrl) return;
+
+  console.log(`[AutoProvision] TENANT_SLUG=${slug || '(não definido)'}`);
+  console.log(`[AutoProvision] DATABASE_URL=${dbUrl ? 'definida' : '(não definida)'}`);
+
+  if (!slug || !dbUrl) {
+    console.log('[AutoProvision] Variáveis ausentes, pulando.');
+    return;
+  }
 
   const existe = await masterDb.query('SELECT id FROM tenants WHERE slug = $1', [slug]);
-  if (existe.rows.length > 0) return;
+  if (existe.rows.length > 0) {
+    console.log(`[AutoProvision] Tenant "${slug}" já existe (id=${existe.rows[0].id}), verificando tabelas...`);
+    // Mesmo existindo, garante que as tabelas estão criadas
+    try {
+      const { getPool } = require('./tenantDb');
+      const { initializeTenant } = require('./tenantSchema');
+      const pool = await getPool(slug);
+      const adminEmail = process.env.ADMIN_EMAIL || 'admin@loja.com';
+      const adminSenha = process.env.ADMIN_SENHA || 'admin123';
+      const adminNome  = process.env.ADMIN_NOME  || 'Administrador';
+      await initializeTenant(pool, adminEmail, adminSenha, adminNome);
+      console.log(`[AutoProvision] Tabelas do tenant "${slug}" verificadas/criadas.`);
+    } catch (err) {
+      console.error(`[AutoProvision] Erro ao verificar tabelas do tenant "${slug}":`, err.message);
+    }
+    return;
+  }
 
   let host, port, nome_db, user, password;
   try {
@@ -52,27 +74,36 @@ async function autoProvisionarTenant() {
     nome_db  = url.pathname.replace(/^\//, '');
     user     = url.username;
     password = decodeURIComponent(url.password);
-  } catch {
-    console.error('⚠️  DATABASE_URL inválida para auto-provisionar tenant');
+    console.log(`[AutoProvision] Parsed → host=${host} port=${port} db=${nome_db} user=${user}`);
+  } catch (err) {
+    console.error('[AutoProvision] Falha ao parsear DATABASE_URL:', err.message);
     return;
   }
 
-  await masterDb.query(
-    `INSERT INTO tenants (slug, nome, db_host, db_port, db_name, db_user, db_password)
-     VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-    [slug, slug, host, port, nome_db, user, password]
-  );
-  console.log(`✅ Tenant "${slug}" registrado automaticamente`);
+  try {
+    await masterDb.query(
+      `INSERT INTO tenants (slug, nome, db_host, db_port, db_name, db_user, db_password)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [slug, slug, host, port, nome_db, user, password]
+    );
+    console.log(`✅ Tenant "${slug}" registrado automaticamente`);
+  } catch (err) {
+    console.error(`[AutoProvision] Erro ao inserir tenant "${slug}":`, err.message);
+    return;
+  }
 
-  // Inicializa as tabelas do tenant
-  const { getPool } = require('./tenantDb');
-  const { initializeTenant } = require('./tenantSchema');
-  const adminEmail = process.env.ADMIN_EMAIL || 'admin@loja.com';
-  const adminSenha = process.env.ADMIN_SENHA || 'admin123';
-  const adminNome  = process.env.ADMIN_NOME  || 'Administrador';
-  const pool = await getPool(slug);
-  await initializeTenant(pool, adminEmail, adminSenha, adminNome);
-  console.log(`✅ Banco do tenant "${slug}" inicializado (admin: ${adminEmail})`);
+  try {
+    const { getPool } = require('./tenantDb');
+    const { initializeTenant } = require('./tenantSchema');
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@loja.com';
+    const adminSenha = process.env.ADMIN_SENHA || 'admin123';
+    const adminNome  = process.env.ADMIN_NOME  || 'Administrador';
+    const pool = await getPool(slug);
+    await initializeTenant(pool, adminEmail, adminSenha, adminNome);
+    console.log(`✅ Banco do tenant "${slug}" inicializado (admin: ${adminEmail})`);
+  } catch (err) {
+    console.error(`[AutoProvision] Erro ao inicializar tabelas do tenant "${slug}":`, err.message);
+  }
 }
 
 module.exports = initializeDatabase;
