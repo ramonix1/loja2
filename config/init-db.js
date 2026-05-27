@@ -2,7 +2,6 @@ const masterDb = require('./masterDb');
 
 async function initializeDatabase() {
   try {
-    // Tabela de tenants (catálogo de clientes)
     await masterDb.query(`
       CREATE TABLE IF NOT EXISTS tenants (
         id SERIAL PRIMARY KEY,
@@ -29,9 +28,51 @@ async function initializeDatabase() {
     `);
 
     console.log('✅ Banco master inicializado (tenants + sessao)');
+
+    // Auto-provisiona tenant quando TENANT_SLUG + DATABASE_URL estão definidos (ex: Render)
+    await autoProvisionarTenant();
   } catch (err) {
     console.error('⚠️  Erro ao inicializar banco master:', err.message);
   }
+}
+
+async function autoProvisionarTenant() {
+  const slug = process.env.TENANT_SLUG;
+  const dbUrl = process.env.DATABASE_URL;
+  if (!slug || !dbUrl) return;
+
+  const existe = await masterDb.query('SELECT id FROM tenants WHERE slug = $1', [slug]);
+  if (existe.rows.length > 0) return;
+
+  let host, port, nome_db, user, password;
+  try {
+    const url = new URL(dbUrl);
+    host     = url.hostname;
+    port     = parseInt(url.port) || 5432;
+    nome_db  = url.pathname.replace(/^\//, '');
+    user     = url.username;
+    password = decodeURIComponent(url.password);
+  } catch {
+    console.error('⚠️  DATABASE_URL inválida para auto-provisionar tenant');
+    return;
+  }
+
+  await masterDb.query(
+    `INSERT INTO tenants (slug, nome, db_host, db_port, db_name, db_user, db_password)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+    [slug, slug, host, port, nome_db, user, password]
+  );
+  console.log(`✅ Tenant "${slug}" registrado automaticamente`);
+
+  // Inicializa as tabelas do tenant
+  const { getPool } = require('./tenantDb');
+  const { initializeTenant } = require('./tenantSchema');
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@loja.com';
+  const adminSenha = process.env.ADMIN_SENHA || 'admin123';
+  const adminNome  = process.env.ADMIN_NOME  || 'Administrador';
+  const pool = await getPool(slug);
+  await initializeTenant(pool, adminEmail, adminSenha, adminNome);
+  console.log(`✅ Banco do tenant "${slug}" inicializado (admin: ${adminEmail})`);
 }
 
 module.exports = initializeDatabase;
