@@ -23,6 +23,7 @@ const relatorioRoutes = require('./routes/relatorioRoutes');
 const tenantManagementRoutes = require('./routes/tenantManagementRoutes');
 const billingRoutes = require('./routes/billingRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const compradorRoutes = require('./routes/compradorRoutes');
 const initializeDatabase = require('./config/init-db');
 const socketio = require('./config/socketio');
 
@@ -198,6 +199,7 @@ app.use('/', aparenciaRoutes);
 app.use('/', freteRoutes);
 app.use('/', relatorioRoutes);
 app.use('/', chatRoutes);
+app.use('/', compradorRoutes);
 
 // ── 404 ───────────────────────────────────────────────────────────────────
 app.use((req, res) => {
