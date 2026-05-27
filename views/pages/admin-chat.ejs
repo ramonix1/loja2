@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat - Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    #mensagens-lista { scroll-behavior: smooth; }
+    .msg-cliente { background: #1e3a5f; }
+    .msg-bot     { background: #1a3a2a; }
+    .msg-admin   { background: #3b1f5e; }
+  </style>
+</head>
+<body class="bg-gray-950 min-h-screen text-white">
+<div class="flex min-h-screen">
+
+  <%- include('../partials/admin-sidebar') %>
+
+  <main class="ml-60 flex-1 flex flex-col" style="height:100vh;">
+
+    <!-- Header -->
+    <div class="px-8 py-5 border-b border-gray-800 flex items-center justify-between flex-shrink-0">
+      <div>
+        <h1 class="text-2xl font-bold text-white">💬 Chat ao Vivo</h1>
+        <p class="text-gray-400 text-sm mt-0.5">Atenda seus clientes em tempo real</p>
+      </div>
+      <button id="btn-bot-config" class="text-sm bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition">
+        ⚙️ Configurar Bot
+      </button>
+    </div>
+
+    <!-- Layout 3 colunas -->
+    <div class="flex flex-1 overflow-hidden">
+
+      <!-- Coluna: Lista de conversas -->
+      <div class="w-72 border-r border-gray-800 flex flex-col flex-shrink-0">
+        <div class="p-3 border-b border-gray-800">
+          <div class="flex gap-2 text-xs">
+            <button data-filtro="abertas" class="filtro-btn px-3 py-1.5 rounded-lg bg-blue-600 text-white font-medium">Abertas</button>
+            <button data-filtro="todas" class="filtro-btn px-3 py-1.5 rounded-lg bg-gray-800 text-gray-400 hover:text-white transition">Todas</button>
+            <button data-filtro="encerradas" class="filtro-btn px-3 py-1.5 rounded-lg bg-gray-800 text-gray-400 hover:text-white transition">Encerradas</button>
+          </div>
+        </div>
+        <div id="lista-conversas" class="flex-1 overflow-y-auto">
+          <div class="p-4 text-center text-gray-600 text-sm">Carregando...</div>
+        </div>
+      </div>
+
+      <!-- Coluna: Chat ativo -->
+      <div class="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <!-- Estado vazio -->
+        <div id="chat-vazio" class="flex-1 flex items-center justify-center text-center">
+          <div>
+            <div class="text-5xl mb-3">💬</div>
+            <p class="text-gray-400 font-medium">Selecione uma conversa</p>
+            <p class="text-gray-600 text-sm mt-1">Clique em uma conversa à esquerda para visualizar</p>
+          </div>
+        </div>
+
+        <!-- Chat ativo (hidden por padrão) -->
+        <div id="chat-ativo" class="flex-1 flex flex-col hidden overflow-hidden">
+          <!-- Header da conversa -->
+          <div class="px-5 py-3 border-b border-gray-800 flex items-center justify-between flex-shrink-0">
+            <div>
+              <div id="chat-nome" class="font-semibold text-white"></div>
+              <div id="chat-status-badge" class="text-xs mt-0.5"></div>
+            </div>
+            <div class="flex gap-2">
+              <button id="btn-assumir" class="text-xs bg-yellow-600 hover:bg-yellow-500 px-3 py-1.5 rounded-lg transition hidden">
+                👤 Assumir conversa
+              </button>
+              <button id="btn-liberar-bot" class="text-xs bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded-lg transition hidden">
+                🤖 Ativar bot
+              </button>
+              <button id="btn-encerrar" class="text-xs bg-red-700 hover:bg-red-600 px-3 py-1.5 rounded-lg transition">
+                ✕ Encerrar
+              </button>
+            </div>
+          </div>
+
+          <!-- Mensagens -->
+          <div id="mensagens-lista" class="flex-1 overflow-y-auto p-5 space-y-3">
+          </div>
+
+          <!-- Input de resposta -->
+          <div class="p-4 border-t border-gray-800 flex-shrink-0">
+            <div class="flex gap-3">
+              <input id="input-admin" type="text" placeholder="Digite sua resposta..."
+                class="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500">
+              <button id="btn-enviar-admin"
+                class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition">
+                Enviar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Modal: Configuração do Bot -->
+<div id="modal-bot" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+    <div class="p-6 border-b border-gray-800 flex justify-between items-center">
+      <div>
+        <h2 class="text-lg font-bold">🤖 Configuração do Bot</h2>
+        <p class="text-xs text-gray-400 mt-0.5">Separe múltiplas palavras-chave por vírgula (ex: preço, valor, quanto custa)</p>
+      </div>
+      <button id="fechar-modal-bot" class="text-gray-500 hover:text-white text-xl">✕</button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-6">
+      <div id="lista-bot-respostas" class="space-y-3 mb-6">
+        <% if (botRespostas.length === 0) { %>
+          <p class="text-gray-500 text-sm text-center py-4">Nenhuma resposta configurada ainda.</p>
+        <% } else { %>
+          <% botRespostas.forEach(r => { %>
+            <div class="bot-item bg-gray-800 rounded-xl p-4" data-id="<%= r.id %>">
+              <div class="flex justify-between items-start gap-3">
+                <div class="flex-1">
+                  <div class="text-xs text-blue-400 font-medium mb-1">Palavras-chave:</div>
+                  <div class="text-sm text-gray-200 mb-2 bot-kw"><%= r.palavra_chave %></div>
+                  <div class="text-xs text-green-400 font-medium mb-1">Resposta:</div>
+                  <div class="text-sm text-gray-300 bot-resp"><%= r.resposta %></div>
+                </div>
+                <div class="flex gap-2 flex-shrink-0">
+                  <button class="btn-edit-bot text-xs bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded transition">Editar</button>
+                  <button class="btn-del-bot text-xs bg-red-900 hover:bg-red-700 px-2 py-1 rounded transition">Excluir</button>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        <% } %>
+      </div>
+
+      <!-- Formulário novo/editar -->
+      <div class="bg-gray-800 rounded-xl p-4">
+        <h3 id="form-bot-titulo" class="text-sm font-semibold mb-3">+ Nova resposta automática</h3>
+        <input type="hidden" id="bot-edit-id" value="">
+        <div class="space-y-3">
+          <div>
+            <label class="text-xs text-gray-400 block mb-1">Palavras-chave (separadas por vírgula)</label>
+            <input id="bot-kw-input" type="text" placeholder="ex: preço, valor, quanto custa"
+              class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500">
+          </div>
+          <div>
+            <label class="text-xs text-gray-400 block mb-1">Resposta do bot</label>
+            <textarea id="bot-resp-input" rows="3" placeholder="Digite a resposta automática..."
+              class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"></textarea>
+          </div>
+          <div class="flex gap-2">
+            <button id="btn-salvar-bot" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-medium transition">Salvar</button>
+            <button id="btn-cancelar-bot" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg text-sm transition hidden">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const csrfToken = '<%= locals.csrfToken %>';
+const socket = io();
+let conversaAtiva = null;
+let conversas = [];
+let filtroAtual = 'abertas';
+
+// ── Socket.IO ────────────────────────────────────────────────────────────
+socket.on('connect', () => {
+  socket.emit('admin:entrar');
+});
+
+socket.on('admin:nova_conversa', (conversa) => {
+  conversas.unshift(conversa);
+  renderizarLista();
+});
+
+socket.on('admin:nova_mensagem', ({ conversa_id, mensagem }) => {
+  // Atualiza contador se não for a conversa ativa
+  if (conversaAtiva?.id !== conversa_id) {
+    const c = conversas.find(c => c.id === conversa_id);
+    if (c) {
+      c.nao_lidas = (parseInt(c.nao_lidas) || 0) + (mensagem.remetente === 'cliente' ? 1 : 0);
+      renderizarLista();
+    }
+  } else if (conversaAtiva?.id === conversa_id) {
+    adicionarMensagem(mensagem);
+  }
+});
+
+socket.on('admin:conversa_atualizada', ({ conversa_id, bot_ativo, status }) => {
+  const c = conversas.find(c => c.id === conversa_id);
+  if (c) {
+    if (bot_ativo !== undefined) c.bot_ativo = bot_ativo;
+    if (status) c.status = status;
+    renderizarLista();
+  }
+  if (conversaAtiva?.id === conversa_id) {
+    if (bot_ativo !== undefined) conversaAtiva.bot_ativo = bot_ativo;
+    if (status) conversaAtiva.status = status;
+    atualizarHeaderConversa();
+    if (status === 'encerrada') desativarInput();
+  }
+});
+
+// ── Carregar conversas ───────────────────────────────────────────────────
+async function carregarConversas() {
+  const r = await fetch('/admin/chat/api/conversas');
+  conversas = await r.json();
+  renderizarLista();
+}
+
+function renderizarLista() {
+  const lista = document.getElementById('lista-conversas');
+  const filtradas = conversas.filter(c => {
+    if (filtroAtual === 'abertas') return c.status === 'aberta';
+    if (filtroAtual === 'encerradas') return c.status === 'encerrada';
+    return true;
+  });
+
+  if (filtradas.length === 0) {
+    lista.innerHTML = '<div class="p-4 text-center text-gray-600 text-sm">Nenhuma conversa</div>';
+    return;
+  }
+
+  lista.innerHTML = filtradas.map(c => {
+    const naoLidas = parseInt(c.nao_lidas) || 0;
+    const ativa = conversaAtiva?.id === c.id;
+    const tempoAgo = tempoRelativo(c.updated_at);
+    return `
+      <div onclick="abrirConversa(${c.id})"
+           class="p-4 border-b border-gray-800 cursor-pointer transition ${ativa ? 'bg-gray-800' : 'hover:bg-gray-900'}">
+        <div class="flex justify-between items-start">
+          <div class="font-medium text-sm text-white truncate flex-1">${escHtml(c.nome_visitante)}</div>
+          <div class="flex items-center gap-1.5 ml-2 flex-shrink-0">
+            ${naoLidas > 0 ? `<span class="bg-blue-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">${naoLidas}</span>` : ''}
+            <span class="text-xs text-gray-500">${tempoAgo}</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 mt-1">
+          <span class="text-xs px-1.5 py-0.5 rounded ${c.status === 'encerrada' ? 'bg-gray-700 text-gray-400' : c.bot_ativo ? 'bg-green-900 text-green-400' : 'bg-yellow-900 text-yellow-400'}">
+            ${c.status === 'encerrada' ? 'Encerrada' : c.bot_ativo ? '🤖 Bot' : '👤 Humano'}
+          </span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── Abrir conversa ───────────────────────────────────────────────────────
+async function abrirConversa(id) {
+  const conversa = conversas.find(c => c.id === id);
+  if (!conversa) return;
+
+  if (conversaAtiva?.id !== id) {
+    socket.emit('conversa:entrar', id);
+  }
+
+  conversaAtiva = conversa;
+  renderizarLista();
+
+  document.getElementById('chat-vazio').classList.add('hidden');
+  document.getElementById('chat-ativo').classList.remove('hidden');
+
+  atualizarHeaderConversa();
+
+  const r = await fetch(`/admin/chat/api/conversa/${id}/mensagens`);
+  const mensagens = await r.json();
+  conversa.nao_lidas = 0;
+  renderizarLista();
+
+  const lista = document.getElementById('mensagens-lista');
+  lista.innerHTML = '';
+  mensagens.forEach(m => adicionarMensagem(m, false));
+  lista.scrollTop = lista.scrollHeight;
+
+  const input = document.getElementById('input-admin');
+  if (conversa.status === 'encerrada') {
+    desativarInput();
+  } else {
+    input.disabled = false;
+    document.getElementById('btn-enviar-admin').disabled = false;
+    input.focus();
+  }
+}
+
+function atualizarHeaderConversa() {
+  if (!conversaAtiva) return;
+  document.getElementById('chat-nome').textContent = conversaAtiva.nome_visitante;
+
+  const badge = document.getElementById('chat-status-badge');
+  const btnAssumir = document.getElementById('btn-assumir');
+  const btnLiberarBot = document.getElementById('btn-liberar-bot');
+  const btnEncerrar = document.getElementById('btn-encerrar');
+
+  if (conversaAtiva.status === 'encerrada') {
+    badge.innerHTML = '<span class="text-gray-500">Conversa encerrada</span>';
+    btnAssumir.classList.add('hidden');
+    btnLiberarBot.classList.add('hidden');
+    btnEncerrar.classList.add('hidden');
+  } else if (conversaAtiva.bot_ativo) {
+    badge.innerHTML = '<span class="text-green-400">🤖 Bot respondendo</span>';
+    btnAssumir.classList.remove('hidden');
+    btnLiberarBot.classList.add('hidden');
+    btnEncerrar.classList.remove('hidden');
+  } else {
+    badge.innerHTML = '<span class="text-yellow-400">👤 Você está respondendo</span>';
+    btnAssumir.classList.add('hidden');
+    btnLiberarBot.classList.remove('hidden');
+    btnEncerrar.classList.remove('hidden');
+  }
+}
+
+function desativarInput() {
+  const input = document.getElementById('input-admin');
+  input.disabled = true;
+  input.placeholder = 'Conversa encerrada';
+  document.getElementById('btn-enviar-admin').disabled = true;
+}
+
+// ── Enviar mensagem admin ────────────────────────────────────────────────
+function enviarMensagemAdmin() {
+  if (!conversaAtiva || conversaAtiva.status === 'encerrada') return;
+  const input = document.getElementById('input-admin');
+  const conteudo = input.value.trim();
+  if (!conteudo) return;
+  socket.emit('conversa:mensagem_admin', { conversa_id: conversaAtiva.id, conteudo });
+  input.value = '';
+}
+
+document.getElementById('btn-enviar-admin').addEventListener('click', enviarMensagemAdmin);
+document.getElementById('input-admin').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviarMensagemAdmin(); }
+});
+
+// ── Assumir / liberar bot / encerrar ────────────────────────────────────
+document.getElementById('btn-assumir').addEventListener('click', () => {
+  if (!conversaAtiva) return;
+  socket.emit('conversa:assumir', conversaAtiva.id);
+  conversaAtiva.bot_ativo = false;
+  atualizarHeaderConversa();
+});
+
+document.getElementById('btn-liberar-bot').addEventListener('click', () => {
+  if (!conversaAtiva) return;
+  socket.emit('conversa:liberar_bot', conversaAtiva.id);
+  conversaAtiva.bot_ativo = true;
+  atualizarHeaderConversa();
+});
+
+document.getElementById('btn-encerrar').addEventListener('click', () => {
+  if (!conversaAtiva) return;
+  if (!confirm('Encerrar esta conversa?')) return;
+  socket.emit('conversa:encerrar', conversaAtiva.id);
+});
+
+// ── Adicionar mensagem na tela ───────────────────────────────────────────
+function adicionarMensagem(msg, scroll = true) {
+  const lista = document.getElementById('mensagens-lista');
+  const div = document.createElement('div');
+  const isCliente = msg.remetente === 'cliente';
+  const isBot = msg.remetente === 'bot';
+  const isAdmin = msg.remetente === 'admin';
+
+  div.className = `flex ${isAdmin ? 'justify-end' : 'justify-start'}`;
+  div.innerHTML = `
+    <div class="max-w-xs lg:max-w-md">
+      <div class="text-xs text-gray-500 mb-1 ${isAdmin ? 'text-right' : ''}">
+        ${isCliente ? '👤 Cliente' : isBot ? '🤖 Bot' : '👨‍💼 Você'}
+        · ${formatarHora(msg.created_at)}
+      </div>
+      <div class="px-4 py-2.5 rounded-2xl text-sm text-white ${isAdmin ? 'msg-admin rounded-tr-sm' : isBot ? 'msg-bot rounded-tl-sm' : 'msg-cliente rounded-tl-sm'}">
+        ${escHtml(msg.conteudo)}
+      </div>
+    </div>`;
+
+  lista.appendChild(div);
+  if (scroll) lista.scrollTop = lista.scrollHeight;
+}
+
+// ── Filtros ──────────────────────────────────────────────────────────────
+document.querySelectorAll('.filtro-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    filtroAtual = btn.dataset.filtro;
+    document.querySelectorAll('.filtro-btn').forEach(b => {
+      b.className = 'filtro-btn px-3 py-1.5 rounded-lg text-xs font-medium transition ' +
+        (b === btn ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-white');
+    });
+    renderizarLista();
+  });
+});
+
+// ── Modal bot ────────────────────────────────────────────────────────────
+document.getElementById('btn-bot-config').addEventListener('click', () => {
+  document.getElementById('modal-bot').classList.remove('hidden');
+});
+document.getElementById('fechar-modal-bot').addEventListener('click', () => {
+  document.getElementById('modal-bot').classList.add('hidden');
+});
+document.getElementById('modal-bot').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.add('hidden');
+});
+
+// Salvar bot resposta
+document.getElementById('btn-salvar-bot').addEventListener('click', async () => {
+  const id = document.getElementById('bot-edit-id').value;
+  const palavra_chave = document.getElementById('bot-kw-input').value.trim();
+  const resposta = document.getElementById('bot-resp-input').value.trim();
+  if (!palavra_chave || !resposta) return alert('Preencha todos os campos');
+
+  const url = id ? `/admin/chat/api/bot-respostas/${id}` : '/admin/chat/api/bot-respostas';
+  const method = id ? 'PUT' : 'POST';
+
+  const r = await fetch(url, {
+    method,
+    headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrfToken },
+    body: JSON.stringify({ palavra_chave, resposta }),
+  });
+  if (!r.ok) return alert('Erro ao salvar');
+
+  const item = await r.json();
+  if (id) {
+    const el = document.querySelector(`.bot-item[data-id="${id}"]`);
+    if (el) {
+      el.querySelector('.bot-kw').textContent = item.palavra_chave;
+      el.querySelector('.bot-resp').textContent = item.resposta;
+    }
+  } else {
+    const lista = document.getElementById('lista-bot-respostas');
+    const placeholder = lista.querySelector('p');
+    if (placeholder) placeholder.remove();
+    lista.insertAdjacentHTML('beforeend', `
+      <div class="bot-item bg-gray-800 rounded-xl p-4" data-id="${item.id}">
+        <div class="flex justify-between items-start gap-3">
+          <div class="flex-1">
+            <div class="text-xs text-blue-400 font-medium mb-1">Palavras-chave:</div>
+            <div class="text-sm text-gray-200 mb-2 bot-kw">${escHtml(item.palavra_chave)}</div>
+            <div class="text-xs text-green-400 font-medium mb-1">Resposta:</div>
+            <div class="text-sm text-gray-300 bot-resp">${escHtml(item.resposta)}</div>
+          </div>
+          <div class="flex gap-2 flex-shrink-0">
+            <button class="btn-edit-bot text-xs bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded transition">Editar</button>
+            <button class="btn-del-bot text-xs bg-red-900 hover:bg-red-700 px-2 py-1 rounded transition">Excluir</button>
+          </div>
+        </div>
+      </div>`);
+  }
+  limparFormBot();
+});
+
+document.getElementById('btn-cancelar-bot').addEventListener('click', limparFormBot);
+
+function limparFormBot() {
+  document.getElementById('bot-edit-id').value = '';
+  document.getElementById('bot-kw-input').value = '';
+  document.getElementById('bot-resp-input').value = '';
+  document.getElementById('form-bot-titulo').textContent = '+ Nova resposta automática';
+  document.getElementById('btn-cancelar-bot').classList.add('hidden');
+}
+
+// Editar / excluir bot respostas (delegação de eventos)
+document.getElementById('lista-bot-respostas').addEventListener('click', async (e) => {
+  const item = e.target.closest('.bot-item');
+  if (!item) return;
+  const id = item.dataset.id;
+
+  if (e.target.classList.contains('btn-edit-bot')) {
+    document.getElementById('bot-edit-id').value = id;
+    document.getElementById('bot-kw-input').value = item.querySelector('.bot-kw').textContent;
+    document.getElementById('bot-resp-input').value = item.querySelector('.bot-resp').textContent;
+    document.getElementById('form-bot-titulo').textContent = 'Editando resposta';
+    document.getElementById('btn-cancelar-bot').classList.remove('hidden');
+  }
+
+  if (e.target.classList.contains('btn-del-bot')) {
+    if (!confirm('Excluir esta resposta automática?')) return;
+    const r = await fetch(`/admin/chat/api/bot-respostas/${id}`, {
+      method: 'DELETE',
+      headers: { 'x-csrf-token': csrfToken },
+    });
+    if (r.ok) item.remove();
+  }
+});
+
+// ── Utils ────────────────────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function formatarHora(ts) {
+  return new Date(ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+function tempoRelativo(ts) {
+  const diff = Math.floor((Date.now() - new Date(ts)) / 1000);
+  if (diff < 60) return 'agora';
+  if (diff < 3600) return `${Math.floor(diff/60)}min`;
+  if (diff < 86400) return `${Math.floor(diff/3600)}h`;
+  return `${Math.floor(diff/86400)}d`;
+}
+
+carregarConversas();
+</script>
+</body>
+</html>

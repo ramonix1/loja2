@@ -1,5 +1,6 @@
 require('dotenv').config();
 
+const http = require('http');
 const express = require('express');
 const helmet = require('helmet');
 const session = require('express-session');
@@ -21,7 +22,9 @@ const freteRoutes = require('./routes/freteRoutes');
 const relatorioRoutes = require('./routes/relatorioRoutes');
 const tenantManagementRoutes = require('./routes/tenantManagementRoutes');
 const billingRoutes = require('./routes/billingRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 const initializeDatabase = require('./config/init-db');
+const socketio = require('./config/socketio');
 
 const tenantMiddleware = require('./middlewares/tenant');
 
@@ -35,7 +38,7 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      connectSrc: ["'self'", 'https://viacep.com.br', 'https://api.stripe.com', 'https://hooks.stripe.com'],
+      connectSrc: ["'self'", 'ws:', 'wss:', 'https://viacep.com.br', 'https://api.stripe.com', 'https://hooks.stripe.com'],
       styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdn.tailwindcss.com'],
       fontSrc: ["'self'", 'https://fonts.gstatic.com'],
       imgSrc: ["'self'", 'data:', 'blob:', 'https://placehold.co', 'https://*.stripe.com'],
@@ -64,7 +67,7 @@ app.use((req, res, next) => {
 });
 
 // ── Sessão — armazenada no banco MASTER (compartilhado entre tenants) ─────
-app.use(session({
+const sessionMiddleware = session({
   store: new pgSession({
     pool: masterDb,
     tableName: 'sessao',
@@ -80,7 +83,8 @@ app.use(session({
     sameSite: 'lax',
     maxAge: 8 * 60 * 60 * 1000,
   },
-}));
+});
+app.use(sessionMiddleware);
 
 // ── CSRF (Synchronizer Token Pattern) ─────────────────────────────────────
 const { csrfSynchronisedProtection, generateToken } = csrfSync({
@@ -193,6 +197,7 @@ app.use('/', categoriaRoutes);
 app.use('/', aparenciaRoutes);
 app.use('/', freteRoutes);
 app.use('/', relatorioRoutes);
+app.use('/', chatRoutes);
 
 // ── 404 ───────────────────────────────────────────────────────────────────
 app.use((req, res) => {
@@ -212,6 +217,8 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const httpServer = http.createServer(app);
+socketio.init(httpServer, sessionMiddleware);
+httpServer.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });

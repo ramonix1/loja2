@@ -290,6 +290,43 @@ async function initializeTenant(pool, adminEmail, adminSenha, adminNome = 'Admin
     ON CONFLICT (chave) DO NOTHING;
   `);
 
+  // Chat ao vivo
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS conversas (
+      id SERIAL PRIMARY KEY,
+      session_id TEXT NOT NULL,
+      usuario_id INTEGER REFERENCES usuarios(id) ON DELETE SET NULL,
+      nome_visitante VARCHAR(100) DEFAULT 'Visitante',
+      status VARCHAR(20) NOT NULL DEFAULT 'aberta' CHECK (status IN ('aberta', 'encerrada')),
+      bot_ativo BOOLEAN DEFAULT true,
+      created_at TIMESTAMP DEFAULT NOW(),
+      updated_at TIMESTAMP DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_conversas_session ON conversas(session_id);
+    CREATE INDEX IF NOT EXISTS idx_conversas_status  ON conversas(status);
+
+    CREATE TABLE IF NOT EXISTS mensagens (
+      id SERIAL PRIMARY KEY,
+      conversa_id INTEGER NOT NULL REFERENCES conversas(id) ON DELETE CASCADE,
+      remetente VARCHAR(10) NOT NULL CHECK (remetente IN ('cliente', 'bot', 'admin')),
+      conteudo TEXT NOT NULL,
+      lida BOOLEAN DEFAULT false,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_mensagens_conversa ON mensagens(conversa_id);
+
+    CREATE TABLE IF NOT EXISTS bot_respostas (
+      id SERIAL PRIMARY KEY,
+      palavra_chave VARCHAR(200) NOT NULL,
+      resposta TEXT NOT NULL,
+      ordem INTEGER DEFAULT 0,
+      ativo BOOLEAN DEFAULT true,
+      created_at TIMESTAMP DEFAULT NOW(),
+      updated_at TIMESTAMP DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_bot_respostas_ativo ON bot_respostas(ativo);
+  `);
+
   // Admin inicial
   const adminExiste = await pool.query("SELECT id FROM usuarios WHERE role = 'admin' LIMIT 1");
   if (adminExiste.rows.length === 0) {
