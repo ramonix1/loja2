@@ -63,6 +63,8 @@ exports.index = async (req, res) => {
       dados = await getDadosFinanceiro(db, dataInicio, dataFim);
     } else if (aba === 'clientes') {
       dados = await getDadosClientes(db, dataInicio, dataFim);
+    } else if (aba === 'agendamentos') {
+      dados = await getDadosAgendamentos(db, dataInicio, dataFim);
     }
   } catch (err) {
     console.error('[Relatorios] Erro:', err.message);
@@ -164,6 +166,25 @@ exports.exportarCsv = async (req, res) => {
         ...d.topClientes.map(c => [c.nome, c.email, c.total_pedidos, c.total_gasto, fmtDate(c.ultimo_pedido)]),
       ];
       filename = `clientes_${dataInicio.toISOString().slice(0,10)}_${dataFim.toISOString().slice(0,10)}`;
+
+    } else if (tipo === 'agendamentos') {
+      const d = await getDadosAgendamentos(db, dataInicio, dataFim);
+      linhas = [
+        ['Pedido #', 'Cliente', 'E-mail', 'Telefone', 'Data da Compra', 'Data Agendada', 'Produtos', 'Total (R$)', 'Status Agendamento', 'Status Pedido'],
+        ...d.agendamentos.map(a => [
+          a.pedido_id,
+          a.cliente_nome,
+          a.email,
+          a.telefone || '',
+          fmtDate(a.data_compra),
+          fmtDate(a.data_evento + 'T12:00:00'),
+          a.produtos,
+          a.total,
+          a.status_agendamento === 'confirmado' ? 'Confirmado' : 'Cancelado',
+          STATUS_LABEL[a.status_pedido] || a.status_pedido,
+        ]),
+      ];
+      filename = `agendamentos_${dataInicio.toISOString().slice(0,10)}_${dataFim.toISOString().slice(0,10)}`;
     }
 
     const BOM = '﻿';
@@ -409,5 +430,65 @@ async function getDadosClientes(db, dataInicio, dataFim) {
     topClientes: topRes.rows,
     novosPorDia: novosRes.rows,
     totalClientes: totalClientesRes.rows[0]?.total || 0,
+  };
+}
+
+async function getDadosAgendamentos(db, dataInicio, dataFim) {
+  const [agendamentosRes, resumoRes, porMesRes] = await Promise.all([
+    db.query(`
+      SELECT
+        a.id,
+        a.data_evento,
+        a.status AS status_agendamento,
+        a.created_at AS data_agendamento,
+        p.id AS pedido_id,
+        p.created_at AS data_compra,
+        p.total,
+        p.status AS status_pedido,
+        p.nome_entrega AS cliente_nome,
+        p.email_entrega AS email,
+        p.telefone_entrega AS telefone,
+        u.id AS usuario_id,
+        COALESCE(
+          STRING_AGG(pi.nome_produto || ' ×' || pi.quantidade, ', '),
+          ''
+        ) AS produtos
+      FROM agendamentos a
+      JOIN pedidos p ON p.id = a.pedido_id
+      JOIN usuarios u ON u.id = p.usuario_id
+      LEFT JOIN pedido_itens pi ON pi.pedido_id = p.id
+      WHERE a.data_evento BETWEEN $1 AND $2
+      GROUP BY a.id, p.id, u.id
+      ORDER BY a.data_evento ASC
+    `, [dataInicio, dataFim]),
+
+    db.query(`
+      SELECT
+        COUNT(*) AS total,
+        COUNT(*) FILTER (WHERE a.status = 'confirmado') AS confirmados,
+        COUNT(*) FILTER (WHERE a.status = 'cancelado') AS cancelados,
+        COALESCE(SUM(p.total) FILTER (WHERE a.status = 'confirmado'), 0) AS receita_confirmada
+      FROM agendamentos a
+      JOIN pedidos p ON p.id = a.pedido_id
+      WHERE a.data_evento BETWEEN $1 AND $2
+    `, [dataInicio, dataFim]),
+
+    db.query(`
+      SELECT
+        DATE_TRUNC('month', a.data_evento) AS mes,
+        COUNT(*) AS total,
+        COUNT(*) FILTER (WHERE a.status = 'confirmado') AS confirmados,
+        COALESCE(SUM(p.total) FILTER (WHERE a.status = 'confirmado'), 0) AS receita
+      FROM agendamentos a
+      JOIN pedidos p ON p.id = a.pedido_id
+      WHERE a.data_evento >= NOW() - INTERVAL '12 months'
+      GROUP BY mes ORDER BY mes
+    `),
+  ]);
+
+  return {
+    agendamentos: agendamentosRes.rows,
+    resumo: resumoRes.rows[0],
+    porMes: porMesRes.rows,
   };
 }

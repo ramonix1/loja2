@@ -48,7 +48,7 @@
     </div>
 
     <!-- Filtro de datas -->
-    <% if (['vendas','produtos','financeiro','clientes'].includes(aba)) { %>
+    <% if (['vendas','produtos','financeiro','clientes','agendamentos'].includes(aba)) { %>
     <form method="GET" action="/admin/relatorios" class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-4 mb-6 flex flex-wrap gap-3 items-end no-print">
       <input type="hidden" name="aba" value="<%= aba %>">
       <div>
@@ -78,7 +78,8 @@
         { id:'entregas',   icon:'🚚', label:'Entregas' },
         { id:'produtos',   icon:'🏆', label:'Produtos' },
         { id:'financeiro', icon:'💰', label:'Financeiro' },
-        { id:'clientes',   icon:'👥', label:'Clientes' },
+        { id:'clientes',      icon:'👥', label:'Clientes' },
+        { id:'agendamentos',  icon:'📅', label:'Agendamentos' },
       ].forEach(function(a) { %>
         <a href="/admin/relatorios?aba=<%= a.id %>&inicio=<%= dataInicio %>&fim=<%= dataFim %>"
           class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition
@@ -637,6 +638,146 @@
                 </td>
               </tr>
               <% }); %>
+            </tbody>
+          </table>
+        </div>
+        <% } %>
+      </div>
+
+    <% } %>
+
+    <!-- ════════════════════════════════════════════════════════════
+         ABA: AGENDAMENTOS
+    ════════════════════════════════════════════════════════════ -->
+    <% if (aba === 'agendamentos' && !dados.erro) { %>
+
+      <!-- Cards de resumo -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 print-bg">
+          <div class="text-xs text-gray-500 mb-1">Total no período</div>
+          <div class="text-2xl font-bold text-white"><%= dados.resumo.total %></div>
+        </div>
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 print-bg">
+          <div class="text-xs text-gray-500 mb-1">Confirmados</div>
+          <div class="text-2xl font-bold text-green-400"><%= dados.resumo.confirmados %></div>
+        </div>
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 print-bg">
+          <div class="text-xs text-gray-500 mb-1">Cancelados</div>
+          <div class="text-2xl font-bold text-red-400"><%= dados.resumo.cancelados %></div>
+        </div>
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 print-bg">
+          <div class="text-xs text-gray-500 mb-1">Receita confirmada</div>
+          <div class="text-2xl font-bold text-blue-400">
+            R$ <%= Number(dados.resumo.receita_confirmada).toFixed(2).replace('.', ',') %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráfico por mês -->
+      <% if (dados.porMes.length > 0) { %>
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-6 print-bg">
+        <h3 class="text-sm font-semibold text-white mb-4">Agendamentos por Mês (últimos 12 meses)</h3>
+        <% const maxMes = Math.max(...dados.porMes.map(m => m.confirmados), 1); %>
+        <div class="space-y-2">
+          <% dados.porMes.forEach(function(m) { %>
+            <div class="flex items-center gap-3">
+              <div class="text-xs text-gray-400 w-20 flex-shrink-0">
+                <%= new Date(m.mes).toLocaleDateString('pt-BR', {month:'short', year:'2-digit'}) %>
+              </div>
+              <div class="flex-1 bg-gray-800 rounded-full h-5 overflow-hidden">
+                <div class="bar-chart-bar h-full rounded-full bg-blue-600 flex items-center justify-end pr-2"
+                     style="width: <%= Math.max((m.confirmados / maxMes) * 100, 2) %>%">
+                  <span class="text-xs text-white font-medium"><%= m.confirmados %></span>
+                </div>
+              </div>
+              <div class="text-xs text-gray-400 w-24 text-right flex-shrink-0">
+                R$ <%= Number(m.receita).toFixed(2).replace('.', ',') %>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+      <% } %>
+
+      <!-- Tabela de agendamentos -->
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 print-bg">
+        <h3 class="text-sm font-semibold text-white mb-4">
+          Relação de Agendamentos
+          <span class="text-gray-500 font-normal">
+            — datas de evento entre <%= new Date(dataInicio).toLocaleDateString('pt-BR') %>
+            e <%= new Date(dataFim + 'T23:59:59').toLocaleDateString('pt-BR') %>
+          </span>
+        </h3>
+
+        <% if (dados.agendamentos.length === 0) { %>
+          <p class="text-gray-500 text-sm text-center py-8">Nenhum agendamento no período selecionado.</p>
+        <% } else { %>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-gray-800 text-xs text-gray-500 uppercase tracking-wider">
+                <th class="pb-2 text-left">Pedido</th>
+                <th class="pb-2 text-left">Cliente</th>
+                <th class="pb-2 text-left">Data da compra</th>
+                <th class="pb-2 text-left">Data agendada</th>
+                <th class="pb-2 text-left">Produtos</th>
+                <th class="pb-2 text-right">Total</th>
+                <th class="pb-2 text-center">Agendamento</th>
+                <th class="pb-2 text-center">Pedido</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-800">
+              <% dados.agendamentos.forEach(function(a) { %>
+              <tr class="hover:bg-gray-800/40 transition">
+                <td class="py-3 pr-4">
+                  <a href="/admin/pedidos/<%= a.pedido_id %>"
+                     class="text-blue-400 hover:text-blue-300 font-medium">#<%= a.pedido_id %></a>
+                </td>
+                <td class="py-3 pr-4">
+                  <a href="/admin/compradores/<%= a.usuario_id %>"
+                     class="hover:text-blue-300 transition">
+                    <div class="font-medium text-white"><%= a.cliente_nome %></div>
+                    <div class="text-xs text-gray-500"><%= a.email %></div>
+                    <% if (a.telefone) { %>
+                      <div class="text-xs text-gray-600"><%= a.telefone %></div>
+                    <% } %>
+                  </a>
+                </td>
+                <td class="py-3 pr-4 text-gray-400 text-xs whitespace-nowrap">
+                  <%= new Date(a.data_compra).toLocaleDateString('pt-BR') %>
+                  <div class="text-gray-600">
+                    <%= new Date(a.data_compra).toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}) %>
+                  </div>
+                </td>
+                <td class="py-3 pr-4 whitespace-nowrap">
+                  <div class="font-semibold text-white">
+                    <%= new Date(a.data_evento + 'T12:00:00').toLocaleDateString('pt-BR', {day:'2-digit', month:'short', year:'numeric'}) %>
+                  </div>
+                  <div class="text-xs text-gray-500">
+                    <%= new Date(a.data_evento + 'T12:00:00').toLocaleDateString('pt-BR', {weekday:'long'}) %>
+                  </div>
+                </td>
+                <td class="py-3 pr-4 text-gray-300 text-xs max-w-xs">
+                  <%= a.produtos || '—' %>
+                </td>
+                <td class="py-3 pr-4 text-right font-semibold text-green-400 whitespace-nowrap">
+                  R$ <%= Number(a.total).toFixed(2).replace('.', ',') %>
+                </td>
+                <td class="py-3 pr-4 text-center">
+                  <span class="text-xs px-2 py-0.5 rounded-full font-medium
+                    <%= a.status_agendamento === 'confirmado' ? 'bg-green-900/50 text-green-400' : 'bg-red-900/50 text-red-400' %>">
+                    <%= a.status_agendamento === 'confirmado' ? 'Confirmado' : 'Cancelado' %>
+                  </span>
+                </td>
+                <td class="py-3 text-center">
+                  <span class="text-xs px-2 py-0.5 rounded-full
+                    <%= a.status_pedido === 'pago' || a.status_pedido === 'entregue' ? 'bg-blue-900/50 text-blue-400' :
+                        a.status_pedido === 'cancelado' ? 'bg-red-900/50 text-red-400' : 'bg-yellow-900/50 text-yellow-400' %>">
+                    <%= STATUS_LABEL[a.status_pedido] || a.status_pedido %>
+                  </span>
+                </td>
+              </tr>
+              <% }) %>
             </tbody>
           </table>
         </div>
