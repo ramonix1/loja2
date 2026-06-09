@@ -2,13 +2,13 @@ const db = require('../config/db');
 
 const plans = [
   {
-    name: 'Básico',
+    name: 'BÃ¡sico',
     slug: 'basico',
-    description: 'Perfeito para começar',
+    description: 'Perfeito para comeÃ§ar',
     price: 99.90,
     billing_type: 'fixed',
     commission_percentage: null,
-    features: ['Catálogo com até 100 produtos', 'Sistema de pedidos', 'Até 1.000 pedidos/mês']
+    features: ['CatÃ¡logo com atÃ© 100 produtos', 'Sistema de pedidos', 'AtÃ© 1.000 pedidos/mÃªs']
   },
   {
     name: 'Profissional',
@@ -17,7 +17,7 @@ const plans = [
     price: 199.90,
     billing_type: 'fixed',
     commission_percentage: null,
-    features: ['Produtos ilimitados', 'Sistema de pedidos', 'Clientes e CRM', 'Relatórios avançados', 'Até 10.000 pedidos/mês']
+    features: ['Produtos ilimitados', 'Sistema de pedidos', 'Clientes e CRM', 'RelatÃ³rios avanÃ§ados', 'AtÃ© 10.000 pedidos/mÃªs']
   },
   {
     name: 'Enterprise (Revenue Share)',
@@ -26,16 +26,16 @@ const plans = [
     price: null,
     billing_type: 'revenue_share',
     commission_percentage: 2.0,
-    features: ['Tudo do plano Profissional', 'Agendamentos (em breve)', 'Integrações avançadas', 'Suporte prioritário', '2% de comissão por venda']
+    features: ['Tudo do plano Profissional', 'Agendamentos (em breve)', 'IntegraÃ§Ãµes avanÃ§adas', 'Suporte prioritÃ¡rio', '2% de comissÃ£o por venda']
   },
   {
     name: 'Premium (Hibrido)',
     slug: 'premium-hybrid',
-    description: 'Mensalidade reduzida + comissão pequena',
+    description: 'Mensalidade reduzida + comissÃ£o pequena',
     price: 99.90,
     billing_type: 'hybrid',
     commission_percentage: 1.0,
-    features: ['Tudo do plano Profissional', 'R$ 99,90/mês + 1% de comissão', 'Flexibilidade máxima']
+    features: ['Tudo do plano Profissional', 'R$ 99,90/mÃªs + 1% de comissÃ£o', 'Flexibilidade mÃ¡xima']
   }
 ];
 
@@ -67,12 +67,12 @@ async function seed() {
       console.log(`  ${plan.name}`);
     }
 
-    console.log('\n Seed de planos conclu�do!');
-    console.log('\nPlanos dispon�veis:');
-    console.log('  - Básico (R$ 99,90/mês)');
-    console.log('  - Profissional (R$ 199,90/mês)');
+    console.log('\n Seed de planos concluÃdo!');
+    console.log('\nPlanos disponÃveis:');
+    console.log('  - BÃ¡sico (R$ 99,90/mÃªs)');
+    console.log('  - Profissional (R$ 199,90/mÃªs)');
     console.log('  - Enterprise Revenue Share (2% por venda)');
-    console.log('  - Premium H�brido (R$ 99,90/mês + 1% por venda)');
+    console.log('  - Premium HÃbrido (R$ 99,90/mÃªs + 1% por venda)');
 
     process.exit(0);
   } catch (error) {

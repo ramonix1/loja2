@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pedido #<%= pedido.id %> - LojÃ£o</title>
+  <title>Pedido #<%= pedido.id %> - Lojão</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
     .resultado-hero {
@@ -98,11 +98,11 @@
     <% } else if (pedido.metodo_pagamento === 'boleto') { %>
       <div class="resultado-icon"></div>
       <h1 class="resultado-titulo">Boleto gerado!</h1>
-      <p class="resultado-sub">Pedido #<%= pedido.id %>  Pague atÃ© o vencimento para confirmar</p>
+      <p class="resultado-sub">Pedido #<%= pedido.id %>  Pague até o vencimento para confirmar</p>
     <% } else { %>
       <div class="resultado-icon">³</div>
-      <h1 class="resultado-titulo">Pedido em anÃ¡lise</h1>
-      <p class="resultado-sub">Pedido #<%= pedido.id %>  Aguardando confirmaÃ§Ã£o do pagamento</p>
+      <h1 class="resultado-titulo">Pedido em análise</h1>
+      <p class="resultado-sub">Pedido #<%= pedido.id %>  Aguardando confirmação do pagamento</p>
     <% } %>
   </div>
 
@@ -113,12 +113,12 @@
       <% if (pixInfo && pixInfo.qr_code) { %>
         <div class="pix-box">
           <h3>¡ Pague com PIX agora</h3>
-          <p style="font-size:13px;color:#166534;margin-bottom:4px;">Escaneie o QR Code ou copie o cÃ³digo abaixo</p>
+          <p style="font-size:13px;color:#166534;margin-bottom:4px;">Escaneie o QR Code ou copie o código abaixo</p>
           <% if (pixInfo.qr_code_url) { %>
             <img src="<%= pixInfo.qr_code_url %>" alt="QR Code PIX" class="pix-qr">
           <% } %>
           <div class="pix-copia-cola" id="pixCode"><%= pixInfo.qr_code %></div>
-          <button class="btn-copy" onclick="copiarPix()"> Copiar cÃ³digo</button>
+          <button class="btn-copy" onclick="copiarPix()"> Copiar código</button>
           <% if (pixInfo.expiracao) { %>
             <p style="font-size:12px;color:#6b7280;margin-top:12px;">Expira em: <%= new Date(pixInfo.expiracao).toLocaleString('pt-BR') %></p>
           <% } %>
@@ -129,8 +129,8 @@
       <% if (boletoUrl) { %>
         <div class="boleto-box">
           <div style="font-size:48px;margin-bottom:12px;"></div>
-          <h3 style="border:none;color:#92400e;font-size:18px;">Seu boleto estÃ¡ pronto</h3>
-          <p style="font-size:13px;color:#92400e;margin-bottom:20px;">Vencimento em 3 dias Ãºteis. Pague em qualquer banco ou lotÃ©rica.</p>
+          <h3 style="border:none;color:#92400e;font-size:18px;">Seu boleto está pronto</h3>
+          <p style="font-size:13px;color:#92400e;margin-bottom:20px;">Vencimento em 3 dias ºteis. Pague em qualquer banco ou lotérica.</p>
           <a href="<%= boletoUrl %>" target="_blank" class="btn btn-primary" style="padding:12px 32px;font-size:15px;">Abrir boleto</a>
         </div>
       <% } %>
@@ -168,7 +168,7 @@
             <%= {
               aguardando_pagamento: 'Aguardando pagamento',
               pago: 'Pago',
-              em_separacao: 'Em separaÃ§Ã£o',
+              em_separacao: 'Em separação',
               enviado: 'Enviado',
               entregue: 'Entregue',
               cancelado: 'Cancelado'
@@ -178,7 +178,7 @@
         <div class="info-linha">
           <span>Pagamento</span>
           <strong>
-            <%= pedido.metodo_pagamento === 'pix' ? 'PIX' : pedido.metodo_pagamento === 'boleto' ? 'Boleto' : 'CartÃ£o' %>
+            <%= pedido.metodo_pagamento === 'pix' ? 'PIX' : pedido.metodo_pagamento === 'boleto' ? 'Boleto' : 'Cartão' %>
           </strong>
         </div>
         <div class="info-linha">
@@ -188,7 +188,7 @@
       </div>
 
       <div class="card">
-        <h3>EndereÃ§o de entrega</h3>
+        <h3>Endereço de entrega</h3>
         <div style="font-size:14px;color:#374151;line-height:1.8;">
           <%= pedido.logradouro %>, <%= pedido.numero %><%= pedido.complemento ? ', ' + pedido.complemento : '' %><br>
           <%= pedido.bairro %>  <%= pedido.cidade %>/<%= pedido.estado %><br>

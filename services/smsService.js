@@ -10,12 +10,12 @@ function getTwilioClient() {
 async function enviarSmsCodigo(telefone, codigo) {
   const client = getTwilioClient();
   if (!client) {
-    console.warn('Twilio não configurado � SMS não enviado.');
+    console.warn('Twilio nÃ£o configurado  SMS nÃ£o enviado.');
     return false;
   }
 
   await client.messages.create({
-    body: `Lojão: seu código de redefinição de senha é ${codigo}. Válido por ${process.env.TOKEN_EXPIRACAO_MINUTOS || 30} minutos.`,
+    body: `LojÃ£o: seu cÃ³digo de redefiniÃ§Ã£o de senha Ã© ${codigo}. VÃ¡lido por ${process.env.TOKEN_EXPIRACAO_MINUTOS || 30} minutos.`,
     from: process.env.TWILIO_FROM,
     to: telefone,
   });

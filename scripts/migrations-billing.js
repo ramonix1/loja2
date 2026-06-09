@@ -3,7 +3,7 @@ const db = require('../config/db');
 const migrations = [
   {
     id: '001_create_billing_tables',
-    description: 'Criar tabelas para modelo h�brido de faturamento',
+    description: 'Criar tabelas para modelo hÃbrido de faturamento',
     up: `
       -- Tabela de planos
       CREATE TABLE IF NOT EXISTS billing_plans (
@@ -19,7 +19,7 @@ const migrations = [
         updated_at TIMESTAMP DEFAULT NOW()
       );
 
-      -- Tabela de configuração de billing por tenant
+      -- Tabela de configuraÃ§Ã£o de billing por tenant
       CREATE TABLE IF NOT EXISTS tenant_billing (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
@@ -66,12 +66,12 @@ const migrations = [
         updated_at TIMESTAMP DEFAULT NOW()
       );
 
-      -- Tabela de transações de comissão
+      -- Tabela de transaÃ§Ãµes de comissÃ£o
       CREATE TABLE IF NOT EXISTS commission_transactions (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         tenant_id INTEGER NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
         invoice_id UUID REFERENCES invoices(id),
-        pedido_id UUID,  -- referência ao pedido que gerou a comissão
+        pedido_id UUID,  -- referÃªncia ao pedido que gerou a comissÃ£o
 
         order_total DECIMAL(10, 2) NOT NULL,
         commission_percentage DECIMAL(5, 2) NOT NULL,
@@ -83,7 +83,7 @@ const migrations = [
         created_at TIMESTAMP DEFAULT NOW()
       );
 
-      -- �ndices para performance
+      -- Ãndices para performance
       CREATE INDEX idx_tenant_billing ON tenant_billing(tenant_id);
       CREATE INDEX idx_invoices_tenant ON invoices(tenant_id);
       CREATE INDEX idx_invoices_month_year ON invoices(month_year);
@@ -101,7 +101,7 @@ const migrations = [
 
 async function runMigrations(direction = 'up') {
   try {
-    console.log(`� Executando migrations de billing (${direction})...`);
+    console.log(` Executando migrations de billing (${direction})...`);
 
     for (const migration of migrations) {
       const sql = migration[direction];
@@ -111,7 +111,7 @@ async function runMigrations(direction = 'up') {
       console.log(`  ${migration.id}`);
     }
 
-    console.log('Migrations de billing conclu�das!');
+    console.log('Migrations de billing concluÃdas!');
     process.exit(0);
   } catch (error) {
     console.error('[ERRO] Erro:', error.message);

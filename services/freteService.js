@@ -45,16 +45,16 @@ async function calcularViaMelhorEnvio({ cepOrigem, cepDestino, peso, altura, lar
 
 async function calcularOpcoesFrete({ cepDestino, subtotal = 0, configs = {} }) {
   const cepDest = (cepDestino || '').replace(/\D/g, '');
-  if (cepDest.length !== 8) throw new Error('CEP de destino inválido');
+  if (cepDest.length !== 8) throw new Error('CEP de destino invÃ¡lido');
 
   const freteGratisAcima = parseFloat(configs.frete_gratis_acima) || 0;
   const freteFixo        = parseFloat(configs.frete_fixo)         || 0;
   const token            = configs.melhor_envio_token              || '';
   const cepOrigem        = (configs.frete_cep_origem || '').replace(/\D/g, '');
 
-  // Frete grátis por valor m�nimo do pedido
+  // Frete grÃ¡tis por valor mÃnimo do pedido
   if (freteGratisAcima > 0 && subtotal >= freteGratisAcima) {
-    return [{ id: 'gratis', nome: 'Frete Grátis', transportadora: '', prazo: null, valor: 0 }];
+    return [{ id: 'gratis', nome: 'Frete GrÃ¡tis', transportadora: '', prazo: null, valor: 0 }];
   }
 
   // Melhor Envio
@@ -78,11 +78,11 @@ async function calcularOpcoesFrete({ cepDestino, subtotal = 0, configs = {} }) {
 
   // Frete fixo configurado
   if (freteFixo > 0) {
-    return [{ id: 'fixo', nome: 'Entrega padrão', transportadora: '', prazo: null, valor: freteFixo }];
+    return [{ id: 'fixo', nome: 'Entrega padrÃ£o', transportadora: '', prazo: null, valor: freteFixo }];
   }
 
-  // Padrão: grátis
-  return [{ id: 'gratis', nome: 'Frete Grátis', transportadora: '', prazo: null, valor: 0 }];
+  // PadrÃ£o: grÃ¡tis
+  return [{ id: 'gratis', nome: 'Frete GrÃ¡tis', transportadora: '', prazo: null, valor: 0 }];
 }
 
 module.exports = { calcularOpcoesFrete };

@@ -6,16 +6,16 @@ const BillingService = require('../services/billingService');
  * Executar: node scripts/generate-invoices.js [monthYear]
  *
  * Exemplos:
- *   node scripts/generate-invoices.js           (usa mês atual)
+ *   node scripts/generate-invoices.js           (usa mÃªs atual)
  *   node scripts/generate-invoices.js 2026-04   (gera para abril 2026)
  */
 
 async function generateMonthlyInvoices() {
   try {
-    // Obter mês/ano
+    // Obter mÃªs/ano
     const monthYear = process.argv[2] || new Date().toISOString().slice(0, 7);
 
-    console.log(`\n�� Gerando invoices para ${monthYear}...\n`);
+    console.log(`\n§¾ Gerando invoices para ${monthYear}...\n`);
 
     // Obter todos os tenants com billing ativo
     const tenants = await db.query(`
@@ -42,14 +42,14 @@ async function generateMonthlyInvoices() {
       try {
         const tenantId = row.tenant_id;
 
-        // Verificar se já existe invoice para esse mês
+        // Verificar se jÃ¡ existe invoice para esse mÃªs
         const existing = await db.query(`
           SELECT id FROM invoices
           WHERE tenant_id = $1 AND month_year = $2
         `, [tenantId, monthYear]);
 
         if (existing.rows.length > 0) {
-          console.log(`  Pulando ${tenantId} (invoice já existe)`);
+          console.log(`  Pulando ${tenantId} (invoice jÃ¡ existe)`);
           continue;
         }
 
@@ -74,14 +74,14 @@ async function generateMonthlyInvoices() {
       }
     }
 
-    // Relatório final
-    console.log(`\n${'�'.repeat(60)}`);
-    console.log(`[RESUMO] DA GERA�ÃO DE INVOICES (${monthYear})`);
-    console.log(`${'�'.repeat(60)}`);
+    // RelatÃ³rio final
+    console.log(`\n${''.repeat(60)}`);
+    console.log(`[RESUMO] DA GERAÃÃO DE INVOICES (${monthYear})`);
+    console.log(`${''.repeat(60)}`);
     console.log(`[OK] Sucesso:    ${results.success}/${results.total}`);
     console.log(`Erros:      ${results.error}/${results.total}`);
     console.log(` Total:      R$ ${results.invoices.reduce((sum, inv) => sum + inv.total, 0).toFixed(2)}`);
-    console.log(`${'�'.repeat(60)}\n`);
+    console.log(`${''.repeat(60)}\n`);
 
     // Resumo por tipo de billing
     const byType = {};
@@ -97,7 +97,7 @@ async function generateMonthlyInvoices() {
     }
 
     if (Object.keys(byType).length > 0) {
-      console.log('� Receita por Tipo de Billing:');
+      console.log('µ Receita por Tipo de Billing:');
       for (const [type, amount] of Object.entries(byType)) {
         console.log(`  - ${type}: R$ ${amount.toFixed(2)}`);
       }
@@ -106,7 +106,7 @@ async function generateMonthlyInvoices() {
 
     process.exit(results.error > 0 ? 1 : 0);
   } catch (error) {
-    console.error('[ERRO] Erro cr�tico:', error.message);
+    console.error('[ERRO] Erro crÃtico:', error.message);
     process.exit(1);
   }
 }

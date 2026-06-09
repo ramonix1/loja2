@@ -1,66 +1,66 @@
 const { validateCheckoutData } = require('../../middlewares/validation');
 
 /**
- * Testes de Integração � Checkout
+ * Testes de IntegraÃ§Ã£o  Checkout
  *
- * NOTA: Esses testes são conceituais. Para rodar de verdade,
- * seria necessário:
+ * NOTA: Esses testes sÃ£o conceituais. Para rodar de verdade,
+ * seria necessÃ¡rio:
  * - Mock do banco de dados (ou usar banco de testes)
- * - Mock dos serviços de pagamento (Stripe, SumUp)
- * - Mock da sessão do Express
+ * - Mock dos serviÃ§os de pagamento (Stripe, SumUp)
+ * - Mock da sessÃ£o do Express
  */
 
 describe('Checkout Integration Tests', () => {
 
-  describe('Fluxo de Validação de Checkout', () => {
+  describe('Fluxo de ValidaÃ§Ã£o de Checkout', () => {
     const validCheckoutData = {
-      nome_entrega: 'João Silva Santos',
+      nome_entrega: 'JoÃ£o Silva Santos',
       email_entrega: 'joao.silva@example.com',
       telefone_entrega: '(11) 98765-4321',
-      cpf_entrega: '11144477735', // CPF válido (teste)
+      cpf_entrega: '11144477735', // CPF vÃ¡lido (teste)
       cep: '01310-100',
       logradouro: 'Avenida Paulista',
       numero: '1000',
       complemento: 'Apto 201',
       bairro: 'Bela Vista',
-      cidade: 'São Paulo',
+      cidade: 'SÃ£o Paulo',
       estado: 'SP',
       metodo_pagamento: 'cartao',
       frete_valor: '15.50',
       frete_servico: 'PAC',
     };
 
-    test('aceita checkout com dados válidos', () => {
+    test('aceita checkout com dados vÃ¡lidos', () => {
       const errors = validateCheckoutData(validCheckoutData);
       expect(errors).toHaveLength(0);
     });
 
-    test('rejeita checkout com email inválido', () => {
+    test('rejeita checkout com email invÃ¡lido', () => {
       const invalidData = { ...validCheckoutData, email_entrega: 'invalid' };
       const errors = validateCheckoutData(invalidData);
       expect(errors.length).toBeGreaterThan(0);
     });
 
-    test('rejeita checkout com CEP inválido', () => {
+    test('rejeita checkout com CEP invÃ¡lido', () => {
       const invalidData = { ...validCheckoutData, cep: '00000' };
       const errors = validateCheckoutData(invalidData);
       expect(errors.length).toBeGreaterThan(0);
     });
 
-    test('rejeita checkout com estado inválido', () => {
+    test('rejeita checkout com estado invÃ¡lido', () => {
       const invalidData = { ...validCheckoutData, estado: 'ZZZ' };
       const errors = validateCheckoutData(invalidData);
       expect(errors.length).toBeGreaterThan(0);
     });
 
-    test('protege contra SQL injection no endereço', () => {
+    test('protege contra SQL injection no endereÃ§o', () => {
       const maliciousData = {
         ...validCheckoutData,
         logradouro: "Rua'; DROP TABLE pedidos; --",
       };
-      // A validação não deve aceitar
+      // A validaÃ§Ã£o nÃ£o deve aceitar
       const errors = validateCheckoutData(maliciousData);
-      // Pode ser válido em tamanho, mas será escapado no banco
+      // Pode ser vÃ¡lido em tamanho, mas serÃ¡ escapado no banco
       // Importante: sempre usar prepared statements
       expect(typeof errors).toBe('object');
     });
@@ -71,13 +71,13 @@ describe('Checkout Integration Tests', () => {
         complemento: '<script>alert("xss")</script>',
       };
       const errors = validateCheckoutData(xssData);
-      // Complemento é opcional, então pode não gerar erro
+      // Complemento Ã© opcional, entÃ£o pode nÃ£o gerar erro
       // Mas no banco, deve ser escapado
       expect(typeof errors).toBe('object');
     });
   });
 
-  describe('Validação de Métodos de Pagamento', () => {
+  describe('ValidaÃ§Ã£o de MÃ©todos de Pagamento', () => {
     const baseData = {
       nome_entrega: 'Cliente Teste',
       email_entrega: 'teste@example.com',
@@ -88,39 +88,39 @@ describe('Checkout Integration Tests', () => {
       estado: 'SP',
     };
 
-    test('aceita PIX como método de pagamento', () => {
+    test('aceita PIX como mÃ©todo de pagamento', () => {
       const data = { ...baseData, metodo_pagamento: 'pix' };
       const errors = validateCheckoutData(data);
       expect(errors).toHaveLength(0);
     });
 
-    test('aceita Boleto como método de pagamento', () => {
+    test('aceita Boleto como mÃ©todo de pagamento', () => {
       const data = { ...baseData, metodo_pagamento: 'boleto' };
       const errors = validateCheckoutData(data);
       expect(errors).toHaveLength(0);
     });
 
-    test('aceita Cartão como método de pagamento', () => {
+    test('aceita CartÃ£o como mÃ©todo de pagamento', () => {
       const data = { ...baseData, metodo_pagamento: 'cartao' };
       const errors = validateCheckoutData(data);
       expect(errors).toHaveLength(0);
     });
 
-    test('rejeita método de pagamento inválido', () => {
+    test('rejeita mÃ©todo de pagamento invÃ¡lido', () => {
       const data = { ...baseData, metodo_pagamento: 'bitcoin' };
       const errors = validateCheckoutData(data);
       expect(errors.length).toBeGreaterThan(0);
     });
 
-    test('rejeita método de pagamento vazio', () => {
+    test('rejeita mÃ©todo de pagamento vazio', () => {
       const data = { ...baseData, metodo_pagamento: '' };
       const errors = validateCheckoutData(data);
       expect(errors.length).toBeGreaterThan(0);
     });
   });
 
-  describe('Validação de Valores Monetários', () => {
-    test('valida frete_valor como número positivo', () => {
+  describe('ValidaÃ§Ã£o de Valores MonetÃ¡rios', () => {
+    test('valida frete_valor como nÃºmero positivo', () => {
       const freteValue = '15.50';
       const frete = parseFloat(freteValue);
 
@@ -165,7 +165,7 @@ describe('Checkout Integration Tests', () => {
   describe('Rate Limiting Check', () => {
     test('checkout deve estar protegido por rate limiter', () => {
       // Verificar que o middleware de rate limiting foi aplicado
-      // Em um teste real, would fazer 11 requests e verificar se o 11º é bloqueado
+      // Em um teste real, would fazer 11 requests e verificar se o 11Âº Ã© bloqueado
       expect(true).toBe(true); // Placeholder
     });
   });

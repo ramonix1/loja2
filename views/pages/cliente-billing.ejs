@@ -247,7 +247,7 @@
   </div>
 
   <div class="container">
-    <!-- INFORMAÃÃES DO PLANO -->
+    <!-- INFORMAES DO PLANO -->
     <div class="card">
       <h2>Meu Plano</h2>
       <div class="plano-info">
@@ -261,18 +261,18 @@
             <% if (billing.monthlyFee) { %>
               R$ <%= parseFloat(billing.monthlyFee).toFixed(2) %>
             <% } else { %>
-              VariÃ¡vel
+              Variável
             <% } %>
           </value>
         </div>
         <% if (billing.commissionPercentage) { %>
           <div class="info-item">
-            <label>ComissÃ£o por Venda</label>
+            <label>Comissão por Venda</label>
             <value><%= billing.commissionPercentage %>%</value>
           </div>
         <% } %>
         <div class="info-item">
-          <label>MÃªs Atual</label>
+          <label>Mªs Atual</label>
           <value><%= billing.month || new Date().toLocaleDateString('pt-BR', { year: 'numeric', month: '2-digit' }).split('/').reverse().join('-') %></value>
         </div>
       </div>
@@ -280,7 +280,7 @@
 
     <!-- RESUMO -->
     <div class="card">
-      <h2>Resumo do MÃªs</h2>
+      <h2>Resumo do Mªs</h2>
       <div class="summary">
         <div class="summary-item">
           <div class="label">Pedidos</div>
@@ -292,7 +292,7 @@
         </div>
         <% if (billing.commissionPercentage) { %>
           <div class="summary-item">
-            <div class="label">ComissÃ£o</div>
+            <div class="label">Comissão</div>
             <div class="value">R$ <%= parseFloat(billing.orders?.totalCommission || 0).toFixed(2) %></div>
           </div>
         <% } %>
@@ -306,18 +306,18 @@
       <% if (!invoices || invoices.length === 0) { %>
         <div class="empty">
           <p> Nenhuma invoice gerada ainda</p>
-          <p>Invoices sÃ£o geradas automaticamente no final de cada mÃªs.</p>
+          <p>Invoices são geradas automaticamente no final de cada mªs.</p>
         </div>
       <% } else { %>
         <table>
           <thead>
             <tr>
-              <th>NÃºmero</th>
-              <th>PerÃodo</th>
+              <th>Nºmero</th>
+              <th>Perodo</th>
               <th>Total</th>
               <th>Status</th>
-              <th>EmissÃ£o</th>
-              <th>AÃ§Ãµes</th>
+              <th>Emissão</th>
+              <th>Açµes</th>
             </tr>
           </thead>
           <tbody>
@@ -348,9 +348,9 @@
       <% } %>
     </div>
 
-    <!-- DÃVIDAS -->
+    <!-- DVIDAS -->
     <div class="card">
-      <h2> DÃºvidas?</h2>
+      <h2> Dºvidas?</h2>
       <p>Entre em contato com nosso suporte:</p>
       <ul style="margin-left: 20px; margin-top: 10px; line-height: 1.8;">
         <li><strong>Email:</strong> suporte@<%= (loja.email || 'empresa.com').split('@')[1] %></li>

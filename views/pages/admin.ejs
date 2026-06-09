@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Produtos - Admin LojÃ£o</title>
+  <title>Produtos - Admin Lojão</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -28,21 +28,21 @@
       <p class="text-gray-400 mt-1 text-sm">Cadastre, edite e remova produtos da loja</p>
     </div>
 
-    <!-- FormulÃ¡rio de cadastro -->
+    <!-- Formulário de cadastro -->
     <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 max-w-2xl mb-8">
       <h2 class="text-lg font-bold text-white mb-5">Cadastrar Novo Produto</h2>
 
       <form action="/salvar-produto?_csrf=<%= locals.csrfToken %>" method="POST" enctype="multipart/form-data" class="space-y-4">
 
         <div>
-          <label class="block text-sm font-medium text-gray-300 mb-1">TÃtulo *</label>
+          <label class="block text-sm font-medium text-gray-300 mb-1">Ttulo *</label>
           <input type="text" name="titulo" required
             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             placeholder="Nome do produto">
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-300 mb-1">SubtÃtulo</label>
+          <label class="block text-sm font-medium text-gray-300 mb-1">Subttulo</label>
           <input type="text" name="subtitulo"
             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             placeholder="Ex: Modelo XYZ, Cor Azul">
@@ -66,17 +66,17 @@
         <% } %>
 
         <div>
-          <label class="block text-sm font-medium text-gray-300 mb-1">DescriÃ§Ã£o</label>
+          <label class="block text-sm font-medium text-gray-300 mb-1">Descrição</label>
           <textarea name="descricao" rows="3"
             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
-            placeholder="DescriÃ§Ã£o detalhada (opcional)"></textarea>
+            placeholder="Descrição detalhada (opcional)"></textarea>
         </div>
 
         <div>
           <label class="block text-sm font-medium text-gray-300 mb-1">Imagens *</label>
           <input type="file" name="imagens" id="imagens" multiple accept="image/*" required
             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-gray-300 text-sm file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-600 file:text-white file:text-xs file:cursor-pointer hover:file:bg-blue-700">
-          <p class="text-xs text-gray-500 mt-1">JPG, PNG, WEBP  mÃ¡x. 5MB cada</p>
+          <p class="text-xs text-gray-500 mt-1">JPG, PNG, WEBP  máx. 5MB cada</p>
           <div id="previewArea" class="flex flex-wrap gap-2 mt-3"></div>
         </div>
 
@@ -98,16 +98,16 @@
         <div class="text-center py-16 bg-gray-800 rounded-xl">
           <div class="text-5xl mb-3"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('package', 'w-5 h-5') %></span></div>
           <p class="text-gray-400 font-medium">Nenhum produto cadastrado</p>
-          <p class="text-gray-600 text-sm mt-1">Use o formulÃ¡rio acima para adicionar</p>
+          <p class="text-gray-600 text-sm mt-1">Use o formulário acima para adicionar</p>
         </div>
       <% } else { %>
         <div class="overflow-x-auto">
           <table class="w-full">
             <% if (configs.controla_estoque !== 'true') { %>
             <div class="mb-4 bg-yellow-900/30 border border-yellow-700/50 text-yellow-300 rounded-lg px-4 py-3 text-xs">
-               O controle de estoque estÃ¡ <strong>desativado</strong>  vocÃª pode definir as quantidades abaixo,
-              mas elas sÃ³ serÃ£o <strong>bloqueadas na vitrine e debitadas nos pedidos</strong> apÃ³s ativar em
-              <a href="/admin/configuracoes" class="underline hover:text-yellow-100">ConfiguraÃ§Ãµes  Controle de Estoque</a>.
+               O controle de estoque está <strong>desativado</strong>  vocª pode definir as quantidades abaixo,
+              mas elas só serão <strong>bloqueadas na vitrine e debitadas nos pedidos</strong> após ativar em
+              <a href="/admin/configuracoes" class="underline hover:text-yellow-100">Configuraçµes  Controle de Estoque</a>.
             </div>
             <% } %>
             <thead>
@@ -115,7 +115,7 @@
                 <th class="pb-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Produto</th>
                 <th class="pb-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Valor</th>
                 <th class="pb-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-48">Estoque</th>
-                <th class="pb-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">AÃ§Ãµes</th>
+                <th class="pb-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Açµes</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-800">
@@ -140,7 +140,7 @@
                     </span>
                   </td>
 
-                  <!-- Estoque com ediÃ§Ã£o inline -->
+                  <!-- Estoque com edição inline -->
                   <td class="py-2 pr-4">
                     <form method="POST" action="/admin/produtos/<%= produto.id %>/estoque"
                           class="flex items-center gap-1.5">
@@ -166,7 +166,7 @@
                       <% } else if (produto.estoque === 0) { %>
                         Esgotado
                       <% } else if (produto.estoque <= 5) { %>
-                        AtenÃ§Ã£o: poucas unidades
+                        Atenção: poucas unidades
                       <% } else { %>
                         <%= produto.estoque %> em estoque
                       <% } %>

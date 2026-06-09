@@ -3,7 +3,7 @@ const path = require('path');
 
 const heroiconsPath = path.join(__dirname, '../node_modules/heroicons/24/solid');
 
-// Mapeamento de nomes lógicos para arquivos SVG
+// Mapeamento de nomes lÃ³gicos para arquivos SVG
 const iconMap = {
   shopping_cart: 'shopping-cart.svg',
   package: 'cube.svg',
@@ -38,9 +38,9 @@ const iconMap = {
 const svgCache = {};
 
 /**
- * Retorna um �cone SVG como string HTML
- * @param {string} iconName - Nome lógico do �cone (ex: 'shopping_cart')
- * @param {Object} options - Opções (classes, width, height, etc)
+ * Retorna um Ãcone SVG como string HTML
+ * @param {string} iconName - Nome lÃ³gico do Ãcone (ex: 'shopping_cart')
+ * @param {Object} options - OpÃ§Ãµes (classes, width, height, etc)
  * @returns {string} SVG HTML inline
  */
 function getIcon(iconName, options = {}) {
@@ -51,7 +51,7 @@ function getIcon(iconName, options = {}) {
     return '';
   }
 
-  // Usar cache se dispon�vel
+  // Usar cache se disponÃvel
   if (!svgCache[filename]) {
     try {
       const filePath = path.join(heroiconsPath, filename);
@@ -81,8 +81,8 @@ function getIcon(iconName, options = {}) {
 }
 
 /**
- * Versão simplificada para usar em templates EJS
- * Retorna apenas SVG inline com classe padrão
+ * VersÃ£o simplificada para usar em templates EJS
+ * Retorna apenas SVG inline com classe padrÃ£o
  */
 function icon(iconName, cssClass = 'w-5 h-5') {
   return getIcon(iconName, { class: cssClass });

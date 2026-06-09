@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Criar conta  LojÃ£o</title>
+  <title>Criar conta  Lojão</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
     body { background: #f3f4f6; margin: 0; padding: 32px 16px; font-family: 'Inter', Arial, sans-serif; }
@@ -52,9 +52,9 @@
 </head>
 <body>
   <div class="auth-card">
-    <div class="auth-logo"><a href="/"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('shopping_cart', 'w-5 h-5') %></span> LojÃ£o</a></div>
+    <div class="auth-logo"><a href="/"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('shopping_cart', 'w-5 h-5') %></span> Lojão</a></div>
     <h1 class="auth-titulo">Criar sua conta</h1>
-    <p class="auth-sub">Preencha os dados abaixo para comeÃ§ar a comprar.</p>
+    <p class="auth-sub">Preencha os dados abaixo para começar a comprar.</p>
 
     <% if (erros && erros.length > 0) { %>
       <div class="alerta-erros">
@@ -90,7 +90,7 @@
         <div class="form-grupo">
           <label for="senha">Senha <span class="obrigatorio">*</span></label>
           <div class="senha-wrapper">
-            <input type="password" id="senha" name="senha" required autocomplete="new-password" placeholder="MÃnimo 8 caracteres" oninput="avaliarSenha(this.value)">
+            <input type="password" id="senha" name="senha" required autocomplete="new-password" placeholder="Mnimo 8 caracteres" oninput="avaliarSenha(this.value)">
             <button type="button" class="toggle-senha" onclick="toggleSenha('senha',this)"></button>
           </div>
           <div class="forca-barra" id="forcaBarra"></div>
@@ -105,7 +105,7 @@
         </div>
       </div>
 
-      <div class="secao">EndereÃ§o</div>
+      <div class="secao">Endereço</div>
 
       <div class="form-grupo">
         <label for="cep">CEP <span class="obrigatorio">*</span></label>
@@ -126,7 +126,7 @@
           <input type="text" id="bairro" name="bairro" value="<%= dados.bairro || '' %>" required>
         </div>
         <div class="form-grupo">
-          <label for="numero">NÃºmero <span class="obrigatorio">*</span></label>
+          <label for="numero">Nºmero <span class="obrigatorio">*</span></label>
           <input type="text" id="numero" name="numero" value="<%= dados.numero || '' %>" required placeholder="Ex: 42">
         </div>
       </div>
@@ -156,7 +156,7 @@
     </form>
 
     <div class="links-auth">
-      JÃ¡ tem conta? <a href="/login">Entrar</a>
+      Já tem conta? <a href="/login">Entrar</a>
     </div>
   </div>
 
@@ -170,7 +170,7 @@
     function avaliarSenha(v) {
       const pontos = [v.length >= 8, /\d/.test(v), /[A-Z]/.test(v), /[^a-zA-Z0-9]/.test(v)].filter(Boolean).length;
       const cores = ['#ef4444','#f97316','#eab308','#22c55e'];
-      const labels = ['Muito fraca','Fraca','MÃ©dia','Forte'];
+      const labels = ['Muito fraca','Fraca','Média','Forte'];
       const barra = document.getElementById('forcaBarra');
       const label = document.getElementById('forcaLabel');
       if (!v.length) { barra.style.width='0'; label.textContent=''; return; }

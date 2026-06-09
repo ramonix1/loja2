@@ -102,10 +102,10 @@
           </div>
         </div>
 
-        <!-- EndereÃ§o -->
+        <!-- Endereço -->
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
           <h2 class="font-semibold text-white mb-4 flex items-center gap-2">
-            <span></span> EndereÃ§o
+            <span></span> Endereço
           </h2>
           <% const temEndereco = comprador.logradouro || comprador.cidade; %>
           <% if (temEndereco) { %>
@@ -127,7 +127,7 @@
               <% } %>
             </div>
           <% } else { %>
-            <p class="text-gray-600 text-sm">EndereÃ§o nÃ£o informado</p>
+            <p class="text-gray-600 text-sm">Endereço não informado</p>
           <% } %>
         </div>
 
@@ -141,12 +141,12 @@
               <div class="text-xs text-gray-500 mb-0.5">Cadastro</div>
               <div class="text-gray-200">
                 <%= new Date(comprador.created_at).toLocaleDateString('pt-BR') %>
-                Ãs <%= new Date(comprador.created_at).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) %>
+                s <%= new Date(comprador.created_at).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) %>
               </div>
             </div>
             <% if (comprador.ultimo_acesso) { %>
               <div>
-                <div class="text-xs text-gray-500 mb-0.5">Ãltimo acesso</div>
+                <div class="text-xs text-gray-500 mb-0.5">ltimo acesso</div>
                 <div class="text-gray-200">
                   <%= new Date(comprador.ultimo_acesso).toLocaleDateString('pt-BR') %>
                 </div>
@@ -201,10 +201,10 @@
         </div>
         <% } %>
 
-        <!-- HistÃ³rico de pedidos -->
+        <!-- Histórico de pedidos -->
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
           <h2 class="font-semibold text-white mb-4 flex items-center gap-2">
-            <span></span> HistÃ³rico de Pedidos
+            <span></span> Histórico de Pedidos
             <span class="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full font-medium">
               <%= pedidos.length %>
             </span>
@@ -225,7 +225,7 @@
               const STATUS_LABEL = {
                 aguardando_pagamento: 'Aguardando pagamento',
                 pago: 'Pago',
-                em_separacao: 'Em separaÃ§Ã£o',
+                em_separacao: 'Em separação',
                 enviado: 'Enviado',
                 entregue: 'Entregue',
                 cancelado: 'Cancelado',
@@ -242,7 +242,7 @@
                     </div>
                     <div class="flex items-center gap-4 text-xs text-gray-500">
                       <span><%= new Date(p.created_at).toLocaleDateString('pt-BR') %>
-                        Ãs <%= new Date(p.created_at).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) %>
+                        s <%= new Date(p.created_at).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) %>
                       </span>
                       <span class="font-semibold text-white text-sm">
                         R$ <%= Number(p.total).toFixed(2).replace('.', ',') %>
@@ -257,7 +257,7 @@
                       <% p.itens.forEach(item => { %>
                         <div class="flex justify-between text-sm">
                           <span class="text-gray-300">
-                            <%= item.quantidade %>Ã <%= item.nome %>
+                            <%= item.quantidade %> <%= item.nome %>
                           </span>
                           <span class="text-gray-400">
                             R$ <%= Number(item.subtotal).toFixed(2).replace('.', ',') %>

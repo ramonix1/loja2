@@ -159,15 +159,15 @@
     <button class="cw-fechar" id="cw-fechar-btn" aria-label="Fechar chat"></button>
   </div>
 
-  <!-- Tela de inÃcio (pede nome) -->
+  <!-- Tela de incio (pede nome) -->
   <div id="cw-inicio">
-    <p>OlÃ¡! Como podemos te ajudar hoje?<br>Informe seu nome para comeÃ§ar.</p>
+    <p>Olá! Como podemos te ajudar hoje?<br>Informe seu nome para começar.</p>
     <input id="cw-nome-input" type="text" placeholder="Seu nome..." maxlength="60"
       value="<%= locals.usuario?.nome || '' %>">
     <button id="cw-btn-iniciar">Iniciar conversa </button>
   </div>
 
-  <!-- Ãrea de mensagens (oculta atÃ© iniciar) -->
+  <!-- rea de mensagens (oculta até iniciar) -->
   <div id="cw-chat-area" style="display:none;flex:1;flex-direction:column;overflow:hidden;display:none;">
     <div id="cw-mensagens"></div>
     <div id="cw-digitando" class="cw-digitando" style="display:none;"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('robot', 'w-5 h-5') %></span> digitando...</div>
@@ -302,7 +302,7 @@
     if (msg.remetente === 'bot') digitando.style.display = 'none';
     const div = document.createElement('div');
     div.className = `cw-msg ${msg.remetente}`;
-    const label = msg.remetente === 'cliente' ? 'VocÃª' : msg.remetente === 'bot' ? '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('robot', 'w-5 h-5') %></span> Bot' : '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('person', 'w-5 h-5') %></span> Atendente';
+    const label = msg.remetente === 'cliente' ? 'Vocª' : msg.remetente === 'bot' ? '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('robot', 'w-5 h-5') %></span> Bot' : '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('person', 'w-5 h-5') %></span> Atendente';
     div.innerHTML = `<div class="cw-msg-label">${label}</div><div class="cw-msg-balao">${escHtml(msg.conteudo)}</div>`;
     mensagensEl.appendChild(div);
     if (scroll) mensagensEl.scrollTop = mensagensEl.scrollHeight;

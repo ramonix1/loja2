@@ -2,7 +2,7 @@ const db = require('../config/db');
 const BillingService = require('../services/billingService');
 
 /**
- * SUPER ADMIN: Listar planos dispon�veis
+ * SUPER ADMIN: Listar planos disponÃveis
  */
 exports.listPlans = async (req, res) => {
   try {
@@ -37,14 +37,14 @@ exports.assignPlanToTenant = async (req, res) => {
   try {
     // Validar super admin
     if (req.session.user?.email !== 'ramon.oliveira08@gmail.com') {
-      return res.status(403).json({ error: 'Não autorizado' });
+      return res.status(403).json({ error: 'NÃ£o autorizado' });
     }
 
     const { tenantId } = req.params;
     const { planSlug } = req.body;
 
     if (!planSlug) {
-      return res.status(400).json({ error: 'planSlug é obrigatório' });
+      return res.status(400).json({ error: 'planSlug Ã© obrigatÃ³rio' });
     }
 
     // Atribuir plano
@@ -52,7 +52,7 @@ exports.assignPlanToTenant = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Plano atribu�do com sucesso',
+      message: 'Plano atribuÃdo com sucesso',
       billing
     });
   } catch (error) {
@@ -62,7 +62,7 @@ exports.assignPlanToTenant = async (req, res) => {
 };
 
 /**
- * CLIENTE: Ver sua configuração de billing
+ * CLIENTE: Ver sua configuraÃ§Ã£o de billing
  */
 exports.getMyBilling = async (req, res) => {
   try {
@@ -86,7 +86,7 @@ exports.getMyBilling = async (req, res) => {
     `, [tenantId]);
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Configuração de billing não encontrada' });
+      return res.status(404).json({ error: 'ConfiguraÃ§Ã£o de billing nÃ£o encontrada' });
     }
 
     res.json({
@@ -94,12 +94,12 @@ exports.getMyBilling = async (req, res) => {
     });
   } catch (error) {
     console.error('[ERRO] getMyBilling error:', error);
-    res.status(500).json({ error: 'Erro ao buscar configuração de billing' });
+    res.status(500).json({ error: 'Erro ao buscar configuraÃ§Ã£o de billing' });
   }
 };
 
 /**
- * CLIENTE: Ver relatório de faturamento (seu mês)
+ * CLIENTE: Ver relatÃ³rio de faturamento (seu mÃªs)
  */
 exports.getMyBillingReport = async (req, res) => {
   try {
@@ -111,7 +111,7 @@ exports.getMyBillingReport = async (req, res) => {
     res.json(report);
   } catch (error) {
     console.error('[ERRO] getMyBillingReport error:', error);
-    res.status(500).json({ error: 'Erro ao gerar relatório' });
+    res.status(500).json({ error: 'Erro ao gerar relatÃ³rio' });
   }
 };
 
@@ -135,7 +135,7 @@ exports.listMyInvoices = async (req, res) => {
 };
 
 /**
- * CLIENTE: Ver uma invoice espec�fica
+ * CLIENTE: Ver uma invoice especÃfica
  */
 exports.getInvoice = async (req, res) => {
   try {
@@ -149,10 +149,10 @@ exports.getInvoice = async (req, res) => {
     `, [invoiceId, tenantId]);
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Invoice não encontrada' });
+      return res.status(404).json({ error: 'Invoice nÃ£o encontrada' });
     }
 
-    // Se for revenue share, listar as comissões que compõem a invoice
+    // Se for revenue share, listar as comissÃµes que compÃµem a invoice
     const invoice = result.rows[0];
 
     if (invoice.billing_type === 'revenue_share' || invoice.billing_type === 'hybrid') {
@@ -181,13 +181,13 @@ exports.getInvoice = async (req, res) => {
 };
 
 /**
- * SUPER ADMIN: Relatório de receita (todos clientes)
+ * SUPER ADMIN: RelatÃ³rio de receita (todos clientes)
  */
 exports.getRevenueReport = async (req, res) => {
   try {
     // Validar super admin
     if (req.session.user?.email !== 'ramon.oliveira08@gmail.com') {
-      return res.status(403).json({ error: 'Não autorizado' });
+      return res.status(403).json({ error: 'NÃ£o autorizado' });
     }
 
     const { monthYear } = req.query;
@@ -197,7 +197,7 @@ exports.getRevenueReport = async (req, res) => {
     res.json(report);
   } catch (error) {
     console.error('[ERRO] getRevenueReport error:', error);
-    res.status(500).json({ error: 'Erro ao gerar relatório de receita' });
+    res.status(500).json({ error: 'Erro ao gerar relatÃ³rio de receita' });
   }
 };
 
@@ -208,7 +208,7 @@ exports.listAllInvoices = async (req, res) => {
   try {
     // Validar super admin
     if (req.session.user?.email !== 'ramon.oliveira08@gmail.com') {
-      return res.status(403).json({ error: 'Não autorizado' });
+      return res.status(403).json({ error: 'NÃ£o autorizado' });
     }
 
     const { monthYear, status, limit = 50, offset = 0 } = req.query;
@@ -274,7 +274,7 @@ exports.listTenantBillings = async (req, res) => {
   try {
     // Validar super admin
     if (req.session.user?.email !== 'ramon.oliveira08@gmail.com') {
-      return res.status(403).json({ error: 'Não autorizado' });
+      return res.status(403).json({ error: 'NÃ£o autorizado' });
     }
 
     const result = await db.query(`
@@ -304,6 +304,6 @@ exports.listTenantBillings = async (req, res) => {
     });
   } catch (error) {
     console.error('[ERRO] listTenantBillings error:', error);
-    res.status(500).json({ error: 'Erro ao listar configurações de billing' });
+    res.status(500).json({ error: 'Erro ao listar configuraÃ§Ãµes de billing' });
   }
 };

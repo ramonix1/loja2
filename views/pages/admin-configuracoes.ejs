@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ConfiguraÃ§Ãµes - Admin LojÃ£o</title>
+  <title>Configuraçµes - Admin Lojão</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -22,20 +22,20 @@
       <div class="text-xs text-gray-500 mb-1">
         <a href="/admin" class="hover:text-gray-300 transition">Dashboard</a>
         <span class="mx-2">/</span>
-        <span class="text-gray-300">ConfiguraÃ§Ãµes</span>
+        <span class="text-gray-300">Configuraçµes</span>
       </div>
-      <h1 class="text-2xl font-bold text-white"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('settings', 'w-5 h-5') %></span> ConfiguraÃ§Ãµes</h1>
-      <p class="text-gray-400 mt-1 text-sm">Gerencie as opÃ§Ãµes do sistema</p>
+      <h1 class="text-2xl font-bold text-white"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('settings', 'w-5 h-5') %></span> Configuraçµes</h1>
+      <p class="text-gray-400 mt-1 text-sm">Gerencie as opçµes do sistema</p>
     </div>
 
     <% if (salvo) { %>
       <div class="mb-6 bg-green-900/50 border border-green-700 text-green-300 rounded-xl px-4 py-3 text-sm">
-        <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('check', 'w-5 h-5') %></span> ConfiguraÃ§Ãµes salvas com sucesso.
+        <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('check', 'w-5 h-5') %></span> Configuraçµes salvas com sucesso.
       </div>
     <% } %>
     <% if (erro) { %>
       <div class="mb-6 bg-red-900/50 border border-red-700 text-red-300 rounded-xl px-4 py-3 text-sm">
-        <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('error', 'w-5 h-5') %></span> Erro ao salvar configuraÃ§Ãµes.
+        <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('error', 'w-5 h-5') %></span> Erro ao salvar configuraçµes.
       </div>
     <% } %>
 
@@ -45,7 +45,7 @@
       <!-- Estoque -->
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
         <h2 class="text-lg font-bold text-white mb-1"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('package', 'w-5 h-5') %></span> Controle de Estoque</h2>
-        <p class="text-gray-400 text-sm mb-5">Configure como o estoque dos produtos serÃ¡ gerenciado.</p>
+        <p class="text-gray-400 text-sm mb-5">Configure como o estoque dos produtos será gerenciado.</p>
 
         <div class="space-y-5">
 
@@ -63,7 +63,7 @@
               <div class="font-medium text-white text-sm">Ativar controle de estoque</div>
               <div class="text-gray-400 text-xs mt-0.5">
                 Quando ativado, cada produto pode ter uma quantidade em estoque definida.
-                Produtos com estoque zerado serÃ£o marcados como esgotados na vitrine.
+                Produtos com estoque zerado serão marcados como esgotados na vitrine.
               </div>
             </div>
           </label>
@@ -81,10 +81,10 @@
             <div>
               <div class="font-medium text-white text-sm">Reservar estoque ao adicionar ao carrinho</div>
               <div class="text-gray-400 text-xs mt-0.5">
-                <strong>Ativado:</strong> o estoque Ã© bloqueado quando o cliente adiciona ao carrinho,
+                <strong>Ativado:</strong> o estoque é bloqueado quando o cliente adiciona ao carrinho,
                 impedindo que dois clientes comprem o mesmo item simultaneamente.<br>
-                <strong>Desativado:</strong> o estoque sÃ³ Ã© debitado ao concluir o pagamento.
-                Pode haver concorrÃªncia entre clientes, mas o carrinho nÃ£o bloqueia unidades.
+                <strong>Desativado:</strong> o estoque só é debitado ao concluir o pagamento.
+                Pode haver concorrªncia entre clientes, mas o carrinho não bloqueia unidades.
               </div>
             </div>
           </label>
@@ -96,7 +96,7 @@
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
         <h2 class="text-lg font-bold text-white mb-1">³ SumUp</h2>
         <p class="text-gray-400 text-sm mb-5">
-          Habilite apenas se sua conta SumUp tiver o mÃ³dulo de pagamento online ativo.
+          Habilite apenas se sua conta SumUp tiver o módulo de pagamento online ativo.
           Requer <code class="text-xs bg-gray-800 px-1 rounded">SUMUP_API_KEY</code> e
           <code class="text-xs bg-gray-800 px-1 rounded">SUMUP_MERCHANT_CODE</code> configurados no servidor.
         </p>
@@ -111,9 +111,9 @@
                         peer-checked:after:translate-x-5"></div>
           </div>
           <div>
-            <div class="font-medium text-white text-sm">Exibir opÃ§Ã£o de pagamento via SumUp no checkout</div>
+            <div class="font-medium text-white text-sm">Exibir opção de pagamento via SumUp no checkout</div>
             <div class="text-gray-400 text-xs mt-0.5">
-              Quando desativado, a opÃ§Ã£o SumUp nÃ£o aparece para o cliente, mesmo que as credenciais estejam configuradas.
+              Quando desativado, a opção SumUp não aparece para o cliente, mesmo que as credenciais estejam configuradas.
             </div>
           </div>
         </label>
@@ -123,9 +123,9 @@
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
         <h2 class="text-lg font-bold text-white mb-1">Frete</h2>
         <p class="text-gray-400 text-sm mb-5">
-          Configure como o frete serÃ¡ calculado no checkout.
-          Para cÃ¡lculo dinÃmico via <strong>Melhor Envio</strong>, informe o token e o CEP de origem.
-          Caso contrÃ¡rio, use frete fixo ou grÃ¡tis.
+          Configure como o frete será calculado no checkout.
+          Para cálculo dinmico via <strong>Melhor Envio</strong>, informe o token e o CEP de origem.
+          Caso contrário, use frete fixo ou grátis.
         </p>
 
         <div class="space-y-4">
@@ -136,30 +136,30 @@
               <input type="text" name="frete_cep_origem" value="<%= configs.frete_cep_origem || '' %>"
                      placeholder="00000-000" maxlength="9"
                      class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 placeholder-gray-500">
-              <p class="text-xs text-gray-500 mt-1">ObrigatÃ³rio para cÃ¡lculo via Melhor Envio.</p>
+              <p class="text-xs text-gray-500 mt-1">Obrigatório para cálculo via Melhor Envio.</p>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-300 mb-1.5">Frete fixo (R$)</label>
               <input type="number" name="frete_fixo" value="<%= configs.frete_fixo || '0' %>"
                      min="0" step="0.01" placeholder="0.00"
                      class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500">
-              <p class="text-xs text-gray-500 mt-1">Usado quando Melhor Envio nÃ£o estÃ¡ configurado. 0 = grÃ¡tis.</p>
+              <p class="text-xs text-gray-500 mt-1">Usado quando Melhor Envio não está configurado. 0 = grátis.</p>
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-300 mb-1.5">Frete grÃ¡tis acima de (R$)</label>
+            <label class="block text-sm font-medium text-gray-300 mb-1.5">Frete grátis acima de (R$)</label>
             <input type="number" name="frete_gratis_acima" value="<%= configs.frete_gratis_acima || '0' %>"
                    min="0" step="0.01" placeholder="0.00"
                    class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500">
-            <p class="text-xs text-gray-500 mt-1">0 = desativado. Ex: 150 = frete grÃ¡tis em pedidos acima de R$ 150.</p>
+            <p class="text-xs text-gray-500 mt-1">0 = desativado. Ex: 150 = frete grátis em pedidos acima de R$ 150.</p>
           </div>
 
           <div class="border-t border-gray-800 pt-4">
             <h3 class="text-sm font-bold text-gray-200 mb-3">Melhor Envio (opcional)</h3>
             <p class="text-xs text-gray-500 mb-3">
               Cria conta gratuita em <span class="text-gray-400">melhorenvio.com.br</span>, gere um token em
-              <em>ConfiguraÃ§Ãµes  Tokens de acesso</em> e cole abaixo.
+              <em>Configuraçµes  Tokens de acesso</em> e cole abaixo.
             </p>
 
             <div class="space-y-3">
@@ -181,15 +181,15 @@
                 </div>
                 <div>
                   <div class="font-medium text-white text-sm">Usar ambiente sandbox (teste)</div>
-                  <div class="text-gray-400 text-xs">Desative quando for para produÃ§Ã£o.</div>
+                  <div class="text-gray-400 text-xs">Desative quando for para produção.</div>
                 </div>
               </label>
             </div>
           </div>
 
           <div class="border-t border-gray-800 pt-4">
-            <h3 class="text-sm font-bold text-gray-200 mb-3">DimensÃµes e peso padrÃ£o do pacote</h3>
-            <p class="text-xs text-gray-500 mb-3">Usados no cÃ¡lculo quando o produto nÃ£o tem dimensÃµes individuais definidas.</p>
+            <h3 class="text-sm font-bold text-gray-200 mb-3">Dimensµes e peso padrão do pacote</h3>
+            <p class="text-xs text-gray-500 mb-3">Usados no cálculo quando o produto não tem dimensµes individuais definidas.</p>
 
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div>
@@ -222,12 +222,12 @@
         </div>
       </div>
 
-      <!-- MÃ³dulo Agenda -->
+      <!-- Módulo Agenda -->
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h2 class="text-lg font-bold text-white mb-1">MÃ³dulo Agenda (Buffet)</h2>
+        <h2 class="text-lg font-bold text-white mb-1">Módulo Agenda (Buffet)</h2>
         <p class="text-gray-400 text-sm mb-5">
           Quando ativado, o cliente precisa escolher uma data de evento no checkout.
-          Configure as vagas e dias disponÃveis em <a href="/admin/agenda" class="text-blue-400 hover:underline">Agenda</a>.
+          Configure as vagas e dias disponveis em <a href="/admin/agenda" class="text-blue-400 hover:underline">Agenda</a>.
         </p>
 
         <label class="flex items-start gap-4 cursor-pointer group">
@@ -240,10 +240,10 @@
                         peer-checked:after:translate-x-5"></div>
           </div>
           <div>
-            <div class="font-medium text-white text-sm">Ativar mÃ³dulo de agendamento</div>
+            <div class="font-medium text-white text-sm">Ativar módulo de agendamento</div>
             <div class="text-gray-400 text-xs mt-0.5">
-              Exibe um calendÃ¡rio no checkout para o cliente selecionar a data do evento.
-              Bloqueia a compra se nÃ£o houver vagas disponÃveis no dia escolhido.
+              Exibe um calendário no checkout para o cliente selecionar a data do evento.
+              Bloqueia a compra se não houver vagas disponveis no dia escolhido.
             </div>
           </div>
         </label>
@@ -252,11 +252,11 @@
         <div class="flex gap-3 items-center">
         <button type="submit"
           class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg text-sm font-semibold transition">
-          ¾ Salvar ConfiguraÃ§Ãµes
+          ¾ Salvar Configuraçµes
         </button>
         <a href="/admin/diagnostico"
            class="text-sm text-gray-400 hover:text-white transition">
-          § DiagnÃ³stico de pagamentos 
+          § Diagnóstico de pagamentos 
         </a>
       </div>
     </form>

@@ -1,12 +1,12 @@
-// Testes unitários para relatorioController
-describe('Relatorio Controller � SQL Injection Prevention', () => {
+// Testes unitÃ¡rios para relatorioController
+describe('Relatorio Controller  SQL Injection Prevention', () => {
 
-  test('FILTROS_ESTOQUE_VALIDOS contém whitelist segura', () => {
-    // Este é um teste conceitual para documenta a validação
+  test('FILTROS_ESTOQUE_VALIDOS contÃ©m whitelist segura', () => {
+    // Este Ã© um teste conceitual para documenta a validaÃ§Ã£o
     const validFiltros = ['todos', 'esgotado', 'baixo', 'ok', 'ilimitado'];
 
     validFiltros.forEach(filtro => {
-      // Todos os filtros válidos não contêm SQL malicioso
+      // Todos os filtros vÃ¡lidos nÃ£o contÃªm SQL malicioso
       expect(filtro).toMatch(/^[a-z]+$/);
     });
   });
@@ -29,13 +29,13 @@ describe('Relatorio Controller � SQL Injection Prevention', () => {
   });
 
   describe('Data Parsing', () => {
-    test('parseDatas com datas válidas', () => {
+    test('parseDatas com datas vÃ¡lidas', () => {
       const query = {
         inicio: '2026-01-01',
         fim: '2026-05-20',
       };
 
-      // Simulação de parseDatas
+      // SimulaÃ§Ã£o de parseDatas
       const dataInicio = new Date(query.inicio + 'T00:00:00');
       const dataFim = new Date(query.fim + 'T23:59:59');
 
@@ -49,7 +49,7 @@ describe('Relatorio Controller � SQL Injection Prevention', () => {
       expect(dataFim.getDate()).toBe(20);
     });
 
-    test('parseDatas usa 30 dias atrás como padrão', () => {
+    test('parseDatas usa 30 dias atrÃ¡s como padrÃ£o', () => {
       const hoje = new Date();
       const inicio30 = new Date(hoje);
       inicio30.setDate(inicio30.getDate() - 29);
@@ -59,7 +59,7 @@ describe('Relatorio Controller � SQL Injection Prevention', () => {
   });
 
   describe('STATUS_LABEL constants', () => {
-    test('contém todos os status de pedido esperados', () => {
+    test('contÃ©m todos os status de pedido esperados', () => {
       const expectedStatus = [
         'aguardando_pagamento',
         'pago',
@@ -69,7 +69,7 @@ describe('Relatorio Controller � SQL Injection Prevention', () => {
         'cancelado',
       ];
 
-      // Todos os status devem ter labels leg�veis
+      // Todos os status devem ter labels legÃveis
       expectedStatus.forEach(status => {
         expect(typeof status).toBe('string');
         expect(status.length).toBeGreaterThan(0);

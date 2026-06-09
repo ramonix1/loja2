@@ -2,8 +2,8 @@ const db = require('../config/db');
 
 class BillingService {
   /**
-   * Registrar uma transação de comissão quando pedido é criado
-   * Chamado quando novo pedido é confirmado
+   * Registrar uma transaÃ§Ã£o de comissÃ£o quando pedido Ã© criado
+   * Chamado quando novo pedido Ã© confirmado
    */
   static async recordCommissionOnOrder(tenantId, pedidoId, orderTotal) {
     try {
@@ -16,13 +16,13 @@ class BillingService {
       `, [tenantId]);
 
       if (billing.rows.length === 0) {
-        console.log(` Tenant ${tenantId} não tem billing configurado`);
+        console.log(` Tenant ${tenantId} nÃ£o tem billing configurado`);
         return null;
       }
 
       const config = billing.rows[0];
 
-      // Se não tem comissão, não registra
+      // Se nÃ£o tem comissÃ£o, nÃ£o registra
       if (!config.commission_percentage || config.commission_percentage === 0) {
         return null;
       }
@@ -30,7 +30,7 @@ class BillingService {
       const commissionAmount = (orderTotal * config.commission_percentage) / 100;
       const monthYear = new Date().toISOString().slice(0, 7); // '2026-05'
 
-      // Registrar transação de comissão
+      // Registrar transaÃ§Ã£o de comissÃ£o
       const result = await db.query(`
         INSERT INTO commission_transactions
         (tenant_id, pedido_id, order_total, commission_percentage, commission_amount, month_year, status)
@@ -38,17 +38,17 @@ class BillingService {
         RETURNING *
       `, [tenantId, pedidoId, orderTotal, config.commission_percentage, commissionAmount, monthYear]);
 
-      console.log(`[OK] Comissão registrada: ${commissionAmount.toFixed(2)} para tenant ${tenantId}`);
+      console.log(`[OK] ComissÃ£o registrada: ${commissionAmount.toFixed(2)} para tenant ${tenantId}`);
       return result.rows[0];
     } catch (error) {
-      console.error('[ERRO] Erro ao registrar comissão:', error);
+      console.error('[ERRO] Erro ao registrar comissÃ£o:', error);
       throw error;
     }
   }
 
   /**
    * Gerar invoice mensal para um tenant
-   * Deve ser chamado no in�cio de cada mês
+   * Deve ser chamado no inÃcio de cada mÃªs
    */
   static async generateMonthlyInvoice(tenantId, monthYear) {
     try {
@@ -66,7 +66,7 @@ class BillingService {
         `, [tenantId]);
 
         if (billing.rows.length === 0) {
-          throw new Error('Billing não configurado para este tenant');
+          throw new Error('Billing nÃ£o configurado para este tenant');
         }
 
         const config = billing.rows[0];
@@ -86,7 +86,7 @@ class BillingService {
           invoiceData.subtotal = config.price;
           invoiceData.total = config.price;
         } else if (config.billing_type === 'revenue_share') {
-          // Somar comissões do mês
+          // Somar comissÃµes do mÃªs
           const commissions = await client.query(`
             SELECT
               SUM(order_total) as total_sales,
@@ -106,7 +106,7 @@ class BillingService {
             invoiceData.total = invoiceData.commissionAmount;
           }
         } else if (config.billing_type === 'hybrid') {
-          // Mensal + comissão
+          // Mensal + comissÃ£o
           invoiceData.monthlyFee = config.price;
 
           const commissions = await client.query(`
@@ -151,7 +151,7 @@ class BillingService {
           invoiceData.total
         ]);
 
-        // Marcar comissões como invoiced
+        // Marcar comissÃµes como invoiced
         await client.query(`
           UPDATE commission_transactions
           SET status = 'invoiced', invoice_id = $1
@@ -186,12 +186,12 @@ class BillingService {
       );
 
       if (plan.rows.length === 0) {
-        throw new Error('Plano não encontrado');
+        throw new Error('Plano nÃ£o encontrado');
       }
 
       const planData = plan.rows[0];
 
-      // Criar configuração de billing
+      // Criar configuraÃ§Ã£o de billing
       const result = await db.query(`
         INSERT INTO tenant_billing
         (tenant_id, plan_id, billing_type, monthly_fee, commission_percentage, next_billing_date, status)
@@ -211,7 +211,7 @@ class BillingService {
         planData.commission_percentage
       ]);
 
-      console.log(`[OK] Plano ${planSlug} atribu�do ao tenant ${tenantId}`);
+      console.log(`[OK] Plano ${planSlug} atribuÃdo ao tenant ${tenantId}`);
       return result.rows[0];
     } catch (error) {
       console.error('[ERRO] Erro ao atribuir plano:', error);
@@ -220,7 +220,7 @@ class BillingService {
   }
 
   /**
-   * Obter relatório de faturamento
+   * Obter relatÃ³rio de faturamento
    */
   static async getBillingReport(tenantId, monthYear = null) {
     try {
@@ -268,7 +268,7 @@ class BillingService {
         }
       };
     } catch (error) {
-      console.error('[ERRO] Erro ao gerar relatório:', error);
+      console.error('[ERRO] Erro ao gerar relatÃ³rio:', error);
       throw error;
     }
   }
@@ -349,7 +349,7 @@ class BillingService {
   }
 
   /**
-   * Gerar número de invoice único
+   * Gerar nÃºmero de invoice Ãºnico
    */
   static generateInvoiceNumber(tenantId, monthYear) {
     // Formato: INV-2026-05-abc123 (INV-YYYY-MM-TENANTID)

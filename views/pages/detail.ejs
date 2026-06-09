@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= produto.nome %> - LojÃ£o</title>
+  <title><%= produto.nome %> - Lojão</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -48,12 +48,12 @@
         <% } %>
       </div>
 
-      <!-- AVALIAÃÃES -->
+      <!-- AVALIAES -->
       <div style="display:flex; align-items:center; gap:8px; color:#f59e0b;">
-         <span style="color:#9ca3af; font-size:13px;">(124 avaliaÃ§Ãµes)</span>
+         <span style="color:#9ca3af; font-size:13px;">(124 avaliaçµes)</span>
       </div>
 
-      <!-- PREÃO -->
+      <!-- PREO -->
       <div style="font-size:38px; font-weight:900; color:#2563eb;">
         R$ <%= Number(produto.valor).toFixed(2).replace('.', ',') %>
       </div>
@@ -66,7 +66,7 @@
           </div>
         <% } else if (produto.estoque <= 5) { %>
           <div style="display:inline-block; background:#fef3c7; color:#d97706; font-size:13px; font-weight:700; padding:4px 12px; border-radius:20px;">
-            Ãltimas <%= produto.estoque %> unidade<%= produto.estoque > 1 ? 's' : '' %> disponÃvel<%= produto.estoque > 1 ? 'is' : '' %>
+            ltimas <%= produto.estoque %> unidade<%= produto.estoque > 1 ? 's' : '' %> disponvel<%= produto.estoque > 1 ? 'is' : '' %>
           </div>
         <% } else { %>
           <div style="display:inline-block; background:#dcfce7; color:#16a34a; font-size:13px; font-weight:600; padding:4px 12px; border-radius:20px;">
@@ -75,7 +75,7 @@
         <% } %>
       <% } %>
 
-      <!-- DESCRIÃÃO -->
+      <!-- DESCRIO -->
       <% if(produto.descricao){ %>
         <p class="produto-descricao"><%= produto.descricao %></p>
       <% } %>
@@ -91,7 +91,7 @@
         </div>
       </div>
 
-      <!-- BOTÃES -->
+      <!-- BOTES -->
       <% const esgotadoDetalhe = locals.configs && locals.configs.controla_estoque === 'true' && produto.estoque !== null && produto.estoque !== undefined && produto.estoque <= 0; %>
       <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:8px;">
         <% if (esgotadoDetalhe) { %>
@@ -108,7 +108,7 @@
           <span>Frete calculado no checkout</span>
         </div>
         <div style="display:flex; align-items:center; gap:8px; font-size:14px; color:#4b5563;">
-           <span>Troca garantida em atÃ© 7 dias</span>
+           <span>Troca garantida em até 7 dias</span>
         </div>
         <div style="display:flex; align-items:center; gap:8px; font-size:14px; color:#4b5563;">
           <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('lock', 'w-5 h-5') %></span> <span>Pagamento 100% seguro</span>

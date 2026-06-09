@@ -31,7 +31,7 @@ exports.adicionarItem = async (req, res) => {
 
   try {
     const prod = await req.db.query('SELECT id, valor, estoque FROM produtos WHERE id = $1', [produto_id]);
-    if (!prod.rows[0]) return res.status(404).json({ erro: 'Produto não encontrado.' });
+    if (!prod.rows[0]) return res.status(404).json({ erro: 'Produto nÃ£o encontrado.' });
 
     // Verificar estoque se o controle estiver ativo
     const configRes = await req.db.query(
@@ -45,7 +45,7 @@ exports.adicionarItem = async (req, res) => {
       const estoqueDisponivel = prod.rows[0].estoque;
 
       if (cfgMap.reservar_estoque_carrinho === 'true') {
-        // Conta itens já em todos os carrinhos para este produto
+        // Conta itens jÃ¡ em todos os carrinhos para este produto
         const reservadoRes = await req.db.query(
           'SELECT COALESCE(SUM(quantidade), 0) AS total FROM carrinho_itens WHERE produto_id = $1',
           [produto_id]
@@ -53,7 +53,7 @@ exports.adicionarItem = async (req, res) => {
         const reservado = parseInt(reservadoRes.rows[0].total);
         if (reservado + qtd > estoqueDisponivel) {
           const disponivel = Math.max(0, estoqueDisponivel - reservado);
-          return res.status(400).json({ erro: disponivel === 0 ? 'Produto esgotado.' : `Apenas ${disponivel} unidade(s) dispon�vel(is).` });
+          return res.status(400).json({ erro: disponivel === 0 ? 'Produto esgotado.' : `Apenas ${disponivel} unidade(s) disponÃvel(is).` });
         }
       } else {
         if (estoqueDisponivel <= 0) {
@@ -66,7 +66,7 @@ exports.adicionarItem = async (req, res) => {
         );
         const noCarrinho = parseInt(noCarrinhoRes.rows[0]?.qtd || 0);
         if (noCarrinho + qtd > estoqueDisponivel) {
-          return res.status(400).json({ erro: `Apenas ${Math.max(0, estoqueDisponivel - noCarrinho)} unidade(s) dispon�vel(is).` });
+          return res.status(400).json({ erro: `Apenas ${Math.max(0, estoqueDisponivel - noCarrinho)} unidade(s) disponÃvel(is).` });
         }
       }
     }

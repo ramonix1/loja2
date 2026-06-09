@@ -56,11 +56,11 @@
           <div>
             <div class="text-5xl mb-3"></div>
             <p class="text-gray-400 font-medium">Selecione uma conversa</p>
-            <p class="text-gray-600 text-sm mt-1">Clique em uma conversa Ã esquerda para visualizar</p>
+            <p class="text-gray-600 text-sm mt-1">Clique em uma conversa  esquerda para visualizar</p>
           </div>
         </div>
 
-        <!-- Chat ativo (hidden por padrÃ£o) -->
+        <!-- Chat ativo (hidden por padrão) -->
         <div id="chat-ativo" class="flex-1 flex flex-col hidden overflow-hidden">
           <!-- Header da conversa -->
           <div class="px-5 py-3 border-b border-gray-800 flex items-center justify-between flex-shrink-0">
@@ -103,13 +103,13 @@
   </main>
 </div>
 
-<!-- Modal: ConfiguraÃ§Ã£o do Bot -->
+<!-- Modal: Configuração do Bot -->
 <div id="modal-bot" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
   <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
     <div class="p-6 border-b border-gray-800 flex justify-between items-center">
       <div>
-        <h2 class="text-lg font-bold"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('robot', 'w-5 h-5') %></span> ConfiguraÃ§Ã£o do Bot</h2>
-        <p class="text-xs text-gray-400 mt-0.5">Separe mÃºltiplas palavras-chave por vÃrgula (ex: preÃ§o, valor, quanto custa)</p>
+        <h2 class="text-lg font-bold"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('robot', 'w-5 h-5') %></span> Configuração do Bot</h2>
+        <p class="text-xs text-gray-400 mt-0.5">Separe mºltiplas palavras-chave por vrgula (ex: preço, valor, quanto custa)</p>
       </div>
       <button id="fechar-modal-bot" class="text-gray-500 hover:text-white text-xl"></button>
     </div>
@@ -138,19 +138,19 @@
         <% } %>
       </div>
 
-      <!-- FormulÃ¡rio novo/editar -->
+      <!-- Formulário novo/editar -->
       <div class="bg-gray-800 rounded-xl p-4">
-        <h3 id="form-bot-titulo" class="text-sm font-semibold mb-3">+ Nova resposta automÃ¡tica</h3>
+        <h3 id="form-bot-titulo" class="text-sm font-semibold mb-3">+ Nova resposta automática</h3>
         <input type="hidden" id="bot-edit-id" value="">
         <div class="space-y-3">
           <div>
-            <label class="text-xs text-gray-400 block mb-1">Palavras-chave (separadas por vÃrgula)</label>
-            <input id="bot-kw-input" type="text" placeholder="ex: preÃ§o, valor, quanto custa"
+            <label class="text-xs text-gray-400 block mb-1">Palavras-chave (separadas por vrgula)</label>
+            <input id="bot-kw-input" type="text" placeholder="ex: preço, valor, quanto custa"
               class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500">
           </div>
           <div>
             <label class="text-xs text-gray-400 block mb-1">Resposta do bot</label>
-            <textarea id="bot-resp-input" rows="3" placeholder="Digite a resposta automÃ¡tica..."
+            <textarea id="bot-resp-input" rows="3" placeholder="Digite a resposta automática..."
               class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none"></textarea>
           </div>
           <div class="flex gap-2">
@@ -182,7 +182,7 @@ socket.on('admin:nova_conversa', (conversa) => {
 });
 
 socket.on('admin:nova_mensagem', ({ conversa_id, mensagem }) => {
-  // Atualiza contador se nÃ£o for a conversa ativa
+  // Atualiza contador se não for a conversa ativa
   if (conversaAtiva?.id !== conversa_id) {
     const c = conversas.find(c => c.id === conversa_id);
     if (c) {
@@ -309,7 +309,7 @@ function atualizarHeaderConversa() {
     btnLiberarBot.classList.add('hidden');
     btnEncerrar.classList.remove('hidden');
   } else {
-    badge.innerHTML = '<span class="text-yellow-400"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('user', 'w-5 h-5') %></span> VocÃª estÃ¡ respondendo</span>';
+    badge.innerHTML = '<span class="text-yellow-400"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('user', 'w-5 h-5') %></span> Vocª está respondendo</span>';
     btnAssumir.classList.add('hidden');
     btnLiberarBot.classList.remove('hidden');
     btnEncerrar.classList.remove('hidden');
@@ -371,7 +371,7 @@ function adicionarMensagem(msg, scroll = true) {
   div.innerHTML = `
     <div class="max-w-xs lg:max-w-md">
       <div class="text-xs text-gray-500 mb-1 ${isAdmin ? 'text-right' : ''}">
-        ${isCliente ? '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('user', 'w-5 h-5') %></span> Cliente' : isBot ? '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('robot', 'w-5 h-5') %></span> Bot' : '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('person', 'w-5 h-5') %></span> VocÃª'}
+        ${isCliente ? '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('user', 'w-5 h-5') %></span> Cliente' : isBot ? '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('robot', 'w-5 h-5') %></span> Bot' : '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('person', 'w-5 h-5') %></span> Vocª'}
         Â ${formatarHora(msg.created_at)}
       </div>
       <div class="px-4 py-2.5 rounded-2xl text-sm text-white ${isAdmin ? 'msg-admin rounded-tr-sm' : isBot ? 'msg-bot rounded-tl-sm' : 'msg-cliente rounded-tl-sm'}">
@@ -459,11 +459,11 @@ function limparFormBot() {
   document.getElementById('bot-edit-id').value = '';
   document.getElementById('bot-kw-input').value = '';
   document.getElementById('bot-resp-input').value = '';
-  document.getElementById('form-bot-titulo').textContent = '+ Nova resposta automÃ¡tica';
+  document.getElementById('form-bot-titulo').textContent = '+ Nova resposta automática';
   document.getElementById('btn-cancelar-bot').classList.add('hidden');
 }
 
-// Editar / excluir bot respostas (delegaÃ§Ã£o de eventos)
+// Editar / excluir bot respostas (delegação de eventos)
 document.getElementById('lista-bot-respostas').addEventListener('click', async (e) => {
   const item = e.target.closest('.bot-item');
   if (!item) return;
@@ -478,7 +478,7 @@ document.getElementById('lista-bot-respostas').addEventListener('click', async (
   }
 
   if (e.target.classList.contains('btn-del-bot')) {
-    if (!confirm('Excluir esta resposta automÃ¡tica?')) return;
+    if (!confirm('Excluir esta resposta automática?')) return;
     const r = await fetch(`/admin/chat/api/bot-respostas/${id}`, {
       method: 'DELETE',
       headers: { 'x-csrf-token': csrfToken },

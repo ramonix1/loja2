@@ -21,8 +21,8 @@ exports.exibirConfiguracoes = async (req, res) => {
       erro: req.query.erro === '1',
     });
   } catch (err) {
-    console.error('Erro configurações:', err);
-    res.status(500).render('pages/error', { message: 'Erro ao carregar configurações' });
+    console.error('Erro configuraÃ§Ãµes:', err);
+    res.status(500).render('pages/error', { message: 'Erro ao carregar configuraÃ§Ãµes' });
   }
 };
 
@@ -67,7 +67,7 @@ exports.diagnostico = async (req, res) => {
     dica: appUrl ? null : 'Configure no .env: APP_URL=https://sua-url.ngrok-free.app',
   });
 
-  // Testar MP API � qualquer resposta da API (mesmo 404) significa token válido
+  // Testar MP API  qualquer resposta da API (mesmo 404) significa token vÃ¡lido
   let mpApiOk = false, mpApiErro = null;
   if (mpToken) {
     try {
@@ -77,11 +77,11 @@ exports.diagnostico = async (req, res) => {
       await p.get({ id: '1' }).catch(e => {
         const status = e.statusCode || e.status || (e.cause?.status);
         const msg = (e.message || '').toLowerCase();
-        // 404 / "not found" / "payment not found" = API acess�vel, token válido
+        // 404 / "not found" / "payment not found" = API acessÃvel, token vÃ¡lido
         if (status === 404 || msg.includes('not found') || msg.includes('payment')) {
           mpApiOk = true;
         } else if (status === 401 || status === 403) {
-          mpApiErro = `Token inválido (HTTP ${status})`;
+          mpApiErro = `Token invÃ¡lido (HTTP ${status})`;
         } else {
           mpApiOk = true; // qualquer outra resposta = conectou
         }
@@ -92,9 +92,9 @@ exports.diagnostico = async (req, res) => {
     }
   }
   resultados.push({
-    nome: 'Conexão MP API',
+    nome: 'ConexÃ£o MP API',
     ok: mpApiOk,
-    valor: mpApiOk ? 'OK � token válido, API acess�vel' : (mpApiErro || 'Não testado'),
+    valor: mpApiOk ? 'OK  token vÃ¡lido, API acessÃvel' : (mpApiErro || 'NÃ£o testado'),
     dica: !mpApiOk && mpToken ? `Erro: ${mpApiErro}` : null,
   });
 
@@ -110,14 +110,14 @@ exports.diagnostico = async (req, res) => {
       if (!sumupApiOk) sumupApiOk = true;
     } catch (e) {
       sumupApiErro = e.message || String(e);
-      if (e.statusCode === 401 || e.statusCode === 403) sumupApiErro = `Token inválido (${e.statusCode})`;
+      if (e.statusCode === 401 || e.statusCode === 403) sumupApiErro = `Token invÃ¡lido (${e.statusCode})`;
       else if (e.statusCode === 404) sumupApiOk = true;
     }
   }
   resultados.push({
-    nome: 'Conexão SumUp API',
+    nome: 'ConexÃ£o SumUp API',
     ok: sumupApiOk,
-    valor: sumupApiOk ? 'OK � API respondeu' : (sumupApiErro || 'Não testado'),
+    valor: sumupApiOk ? 'OK  API respondeu' : (sumupApiErro || 'NÃ£o testado'),
     dica: !sumupApiOk && sumupKey ? `Erro: ${sumupApiErro}` : null,
   });
 
@@ -155,7 +155,7 @@ exports.salvarConfiguracoes = async (req, res) => {
     }
     res.redirect('/admin/configuracoes?salvo=1');
   } catch (err) {
-    console.error('Erro ao salvar configurações:', err);
+    console.error('Erro ao salvar configuraÃ§Ãµes:', err);
     res.redirect('/admin/configuracoes?erro=1');
   }
 };

@@ -1,6 +1,6 @@
 const { getConfigs } = require('./configController');
 
-// ValidaÃ§Ã£o segura de filtros de estoque
+// ValidaÃƒÂ§ÃƒÂ£o segura de filtros de estoque
 const FILTROS_ESTOQUE_VALIDOS = {
   todos: '',
   esgotado: 'WHERE p.estoque = 0',
@@ -12,7 +12,7 @@ const FILTROS_ESTOQUE_VALIDOS = {
 const STATUS_LABEL = {
   aguardando_pagamento: 'Aguardando pagamento',
   pago: 'Pago',
-  em_separacao: 'Em separaÃ§Ã£o',
+  em_separacao: 'Em separaÃƒÂ§ÃƒÂ£o',
   enviado: 'Enviado',
   entregue: 'Entregue',
   cancelado: 'Cancelado',
@@ -41,7 +41,7 @@ function fmtMoeda(v) {
   return 'R$ ' + Number(v || 0).toFixed(2).replace('.', ',');
 }
 
-// €€ GET /admin/relatorios €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
+// Â€Â€ GET /admin/relatorios Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€
 exports.index = async (req, res) => {
   const aba = req.query.aba || 'vendas';
   const { dataInicio, dataFim } = parseDatas(req.query);
@@ -83,7 +83,7 @@ exports.index = async (req, res) => {
   });
 };
 
-// €€ GET /admin/relatorios/csv/:tipo €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
+// Â€Â€ GET /admin/relatorios/csv/:tipo Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€
 exports.exportarCsv = async (req, res) => {
   const { tipo } = req.params;
   const { dataInicio, dataFim } = parseDatas(req.query);
@@ -118,7 +118,7 @@ exports.exportarCsv = async (req, res) => {
         ['Produto', 'Categoria', 'Estoque', 'Status'],
         ...d.produtos.map(p => [
           p.nome,
-          p.categoria_nome || '€',
+          p.categoria_nome || 'Â€',
           p.estoque !== null ? p.estoque : 'Ilimitado',
           p.estoque === null ? 'Sem controle' : p.estoque === 0 ? 'Esgotado' : p.estoque <= 5 ? 'Estoque baixo' : 'OK',
         ]),
@@ -134,7 +134,7 @@ exports.exportarCsv = async (req, res) => {
           fmtDate(p.created_at),
           p.nome_entrega,
           STATUS_LABEL[p.status] || p.status,
-          p.codigo_rastreio || '€',
+          p.codigo_rastreio || 'Â€',
           `${p.cidade || ''}/${p.estado || ''}`,
           p.total,
         ]),
@@ -152,7 +152,7 @@ exports.exportarCsv = async (req, res) => {
     } else if (tipo === 'financeiro') {
       const d = await getDadosFinanceiro(db, dataInicio, dataFim);
       linhas = [
-        ['MÃ©todo de Pagamento', 'Pedidos', 'Receita (R$)'],
+        ['MÃƒÂ©todo de Pagamento', 'Pedidos', 'Receita (R$)'],
         ...d.porMetodo.map(m => [m.metodo_pagamento || 'N/A', m.total_pedidos, m.receita]),
         [], ['Data', 'Pedidos', 'Receita (R$)'],
         ...d.porDia.map(d => [fmtDate(d.dia), d.total_pedidos, d.receita]),
@@ -162,7 +162,7 @@ exports.exportarCsv = async (req, res) => {
     } else if (tipo === 'clientes') {
       const d = await getDadosClientes(db, dataInicio, dataFim);
       linhas = [
-        ['Cliente', 'E-mail', 'Pedidos', 'Total Gasto (R$)', 'Ãltimo Pedido'],
+        ['Cliente', 'E-mail', 'Pedidos', 'Total Gasto (R$)', 'Ãƒltimo Pedido'],
         ...d.topClientes.map(c => [c.nome, c.email, c.total_pedidos, c.total_gasto, fmtDate(c.ultimo_pedido)]),
       ];
       filename = `clientes_${dataInicio.toISOString().slice(0,10)}_${dataFim.toISOString().slice(0,10)}`;
@@ -187,7 +187,7 @@ exports.exportarCsv = async (req, res) => {
       filename = `agendamentos_${dataInicio.toISOString().slice(0,10)}_${dataFim.toISOString().slice(0,10)}`;
     }
 
-    const BOM = '»¿';
+    const BOM = 'Â»Â¿';
     const csv = BOM + linhas
       .map(l => l.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(';'))
       .join('\n');
@@ -202,7 +202,7 @@ exports.exportarCsv = async (req, res) => {
   }
 };
 
-// €€ Dados por relatÃ³rio €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
+// Â€Â€ Dados por relatÃƒÂ³rio Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€
 
 async function getDadosVendas(db, dataInicio, dataFim) {
   const [pedidosRes, resumoRes, porDiaRes] = await Promise.all([
@@ -254,10 +254,10 @@ async function getDadosVendas(db, dataInicio, dataFim) {
 }
 
 async function getDadosEstoque(db, filtro) {
-  // Whitelist validation € rejeita valores nÃ£o esperados
+  // Whitelist validation Â€ rejeita valores nÃƒÂ£o esperados
   const condicao = FILTROS_ESTOQUE_VALIDOS[filtro] || FILTROS_ESTOQUE_VALIDOS['todos'];
   if (!FILTROS_ESTOQUE_VALIDOS.hasOwnProperty(filtro)) {
-    console.warn(` Filtro de estoque invÃ¡lido recebido: ${filtro}`);
+    console.warn(` Filtro de estoque invÃƒÂ¡lido recebido: ${filtro}`);
   }
 
   const [produtosRes, resumoRes] = await Promise.all([
@@ -450,7 +450,7 @@ async function getDadosAgendamentos(db, dataInicio, dataFim) {
         p.telefone_entrega AS telefone,
         u.id AS usuario_id,
         COALESCE(
-          STRING_AGG(pi.nome_produto || ' Ã—' || pi.quantidade, ', '),
+          STRING_AGG(pi.nome_produto || ' ÃƒÂ—' || pi.quantidade, ', '),
           ''
         ) AS produtos
       FROM agendamentos a

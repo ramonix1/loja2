@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meu Carrinho  LojÃ£o</title>
+  <title>Meu Carrinho  Lojão</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
     .carrinho-wrap { max-width: 1100px; margin: 40px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; align-items: start; }
@@ -76,7 +76,7 @@
   <% if (itens.length === 0) { %>
     <div class="carrinho-vazio">
       <div class="icon"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('shopping_cart', 'w-5 h-5') %></span></div>
-      <h2>Seu carrinho estÃ¡ vazio</h2>
+      <h2>Seu carrinho está vazio</h2>
       <p style="margin-bottom:20px;">Explore nossa vitrine e adicione produtos.</p>
       <a href="/" class="btn btn-primary" style="display:inline-block;padding:12px 28px;">Ver produtos</a>
     </div>
@@ -159,7 +159,7 @@
     }
   }
 
-  // BotÃµes de incremento/decremento
+  // Botµes de incremento/decremento
   document.querySelectorAll('.qty-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var id = this.dataset.id;

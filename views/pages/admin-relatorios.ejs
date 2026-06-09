@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RelatÃ³rios - Admin</title>
+  <title>Relatórios - Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -24,16 +24,16 @@
 
   <main class="ml-60 flex-1 p-8">
 
-    <!-- CabeÃ§alho -->
+    <!-- Cabeçalho -->
     <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
       <div>
         <div class="text-xs text-gray-500 mb-1">
           <a href="/admin" class="hover:text-gray-300 transition">Dashboard</a>
           <span class="mx-2">/</span>
-          <span class="text-gray-300">RelatÃ³rios</span>
+          <span class="text-gray-300">Relatórios</span>
         </div>
-        <h1 class="text-2xl font-bold text-white flex items-center gap-2"><span style="display:flex;align-items:center;width:24px;height:24px;"><%- icon('chart', 'w-6 h-6') %></span> RelatÃ³rios</h1>
-        <p class="text-gray-400 mt-1 text-sm">VisÃ£o analÃtica do negÃ³cio</p>
+        <h1 class="text-2xl font-bold text-white flex items-center gap-2"><span style="display:flex;align-items:center;width:24px;height:24px;"><%- icon('chart', 'w-6 h-6') %></span> Relatórios</h1>
+        <p class="text-gray-400 mt-1 text-sm">Visão analtica do negócio</p>
       </div>
       <div class="flex gap-2 no-print">
         <button onclick="window.print()"
@@ -52,7 +52,7 @@
     <form method="GET" action="/admin/relatorios" class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-4 mb-6 flex flex-wrap gap-3 items-end no-print">
       <input type="hidden" name="aba" value="<%= aba %>">
       <div>
-        <label class="block text-xs text-gray-400 mb-1">InÃcio</label>
+        <label class="block text-xs text-gray-400 mb-1">Incio</label>
         <input type="date" name="inicio" value="<%= dataInicio %>"
           class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
       </div>
@@ -92,7 +92,7 @@
     <!-- Erro -->
     <% if (dados.erro) { %>
       <div class="bg-red-900/30 border border-red-700 text-red-300 rounded-xl px-5 py-4 mb-6">
-        Erro ao carregar relatÃ³rio: <%= dados.erro %>
+        Erro ao carregar relatório: <%= dados.erro %>
       </div>
     <% } %>
 
@@ -113,7 +113,7 @@
           <div class="text-2xl font-bold text-green-400">R$ <%= Number(dados.resumo.receita_confirmada).toFixed(2).replace('.', ',') %></div>
         </div>
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <div class="text-xs text-gray-500 mb-1">Ticket MÃ©dio</div>
+          <div class="text-xs text-gray-500 mb-1">Ticket Médio</div>
           <div class="text-2xl font-bold text-blue-400">R$ <%= Number(dados.resumo.ticket_medio).toFixed(2).replace('.', ',') %></div>
         </div>
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
@@ -122,7 +122,7 @@
         </div>
       </div>
 
-      <!-- GrÃ¡fico por dia -->
+      <!-- Gráfico por dia -->
       <% if (dados.porDia && dados.porDia.length > 0) { %>
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-6">
         <h3 class="text-sm font-semibold text-white mb-4">Receita por Dia</h3>
@@ -153,9 +153,9 @@
 
       <!-- Tabela de pedidos -->
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-        <h3 class="text-sm font-semibold text-white mb-4">Pedidos no PerÃodo</h3>
+        <h3 class="text-sm font-semibold text-white mb-4">Pedidos no Perodo</h3>
         <% if (dados.pedidos.length === 0) { %>
-          <p class="text-gray-500 text-sm text-center py-8">Nenhum pedido no perÃodo selecionado.</p>
+          <p class="text-gray-500 text-sm text-center py-8">Nenhum pedido no perodo selecionado.</p>
         <% } else { %>
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
@@ -338,9 +338,9 @@
               <tr class="border-b border-gray-800 text-xs text-gray-500 uppercase tracking-wider">
                 <th class="pb-2 text-left">#</th>
                 <th class="pb-2 text-left">Data</th>
-                <th class="pb-2 text-left">DestinatÃ¡rio</th>
+                <th class="pb-2 text-left">Destinatário</th>
                 <th class="pb-2 text-left">Cidade/UF</th>
-                <th class="pb-2 text-left">ServiÃ§o</th>
+                <th class="pb-2 text-left">Serviço</th>
                 <th class="pb-2 text-left">Rastreio</th>
                 <th class="pb-2 text-right">Total</th>
                 <th class="pb-2 text-left">Status</th>
@@ -406,7 +406,7 @@
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
           <h3 class="text-sm font-semibold text-white mb-4">Top Produtos Vendidos</h3>
           <% if (dados.topProdutos.length === 0) { %>
-            <p class="text-gray-500 text-sm text-center py-8">Nenhum produto vendido no perÃodo.</p>
+            <p class="text-gray-500 text-sm text-center py-8">Nenhum produto vendido no perodo.</p>
           <% } else { %>
             <%
               const maxVendidos = Math.max(...dados.topProdutos.map(p => parseInt(p.total_vendido) || 0), 1);
@@ -438,7 +438,7 @@
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
           <h3 class="text-sm font-semibold text-white mb-4"> Receita por Categoria</h3>
           <% if (dados.porCategoria.length === 0) { %>
-            <p class="text-gray-500 text-sm text-center py-8">Nenhum dado no perÃodo.</p>
+            <p class="text-gray-500 text-sm text-center py-8">Nenhum dado no perodo.</p>
           <% } else { %>
             <%
               const maxCat = Math.max(...dados.porCategoria.map(c => parseFloat(c.receita_total) || 0), 1);
@@ -482,7 +482,7 @@
           <div class="text-2xl font-bold text-white"><%= dados.resumo.total_pedidos %></div>
         </div>
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <div class="text-xs text-gray-500 mb-1">Ticket MÃ©dio</div>
+          <div class="text-xs text-gray-500 mb-1">Ticket Médio</div>
           <div class="text-2xl font-bold text-blue-400">R$ <%= Number(dados.resumo.ticket_medio).toFixed(2).replace('.', ',') %></div>
         </div>
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
@@ -493,9 +493,9 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        <!-- Por mÃ©todo de pagamento -->
+        <!-- Por método de pagamento -->
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <h3 class="text-sm font-semibold text-white mb-4">MÃ©todos de Pagamento</h3>
+          <h3 class="text-sm font-semibold text-white mb-4">Métodos de Pagamento</h3>
           <% if (dados.porMetodo.length === 0) { %>
             <p class="text-gray-500 text-sm text-center py-6">Nenhum dado.</p>
           <% } else { %>
@@ -523,9 +523,9 @@
           <% } %>
         </div>
 
-        <!-- Receita Ãºltimos 12 meses -->
+        <!-- Receita ºltimos 12 meses -->
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <h3 class="text-sm font-semibold text-white mb-4">Receita  Ãltimos 12 Meses</h3>
+          <h3 class="text-sm font-semibold text-white mb-4">Receita  ltimos 12 Meses</h3>
           <% if (!dados.porMes || dados.porMes.length === 0) { %>
             <p class="text-gray-500 text-sm text-center py-6">Nenhum dado.</p>
           <% } else { %>
@@ -564,18 +564,18 @@
           <div class="text-2xl font-bold text-white"><%= dados.totalClientes %></div>
         </div>
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <div class="text-xs text-gray-500 mb-1">Clientes Ativos (perÃodo)</div>
+          <div class="text-xs text-gray-500 mb-1">Clientes Ativos (perodo)</div>
           <div class="text-2xl font-bold text-blue-400"><%= dados.topClientes.length %></div>
         </div>
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <div class="text-xs text-gray-500 mb-1">Novos no PerÃodo</div>
+          <div class="text-xs text-gray-500 mb-1">Novos no Perodo</div>
           <div class="text-2xl font-bold text-green-400">
             <%= dados.novosPorDia.reduce(function(s, d) { return s + parseInt(d.novos || 0); }, 0) %>
           </div>
         </div>
       </div>
 
-      <!-- GrÃ¡fico novos clientes por dia -->
+      <!-- Gráfico novos clientes por dia -->
       <% if (dados.novosPorDia && dados.novosPorDia.length > 0) { %>
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-6">
         <h3 class="text-sm font-semibold text-white mb-4">Novos Clientes por Dia</h3>
@@ -602,9 +602,9 @@
 
       <!-- Ranking clientes -->
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-        <h3 class="text-sm font-semibold text-white mb-4">Clientes com Maior Compra no PerÃodo</h3>
+        <h3 class="text-sm font-semibold text-white mb-4">Clientes com Maior Compra no Perodo</h3>
         <% if (dados.topClientes.length === 0) { %>
-          <p class="text-gray-500 text-sm text-center py-8">Nenhum cliente com pedidos no perÃodo.</p>
+          <p class="text-gray-500 text-sm text-center py-8">Nenhum cliente com pedidos no perodo.</p>
         <% } else { %>
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
@@ -614,7 +614,7 @@
                 <th class="pb-2 text-left">Cliente</th>
                 <th class="pb-2 text-right">Pedidos</th>
                 <th class="pb-2 text-right">Total Gasto</th>
-                <th class="pb-2 text-left">Ãltimo Pedido</th>
+                <th class="pb-2 text-left">ltimo Pedido</th>
                 <th class="pb-2 text-left">Membro Desde</th>
               </tr>
             </thead>
@@ -654,7 +654,7 @@
       <!-- Cards de resumo -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 print-bg">
-          <div class="text-xs text-gray-500 mb-1">Total no perÃodo</div>
+          <div class="text-xs text-gray-500 mb-1">Total no perodo</div>
           <div class="text-2xl font-bold text-white"><%= dados.resumo.total %></div>
         </div>
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 print-bg">
@@ -673,10 +673,10 @@
         </div>
       </div>
 
-      <!-- GrÃ¡fico por mÃªs -->
+      <!-- Gráfico por mªs -->
       <% if (dados.porMes.length > 0) { %>
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-6 print-bg">
-        <h3 class="text-sm font-semibold text-white mb-4">Agendamentos por MÃªs (Ãºltimos 12 meses)</h3>
+        <h3 class="text-sm font-semibold text-white mb-4">Agendamentos por Mªs (ºltimos 12 meses)</h3>
         <% const maxMes = Math.max(...dados.porMes.map(m => m.confirmados), 1); %>
         <div class="space-y-2">
           <% dados.porMes.forEach(function(m) { %>
@@ -702,7 +702,7 @@
       <!-- Tabela de agendamentos -->
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 print-bg">
         <h3 class="text-sm font-semibold text-white mb-4">
-          RelaÃ§Ã£o de Agendamentos
+          Relação de Agendamentos
           <span class="text-gray-500 font-normal">
              datas de evento entre <%= new Date(dataInicio).toLocaleDateString('pt-BR') %>
             e <%= new Date(dataFim + 'T23:59:59').toLocaleDateString('pt-BR') %>
@@ -710,7 +710,7 @@
         </h3>
 
         <% if (dados.agendamentos.length === 0) { %>
-          <p class="text-gray-500 text-sm text-center py-8">Nenhum agendamento no perÃodo selecionado.</p>
+          <p class="text-gray-500 text-sm text-center py-8">Nenhum agendamento no perodo selecionado.</p>
         <% } else { %>
         <div class="overflow-x-auto">
           <table class="w-full text-sm">

@@ -1,4 +1,4 @@
-// Middleware de validação e sanitização de inputs
+// Middleware de validaÃ§Ã£o e sanitizaÃ§Ã£o de inputs
 
 function validateEmail(email) {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -34,42 +34,42 @@ function sanitizeString(str, maxLength = 255) {
 function validateCheckoutData(body) {
   const errors = [];
 
-  // Validar campos obrigatórios
+  // Validar campos obrigatÃ³rios
   if (!body.nome_entrega || String(body.nome_entrega).trim().length < 3) {
-    errors.push('Nome de entrega inválido (m�nimo 3 caracteres)');
+    errors.push('Nome de entrega invÃ¡lido (mÃnimo 3 caracteres)');
   }
 
   if (!validateEmail(body.email_entrega)) {
-    errors.push('Email inválido');
+    errors.push('Email invÃ¡lido');
   }
 
   if (!validateCEP(body.cep)) {
-    errors.push('CEP inválido');
+    errors.push('CEP invÃ¡lido');
   }
 
   if (!body.logradouro || String(body.logradouro).trim().length < 3) {
-    errors.push('Logradouro inválido');
+    errors.push('Logradouro invÃ¡lido');
   }
 
   if (!body.numero || String(body.numero).trim().length === 0) {
-    errors.push('Número obrigatório');
+    errors.push('NÃºmero obrigatÃ³rio');
   }
 
   if (!body.cidade || String(body.cidade).trim().length < 2) {
-    errors.push('Cidade inválida');
+    errors.push('Cidade invÃ¡lida');
   }
 
   if (!body.estado || !/^[A-Z]{2}$/.test(body.estado)) {
-    errors.push('Estado inválido');
+    errors.push('Estado invÃ¡lido');
   }
 
   if (!['pix', 'boleto', 'cartao', 'sumup_online', 'teste'].includes(body.metodo_pagamento)) {
-    errors.push('Método de pagamento inválido');
+    errors.push('MÃ©todo de pagamento invÃ¡lido');
   }
 
-  // CPF é opcional, mas se fornecido deve ser válido
+  // CPF Ã© opcional, mas se fornecido deve ser vÃ¡lido
   if (body.cpf_entrega && !validateCPF(body.cpf_entrega)) {
-    errors.push('CPF inválido');
+    errors.push('CPF invÃ¡lido');
   }
 
   return errors;

@@ -46,35 +46,35 @@
       const primeiroDiaSemana = (new Date(ano, mesNum - 1, 1).getDay() + 6) % 7;
       const prevMes = mesNum === 1 ? `${ano - 1}-12` : `${ano}-${pad(mesNum - 1)}`;
       const nextMes = mesNum === 12 ? `${ano + 1}-01` : `${ano}-${pad(mesNum + 1)}`;
-      const nomesMes = ['Janeiro','Fevereiro','MarÃ§o','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+      const nomesMes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
     %>
 
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
-      <!--  CalendÃ¡rio  -->
+      <!--  Calendário  -->
       <div class="xl:col-span-2 space-y-4">
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
 
-          <!-- NavegaÃ§Ã£o mÃªs -->
+          <!-- Navegação mªs -->
           <div class="flex items-center justify-between mb-5">
             <a href="?mes=<%= prevMes %>"
                class="bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm transition"> Anterior</a>
             <h2 class="text-lg font-bold text-white"><%= nomesMes[mesNum - 1] %> <%= ano %></h2>
             <a href="?mes=<%= nextMes %>"
-               class="bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm transition">PrÃ³ximo </a>
+               class="bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm transition">Próximo </a>
           </div>
 
-          <!-- CabeÃ§alhos dos dias -->
+          <!-- Cabeçalhos dos dias -->
           <div class="grid grid-cols-7 gap-1 mb-1">
-            <% ['Seg','Ter','Qua','Qui','Sex','SÃ¡b','Dom'].forEach(d => { %>
+            <% ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].forEach(d => { %>
               <div class="text-center text-xs font-semibold text-gray-500 py-2"><%= d %></div>
             <% }) %>
           </div>
 
-          <!-- CÃ©lulas do calendÃ¡rio -->
+          <!-- Células do calendário -->
           <div class="grid grid-cols-7 gap-1" id="calendario-grid">
 
-            <!-- CÃ©lulas vazias iniciais -->
+            <!-- Células vazias iniciais -->
             <% for (let i = 0; i < primeiroDiaSemana; i++) { %>
               <div class="day-cell"></div>
             <% } %>
@@ -126,7 +126,7 @@
 
           <!-- Legenda -->
           <div class="flex flex-wrap gap-4 mt-5 text-xs text-gray-400">
-            <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded bg-green-900/60"></div> DisponÃvel</div>
+            <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded bg-green-900/60"></div> Disponvel</div>
             <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded bg-yellow-900/60"></div> Parcialmente ocupado</div>
             <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded bg-red-900/70"></div> Lotado</div>
             <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded bg-gray-950 border border-gray-700"></div> Fechado (folga)</div>
@@ -139,40 +139,40 @@
       <!--  Painel direito  -->
       <div class="space-y-4">
 
-        <!-- ConfiguraÃ§Ãµes gerais -->
+        <!-- Configuraçµes gerais -->
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <h2 class="font-bold text-white mb-4 text-sm uppercase tracking-wider"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('settings', 'w-5 h-5') %></span> ConfiguraÃ§Ãµes</h2>
+          <h2 class="font-bold text-white mb-4 text-sm uppercase tracking-wider"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('settings', 'w-5 h-5') %></span> Configuraçµes</h2>
           <form action="/admin/agenda/config" method="POST" class="space-y-4">
             <input type="hidden" name="_csrf" value="<%= locals.csrfToken %>">
             <input type="hidden" name="mes" value="<%= mes %>">
 
             <div>
-              <label class="block text-xs font-medium text-gray-400 mb-1">Vagas por dia (padrÃ£o)</label>
+              <label class="block text-xs font-medium text-gray-400 mb-1">Vagas por dia (padrão)</label>
               <input type="number" name="capacidade_diaria" min="1" value="<%= config.capacidade_diaria %>"
                 class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
               <p class="text-xs text-gray-600 mt-1">Quantos eventos por dia o buffet atende</p>
             </div>
 
             <div>
-              <label class="block text-xs font-medium text-gray-400 mb-1">AntecedÃªncia mÃnima (dias)</label>
+              <label class="block text-xs font-medium text-gray-400 mb-1">Antecedªncia mnima (dias)</label>
               <input type="number" name="antecedencia_minima_dias" min="0" value="<%= config.antecedencia_minima_dias %>"
                 class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
             </div>
 
             <div>
-              <label class="block text-xs font-medium text-gray-400 mb-1">AntecedÃªncia mÃ¡xima (dias)</label>
+              <label class="block text-xs font-medium text-gray-400 mb-1">Antecedªncia máxima (dias)</label>
               <input type="number" name="antecedencia_maxima_dias" min="1" value="<%= config.antecedencia_maxima_dias %>"
                 class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
             </div>
 
             <button type="submit"
               class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-sm transition">
-              ¾ Salvar ConfiguraÃ§Ãµes
+              ¾ Salvar Configuraçµes
             </button>
           </form>
         </div>
 
-        <!-- Painel de ediÃ§Ã£o de dia (aparece ao clicar) -->
+        <!-- Painel de edição de dia (aparece ao clicar) -->
         <div id="painel-dia" class="hidden bg-gray-900 border border-blue-700 rounded-xl p-5">
           <div class="flex items-center justify-between mb-3">
             <h3 class="font-bold text-white text-sm"> Configurar dia</h3>
@@ -194,14 +194,14 @@
               <label class="block text-xs font-medium text-gray-400 mb-1">
                 Capacidade especial
               </label>
-              <input type="number" name="capacidade" id="painel-capacidade" min="0" placeholder="Vazio = padrÃ£o | 0 = fechar"
+              <input type="number" name="capacidade" id="painel-capacidade" min="0" placeholder="Vazio = padrão | 0 = fechar"
                 class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
-              <p class="text-xs text-gray-600 mt-1">Deixe vazio para usar o padrÃ£o. Use <strong>0</strong> para bloquear o dia.</p>
+              <p class="text-xs text-gray-600 mt-1">Deixe vazio para usar o padrão. Use <strong>0</strong> para bloquear o dia.</p>
             </div>
 
             <div>
               <label class="block text-xs font-medium text-gray-400 mb-1">Motivo (opcional)</label>
-              <input type="text" name="motivo" id="painel-motivo" placeholder="Ex: Feriado, FÃ©rias..."
+              <input type="text" name="motivo" id="painel-motivo" placeholder="Ex: Feriado, Férias..."
                 class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
             </div>
 
@@ -218,16 +218,16 @@
             </div>
           </form>
 
-          <!-- Form separado para o POST de remoÃ§Ã£o -->
+          <!-- Form separado para o POST de remoção -->
           <form id="form-remover-dia" action="" method="POST" class="hidden">
             <input type="hidden" name="_csrf" value="<%= locals.csrfToken %>">
           </form>
         </div>
 
-        <!-- Dias especiais deste mÃªs -->
+        <!-- Dias especiais deste mªs -->
         <% if (especiais.length > 0) { %>
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <h3 class="font-bold text-white text-sm uppercase tracking-wider mb-3"> Dias especiais do mÃªs</h3>
+          <h3 class="font-bold text-white text-sm uppercase tracking-wider mb-3"> Dias especiais do mªs</h3>
           <div class="space-y-2">
             <% especiais.forEach(e => {
               const cap = e.capacidade;
@@ -258,7 +258,7 @@
 (function() {
   var configPadrao = <%= config.capacidade_diaria %>;
 
-  // Ligar eventos de clique nas cÃ©lulas
+  // Ligar eventos de clique nas células
   document.querySelectorAll('.day-cell[data-data]').forEach(function(cell) {
     if (cell.classList.contains('past')) return;
     cell.addEventListener('click', function() {
@@ -270,7 +270,7 @@
   });
 
   function abrirDia(data, usados, cap, bloqueado, isEspecial, motivo) {
-    var nomes = ['Janeiro','Fevereiro','MarÃ§o','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    var nomes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
     var partes = data.split('-');
     var dataFormatada = parseInt(partes[2]) + ' de ' + nomes[parseInt(partes[1]) - 1] + ' de ' + partes[0];
 
@@ -310,7 +310,7 @@
   };
 
   window.removerDia = function() {
-    if (confirm('Remover configuraÃ§Ã£o especial deste dia?')) {
+    if (confirm('Remover configuração especial deste dia?')) {
       document.getElementById('form-remover-dia').submit();
     }
   };

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AparÃªncia - Admin</title>
+  <title>Aparªncia - Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -37,21 +37,21 @@
       <div class="text-xs text-gray-500 mb-1">
         <a href="/admin" class="hover:text-gray-300 transition">Dashboard</a>
         <span class="mx-2">/</span>
-        <span class="text-gray-300">AparÃªncia</span>
+        <span class="text-gray-300">Aparªncia</span>
       </div>
-      <h1 class="text-2xl font-bold text-white">AparÃªncia</h1>
+      <h1 class="text-2xl font-bold text-white">Aparªncia</h1>
       <p class="text-gray-400 mt-1 text-sm">Personalize a identidade visual da loja</p>
     </div>
 
     <% if (salvo) { %>
       <div class="mb-6 bg-green-900/50 border border-green-700 text-green-300 rounded-xl px-4 py-3 text-sm">
-        <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('check', 'w-5 h-5') %></span> AparÃªncia salva com sucesso.
+        <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('check', 'w-5 h-5') %></span> Aparªncia salva com sucesso.
       </div>
     <% } %>
 
     <!-- Preview ao vivo -->
     <div class="mb-6">
-      <div class="text-xs text-gray-500 uppercase tracking-wide mb-2 font-medium">PrÃ©-visualizaÃ§Ã£o do header</div>
+      <div class="text-xs text-gray-500 uppercase tracking-wide mb-2 font-medium">Pré-visualização do header</div>
       <div class="preview-nav" id="previewNav">
         <div id="previewLogo" style="font-size:20px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px;">
           <% if (cfg.loja_logo) { %>
@@ -73,27 +73,27 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        <!-- InformaÃ§Ãµes bÃ¡sicas -->
+        <!-- Informaçµes básicas -->
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-          <h2 class="text-base font-bold text-white mb-1">InformaÃ§Ãµes bÃ¡sicas</h2>
+          <h2 class="text-base font-bold text-white mb-1">Informaçµes básicas</h2>
 
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-1.5">Nome da loja</label>
             <input type="text" name="loja_nome" value="<%= cfg.loja_nome || '' %>"
                    placeholder="Ex: Sapataria Mario"
                    class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 placeholder-gray-500">
-            <p class="text-xs text-gray-500 mt-1">Exibido no header, rodapÃ© e abas do navegador.</p>
+            <p class="text-xs text-gray-500 mt-1">Exibido no header, rodapé e abas do navegador.</p>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-300 mb-1.5">Slogan / descriÃ§Ã£o curta</label>
+            <label class="block text-sm font-medium text-gray-300 mb-1.5">Slogan / descrição curta</label>
             <input type="text" name="loja_slogan" value="<%= cfg.loja_slogan || '' %>"
-                   placeholder="Ex: Os melhores calÃ§ados da cidade"
+                   placeholder="Ex: Os melhores calçados da cidade"
                    class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 placeholder-gray-500">
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-300 mb-1.5">Texto do rodapÃ©</label>
+            <label class="block text-sm font-medium text-gray-300 mb-1.5">Texto do rodapé</label>
             <input type="text" name="loja_rodape" value="<%= cfg.loja_rodape || '' %>"
                    placeholder="Ex: Â© 2025 Sapataria Mario. Todos os direitos reservados."
                    class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 placeholder-gray-500">
@@ -112,7 +112,7 @@
                      class="w-12 h-12 rounded-lg border border-gray-700 cursor-pointer bg-gray-800 p-1">
               <div>
                 <div class="text-sm text-white font-medium" id="corHex"><%= cfg.loja_cor_primaria || '#2563eb' %></div>
-                <div class="text-xs text-gray-500">Aplicada em botÃµes e destaques</div>
+                <div class="text-xs text-gray-500">Aplicada em botµes e destaques</div>
               </div>
             </div>
           </div>
@@ -127,7 +127,7 @@
             <% } %>
             <input type="file" name="logo" accept="image/*"
                    class="block w-full text-sm text-gray-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-800 file:text-gray-300 hover:file:bg-gray-700 file:cursor-pointer">
-            <p class="text-xs text-gray-500 mt-1">PNG ou SVG com fundo transparente. Recomendado: 200Ã60px.</p>
+            <p class="text-xs text-gray-500 mt-1">PNG ou SVG com fundo transparente. Recomendado: 20060px.</p>
           </div>
 
           <div>
@@ -140,14 +140,14 @@
             <% } %>
             <input type="file" name="favicon" accept="image/*"
                    class="block w-full text-sm text-gray-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-gray-800 file:text-gray-300 hover:file:bg-gray-700 file:cursor-pointer">
-            <p class="text-xs text-gray-500 mt-1">PNG ou ICO. Recomendado: 32Ã32px.</p>
+            <p class="text-xs text-gray-500 mt-1">PNG ou ICO. Recomendado: 3232px.</p>
           </div>
         </div>
 
         <!-- Contato -->
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-          <h2 class="text-base font-bold text-white mb-1">InformaÃ§Ãµes de contato</h2>
-          <p class="text-gray-500 text-xs -mt-2">Exibidas no rodapÃ© da loja.</p>
+          <h2 class="text-base font-bold text-white mb-1">Informaçµes de contato</h2>
+          <p class="text-gray-500 text-xs -mt-2">Exibidas no rodapé da loja.</p>
 
           <div>
             <label class="block text-sm font-medium text-gray-300 mb-1.5">E-mail de contato</label>
@@ -169,7 +169,7 @@
       <div class="mt-6">
         <button type="submit"
                 class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg text-sm transition">
-          ¾ Salvar aparÃªncia
+          ¾ Salvar aparªncia
         </button>
       </div>
 

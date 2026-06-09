@@ -4,7 +4,7 @@
  * Uso:
  *   node scripts/criarTenant.js \
  *     --slug=sapataria-mario \
- *     --nome="Sapataria do Mário" \
+ *     --nome="Sapataria do MÃ¡rio" \
  *     --admin-email=admin@sapataria.com \
  *     --admin-senha=Senha@123
  */
@@ -35,7 +35,7 @@ async function criarTenant({ slug, nome, adminEmail, adminSenha, adminNome }) {
   const dbUser = process.env.DB_USER || 'postgres';
   const dbPassword = process.env.DB_PASSWORD || '123456';
 
-  console.log(`\n� Criando tenant: ${nome} (${slug})`);
+  console.log(`\n Criando tenant: ${nome} (${slug})`);
   console.log(`   Banco de dados: ${dbName}`);
 
   // 1. Criar o banco de dados
@@ -49,7 +49,7 @@ async function criarTenant({ slug, nome, adminEmail, adminSenha, adminNome }) {
     console.log(`[OK] Banco "${dbName}" criado`);
   } catch (err) {
     if (err.code === '42P04') {
-      console.log(`  Banco "${dbName}" já existe, continuando...`);
+      console.log(`  Banco "${dbName}" jÃ¡ existe, continuando...`);
     } else {
       throw err;
     }
@@ -77,7 +77,7 @@ async function criarTenant({ slug, nome, adminEmail, adminSenha, adminNome }) {
   `, [slug, nome, dbHost, dbPort, dbName, dbUser, dbPassword]);
 
   console.log(`[OK] Tenant registrado no banco master`);
-  console.log(`\n� Tenant "${nome}" criado com sucesso!`);
+  console.log(`\n Tenant "${nome}" criado com sucesso!`);
   console.log(`   Slug:  ${slug}`);
   console.log(`   Login: ${adminEmail} / ${adminSenha}`);
   console.log(`   Para testar localmente, use o header: X-Tenant-Slug: ${slug}\n`);

@@ -3,7 +3,7 @@ const router = express.Router();
 const masterDb = require('../config/masterDb');
 const { invalidatePool } = require('../config/tenantDb');
 
-// Só dispon�vel em desenvolvimento
+// SÃ³ disponÃvel em desenvolvimento
 function devOnly(req, res, next) {
   if (process.env.NODE_ENV === 'production') {
     return res.status(404).send('Not found');
@@ -29,13 +29,13 @@ router.get('/', devOnly, async (req, res) => {
   }
 });
 
-// Trocar tenant ativo na sessão
+// Trocar tenant ativo na sessÃ£o
 router.post('/switch/:slug', devOnly, async (req, res) => {
   const { slug } = req.params;
   try {
     const r = await masterDb.query('SELECT id FROM tenants WHERE slug = $1', [slug]);
     if (!r.rows[0]) {
-      return res.redirect('/_tenants?erro=Tenant+não+encontrado');
+      return res.redirect('/_tenants?erro=Tenant+nÃ£o+encontrado');
     }
     req.session.tenantSlug = slug;
     req.session.usuarioId = null;
@@ -47,12 +47,12 @@ router.post('/switch/:slug', devOnly, async (req, res) => {
   }
 });
 
-// Resetar conexão do pool
+// Resetar conexÃ£o do pool
 router.post('/reset/:slug', devOnly, async (req, res) => {
   const { slug } = req.params;
   try {
     invalidatePool(slug);
-    res.redirect('/_tenants?msg=Conexão+resetada+para+' + encodeURIComponent(slug));
+    res.redirect('/_tenants?msg=ConexÃ£o+resetada+para+' + encodeURIComponent(slug));
   } catch (err) {
     res.redirect('/_tenants?erro=' + encodeURIComponent(err.message));
   }
@@ -79,7 +79,7 @@ router.get('/acessar/:slug', devOnly, async (req, res) => {
   try {
     const r = await masterDb.query('SELECT id, url_propria FROM tenants WHERE slug = $1', [slug]);
     if (!r.rows[0]) {
-      return res.redirect('/_tenants?erro=Tenant+não+encontrado');
+      return res.redirect('/_tenants?erro=Tenant+nÃ£o+encontrado');
     }
     req.session.tenantSlug = slug;
     req.session.usuarioId = null;

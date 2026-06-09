@@ -1,18 +1,18 @@
 const { getPool } = require('../config/tenantDb');
 
-// Resolve o slug do tenant a partir da requisição.
-// Prioridade: sessão > env TENANT_SLUG > header X-Tenant-Slug > subdom�nio
+// Resolve o slug do tenant a partir da requisiÃ§Ã£o.
+// Prioridade: sessÃ£o > env TENANT_SLUG > header X-Tenant-Slug > subdomÃnio
 function resolveSlug(req) {
-  // Sessão tem prioridade máxima (permite trocar de tenant pelo painel de gestão)
+  // SessÃ£o tem prioridade mÃ¡xima (permite trocar de tenant pelo painel de gestÃ£o)
   if (req.session?.tenantSlug) return req.session.tenantSlug;
 
-  // Se TENANT_SLUG está definido no ambiente, usa como fallback
+  // Se TENANT_SLUG estÃ¡ definido no ambiente, usa como fallback
   if (process.env.TENANT_SLUG) return process.env.TENANT_SLUG;
 
-  // Header expl�cito (útil para ferramentas como Postman)
+  // Header explÃcito (Ãºtil para ferramentas como Postman)
   if (req.headers['x-tenant-slug']) return req.headers['x-tenant-slug'];
 
-  // Em produção: subdom�nio real (ex: sapataria-mario.sualoja.com.br)
+  // Em produÃ§Ã£o: subdomÃnio real (ex: sapataria-mario.sualoja.com.br)
   const hostname = req.hostname || '';
   const parts = hostname.split('.');
   const isIp = /^\d+\.\d+\.\d+\.\d+$/.test(hostname);
@@ -31,7 +31,7 @@ async function tenantMiddleware(req, res, next) {
       return res.redirect('/_tenants?erro=Nenhum+tenant+selecionado.+Escolha+um+abaixo.');
     }
     return res.status(400).render('pages/error', {
-      message: 'Tenant não identificado. Configure o subdom�nio ou o header X-Tenant-Slug.',
+      message: 'Tenant nÃ£o identificado. Configure o subdomÃnio ou o header X-Tenant-Slug.',
     });
   }
 
@@ -41,8 +41,8 @@ async function tenantMiddleware(req, res, next) {
     next();
   } catch (err) {
     console.error(`[Tenant] Erro ao conectar tenant "${slug}":`, err.message);
-    if (!res.locals.loja) res.locals.loja = { nome: 'Lojão', slogan: '', logo: '', favicon: '', cor_primaria: '#2563eb', rodape: '', email: '', whatsapp: '' };
-    res.status(404).render('pages/error', { message: 'Loja não encontrada.' });
+    if (!res.locals.loja) res.locals.loja = { nome: 'LojÃ£o', slogan: '', logo: '', favicon: '', cor_primaria: '#2563eb', rodape: '', email: '', whatsapp: '' };
+    res.status(404).render('pages/error', { message: 'Loja nÃ£o encontrada.' });
   }
 }
 

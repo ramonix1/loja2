@@ -9,12 +9,12 @@ const {
 describe('Validation Middleware', () => {
 
   describe('validateEmail', () => {
-    test('aceita email válido', () => {
+    test('aceita email vÃ¡lido', () => {
       expect(validateEmail('user@example.com')).toBe(true);
       expect(validateEmail('test.name+tag@domain.co.uk')).toBe(true);
     });
 
-    test('rejeita email inválido', () => {
+    test('rejeita email invÃ¡lido', () => {
       expect(validateEmail('invalid')).toBe(false);
       expect(validateEmail('user@')).toBe(false);
       expect(validateEmail('@example.com')).toBe(false);
@@ -22,7 +22,7 @@ describe('Validation Middleware', () => {
       expect(validateEmail('')).toBe(false);
     });
 
-    test('não é sens�vel a case', () => {
+    test('nÃ£o Ã© sensÃvel a case', () => {
       expect(validateEmail('User@EXAMPLE.COM')).toBe(true);
     });
   });
@@ -33,7 +33,7 @@ describe('Validation Middleware', () => {
       expect(validateCEP('12345678')).toBe(true);
     });
 
-    test('rejeita CEP inválido', () => {
+    test('rejeita CEP invÃ¡lido', () => {
       expect(validateCEP('123')).toBe(false);
       expect(validateCEP('12345')).toBe(false);
       expect(validateCEP('abcde-fgh')).toBe(false);
@@ -42,25 +42,25 @@ describe('Validation Middleware', () => {
   });
 
   describe('validateCPF', () => {
-    test('rejeita CPF com d�gitos repetidos', () => {
+    test('rejeita CPF com dÃgitos repetidos', () => {
       expect(validateCPF('11111111111')).toBe(false);
       expect(validateCPF('00000000000')).toBe(false);
     });
 
-    test('rejeita CPF com tamanho inválido', () => {
+    test('rejeita CPF com tamanho invÃ¡lido', () => {
       expect(validateCPF('123')).toBe(false);
       expect(validateCPF('1234567890')).toBe(false);
     });
 
-    test('rejeita CPF não-string', () => {
+    test('rejeita CPF nÃ£o-string', () => {
       expect(validateCPF(12345678901)).toBe(false);
       expect(validateCPF(null)).toBe(false);
       expect(validateCPF(undefined)).toBe(false);
     });
 
-    test('aceita CPF com máscara', () => {
-      // CPF válido com máscara deve funcionar
-      const validCPF = '123.456.789-09'; // Este é um exemplo, pode não ser válido de verdade
+    test('aceita CPF com mÃ¡scara', () => {
+      // CPF vÃ¡lido com mÃ¡scara deve funcionar
+      const validCPF = '123.456.789-09'; // Este Ã© um exemplo, pode nÃ£o ser vÃ¡lido de verdade
       const result = validateCPF(validCPF);
       expect(typeof result).toBe('boolean');
     });
@@ -71,24 +71,24 @@ describe('Validation Middleware', () => {
       const result1 = sanitizeString('<script>alert()</script>');
       const result2 = sanitizeString('Hello <b>World</b>');
 
-      // Remove < e >, mantém o texto
+      // Remove < e >, mantÃ©m o texto
       expect(result1).not.toContain('<');
       expect(result1).not.toContain('>');
       expect(result2).not.toContain('<');
       expect(result2).not.toContain('>');
     });
 
-    test('limita tamanho máximo', () => {
+    test('limita tamanho mÃ¡ximo', () => {
       const longString = 'a'.repeat(300);
       const result = sanitizeString(longString, 100);
       expect(result.length).toBeLessThanOrEqual(100);
     });
 
-    test('faz trim de espaços', () => {
+    test('faz trim de espaÃ§os', () => {
       expect(sanitizeString('  hello world  ')).toBe('hello world');
     });
 
-    test('retorna string vazia para input inválido', () => {
+    test('retorna string vazia para input invÃ¡lido', () => {
       expect(sanitizeString(null)).toBe('');
       expect(sanitizeString(undefined)).toBe('');
       expect(sanitizeString(123)).toBe('');
@@ -103,17 +103,17 @@ describe('Validation Middleware', () => {
 
   describe('validateCheckoutData', () => {
     const validData = {
-      nome_entrega: 'João Silva',
+      nome_entrega: 'JoÃ£o Silva',
       email_entrega: 'joao@example.com',
       cep: '12345-678',
       logradouro: 'Rua Principal',
       numero: '123',
-      cidade: 'São Paulo',
+      cidade: 'SÃ£o Paulo',
       estado: 'SP',
       metodo_pagamento: 'cartao',
     };
 
-    test('aceita dados válidos', () => {
+    test('aceita dados vÃ¡lidos', () => {
       const errors = validateCheckoutData(validData);
       expect(errors).toHaveLength(0);
     });
@@ -125,31 +125,31 @@ describe('Validation Middleware', () => {
       expect(errors[0]).toContain('Nome de entrega');
     });
 
-    test('rejeita email inválido', () => {
+    test('rejeita email invÃ¡lido', () => {
       const data = { ...validData, email_entrega: 'invalid-email' };
       const errors = validateCheckoutData(data);
       expect(errors.length).toBeGreaterThan(0);
     });
 
-    test('rejeita CEP inválido', () => {
+    test('rejeita CEP invÃ¡lido', () => {
       const data = { ...validData, cep: '123' };
       const errors = validateCheckoutData(data);
       expect(errors.length).toBeGreaterThan(0);
     });
 
-    test('rejeita estado com formato inválido', () => {
+    test('rejeita estado com formato invÃ¡lido', () => {
       const data = { ...validData, estado: 'SPX' };
       const errors = validateCheckoutData(data);
       expect(errors.length).toBeGreaterThan(0);
     });
 
-    test('rejeita método de pagamento inválido', () => {
+    test('rejeita mÃ©todo de pagamento invÃ¡lido', () => {
       const data = { ...validData, metodo_pagamento: 'crypto' };
       const errors = validateCheckoutData(data);
       expect(errors.length).toBeGreaterThan(0);
     });
 
-    test('aceita métodos de pagamento válidos', () => {
+    test('aceita mÃ©todos de pagamento vÃ¡lidos', () => {
       const metodos = ['pix', 'boleto', 'cartao', 'sumup_online', 'teste'];
       metodos.forEach(metodo => {
         const data = { ...validData, metodo_pagamento: metodo };
@@ -158,20 +158,20 @@ describe('Validation Middleware', () => {
       });
     });
 
-    test('rejeita CPF inválido (se fornecido)', () => {
+    test('rejeita CPF invÃ¡lido (se fornecido)', () => {
       const data = { ...validData, cpf_entrega: '00000000000' };
       const errors = validateCheckoutData(data);
       expect(errors.length).toBeGreaterThan(0);
     });
 
-    test('rejeita múltiplos erros de uma vez', () => {
+    test('rejeita mÃºltiplos erros de uma vez', () => {
       const invalidData = {
         nome_entrega: 'J',
         email_entrega: 'invalid',
         cep: '123',
         logradouro: 'Rua',
         numero: '123',
-        cidade: 'São Paulo',
+        cidade: 'SÃ£o Paulo',
         estado: 'INVALID',
         metodo_pagamento: 'invalid',
       };

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Editar Produto - Admin LojÃ£o</title>
+  <title>Editar Produto - Admin Lojão</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -43,7 +43,7 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-300 mb-1">SubtÃtulo</label>
+          <label class="block text-sm font-medium text-gray-300 mb-1">Subttulo</label>
           <input name="subtitulo" value="<%= produto.subtitulo || '' %>"
             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
         </div>
@@ -62,12 +62,12 @@
             value="<%= produto.estoque !== null && produto.estoque !== undefined ? produto.estoque : '' %>"
             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             placeholder="Deixe em branco para ilimitado">
-          <p class="text-xs text-gray-500 mt-1">Deixe em branco para nÃ£o controlar estoque deste produto.</p>
+          <p class="text-xs text-gray-500 mt-1">Deixe em branco para não controlar estoque deste produto.</p>
         </div>
         <% } %>
 
         <div>
-          <label class="block text-sm font-medium text-gray-300 mb-1">DescriÃ§Ã£o</label>
+          <label class="block text-sm font-medium text-gray-300 mb-1">Descrição</label>
           <textarea name="descricao" rows="4"
             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"><%= produto.descricao || '' %></textarea>
         </div>
@@ -83,7 +83,7 @@
                        class="h-20 w-20 object-cover rounded-lg border border-gray-700">
                   <a href="/excluir-imagem/<%= img.id %>?produto=<%= produto.id %>"
                      onclick="return confirm('Remover esta imagem?')"
-                     class="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition font-bold">Ã</a>
+                     class="absolute -top-1 -right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition font-bold"></a>
                 </div>
               <% }) %>
             </div>
@@ -103,7 +103,7 @@
       <div class="flex gap-3 mt-6 pt-6 border-t border-gray-800">
         <button type="submit"
           class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg text-sm font-semibold transition">
-          ¾ Salvar AlteraÃ§Ãµes
+          ¾ Salvar Alteraçµes
         </button>
         <a href="/admin/produtos"
           class="bg-gray-700 hover:bg-gray-600 text-gray-300 px-6 py-2.5 rounded-lg text-sm font-medium transition text-center">
