@@ -21,11 +21,11 @@
   <main class="ml-60 flex-1 p-8">
 
     <div class="mb-8">
-      <h1 class="text-2xl font-bold text-white">Dashboard</h1>
+      <h1 class="text-2xl font-bold text-white flex items-center gap-2"><span style="display:flex;align-items:center;width:24px;height:24px;"><%- icon('home', 'w-6 h-6') %></span> Dashboard</h1>
       <p class="text-gray-400 mt-1 text-sm">Bem-vindo ao painel de controle</p>
     </div>
 
-    <!-- Cards de estat�stica -->
+    <!-- Cards de estat�stica -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
 
       <div class="bg-gray-900 rounded-xl p-5 border border-gray-800">
@@ -35,19 +35,19 @@
       </div>
 
       <div class="bg-gray-900 rounded-xl p-5 border border-gray-800">
-        <div class="text-2xl mb-1"></div>
+        <div class="text-2xl mb-1"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('tag', 'w-5 h-5') %></span></div>
         <div class="text-2xl font-bold text-white"><%= totalCategorias %></div>
         <div class="text-xs text-gray-400 mt-1">Categorias</div>
       </div>
 
       <div class="bg-gray-900 rounded-xl p-5 border border-gray-800">
-        <div class="text-2xl mb-1"></div>
+        <div class="text-2xl mb-1"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('shopping_bag', 'w-5 h-5') %></span></div>
         <div class="text-2xl font-bold text-white"><%= totalPedidos %></div>
         <div class="text-xs text-gray-400 mt-1">Pedidos</div>
       </div>
 
       <div class="bg-gray-900 rounded-xl p-5 border border-gray-800">
-        <div class="text-2xl mb-1"></div>
+        <div class="text-2xl mb-1"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('image', 'w-5 h-5') %></span></div>
         <div class="text-2xl font-bold text-white"><%= totalBanners %></div>
         <div class="text-xs text-gray-400 mt-1">Banners ativos</div>
       </div>
@@ -66,7 +66,7 @@
     <% if (pedidosRecentes && pedidosRecentes.length > 0) { %>
     <div class="mb-10">
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-base font-semibold text-white">Pedidos recentes</h2>
+        <h2 class="text-base font-semibold text-white flex items-center gap-2"><span style="display:flex;align-items:center;width:18px;height:18px;"><%- icon('shopping_bag', 'w-4.5 h-4.5') %></span> Pedidos recentes</h2>
         <a href="/admin/pedidos" class="text-sm text-blue-400 hover:text-blue-300 transition">Ver todos </a>
       </div>
       <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
@@ -86,7 +86,7 @@
               <tr class="hover:bg-gray-800/40 transition cursor-pointer" onclick="location.href='/admin/pedidos/<%= p.id %>'">
                 <td class="px-5 py-3 text-gray-400 font-mono">#<%= p.id %></td>
                 <td class="px-5 py-3 text-white font-medium"><%= p.cliente_nome %></td>
-                <td class="px-5 py-3 text-gray-300 capitalize"><%= p.metodo_pagamento || '�' %></td>
+                <td class="px-5 py-3 text-gray-300 capitalize"><%= p.metodo_pagamento || '�' %></td>
                 <td class="px-5 py-3 text-white font-semibold">
                   R$ <%= Number(p.total).toLocaleString('pt-BR', {minimumFractionDigits:2}) %>
                 </td>
@@ -116,7 +116,7 @@
     <% } %>
 
     <!-- Módulos -->
-    <h2 class="text-base font-semibold text-white mb-4">Módulos</h2>
+    <h2 class="text-base font-semibold text-white mb-4 flex items-center gap-2"><span style="display:flex;align-items:center;width:18px;height:18px;"><%- icon('settings', 'w-4.5 h-4.5') %></span> Módulos</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
 
       <a href="/admin/produtos" class="module-card bg-gray-900 border border-gray-800 hover:border-blue-500 rounded-xl p-6 block">
@@ -145,7 +145,7 @@
           <span class="text-xs bg-green-900 text-green-400 font-semibold px-2 py-1 rounded-full">Ativo</span>
         </div>
         <h3 class="font-bold text-white text-base mb-1">Banners</h3>
-        <p class="text-gray-400 text-sm mb-4">Gerencie os banners do carrossel da página inicial com t�tulo, subt�tulo e botão CTA.</p>
+        <p class="text-gray-400 text-sm mb-4">Gerencie os banners do carrossel da página inicial com t�tulo, subt�tulo e botão CTA.</p>
         <div class="flex items-center text-blue-400 text-sm font-medium">Acessar módulo </div>
       </a>
 
