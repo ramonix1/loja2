@@ -33,6 +33,8 @@ const iconMap = {
   printer: 'printer.svg',
   download: 'arrow-down-tray.svg',
   trash: 'trash.svg',
+  sun: 'sun.svg',
+  moon: 'moon.svg',
 };
 
 // Cache dos SVGs

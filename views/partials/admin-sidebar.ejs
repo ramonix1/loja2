@@ -1,3 +1,12 @@
+<!-- Detecção de tema antes do render para evitar flash -->
+<script>
+  (function() {
+    if (localStorage.getItem('adminTheme') === 'light')
+      document.documentElement.classList.add('admin-light');
+  })();
+</script>
+<link rel="stylesheet" href="/css/admin-theme.css">
+
 <aside class="w-60 bg-gray-900 border-r border-gray-800 flex flex-col fixed h-full">
   <div class="p-6 border-b border-gray-800">
     <a href="/" class="flex items-center gap-3">
@@ -83,6 +92,17 @@
   </nav>
 
   <div class="p-4 border-t border-gray-800 space-y-1">
+    <!-- Toggle de tema claro/escuro -->
+    <button id="admin-theme-toggle"
+      class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition px-3 py-2 rounded-lg hover:bg-gray-800 w-full text-left">
+      <span id="theme-icon-dark" style="display:flex;align-items:center;width:18px;height:18px;"><%- icon('moon', 'w-4 h-4') %></span>
+      <span id="theme-icon-light" style="display:none;align-items:center;width:18px;height:18px;"><%- icon('sun', 'w-4 h-4') %></span>
+      <span id="theme-label">Tema escuro</span>
+      <div class="ml-auto w-9 h-5 rounded-full relative flex-shrink-0 admin-theme-toggle-track">
+        <div class="w-4 h-4 rounded-full absolute top-0.5 left-0.5 admin-theme-toggle-thumb"></div>
+      </div>
+    </button>
+
     <a href="/"
        class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition px-3 py-2 rounded-lg hover:bg-gray-800">
        Ver loja
@@ -93,3 +113,29 @@
     </a>
   </div>
 </aside>
+
+<script>
+(function() {
+  var html = document.documentElement;
+  var toggle = document.getElementById('admin-theme-toggle');
+  var iconDark = document.getElementById('theme-icon-dark');
+  var iconLight = document.getElementById('theme-icon-light');
+  var label = document.getElementById('theme-label');
+
+  function updateUI() {
+    var isLight = html.classList.contains('admin-light');
+    iconDark.style.display  = isLight ? 'none' : 'flex';
+    iconLight.style.display = isLight ? 'flex' : 'none';
+    label.textContent = isLight ? 'Tema claro' : 'Tema escuro';
+  }
+
+  toggle.addEventListener('click', function() {
+    html.classList.toggle('admin-light');
+    var isLight = html.classList.contains('admin-light');
+    localStorage.setItem('adminTheme', isLight ? 'light' : 'dark');
+    updateUI();
+  });
+
+  updateUI();
+})();
+</script>
