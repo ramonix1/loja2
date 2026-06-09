@@ -18,11 +18,11 @@ function parseArgs() {
 }
 
 async function migrarTenant(slug) {
-  console.log(`\n🔧 Migrando tenant "${slug}"...`);
+  console.log(`\n� Migrando tenant "${slug}"...`);
   const pool = await getPool(slug);
 
   await pool.query(`ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS data_evento DATE`);
-  console.log('   ✅ Coluna data_evento em pedidos (ou já existia)');
+  console.log('   Coluna data_evento em pedidos (ou já existia)');
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS agenda_config (
@@ -35,7 +35,7 @@ async function migrarTenant(slug) {
     INSERT INTO agenda_config (id, capacidade_diaria, antecedencia_minima_dias, antecedencia_maxima_dias)
     VALUES (1, 1, 1, 180) ON CONFLICT (id) DO NOTHING;
   `);
-  console.log('   ✅ Tabela agenda_config (ou já existia)');
+  console.log('   Tabela agenda_config (ou já existia)');
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS agenda_dias_especiais (
@@ -45,7 +45,7 @@ async function migrarTenant(slug) {
       created_at TIMESTAMP DEFAULT NOW()
     );
   `);
-  console.log('   ✅ Tabela agenda_dias_especiais (ou já existia)');
+  console.log('   Tabela agenda_dias_especiais (ou já existia)');
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS agendamentos (
@@ -59,15 +59,15 @@ async function migrarTenant(slug) {
     CREATE INDEX IF NOT EXISTS idx_agendamentos_data   ON agendamentos(data_evento);
     CREATE INDEX IF NOT EXISTS idx_agendamentos_pedido ON agendamentos(pedido_id);
   `);
-  console.log('   ✅ Tabela agendamentos (ou já existia)');
+  console.log('   Tabela agendamentos (ou já existia)');
 
   await pool.query(`
     INSERT INTO configuracoes (chave, valor) VALUES ('modulo_agenda', 'false')
     ON CONFLICT (chave) DO NOTHING;
   `);
-  console.log('   ✅ Config modulo_agenda adicionada (ou já existia)');
+  console.log('   Config modulo_agenda adicionada (ou já existia)');
 
-  console.log(`   ✅ Tenant "${slug}" migrado com sucesso.`);
+  console.log(`   Tenant "${slug}" migrado com sucesso.`);
 }
 
 async function main() {
@@ -78,16 +78,16 @@ async function main() {
     for (const row of r.rows) {
       await migrarTenant(row.slug);
     }
-    console.log(`\n🎉 Todos os tenants migrados!\n`);
+    console.log(`\n� Todos os tenants migrados!\n`);
   } else if (args.slug) {
     await migrarTenant(args.slug);
-    console.log(`\n🎉 Pronto!\n`);
+    console.log(`\n� Pronto!\n`);
   } else {
-    console.error('❌ Use --slug=<slug> ou --all');
+    console.error('[ERRO] Use --slug=<slug> ou --all');
     process.exit(1);
   }
 }
 
 main()
   .then(() => process.exit(0))
-  .catch(err => { console.error('❌ Erro:', err.message); process.exit(1); });
+  .catch(err => { console.error('[ERRO] Erro:', err.message); process.exit(1); });

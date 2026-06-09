@@ -32,17 +32,17 @@
           <span class="mx-2">/</span>
           <span class="text-gray-300">Relat√≥rios</span>
         </div>
-        <h1 class="text-2xl font-bold text-white">üìä Relat√≥rios</h1>
-        <p class="text-gray-400 mt-1 text-sm">Vis√£o anal√≠tica do neg√≥cio</p>
+        <h1 class="text-2xl font-bold text-white flex items-center gap-2"><span style="display:flex;align-items:center;width:24px;height:24px;"><%- icon('chart', 'w-6 h-6') %></span> Relat√≥rios</h1>
+        <p class="text-gray-400 mt-1 text-sm">Vis√£o anal√tica do neg√≥cio</p>
       </div>
       <div class="flex gap-2 no-print">
         <button onclick="window.print()"
           class="bg-gray-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
-          üñ®Ô∏è Imprimir
+          <span style="display:flex;align-items:center;width:18px;height:18px;"><%- icon('printer', 'w-4.5 h-4.5') %></span> Imprimir
         </button>
         <a href="/admin/relatorios/csv/<%= aba %>?inicio=<%= dataInicio %>&fim=<%= dataFim %>"
           class="bg-green-700 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
-          ‚¨áÔ∏è Exportar CSV
+          <span style="display:flex;align-items:center;width:18px;height:18px;"><%- icon('download', 'w-4.5 h-4.5') %></span> Exportar CSV
         </a>
       </div>
     </div>
@@ -52,7 +52,7 @@
     <form method="GET" action="/admin/relatorios" class="bg-gray-900 border border-gray-800 rounded-xl px-5 py-4 mb-6 flex flex-wrap gap-3 items-end no-print">
       <input type="hidden" name="aba" value="<%= aba %>">
       <div>
-        <label class="block text-xs text-gray-400 mb-1">In√≠cio</label>
+        <label class="block text-xs text-gray-400 mb-1">In√cio</label>
         <input type="date" name="inicio" value="<%= dataInicio %>"
           class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
       </div>
@@ -73,18 +73,18 @@
     <!-- Abas -->
     <div class="flex gap-1 mb-6 bg-gray-900 border border-gray-800 p-1 rounded-xl w-fit no-print">
       <% [
-        { id:'vendas',     icon:'<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('shopping_cart', 'w-5 h-5') %></span>', label:'Vendas' },
-        { id:'estoque',    icon:'<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('package', 'w-5 h-5') %></span>', label:'Estoque' },
-        { id:'entregas',   icon:'üöö', label:'Entregas' },
-        { id:'produtos',   icon:'üèÜ', label:'Produtos' },
-        { id:'financeiro', icon:'<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('money', 'w-5 h-5') %></span>', label:'Financeiro' },
-        { id:'clientes',      icon:'üë•', label:'Clientes' },
-        { id:'agendamentos',  icon:'üìÖ', label:'Agendamentos' },
+        { id:'vendas',     iconName:'shopping_cart', label:'Vendas' },
+        { id:'estoque',    iconName:'package', label:'Estoque' },
+        { id:'entregas',   iconName:'truck', label:'Entregas' },
+        { id:'produtos',   iconName:'trophy', label:'Produtos' },
+        { id:'financeiro', iconName:'money', label:'Financeiro' },
+        { id:'clientes',   iconName:'users', label:'Clientes' },
+        { id:'agendamentos', iconName:'calendar', label:'Agendamentos' },
       ].forEach(function(a) { %>
         <a href="/admin/relatorios?aba=<%= a.id %>&inicio=<%= dataInicio %>&fim=<%= dataFim %>"
           class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition
                  <%= aba === a.id ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white hover:bg-gray-800' %>">
-          <%= a.icon %> <%= a.label %>
+          <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon(a.iconName, 'w-5 h-5') %></span> <%= a.label %>
         </a>
       <% }) %>
     </div>
@@ -96,9 +96,9 @@
       </div>
     <% } %>
 
-    <!-- ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
+    <!-- ïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïï
          ABA: VENDAS
-    ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê -->
+    ïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïï -->
     <% if (aba === 'vendas' && !dados.erro) { %>
 
       <!-- KPIs -->
@@ -153,9 +153,9 @@
 
       <!-- Tabela de pedidos -->
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-        <h3 class="text-sm font-semibold text-white mb-4">Pedidos no Per√≠odo</h3>
+        <h3 class="text-sm font-semibold text-white mb-4">Pedidos no Per√odo</h3>
         <% if (dados.pedidos.length === 0) { %>
-          <p class="text-gray-500 text-sm text-center py-8">Nenhum pedido no per√≠odo selecionado.</p>
+          <p class="text-gray-500 text-sm text-center py-8">Nenhum pedido no per√odo selecionado.</p>
         <% } else { %>
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
@@ -185,7 +185,7 @@
                 <td class="py-2 pr-3 text-right font-semibold text-green-400">
                   R$ <%= Number(p.total).toFixed(2).replace('.', ',') %>
                 </td>
-                <td class="py-2 pr-3 text-gray-400 text-xs capitalize"><%= p.metodo_pagamento || '‚Äî' %></td>
+                <td class="py-2 pr-3 text-gray-400 text-xs capitalize"><%= p.metodo_pagamento || 'Ä' %></td>
                 <td class="py-2">
                   <%
                     const statusCores = {
@@ -210,9 +210,9 @@
         <% } %>
       </div>
 
-    <!-- ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
+    <!-- ïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïï
          ABA: ESTOQUE
-    ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê -->
+    ïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïï -->
     <% } else if (aba === 'estoque' && !dados.erro) { %>
 
       <!-- KPIs estoque -->
@@ -280,10 +280,10 @@
               %>
               <tr class="hover:bg-gray-800/40 transition">
                 <td class="py-2 pr-4 font-medium text-white"><%= p.nome %></td>
-                <td class="py-2 pr-4 text-gray-400 text-xs"><%= p.categoria_nome || '‚Äî' %></td>
+                <td class="py-2 pr-4 text-gray-400 text-xs"><%= p.categoria_nome || 'Ä' %></td>
                 <td class="py-2 pr-4 text-right text-green-400">R$ <%= Number(p.valor).toFixed(2).replace('.', ',') %></td>
                 <td class="py-2 pr-4 text-right font-semibold <%= stCores[st] %>">
-                  <%= p.estoque !== null ? p.estoque : '‚àû' %>
+                  <%= p.estoque !== null ? p.estoque : 'àû' %>
                 </td>
                 <td class="py-2">
                   <span class="text-xs font-medium <%= stCores[st] %>"><%= stLabel[st] %></span>
@@ -296,9 +296,9 @@
         <% } %>
       </div>
 
-    <!-- ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
+    <!-- ïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïï
          ABA: ENTREGAS
-    ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê -->
+    ïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïï -->
     <% } else if (aba === 'entregas' && !dados.erro) { %>
 
       <!-- KPIs por status -->
@@ -368,7 +368,7 @@
                   <div class="text-gray-500 text-xs"><%= p.email_entrega %></div>
                 </td>
                 <td class="py-2 pr-3 text-gray-400 text-xs"><%= p.cidade || '' %>/<%= p.estado || '' %></td>
-                <td class="py-2 pr-3 text-gray-400 text-xs"><%= p.frete_servico || '‚Äî' %></td>
+                <td class="py-2 pr-3 text-gray-400 text-xs"><%= p.frete_servico || 'Ä' %></td>
                 <td class="py-2 pr-3">
                   <% if (p.codigo_rastreio) { %>
                     <a href="https://www.correios.com.br/rastreamento/#/<%= p.codigo_rastreio %>"
@@ -376,7 +376,7 @@
                       <%= p.codigo_rastreio %>
                     </a>
                   <% } else { %>
-                    <span class="text-gray-600 text-xs">‚Äî</span>
+                    <span class="text-gray-600 text-xs">Ä</span>
                   <% } %>
                 </td>
                 <td class="py-2 pr-3 text-right font-semibold text-green-400 text-sm">
@@ -395,18 +395,18 @@
         <% } %>
       </div>
 
-    <!-- ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
+    <!-- ïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïï
          ABA: PRODUTOS
-    ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê -->
+    ïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïï -->
     <% } else if (aba === 'produtos' && !dados.erro) { %>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 
         <!-- Top 20 produtos -->
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <h3 class="text-sm font-semibold text-white mb-4">üèÜ Top Produtos Vendidos</h3>
+          <h3 class="text-sm font-semibold text-white mb-4">Top Produtos Vendidos</h3>
           <% if (dados.topProdutos.length === 0) { %>
-            <p class="text-gray-500 text-sm text-center py-8">Nenhum produto vendido no per√≠odo.</p>
+            <p class="text-gray-500 text-sm text-center py-8">Nenhum produto vendido no per√odo.</p>
           <% } else { %>
             <%
               const maxVendidos = Math.max(...dados.topProdutos.map(p => parseInt(p.total_vendido) || 0), 1);
@@ -436,9 +436,9 @@
 
         <!-- Por categoria -->
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <h3 class="text-sm font-semibold text-white mb-4">üìÅ Receita por Categoria</h3>
+          <h3 class="text-sm font-semibold text-white mb-4">Å Receita por Categoria</h3>
           <% if (dados.porCategoria.length === 0) { %>
-            <p class="text-gray-500 text-sm text-center py-8">Nenhum dado no per√≠odo.</p>
+            <p class="text-gray-500 text-sm text-center py-8">Nenhum dado no per√odo.</p>
           <% } else { %>
             <%
               const maxCat = Math.max(...dados.porCategoria.map(c => parseFloat(c.receita_total) || 0), 1);
@@ -466,9 +466,9 @@
 
       </div>
 
-    <!-- ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
+    <!-- ïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïï
          ABA: FINANCEIRO
-    ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê -->
+    ïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïï -->
     <% } else if (aba === 'financeiro' && !dados.erro) { %>
 
       <!-- KPIs financeiro -->
@@ -525,7 +525,7 @@
 
         <!-- Receita √∫ltimos 12 meses -->
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <h3 class="text-sm font-semibold text-white mb-4">Receita ‚Äî √öltimos 12 Meses</h3>
+          <h3 class="text-sm font-semibold text-white mb-4">Receita Ä √ltimos 12 Meses</h3>
           <% if (!dados.porMes || dados.porMes.length === 0) { %>
             <p class="text-gray-500 text-sm text-center py-6">Nenhum dado.</p>
           <% } else { %>
@@ -552,9 +552,9 @@
 
       </div>
 
-    <!-- ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
+    <!-- ïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïï
          ABA: CLIENTES
-    ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê -->
+    ïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïï -->
     <% } else if (aba === 'clientes' && !dados.erro) { %>
 
       <!-- KPIs -->
@@ -564,11 +564,11 @@
           <div class="text-2xl font-bold text-white"><%= dados.totalClientes %></div>
         </div>
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <div class="text-xs text-gray-500 mb-1">Clientes Ativos (per√≠odo)</div>
+          <div class="text-xs text-gray-500 mb-1">Clientes Ativos (per√odo)</div>
           <div class="text-2xl font-bold text-blue-400"><%= dados.topClientes.length %></div>
         </div>
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <div class="text-xs text-gray-500 mb-1">Novos no Per√≠odo</div>
+          <div class="text-xs text-gray-500 mb-1">Novos no Per√odo</div>
           <div class="text-2xl font-bold text-green-400">
             <%= dados.novosPorDia.reduce(function(s, d) { return s + parseInt(d.novos || 0); }, 0) %>
           </div>
@@ -602,9 +602,9 @@
 
       <!-- Ranking clientes -->
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-        <h3 class="text-sm font-semibold text-white mb-4">Clientes com Maior Compra no Per√≠odo</h3>
+        <h3 class="text-sm font-semibold text-white mb-4">Clientes com Maior Compra no Per√odo</h3>
         <% if (dados.topClientes.length === 0) { %>
-          <p class="text-gray-500 text-sm text-center py-8">Nenhum cliente com pedidos no per√≠odo.</p>
+          <p class="text-gray-500 text-sm text-center py-8">Nenhum cliente com pedidos no per√odo.</p>
         <% } else { %>
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
@@ -614,7 +614,7 @@
                 <th class="pb-2 text-left">Cliente</th>
                 <th class="pb-2 text-right">Pedidos</th>
                 <th class="pb-2 text-right">Total Gasto</th>
-                <th class="pb-2 text-left">√öltimo Pedido</th>
+                <th class="pb-2 text-left">√ltimo Pedido</th>
                 <th class="pb-2 text-left">Membro Desde</th>
               </tr>
             </thead>
@@ -646,15 +646,15 @@
 
     <% } %>
 
-    <!-- ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
+    <!-- ïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïï
          ABA: AGENDAMENTOS
-    ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê -->
+    ïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïïï -->
     <% if (aba === 'agendamentos' && !dados.erro) { %>
 
       <!-- Cards de resumo -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 print-bg">
-          <div class="text-xs text-gray-500 mb-1">Total no per√≠odo</div>
+          <div class="text-xs text-gray-500 mb-1">Total no per√odo</div>
           <div class="text-2xl font-bold text-white"><%= dados.resumo.total %></div>
         </div>
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 print-bg">
@@ -704,13 +704,13 @@
         <h3 class="text-sm font-semibold text-white mb-4">
           Rela√ß√£o de Agendamentos
           <span class="text-gray-500 font-normal">
-            ‚Äî datas de evento entre <%= new Date(dataInicio).toLocaleDateString('pt-BR') %>
+            Ä datas de evento entre <%= new Date(dataInicio).toLocaleDateString('pt-BR') %>
             e <%= new Date(dataFim + 'T23:59:59').toLocaleDateString('pt-BR') %>
           </span>
         </h3>
 
         <% if (dados.agendamentos.length === 0) { %>
-          <p class="text-gray-500 text-sm text-center py-8">Nenhum agendamento no per√≠odo selecionado.</p>
+          <p class="text-gray-500 text-sm text-center py-8">Nenhum agendamento no per√odo selecionado.</p>
         <% } else { %>
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
@@ -758,7 +758,7 @@
                   </div>
                 </td>
                 <td class="py-3 pr-4 text-gray-300 text-xs max-w-xs">
-                  <%= a.produtos || '‚Äî' %>
+                  <%= a.produtos || 'Ä' %>
                 </td>
                 <td class="py-3 pr-4 text-right font-semibold text-green-400 whitespace-nowrap">
                   R$ <%= Number(a.total).toFixed(2).replace('.', ',') %>

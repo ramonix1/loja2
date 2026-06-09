@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Criar conta â€” LojÃ£o</title>
+  <title>Criar conta € LojÃ£o</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
     body { background: #f3f4f6; margin: 0; padding: 32px 16px; font-family: 'Inter', Arial, sans-serif; }
@@ -58,7 +58,7 @@
 
     <% if (erros && erros.length > 0) { %>
       <div class="alerta-erros">
-        âš ï¸ Corrija os erros antes de continuar:
+         Corrija os erros antes de continuar:
         <ul><% erros.forEach(e => { %><li><%= e %></li><% }) %></ul>
       </div>
     <% } %>
@@ -90,8 +90,8 @@
         <div class="form-grupo">
           <label for="senha">Senha <span class="obrigatorio">*</span></label>
           <div class="senha-wrapper">
-            <input type="password" id="senha" name="senha" required autocomplete="new-password" placeholder="MÃ­nimo 8 caracteres" oninput="avaliarSenha(this.value)">
-            <button type="button" class="toggle-senha" onclick="toggleSenha('senha',this)">ğŸ‘</button>
+            <input type="password" id="senha" name="senha" required autocomplete="new-password" placeholder="MÃnimo 8 caracteres" oninput="avaliarSenha(this.value)">
+            <button type="button" class="toggle-senha" onclick="toggleSenha('senha',this)"></button>
           </div>
           <div class="forca-barra" id="forcaBarra"></div>
           <div class="forca-label" id="forcaLabel"></div>
@@ -100,7 +100,7 @@
           <label for="confirmacao">Confirmar senha <span class="obrigatorio">*</span></label>
           <div class="senha-wrapper">
             <input type="password" id="confirmacao" name="confirmacao" required autocomplete="new-password" placeholder="Repita a senha">
-            <button type="button" class="toggle-senha" onclick="toggleSenha('confirmacao',this)">ğŸ‘</button>
+            <button type="button" class="toggle-senha" onclick="toggleSenha('confirmacao',this)"></button>
           </div>
         </div>
       </div>
@@ -164,7 +164,7 @@
     function toggleSenha(id, btn) {
       const input = document.getElementById(id);
       input.type = input.type === 'password' ? 'text' : 'password';
-      btn.textContent = input.type === 'password' ? 'ğŸ‘' : 'ğŸ™ˆ';
+      btn.textContent = input.type === 'password' ? '' : 'ˆ';
     }
 
     function avaliarSenha(v) {

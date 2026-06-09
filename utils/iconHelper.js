@@ -28,14 +28,18 @@ const iconMap = {
   paint: 'paint-brush.svg',
   chart: 'chart-bar.svg',
   chat: 'chat-bubble-left.svg',
+  truck: 'truck.svg',
+  trophy: 'trophy.svg',
+  printer: 'printer.svg',
+  download: 'arrow-down-tray.svg',
 };
 
 // Cache dos SVGs
 const svgCache = {};
 
 /**
- * Retorna um ícone SVG como string HTML
- * @param {string} iconName - Nome lógico do ícone (ex: 'shopping_cart')
+ * Retorna um �cone SVG como string HTML
+ * @param {string} iconName - Nome lógico do �cone (ex: 'shopping_cart')
  * @param {Object} options - Opções (classes, width, height, etc)
  * @returns {string} SVG HTML inline
  */
@@ -47,7 +51,7 @@ function getIcon(iconName, options = {}) {
     return '';
   }
 
-  // Usar cache se disponível
+  // Usar cache se dispon�vel
   if (!svgCache[filename]) {
     try {
       const filePath = path.join(heroiconsPath, filename);

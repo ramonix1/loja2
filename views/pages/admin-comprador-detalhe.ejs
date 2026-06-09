@@ -43,7 +43,7 @@
           </div>
         </div>
         <a href="/admin/compradores" class="text-sm text-gray-400 hover:text-white transition">
-          ← Voltar
+           Voltar
         </a>
       </div>
     </div>
@@ -80,7 +80,7 @@
         <!-- Dados de contato -->
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
           <h2 class="font-semibold text-white mb-4 flex items-center gap-2">
-            <span>📋</span> Dados Pessoais
+            <span>�</span> Dados Pessoais
           </h2>
           <div class="space-y-3 text-sm">
             <div>
@@ -93,11 +93,11 @@
             </div>
             <div>
               <div class="text-xs text-gray-500 mb-0.5">Telefone</div>
-              <div class="text-gray-200"><%= comprador.telefone || '—' %></div>
+              <div class="text-gray-200"><%= comprador.telefone || '�' %></div>
             </div>
             <div>
               <div class="text-xs text-gray-500 mb-0.5">CPF</div>
-              <div class="text-gray-200"><%= comprador.cpf || '—' %></div>
+              <div class="text-gray-200"><%= comprador.cpf || '�' %></div>
             </div>
           </div>
         </div>
@@ -105,7 +105,7 @@
         <!-- Endereço -->
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
           <h2 class="font-semibold text-white mb-4 flex items-center gap-2">
-            <span>📍</span> Endereço
+            <span></span> Endereço
           </h2>
           <% const temEndereco = comprador.logradouro || comprador.cidade; %>
           <% if (temEndereco) { %>
@@ -113,7 +113,7 @@
               <% if (comprador.logradouro) { %>
                 <div class="text-gray-200">
                   <%= comprador.logradouro %>, <%= comprador.numero %>
-                  <% if (comprador.complemento) { %> — <%= comprador.complemento %><% } %>
+                  <% if (comprador.complemento) { %> � <%= comprador.complemento %><% } %>
                 </div>
               <% } %>
               <% if (comprador.bairro) { %>
@@ -134,19 +134,19 @@
         <!-- Info da conta -->
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
           <h2 class="font-semibold text-white mb-4 flex items-center gap-2">
-            <span>🔑</span> Conta
+            <span></span> Conta
           </h2>
           <div class="space-y-3 text-sm">
             <div>
               <div class="text-xs text-gray-500 mb-0.5">Cadastro</div>
               <div class="text-gray-200">
                 <%= new Date(comprador.created_at).toLocaleDateString('pt-BR') %>
-                às <%= new Date(comprador.created_at).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) %>
+                �s <%= new Date(comprador.created_at).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) %>
               </div>
             </div>
             <% if (comprador.ultimo_acesso) { %>
               <div>
-                <div class="text-xs text-gray-500 mb-0.5">Último acesso</div>
+                <div class="text-xs text-gray-500 mb-0.5">�ltimo acesso</div>
                 <div class="text-gray-200">
                   <%= new Date(comprador.ultimo_acesso).toLocaleDateString('pt-BR') %>
                 </div>
@@ -171,7 +171,7 @@
         <% if (agendamentos.length > 0) { %>
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
           <h2 class="font-semibold text-white mb-4 flex items-center gap-2">
-            <span>📅</span> Agendamentos
+            <span></span> Agendamentos
             <span class="text-xs bg-blue-900/50 text-blue-400 px-2 py-0.5 rounded-full font-medium">
               <%= agendamentos.length %>
             </span>
@@ -181,10 +181,10 @@
               <div class="flex items-center justify-between bg-gray-800 rounded-lg px-4 py-3">
                 <div>
                   <div class="font-medium text-sm text-white">
-                    📅 <%= new Date(a.data_evento + 'T12:00:00').toLocaleDateString('pt-BR', {weekday:'long', day:'2-digit', month:'long', year:'numeric'}) %>
+                    <%= new Date(a.data_evento + 'T12:00:00').toLocaleDateString('pt-BR', {weekday:'long', day:'2-digit', month:'long', year:'numeric'}) %>
                   </div>
                   <div class="text-xs text-gray-500 mt-0.5">
-                    Pedido #<%= a.pedido_id %> · R$ <%= Number(a.pedido_total).toFixed(2).replace('.', ',') %>
+                    Pedido #<%= a.pedido_id %> � R$ <%= Number(a.pedido_total).toFixed(2).replace('.', ',') %>
                   </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -193,7 +193,7 @@
                     <%= a.status === 'confirmado' ? 'Confirmado' : 'Cancelado' %>
                   </span>
                   <a href="/admin/pedidos/<%= a.pedido_id %>"
-                    class="text-xs text-blue-400 hover:text-blue-300 transition">Ver pedido →</a>
+                    class="text-xs text-blue-400 hover:text-blue-300 transition">Ver pedido </a>
                 </div>
               </div>
             <% }) %>
@@ -204,7 +204,7 @@
         <!-- Histórico de pedidos -->
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
           <h2 class="font-semibold text-white mb-4 flex items-center gap-2">
-            <span>🛍️</span> Histórico de Pedidos
+            <span></span> Histórico de Pedidos
             <span class="text-xs bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full font-medium">
               <%= pedidos.length %>
             </span>
@@ -242,13 +242,13 @@
                     </div>
                     <div class="flex items-center gap-4 text-xs text-gray-500">
                       <span><%= new Date(p.created_at).toLocaleDateString('pt-BR') %>
-                        às <%= new Date(p.created_at).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) %>
+                        �s <%= new Date(p.created_at).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}) %>
                       </span>
                       <span class="font-semibold text-white text-sm">
                         R$ <%= Number(p.total).toFixed(2).replace('.', ',') %>
                       </span>
                       <a href="/admin/pedidos/<%= p.id %>"
-                        class="text-blue-400 hover:text-blue-300 transition">Ver →</a>
+                        class="text-blue-400 hover:text-blue-300 transition">Ver </a>
                     </div>
                   </div>
                   <!-- Itens do pedido -->

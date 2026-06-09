@@ -1,7 +1,7 @@
 const { validateCheckoutData } = require('../../middlewares/validation');
 
 /**
- * Testes de Integração — Checkout
+ * Testes de Integração � Checkout
  *
  * NOTA: Esses testes são conceituais. Para rodar de verdade,
  * seria necessário:

@@ -23,7 +23,7 @@
 <%- include("../partials/header") %>
 
 <div class="container">
-  <a href="/admin/pedidos" style="color:#2563eb;font-size:14px;text-decoration:none;display:inline-block;margin-bottom:24px;">‚Üê Voltar a pedidos</a>
+  <a href="/admin/pedidos" style="color:#2563eb;font-size:14px;text-decoration:none;display:inline-block;margin-bottom:24px;"> Voltar a pedidos</a>
 
   <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap;">
     <h1 style="font-size:24px;font-weight:800;color:#111827;">Pedido #<%= pedido.id %></h1>
@@ -54,15 +54,15 @@
         <h3>Cliente</h3>
         <div class="info-linha"><span>Nome</span><strong><%= pedido.usuario_nome %></strong></div>
         <div class="info-linha"><span>E-mail</span><strong><%= pedido.usuario_email %></strong></div>
-        <div class="info-linha"><span>Telefone</span><strong><%= pedido.telefone_entrega || '‚Äî' %></strong></div>
-        <div class="info-linha"><span>CPF</span><strong><%= pedido.cpf_entrega || '‚Äî' %></strong></div>
+        <div class="info-linha"><span>Telefone</span><strong><%= pedido.telefone_entrega || 'Ä' %></strong></div>
+        <div class="info-linha"><span>CPF</span><strong><%= pedido.cpf_entrega || 'Ä' %></strong></div>
       </div>
 
       <div class="card">
         <h3>Endere√ßo de entrega</h3>
         <div style="font-size:14px;color:#374151;line-height:1.9;">
           <%= pedido.logradouro %>, <%= pedido.numero %><%= pedido.complemento ? ', ' + pedido.complemento : '' %><br>
-          <%= pedido.bairro %> ‚Äî <%= pedido.cidade %>/<%= pedido.estado %><br>
+          <%= pedido.bairro %> Ä <%= pedido.cidade %>/<%= pedido.estado %><br>
           CEP: <%= pedido.cep %>
         </div>
       </div>
@@ -74,8 +74,8 @@
         <h3>Pagamento</h3>
         <div class="info-linha"><span>M√©todo</span><strong><%= pedido.metodo_pagamento === 'pix' ? 'PIX' : pedido.metodo_pagamento === 'boleto' ? 'Boleto' : 'Cart√£o' %></strong></div>
         <% if (pagamento) { %>
-          <div class="info-linha"><span>Status MP</span><strong><%= pagamento.status_mp || '‚Äî' %></strong></div>
-          <div class="info-linha"><span>ID MP</span><strong style="font-size:12px;word-break:break-all;"><%= pagamento.mp_payment_id || '‚Äî' %></strong></div>
+          <div class="info-linha"><span>Status MP</span><strong><%= pagamento.status_mp || 'Ä' %></strong></div>
+          <div class="info-linha"><span>ID MP</span><strong style="font-size:12px;word-break:break-all;"><%= pagamento.mp_payment_id || 'Ä' %></strong></div>
         <% } %>
         <div class="info-linha"><span>Data</span><strong><%= new Date(pedido.created_at).toLocaleString('pt-BR') %></strong></div>
       </div>
@@ -112,7 +112,7 @@
       <div class="card" style="background:#eff6ff;border:1px solid #bfdbfe;">
         <h3 style="color:#1d4ed8;">Rastreio</h3>
         <div style="font-size:20px;font-weight:800;color:#1e3a8a;letter-spacing:.08em;margin-bottom:6px;"><%= pedido.codigo_rastreio %></div>
-        <a href="https://www.correios.com.br/rastreamento" target="_blank" style="font-size:12px;color:#2563eb;">Verificar nos Correios ‚Üó</a>
+        <a href="https://www.correios.com.br/rastreamento" target="_blank" style="font-size:12px;color:#2563eb;">Verificar nos Correios ó</a>
       </div>
       <% } %>
     </div>

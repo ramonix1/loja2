@@ -23,7 +23,7 @@
   <main class="ml-60 flex-1 p-8">
 
     <div class="mb-6">
-      <h1 class="text-2xl font-bold text-white">ğŸ“… Agenda</h1>
+      <h1 class="text-2xl font-bold text-white">Agenda</h1>
       <p class="text-gray-400 mt-1 text-sm">Gerencie disponibilidade de datas para eventos</p>
     </div>
 
@@ -51,17 +51,17 @@
 
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
-      <!-- â”€â”€ CalendÃ¡rio â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+      <!-- €€ CalendÃ¡rio €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€ -->
       <div class="xl:col-span-2 space-y-4">
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-6">
 
           <!-- NavegaÃ§Ã£o mÃªs -->
           <div class="flex items-center justify-between mb-5">
             <a href="?mes=<%= prevMes %>"
-               class="bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm transition">â† Anterior</a>
+               class="bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm transition"> Anterior</a>
             <h2 class="text-lg font-bold text-white"><%= nomesMes[mesNum - 1] %> <%= ano %></h2>
             <a href="?mes=<%= nextMes %>"
-               class="bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm transition">PrÃ³ximo â†’</a>
+               class="bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg text-sm transition">PrÃ³ximo </a>
           </div>
 
           <!-- CabeÃ§alhos dos dias -->
@@ -126,7 +126,7 @@
 
           <!-- Legenda -->
           <div class="flex flex-wrap gap-4 mt-5 text-xs text-gray-400">
-            <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded bg-green-900/60"></div> DisponÃ­vel</div>
+            <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded bg-green-900/60"></div> DisponÃvel</div>
             <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded bg-yellow-900/60"></div> Parcialmente ocupado</div>
             <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded bg-red-900/70"></div> Lotado</div>
             <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded bg-gray-950 border border-gray-700"></div> Fechado (folga)</div>
@@ -136,7 +136,7 @@
         </div>
       </div>
 
-      <!-- â”€â”€ Painel direito â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+      <!-- €€ Painel direito €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€ -->
       <div class="space-y-4">
 
         <!-- ConfiguraÃ§Ãµes gerais -->
@@ -154,7 +154,7 @@
             </div>
 
             <div>
-              <label class="block text-xs font-medium text-gray-400 mb-1">AntecedÃªncia mÃ­nima (dias)</label>
+              <label class="block text-xs font-medium text-gray-400 mb-1">AntecedÃªncia mÃnima (dias)</label>
               <input type="number" name="antecedencia_minima_dias" min="0" value="<%= config.antecedencia_minima_dias %>"
                 class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500">
             </div>
@@ -167,7 +167,7 @@
 
             <button type="submit"
               class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg text-sm transition">
-              ğŸ’¾ Salvar ConfiguraÃ§Ãµes
+              ¾ Salvar ConfiguraÃ§Ãµes
             </button>
           </form>
         </div>
@@ -175,7 +175,7 @@
         <!-- Painel de ediÃ§Ã£o de dia (aparece ao clicar) -->
         <div id="painel-dia" class="hidden bg-gray-900 border border-blue-700 rounded-xl p-5">
           <div class="flex items-center justify-between mb-3">
-            <h3 class="font-bold text-white text-sm">ğŸ“Œ Configurar dia</h3>
+            <h3 class="font-bold text-white text-sm"> Configurar dia</h3>
             <button onclick="fecharPainel()" class="text-gray-500 hover:text-white text-xl leading-none">&times;</button>
           </div>
 
@@ -227,7 +227,7 @@
         <!-- Dias especiais deste mÃªs -->
         <% if (especiais.length > 0) { %>
         <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-          <h3 class="font-bold text-white text-sm uppercase tracking-wider mb-3">ğŸ“‹ Dias especiais do mÃªs</h3>
+          <h3 class="font-bold text-white text-sm uppercase tracking-wider mb-3">‹ Dias especiais do mÃªs</h3>
           <div class="space-y-2">
             <% especiais.forEach(e => {
               const cap = e.capacidade;

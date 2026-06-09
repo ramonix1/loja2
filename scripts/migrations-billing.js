@@ -3,7 +3,7 @@ const db = require('../config/db');
 const migrations = [
   {
     id: '001_create_billing_tables',
-    description: 'Criar tabelas para modelo híbrido de faturamento',
+    description: 'Criar tabelas para modelo h�brido de faturamento',
     up: `
       -- Tabela de planos
       CREATE TABLE IF NOT EXISTS billing_plans (
@@ -83,7 +83,7 @@ const migrations = [
         created_at TIMESTAMP DEFAULT NOW()
       );
 
-      -- Índices para performance
+      -- �ndices para performance
       CREATE INDEX idx_tenant_billing ON tenant_billing(tenant_id);
       CREATE INDEX idx_invoices_tenant ON invoices(tenant_id);
       CREATE INDEX idx_invoices_month_year ON invoices(month_year);
@@ -101,20 +101,20 @@ const migrations = [
 
 async function runMigrations(direction = 'up') {
   try {
-    console.log(`🚀 Executando migrations de billing (${direction})...`);
+    console.log(`� Executando migrations de billing (${direction})...`);
 
     for (const migration of migrations) {
       const sql = migration[direction];
-      console.log(`  ${direction === 'up' ? '↑' : '↓'} ${migration.id}...`);
+      console.log(`  ${direction === 'up' ? '' : ''} ${migration.id}...`);
       console.log(`     ${migration.description}`);
       await db.query(sql);
-      console.log(`  ✅ ${migration.id}`);
+      console.log(`  ${migration.id}`);
     }
 
-    console.log('✅ Migrations de billing concluídas!');
+    console.log('Migrations de billing conclu�das!');
     process.exit(0);
   } catch (error) {
-    console.error('❌ Erro:', error.message);
+    console.error('[ERRO] Erro:', error.message);
     process.exit(1);
   }
 }

@@ -12,7 +12,7 @@
 
 <div class="container">
 
-  <a href="/" style="color:#2563eb; font-size:14px; text-decoration:none; display:inline-block; margin-bottom:24px;">â† Voltar para loja</a>
+  <a href="/" style="color:#2563eb; font-size:14px; text-decoration:none; display:inline-block; margin-bottom:24px;"> Voltar para loja</a>
 
   <div class="produto-detail">
 
@@ -48,12 +48,12 @@
         <% } %>
       </div>
 
-      <!-- AVALIAÃ‡Ã•ES -->
+      <!-- AVALIAÃÃ•ES -->
       <div style="display:flex; align-items:center; gap:8px; color:#f59e0b;">
-        â˜…â˜…â˜…â˜…â˜… <span style="color:#9ca3af; font-size:13px;">(124 avaliaÃ§Ãµes)</span>
+        ˜˜˜˜˜ <span style="color:#9ca3af; font-size:13px;">(124 avaliaÃ§Ãµes)</span>
       </div>
 
-      <!-- PREÃ‡O -->
+      <!-- PREÃO -->
       <div style="font-size:38px; font-weight:900; color:#2563eb;">
         R$ <%= Number(produto.valor).toFixed(2).replace('.', ',') %>
       </div>
@@ -66,7 +66,7 @@
           </div>
         <% } else if (produto.estoque <= 5) { %>
           <div style="display:inline-block; background:#fef3c7; color:#d97706; font-size:13px; font-weight:700; padding:4px 12px; border-radius:20px;">
-            Ãšltimas <%= produto.estoque %> unidade<%= produto.estoque > 1 ? 's' : '' %> disponÃ­vel<%= produto.estoque > 1 ? 'is' : '' %>
+            Ãltimas <%= produto.estoque %> unidade<%= produto.estoque > 1 ? 's' : '' %> disponÃvel<%= produto.estoque > 1 ? 'is' : '' %>
           </div>
         <% } else { %>
           <div style="display:inline-block; background:#dcfce7; color:#16a34a; font-size:13px; font-weight:600; padding:4px 12px; border-radius:20px;">
@@ -75,7 +75,7 @@
         <% } %>
       <% } %>
 
-      <!-- DESCRIÃ‡ÃƒO -->
+      <!-- DESCRIÃÃƒO -->
       <% if(produto.descricao){ %>
         <p class="produto-descricao"><%= produto.descricao %></p>
       <% } %>
@@ -84,7 +84,7 @@
       <div style="display:flex; align-items:center; gap:16px;">
         <span style="font-weight:600; color:#374151;">Quantidade</span>
         <div style="display:flex;align-items:center;border:1.5px solid #e5e7eb;border-radius:8px;overflow:hidden;">
-          <button id="btnDec" style="width:36px;height:36px;background:#f9fafb;border:none;font-size:1.1rem;cursor:pointer;color:#374151;">âˆ’</button>
+          <button id="btnDec" style="width:36px;height:36px;background:#f9fafb;border:none;font-size:1.1rem;cursor:pointer;color:#374151;">ˆ</button>
           <input type="number" id="qtdInput" value="1" min="1" max="99"
             style="width:52px;height:36px;border:none;border-left:1.5px solid #e5e7eb;border-right:1.5px solid #e5e7eb;text-align:center;font-size:0.95rem;font-weight:600;">
           <button id="btnInc" style="width:36px;height:36px;background:#f9fafb;border:none;font-size:1.1rem;cursor:pointer;color:#374151;">+</button>
@@ -98,17 +98,17 @@
           <button class="btn" disabled style="font-size:15px; padding:14px 28px; background:#374151; color:#9ca3af; cursor:not-allowed;">Produto Esgotado</button>
         <% } else { %>
           <button class="btn btn-primary" id="btnAddCart" data-id="<%= produto.id %>" style="font-size:15px; padding:14px 28px;"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('shopping_cart', 'w-5 h-5') %></span> Adicionar ao Carrinho</button>
-          <button class="btn" id="btnBuyNow" data-id="<%= produto.id %>" style="background:#16a34a; color:white; font-size:15px; padding:14px 28px;">âš¡ Comprar Agora</button>
+          <button class="btn" id="btnBuyNow" data-id="<%= produto.id %>" style="background:#16a34a; color:white; font-size:15px; padding:14px 28px;">¡ Comprar Agora</button>
         <% } %>
       </div>
 
       <!-- GARANTIAS -->
       <div style="border-top:1px solid #f3f4f6; padding-top:20px; display:flex; flex-direction:column; gap:8px;">
         <div style="display:flex; align-items:center; gap:8px; font-size:14px; color:#4b5563;">
-          ğŸšš <span>Frete calculado no checkout</span>
+          <span>Frete calculado no checkout</span>
         </div>
         <div style="display:flex; align-items:center; gap:8px; font-size:14px; color:#4b5563;">
-          ğŸ”„ <span>Troca garantida em atÃ© 7 dias</span>
+          „ <span>Troca garantida em atÃ© 7 dias</span>
         </div>
         <div style="display:flex; align-items:center; gap:8px; font-size:14px; color:#4b5563;">
           <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('lock', 'w-5 h-5') %></span> <span>Pagamento 100% seguro</span>

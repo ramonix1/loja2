@@ -22,7 +22,7 @@
     <main class="ml-60 flex-1 p-8">
 
       <div class="mb-8 flex items-center gap-4">
-        <a href="/admin/banners" class="text-gray-400 hover:text-white transition text-sm">← Banners</a>
+        <a href="/admin/banners" class="text-gray-400 hover:text-white transition text-sm"> Banners</a>
         <h1 class="text-2xl font-bold text-white"><%= banner ? 'Editar Banner' : 'Novo Banner' %></h1>
       </div>
 
@@ -51,9 +51,9 @@
 
             <label class="block">
               <div class="border-2 border-dashed border-gray-700 rounded-lg p-6 text-center cursor-pointer hover:border-blue-500 transition">
-                <div class="text-3xl mb-2">📁</div>
+                <div class="text-3xl mb-2">�</div>
                 <p class="text-sm text-gray-400">Clique para selecionar uma imagem</p>
-                <p class="text-xs text-gray-600 mt-1">JPG, PNG, WEBP ou GIF — até 5MB</p>
+                <p class="text-xs text-gray-600 mt-1">JPG, PNG, WEBP ou GIF � até 5MB</p>
               </div>
               <input type="file" name="imagem" accept="image/*" class="hidden" id="input-imagem"
                 <%= banner ? '' : 'required' %>
@@ -66,7 +66,7 @@
             <h2 class="text-sm font-semibold text-gray-300 mb-2 uppercase tracking-wider">Conteúdo</h2>
 
             <div>
-              <label class="block text-sm font-medium text-gray-300 mb-1">Título <span class="text-red-400">*</span></label>
+              <label class="block text-sm font-medium text-gray-300 mb-1">T�tulo <span class="text-red-400">*</span></label>
               <input type="text" name="titulo" required
                 value="<%= banner ? banner.titulo : '' %>"
                 placeholder="Ex: Super Oferta de Verão"
@@ -74,10 +74,10 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-300 mb-1">Subtítulo / Descrição</label>
+              <label class="block text-sm font-medium text-gray-300 mb-1">Subt�tulo / Descrição</label>
               <input type="text" name="subtitulo"
                 value="<%= banner ? (banner.subtitulo || '') : '' %>"
-                placeholder="Ex: Aproveite descontos imperdíveis em nossos produtos"
+                placeholder="Ex: Aproveite descontos imperd�veis em nossos produtos"
                 class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 text-sm">
             </div>
           </div>
@@ -99,7 +99,7 @@
               <label class="block text-sm font-medium text-gray-300 mb-1">Vincular a um produto</label>
               <select name="produto_id" id="select-produto" onchange="sincronizarCta()"
                 class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-blue-500 text-sm">
-                <option value="">— Nenhum produto (usar URL manual) —</option>
+                <option value="">� Nenhum produto (usar URL manual) �</option>
                 <% produtos.forEach(function(p) { %>
                   <option value="<%= p.id %>"
                     <%= banner && banner.produto_id == p.id ? 'selected' : '' %>>
@@ -128,7 +128,7 @@
               <input type="checkbox" name="ativo" id="ativo" value="on"
                 <%= (!banner || banner.ativo) ? 'checked' : '' %>
                 class="w-4 h-4 rounded accent-blue-500 cursor-pointer">
-              <label for="ativo" class="text-sm text-gray-300 cursor-pointer">Banner ativo (visível na loja)</label>
+              <label for="ativo" class="text-sm text-gray-300 cursor-pointer">Banner ativo (vis�vel na loja)</label>
             </div>
 
             <div>

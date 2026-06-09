@@ -2,7 +2,7 @@ const db = require('../config/db');
 const BillingService = require('../services/billingService');
 
 /**
- * SUPER ADMIN: Listar planos disponíveis
+ * SUPER ADMIN: Listar planos dispon�veis
  */
 exports.listPlans = async (req, res) => {
   try {
@@ -25,7 +25,7 @@ exports.listPlans = async (req, res) => {
       plans: result.rows
     });
   } catch (error) {
-    console.error('❌ listPlans error:', error);
+    console.error('[ERRO] listPlans error:', error);
     res.status(500).json({ error: 'Erro ao listar planos' });
   }
 };
@@ -52,11 +52,11 @@ exports.assignPlanToTenant = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Plano atribuído com sucesso',
+      message: 'Plano atribu�do com sucesso',
       billing
     });
   } catch (error) {
-    console.error('❌ assignPlanToTenant error:', error);
+    console.error('[ERRO] assignPlanToTenant error:', error);
     res.status(500).json({ error: error.message || 'Erro ao atribuir plano' });
   }
 };
@@ -93,7 +93,7 @@ exports.getMyBilling = async (req, res) => {
       billing: result.rows[0]
     });
   } catch (error) {
-    console.error('❌ getMyBilling error:', error);
+    console.error('[ERRO] getMyBilling error:', error);
     res.status(500).json({ error: 'Erro ao buscar configuração de billing' });
   }
 };
@@ -110,7 +110,7 @@ exports.getMyBillingReport = async (req, res) => {
 
     res.json(report);
   } catch (error) {
-    console.error('❌ getMyBillingReport error:', error);
+    console.error('[ERRO] getMyBillingReport error:', error);
     res.status(500).json({ error: 'Erro ao gerar relatório' });
   }
 };
@@ -129,13 +129,13 @@ exports.listMyInvoices = async (req, res) => {
       invoices
     });
   } catch (error) {
-    console.error('❌ listMyInvoices error:', error);
+    console.error('[ERRO] listMyInvoices error:', error);
     res.status(500).json({ error: 'Erro ao listar invoices' });
   }
 };
 
 /**
- * CLIENTE: Ver uma invoice específica
+ * CLIENTE: Ver uma invoice espec�fica
  */
 exports.getInvoice = async (req, res) => {
   try {
@@ -175,7 +175,7 @@ exports.getInvoice = async (req, res) => {
       invoice
     });
   } catch (error) {
-    console.error('❌ getInvoice error:', error);
+    console.error('[ERRO] getInvoice error:', error);
     res.status(500).json({ error: 'Erro ao buscar invoice' });
   }
 };
@@ -196,7 +196,7 @@ exports.getRevenueReport = async (req, res) => {
 
     res.json(report);
   } catch (error) {
-    console.error('❌ getRevenueReport error:', error);
+    console.error('[ERRO] getRevenueReport error:', error);
     res.status(500).json({ error: 'Erro ao gerar relatório de receita' });
   }
 };
@@ -262,7 +262,7 @@ exports.listAllInvoices = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('❌ listAllInvoices error:', error);
+    console.error('[ERRO] listAllInvoices error:', error);
     res.status(500).json({ error: 'Erro ao listar invoices' });
   }
 };
@@ -303,7 +303,7 @@ exports.listTenantBillings = async (req, res) => {
       billings: result.rows
     });
   } catch (error) {
-    console.error('❌ listTenantBillings error:', error);
+    console.error('[ERRO] listTenantBillings error:', error);
     res.status(500).json({ error: 'Erro ao listar configurações de billing' });
   }
 };

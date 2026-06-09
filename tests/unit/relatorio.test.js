@@ -1,5 +1,5 @@
 // Testes unitários para relatorioController
-describe('Relatorio Controller — SQL Injection Prevention', () => {
+describe('Relatorio Controller � SQL Injection Prevention', () => {
 
   test('FILTROS_ESTOQUE_VALIDOS contém whitelist segura', () => {
     // Este é um teste conceitual para documenta a validação
@@ -69,7 +69,7 @@ describe('Relatorio Controller — SQL Injection Prevention', () => {
         'cancelado',
       ];
 
-      // Todos os status devem ter labels legíveis
+      // Todos os status devem ter labels leg�veis
       expectedStatus.forEach(status => {
         expect(typeof status).toBe('string');
         expect(status.length).toBeGreaterThan(0);

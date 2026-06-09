@@ -22,7 +22,7 @@ describe('Validation Middleware', () => {
       expect(validateEmail('')).toBe(false);
     });
 
-    test('não é sensível a case', () => {
+    test('não é sens�vel a case', () => {
       expect(validateEmail('User@EXAMPLE.COM')).toBe(true);
     });
   });
@@ -42,7 +42,7 @@ describe('Validation Middleware', () => {
   });
 
   describe('validateCPF', () => {
-    test('rejeita CPF com dígitos repetidos', () => {
+    test('rejeita CPF com d�gitos repetidos', () => {
       expect(validateCPF('11111111111')).toBe(false);
       expect(validateCPF('00000000000')).toBe(false);
     });

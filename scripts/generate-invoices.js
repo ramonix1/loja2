@@ -15,7 +15,7 @@ async function generateMonthlyInvoices() {
     // Obter mês/ano
     const monthYear = process.argv[2] || new Date().toISOString().slice(0, 7);
 
-    console.log(`\n🧾 Gerando invoices para ${monthYear}...\n`);
+    console.log(`\n�� Gerando invoices para ${monthYear}...\n`);
 
     // Obter todos os tenants com billing ativo
     const tenants = await db.query(`
@@ -26,7 +26,7 @@ async function generateMonthlyInvoices() {
     `);
 
     if (tenants.rows.length === 0) {
-      console.log('⚠️ Nenhum tenant com billing ativo encontrado');
+      console.log(' Nenhum tenant com billing ativo encontrado');
       process.exit(0);
     }
 
@@ -49,7 +49,7 @@ async function generateMonthlyInvoices() {
         `, [tenantId, monthYear]);
 
         if (existing.rows.length > 0) {
-          console.log(`⏭️  Pulando ${tenantId} (invoice já existe)`);
+          console.log(`  Pulando ${tenantId} (invoice já existe)`);
           continue;
         }
 
@@ -66,22 +66,22 @@ async function generateMonthlyInvoices() {
 
         // Buscar nome do tenant para log
         const tenant = await db.query('SELECT name FROM tenants WHERE id = $1', [tenantId]);
-        console.log(`✅ ${tenant.rows[0]?.name || tenantId}: ${invoice.invoice_number} - R$ ${invoice.total}`);
+        console.log(`[OK] ${tenant.rows[0]?.name || tenantId}: ${invoice.invoice_number} - R$ ${invoice.total}`);
 
       } catch (error) {
         results.error++;
-        console.error(`❌ Erro ao gerar invoice para tenant: ${error.message}`);
+        console.error(`Erro ao gerar invoice para tenant: ${error.message}`);
       }
     }
 
     // Relatório final
-    console.log(`\n${'─'.repeat(60)}`);
-    console.log(`📊 RESUMO DA GERAÇÃO DE INVOICES (${monthYear})`);
-    console.log(`${'─'.repeat(60)}`);
-    console.log(`✅ Sucesso:    ${results.success}/${results.total}`);
-    console.log(`❌ Erros:      ${results.error}/${results.total}`);
-    console.log(`💰 Total:      R$ ${results.invoices.reduce((sum, inv) => sum + inv.total, 0).toFixed(2)}`);
-    console.log(`${'─'.repeat(60)}\n`);
+    console.log(`\n${'�'.repeat(60)}`);
+    console.log(`[RESUMO] DA GERA�ÃO DE INVOICES (${monthYear})`);
+    console.log(`${'�'.repeat(60)}`);
+    console.log(`[OK] Sucesso:    ${results.success}/${results.total}`);
+    console.log(`Erros:      ${results.error}/${results.total}`);
+    console.log(` Total:      R$ ${results.invoices.reduce((sum, inv) => sum + inv.total, 0).toFixed(2)}`);
+    console.log(`${'�'.repeat(60)}\n`);
 
     // Resumo por tipo de billing
     const byType = {};
@@ -97,7 +97,7 @@ async function generateMonthlyInvoices() {
     }
 
     if (Object.keys(byType).length > 0) {
-      console.log('💵 Receita por Tipo de Billing:');
+      console.log('� Receita por Tipo de Billing:');
       for (const [type, amount] of Object.entries(byType)) {
         console.log(`  - ${type}: R$ ${amount.toFixed(2)}`);
       }
@@ -106,7 +106,7 @@ async function generateMonthlyInvoices() {
 
     process.exit(results.error > 0 ? 1 : 0);
   } catch (error) {
-    console.error('❌ Erro crítico:', error.message);
+    console.error('[ERRO] Erro cr�tico:', error.message);
     process.exit(1);
   }
 }

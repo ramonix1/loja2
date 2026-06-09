@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Recuperar senha — Lojão</title>
+  <title>Recuperar senha � Lojão</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
     body { background: #f3f4f6; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
@@ -50,15 +50,15 @@
     <p class="auth-sub">Informe seu email ou telefone cadastrado e enviaremos as instruções para redefinir sua senha.</p>
 
     <% if (erro) { %>
-      <div class="alerta-erro">⚠️ <%= erro %></div>
+      <div class="alerta-erro"> <%= erro %></div>
     <% } %>
     <% if (info) { %>
-      <div class="alerta-info">✉️ <%= info %></div>
+      <div class="alerta-info">� <%= info %></div>
     <% } %>
 
     <% if (!info) { %>
     <div class="canal-tabs">
-      <button type="button" class="canal-tab ativo" onclick="selecionarCanal('email', this)">📧 Email</button>
+      <button type="button" class="canal-tab ativo" onclick="selecionarCanal('email', this)">� Email</button>
       <button type="button" class="canal-tab <%= smsDisponivel ? '' : '' %>" onclick="selecionarCanal('sms', this)" <%= smsDisponivel ? '' : 'disabled title="SMS não configurado"' %>>
         <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('phone', 'w-5 h-5') %></span> SMS
       </button>
@@ -87,7 +87,7 @@
     <% } %>
 
     <div class="links-auth">
-      <a href="/login">← Voltar ao login</a>
+      <a href="/login"> Voltar ao login</a>
     </div>
   </div>
 

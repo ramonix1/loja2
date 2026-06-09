@@ -3,7 +3,7 @@ const router = express.Router();
 const masterDb = require('../config/masterDb');
 const { invalidatePool } = require('../config/tenantDb');
 
-// Só disponível em desenvolvimento
+// Só dispon�vel em desenvolvimento
 function devOnly(req, res, next) {
   if (process.env.NODE_ENV === 'production') {
     return res.status(404).send('Not found');

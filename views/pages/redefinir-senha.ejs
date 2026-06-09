@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nova senha â€” LojÃ£o</title>
+  <title>Nova senha € LojÃ£o</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
     body { background: #f3f4f6; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
@@ -48,7 +48,7 @@
     <p class="auth-sub">Escolha uma senha forte para proteger sua conta.</p>
 
     <% if (erro) { %>
-      <div class="alerta-erro">âš ï¸ <%= erro %></div>
+      <div class="alerta-erro"> <%= erro %></div>
     <% } %>
 
     <form method="POST" action="/redefinir-senha/<%= token %>">
@@ -57,15 +57,15 @@
       <div class="form-grupo">
         <label for="senha">Nova senha</label>
         <div class="senha-wrapper">
-          <input type="password" id="senha" name="senha" placeholder="MÃ­nimo 8 caracteres" required autocomplete="new-password" oninput="avaliarSenha(this.value)">
-          <button type="button" class="toggle-senha" onclick="toggleSenha('senha', this)">ğŸ‘</button>
+          <input type="password" id="senha" name="senha" placeholder="MÃnimo 8 caracteres" required autocomplete="new-password" oninput="avaliarSenha(this.value)">
+          <button type="button" class="toggle-senha" onclick="toggleSenha('senha', this)"></button>
         </div>
         <div class="forca-barra" id="forcaBarra"></div>
         <div class="forca-label" id="forcaLabel"></div>
         <div class="requisitos" id="requisitos">
-          <div class="requisito nok" id="req-len">â—‹ MÃ­nimo 8 caracteres</div>
-          <div class="requisito nok" id="req-num">â—‹ Pelo menos um nÃºmero</div>
-          <div class="requisito nok" id="req-esp">â—‹ Pelo menos uma letra maiÃºscula</div>
+          <div class="requisito nok" id="req-len">—‹ MÃnimo 8 caracteres</div>
+          <div class="requisito nok" id="req-num">—‹ Pelo menos um nÃºmero</div>
+          <div class="requisito nok" id="req-esp">—‹ Pelo menos uma letra maiÃºscula</div>
         </div>
       </div>
 
@@ -73,7 +73,7 @@
         <label for="confirmacao">Confirmar nova senha</label>
         <div class="senha-wrapper">
           <input type="password" id="confirmacao" name="confirmacao" placeholder="Repita a senha" required autocomplete="new-password">
-          <button type="button" class="toggle-senha" onclick="toggleSenha('confirmacao', this)">ğŸ‘</button>
+          <button type="button" class="toggle-senha" onclick="toggleSenha('confirmacao', this)"></button>
         </div>
       </div>
 
@@ -85,7 +85,7 @@
     function toggleSenha(id, btn) {
       const input = document.getElementById(id);
       input.type = input.type === 'password' ? 'text' : 'password';
-      btn.textContent = input.type === 'password' ? 'ğŸ‘' : 'ğŸ™ˆ';
+      btn.textContent = input.type === 'password' ? '' : 'ˆ';
     }
 
     function avaliarSenha(senha) {
@@ -113,7 +113,7 @@
       const el = document.getElementById(id);
       el.classList.toggle('ok', ok);
       el.classList.toggle('nok', !ok);
-      el.textContent = (ok ? 'âœ“ ' : 'â—‹ ') + el.textContent.slice(2);
+      el.textContent = (ok ? ' ' : '—‹ ') + el.textContent.slice(2);
     }
   </script>
 </body>

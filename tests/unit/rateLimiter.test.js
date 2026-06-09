@@ -63,14 +63,14 @@ describe('Rate Limiter Middleware', () => {
       // checkoutLimiter foi criado com: max: 10, windowMs: 5 * 60 * 1000
       expect(checkoutLimiter).toBeDefined();
       expect(typeof checkoutLimiter).toBe('function');
-      // Limite restritivo para operação crítica
+      // Limite restritivo para operação cr�tica
     });
 
     test('protege recuperação contra enumeration', () => {
       // recuperacaoLimiter foi criado com: max: 5, windowMs: 60 * 60 * 1000
       expect(recuperacaoLimiter).toBeDefined();
       expect(typeof recuperacaoLimiter).toBe('function');
-      // Muito restritivo para operação sensível
+      // Muito restritivo para operação sens�vel
     });
 
     test('protege API contra abuso', () => {

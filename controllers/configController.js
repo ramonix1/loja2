@@ -67,7 +67,7 @@ exports.diagnostico = async (req, res) => {
     dica: appUrl ? null : 'Configure no .env: APP_URL=https://sua-url.ngrok-free.app',
   });
 
-  // Testar MP API — qualquer resposta da API (mesmo 404) significa token válido
+  // Testar MP API � qualquer resposta da API (mesmo 404) significa token válido
   let mpApiOk = false, mpApiErro = null;
   if (mpToken) {
     try {
@@ -77,7 +77,7 @@ exports.diagnostico = async (req, res) => {
       await p.get({ id: '1' }).catch(e => {
         const status = e.statusCode || e.status || (e.cause?.status);
         const msg = (e.message || '').toLowerCase();
-        // 404 / "not found" / "payment not found" = API acessível, token válido
+        // 404 / "not found" / "payment not found" = API acess�vel, token válido
         if (status === 404 || msg.includes('not found') || msg.includes('payment')) {
           mpApiOk = true;
         } else if (status === 401 || status === 403) {
@@ -94,7 +94,7 @@ exports.diagnostico = async (req, res) => {
   resultados.push({
     nome: 'Conexão MP API',
     ok: mpApiOk,
-    valor: mpApiOk ? 'OK — token válido, API acessível' : (mpApiErro || 'Não testado'),
+    valor: mpApiOk ? 'OK � token válido, API acess�vel' : (mpApiErro || 'Não testado'),
     dica: !mpApiOk && mpToken ? `Erro: ${mpApiErro}` : null,
   });
 
@@ -117,7 +117,7 @@ exports.diagnostico = async (req, res) => {
   resultados.push({
     nome: 'Conexão SumUp API',
     ok: sumupApiOk,
-    valor: sumupApiOk ? 'OK — API respondeu' : (sumupApiErro || 'Não testado'),
+    valor: sumupApiOk ? 'OK � API respondeu' : (sumupApiErro || 'Não testado'),
     dica: !sumupApiOk && sumupKey ? `Erro: ${sumupApiErro}` : null,
   });
 

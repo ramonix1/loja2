@@ -10,7 +10,7 @@ function getTwilioClient() {
 async function enviarSmsCodigo(telefone, codigo) {
   const client = getTwilioClient();
   if (!client) {
-    console.warn('Twilio não configurado — SMS não enviado.');
+    console.warn('Twilio não configurado � SMS não enviado.');
     return false;
   }
 

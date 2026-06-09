@@ -17,7 +17,7 @@
     <!-- Header -->
     <div class="mb-8 flex items-center justify-between">
       <div>
-        <div class="text-xs text-yellow-500 font-bold uppercase tracking-wider mb-1">⚠️ Modo Desenvolvimento</div>
+        <div class="text-xs text-yellow-500 font-bold uppercase tracking-wider mb-1"> Modo Desenvolvimento</div>
         <h1 class="text-3xl font-bold text-white">Gestão de Tenants</h1>
         <p class="text-gray-400 mt-1 text-sm">
           Tenant ativo na sessão:
@@ -29,7 +29,7 @@
         </p>
       </div>
       <a href="/" class="text-sm text-gray-400 hover:text-white transition bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg">
-        ← Acessar loja
+         Acessar loja
       </a>
     </div>
 
@@ -69,7 +69,7 @@
                 <div><span class="text-gray-600">Banco:</span> <span class="text-gray-300 font-mono"><%= t.db_name %></span></div>
                 <div><span class="text-gray-600">Host:</span> <span class="text-gray-300 font-mono"><%= t.db_host %>:<%= t.db_port || 5432 %></span></div>
                 <div><span class="text-gray-600">Usuário DB:</span> <span class="text-gray-300 font-mono"><%= t.db_user %></span></div>
-                <div><span class="text-gray-600">Plano:</span> <span class="text-gray-300"><%= t.plano || '—' %></span></div>
+                <div><span class="text-gray-600">Plano:</span> <span class="text-gray-300"><%= t.plano || '�' %></span></div>
                 <% if (t.url_propria) { %>
                   <div class="col-span-2"><span class="text-gray-600">URL:</span> <span class="text-gray-300 font-mono"><%= t.url_propria %></span></div>
                 <% } %>
@@ -82,14 +82,14 @@
               <!-- Acessar (troca sessão e vai para /) -->
               <a href="/_tenants/acessar/<%= t.slug %>"
                  class="text-center text-xs font-semibold px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition">
-                🚀 Acessar
+                � Acessar
               </a>
 
               <!-- Selecionar (só troca sessão, fica no painel) -->
               <form method="POST" action="/_tenants/switch/<%= t.slug %>">
                 <button type="submit"
                         class="w-full text-xs font-semibold px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 transition">
-                  🔄 Selecionar
+                  � Selecionar
                 </button>
               </form>
 
@@ -97,7 +97,7 @@
               <form method="POST" action="/_tenants/reset/<%= t.slug %>">
                 <button type="submit"
                         class="w-full text-xs font-semibold px-4 py-2 rounded-lg bg-orange-900/50 hover:bg-orange-800/60 text-orange-300 border border-orange-800 transition">
-                  ⚡ Reset pool
+                  � Reset pool
                 </button>
               </form>
 
@@ -108,7 +108,7 @@
                                <%= t.ativo
                                    ? 'bg-red-900/40 hover:bg-red-900/70 text-red-400 border border-red-900'
                                    : 'bg-green-900/40 hover:bg-green-900/70 text-green-400 border border-green-900' %>">
-                  <%= t.ativo ? '🔴 Desativar' : '🟢 Ativar' %>
+                  <%= t.ativo ? '� Desativar' : ' Ativar' %>
                 </button>
               </form>
 
@@ -124,8 +124,8 @@
 
     <!-- Rodapé info -->
     <div class="mt-8 text-xs text-gray-600 border-t border-gray-800 pt-4">
-      Esta página só é acessível em <code class="text-gray-500">NODE_ENV=development</code>.
-      Para trocar de tenant em produção, configure o subdomínio correto ou a variável <code class="text-gray-500">TENANT_SLUG</code>.
+      Esta página só é acess�vel em <code class="text-gray-500">NODE_ENV=development</code>.
+      Para trocar de tenant em produção, configure o subdom�nio correto ou a variável <code class="text-gray-500">TENANT_SLUG</code>.
     </div>
 
   </div>

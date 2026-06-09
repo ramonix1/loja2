@@ -25,7 +25,7 @@
       <p class="text-gray-400 mt-1 text-sm">Bem-vindo ao painel de controle</p>
     </div>
 
-    <!-- Cards de estatística -->
+    <!-- Cards de estat�stica -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
 
       <div class="bg-gray-900 rounded-xl p-5 border border-gray-800">
@@ -35,19 +35,19 @@
       </div>
 
       <div class="bg-gray-900 rounded-xl p-5 border border-gray-800">
-        <div class="text-2xl mb-1">🏷️</div>
+        <div class="text-2xl mb-1"></div>
         <div class="text-2xl font-bold text-white"><%= totalCategorias %></div>
         <div class="text-xs text-gray-400 mt-1">Categorias</div>
       </div>
 
       <div class="bg-gray-900 rounded-xl p-5 border border-gray-800">
-        <div class="text-2xl mb-1">🛍️</div>
+        <div class="text-2xl mb-1"></div>
         <div class="text-2xl font-bold text-white"><%= totalPedidos %></div>
         <div class="text-xs text-gray-400 mt-1">Pedidos</div>
       </div>
 
       <div class="bg-gray-900 rounded-xl p-5 border border-gray-800">
-        <div class="text-2xl mb-1">🖼️</div>
+        <div class="text-2xl mb-1"></div>
         <div class="text-2xl font-bold text-white"><%= totalBanners %></div>
         <div class="text-xs text-gray-400 mt-1">Banners ativos</div>
       </div>
@@ -67,7 +67,7 @@
     <div class="mb-10">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-base font-semibold text-white">Pedidos recentes</h2>
-        <a href="/admin/pedidos" class="text-sm text-blue-400 hover:text-blue-300 transition">Ver todos →</a>
+        <a href="/admin/pedidos" class="text-sm text-blue-400 hover:text-blue-300 transition">Ver todos </a>
       </div>
       <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
         <table class="w-full text-sm">
@@ -86,7 +86,7 @@
               <tr class="hover:bg-gray-800/40 transition cursor-pointer" onclick="location.href='/admin/pedidos/<%= p.id %>'">
                 <td class="px-5 py-3 text-gray-400 font-mono">#<%= p.id %></td>
                 <td class="px-5 py-3 text-white font-medium"><%= p.cliente_nome %></td>
-                <td class="px-5 py-3 text-gray-300 capitalize"><%= p.metodo_pagamento || '—' %></td>
+                <td class="px-5 py-3 text-gray-300 capitalize"><%= p.metodo_pagamento || '�' %></td>
                 <td class="px-5 py-3 text-white font-semibold">
                   R$ <%= Number(p.total).toLocaleString('pt-BR', {minimumFractionDigits:2}) %>
                 </td>
@@ -126,47 +126,47 @@
         </div>
         <h3 class="font-bold text-white text-base mb-1">Produtos</h3>
         <p class="text-gray-400 text-sm mb-4">Cadastre, edite e remova produtos da loja. Gerencie imagens, preços e descrições.</p>
-        <div class="flex items-center text-blue-400 text-sm font-medium">Acessar módulo →</div>
+        <div class="flex items-center text-blue-400 text-sm font-medium">Acessar módulo </div>
       </a>
 
       <a href="/admin/categorias" class="module-card bg-gray-900 border border-gray-800 hover:border-blue-500 rounded-xl p-6 block">
         <div class="flex items-start justify-between mb-4">
-          <div class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-2xl">🏷️</div>
+          <div class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center text-2xl"></div>
           <span class="text-xs bg-green-900 text-green-400 font-semibold px-2 py-1 rounded-full">Ativo</span>
         </div>
         <h3 class="font-bold text-white text-base mb-1">Categorias</h3>
         <p class="text-gray-400 text-sm mb-4">Organize produtos em seções exibidas na vitrine. Cada categoria vira uma seção na página inicial.</p>
-        <div class="flex items-center text-blue-400 text-sm font-medium">Acessar módulo →</div>
+        <div class="flex items-center text-blue-400 text-sm font-medium">Acessar módulo </div>
       </a>
 
       <a href="/admin/banners" class="module-card bg-gray-900 border border-gray-800 hover:border-blue-500 rounded-xl p-6 block">
         <div class="flex items-start justify-between mb-4">
-          <div class="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center text-2xl">🖼️</div>
+          <div class="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center text-2xl"></div>
           <span class="text-xs bg-green-900 text-green-400 font-semibold px-2 py-1 rounded-full">Ativo</span>
         </div>
         <h3 class="font-bold text-white text-base mb-1">Banners</h3>
-        <p class="text-gray-400 text-sm mb-4">Gerencie os banners do carrossel da página inicial com título, subtítulo e botão CTA.</p>
-        <div class="flex items-center text-blue-400 text-sm font-medium">Acessar módulo →</div>
+        <p class="text-gray-400 text-sm mb-4">Gerencie os banners do carrossel da página inicial com t�tulo, subt�tulo e botão CTA.</p>
+        <div class="flex items-center text-blue-400 text-sm font-medium">Acessar módulo </div>
       </a>
 
       <a href="/admin/pedidos" class="module-card bg-gray-900 border border-gray-800 hover:border-blue-500 rounded-xl p-6 block">
         <div class="flex items-start justify-between mb-4">
-          <div class="w-12 h-12 bg-yellow-600 rounded-xl flex items-center justify-center text-2xl">🛍️</div>
+          <div class="w-12 h-12 bg-yellow-600 rounded-xl flex items-center justify-center text-2xl"></div>
           <span class="text-xs bg-green-900 text-green-400 font-semibold px-2 py-1 rounded-full">Ativo</span>
         </div>
         <h3 class="font-bold text-white text-base mb-1">Pedidos</h3>
         <p class="text-gray-400 text-sm mb-4">Acompanhe e gerencie os pedidos realizados pelos clientes.</p>
-        <div class="flex items-center text-blue-400 text-sm font-medium">Acessar módulo →</div>
+        <div class="flex items-center text-blue-400 text-sm font-medium">Acessar módulo </div>
       </a>
 
       <a href="/admin/clientes" class="module-card bg-gray-900 border border-gray-800 hover:border-blue-500 rounded-xl p-6 block">
         <div class="flex items-start justify-between mb-4">
-          <div class="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center text-2xl">🏢</div>
+          <div class="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center text-2xl"></div>
           <span class="text-xs bg-green-900 text-green-400 font-semibold px-2 py-1 rounded-full">Ativo</span>
         </div>
         <h3 class="font-bold text-white text-base mb-1">Clientes</h3>
         <p class="text-gray-400 text-sm mb-4">Gerencie os logos dos clientes exibidos na página inicial.</p>
-        <div class="flex items-center text-blue-400 text-sm font-medium">Acessar módulo →</div>
+        <div class="flex items-center text-blue-400 text-sm font-medium">Acessar módulo </div>
       </a>
 
       <a href="/admin/configuracoes" class="module-card bg-gray-900 border border-gray-800 hover:border-blue-500 rounded-xl p-6 block">
@@ -176,7 +176,7 @@
         </div>
         <h3 class="font-bold text-white text-base mb-1">Configurações</h3>
         <p class="text-gray-400 text-sm mb-4">Controle de estoque, reservas, pagamentos e outras opções do sistema.</p>
-        <div class="flex items-center text-blue-400 text-sm font-medium">Acessar módulo →</div>
+        <div class="flex items-center text-blue-400 text-sm font-medium">Acessar módulo </div>
       </a>
 
     </div>

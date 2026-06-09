@@ -44,9 +44,9 @@ async function run() {
     try {
       const pool = await getPool(row.slug);
       await pool.query(SQL);
-      console.log(`✅ ${row.slug}: tabelas de chat criadas`);
+      console.log(`[OK] ${row.slug}: tabelas de chat criadas`);
     } catch (err) {
-      console.error(`❌ ${row.slug}: ${err.message}`);
+      console.error(`${row.slug}: ${err.message}`);
     }
   }
   process.exit(0);

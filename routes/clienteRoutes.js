@@ -4,7 +4,7 @@ const clienteController = require("../controllers/clienteController");
 const upload = require("../middlewares/upload");
 const { requireAdmin, requireAuth } = require("../middlewares/auth");
 
-// API - Listar clientes ativos (acessível por qualquer usuário autenticado)
+// API - Listar clientes ativos (acess�vel por qualquer usuário autenticado)
 router.get("/api/clientes", requireAuth, clienteController.listar);
 
 // Admin - Dashboard de clientes

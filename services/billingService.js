@@ -16,7 +16,7 @@ class BillingService {
       `, [tenantId]);
 
       if (billing.rows.length === 0) {
-        console.log(`⚠️ Tenant ${tenantId} não tem billing configurado`);
+        console.log(` Tenant ${tenantId} não tem billing configurado`);
         return null;
       }
 
@@ -38,17 +38,17 @@ class BillingService {
         RETURNING *
       `, [tenantId, pedidoId, orderTotal, config.commission_percentage, commissionAmount, monthYear]);
 
-      console.log(`✅ Comissão registrada: ${commissionAmount.toFixed(2)} para tenant ${tenantId}`);
+      console.log(`[OK] Comissão registrada: ${commissionAmount.toFixed(2)} para tenant ${tenantId}`);
       return result.rows[0];
     } catch (error) {
-      console.error('❌ Erro ao registrar comissão:', error);
+      console.error('[ERRO] Erro ao registrar comissão:', error);
       throw error;
     }
   }
 
   /**
    * Gerar invoice mensal para um tenant
-   * Deve ser chamado no início de cada mês
+   * Deve ser chamado no in�cio de cada mês
    */
   static async generateMonthlyInvoice(tenantId, monthYear) {
     try {
@@ -160,7 +160,7 @@ class BillingService {
 
         await client.query('COMMIT');
 
-        console.log(`✅ Invoice gerada: ${invoiceData.invoiceNumber} - R$ ${invoiceData.total}`);
+        console.log(`[OK] Invoice gerada: ${invoiceData.invoiceNumber} - R$ ${invoiceData.total}`);
         return invoice.rows[0];
       } catch (error) {
         await client.query('ROLLBACK');
@@ -169,7 +169,7 @@ class BillingService {
         client.release();
       }
     } catch (error) {
-      console.error('❌ Erro ao gerar invoice:', error);
+      console.error('[ERRO] Erro ao gerar invoice:', error);
       throw error;
     }
   }
@@ -211,10 +211,10 @@ class BillingService {
         planData.commission_percentage
       ]);
 
-      console.log(`✅ Plano ${planSlug} atribuído ao tenant ${tenantId}`);
+      console.log(`[OK] Plano ${planSlug} atribu�do ao tenant ${tenantId}`);
       return result.rows[0];
     } catch (error) {
-      console.error('❌ Erro ao atribuir plano:', error);
+      console.error('[ERRO] Erro ao atribuir plano:', error);
       throw error;
     }
   }
@@ -268,7 +268,7 @@ class BillingService {
         }
       };
     } catch (error) {
-      console.error('❌ Erro ao gerar relatório:', error);
+      console.error('[ERRO] Erro ao gerar relatório:', error);
       throw error;
     }
   }
@@ -300,7 +300,7 @@ class BillingService {
 
       return result.rows;
     } catch (error) {
-      console.error('❌ Erro ao listar invoices:', error);
+      console.error('[ERRO] Erro ao listar invoices:', error);
       throw error;
     }
   }
@@ -343,7 +343,7 @@ class BillingService {
         }
       };
     } catch (error) {
-      console.error('❌ Erro ao gerar revenue report:', error);
+      console.error('[ERRO] Erro ao gerar revenue report:', error);
       throw error;
     }
   }

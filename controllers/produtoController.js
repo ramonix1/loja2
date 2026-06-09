@@ -258,7 +258,7 @@ exports.atualizarEstoque = async (req, res) => {
           [id, tipo, Math.abs(diff), 'admin_ajuste', observacao || 'Ajuste manual']
         );
       } catch (logErr) {
-        console.error('⚠️ Falha ao registrar movimentação de estoque:', logErr.message);
+        console.error(' Falha ao registrar movimentação de estoque:', logErr.message);
       }
     }
 

@@ -28,7 +28,7 @@
           <span class="mx-2">/</span>
           <span class="text-gray-300">Clientes</span>
         </div>
-        <h1 class="text-2xl font-bold text-white">🏢 Clientes</h1>
+        <h1 class="text-2xl font-bold text-white">Clientes</h1>
         <p class="text-gray-400 mt-1 text-sm">Cadastre e gerencie os logos dos clientes</p>
       </div>
 
@@ -64,7 +64,7 @@
             <label class="block text-sm font-medium text-gray-300 mb-1">Logo do Cliente *</label>
             <input type="file" name="logo" id="logo" accept="image/*" required
               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-gray-300 text-sm file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-600 file:text-white file:text-xs file:cursor-pointer hover:file:bg-blue-700">
-            <p class="text-xs text-gray-500 mt-1">PNG, JPG, WEBP — máx. 5MB</p>
+            <p class="text-xs text-gray-500 mt-1">PNG, JPG, WEBP � máx. 5MB</p>
             <div id="previewArea" class="mt-3"></div>
           </div>
 
@@ -84,7 +84,7 @@
 
         <% if (clientes.length === 0) { %>
           <div class="text-center py-16 bg-gray-800 rounded-xl">
-            <div class="text-5xl mb-3">🏢</div>
+            <div class="text-5xl mb-3"></div>
             <p class="text-gray-400 font-medium">Nenhum cliente cadastrado</p>
             <p class="text-gray-600 text-sm mt-1">Use o formulário acima para adicionar</p>
           </div>
@@ -122,19 +122,19 @@
                     </td>
                     <td class="py-3 pr-4">
                       <span class="<%= cliente.ativo ? 'text-green-400' : 'text-red-400' %> text-sm font-medium">
-                        <%= cliente.ativo ? '✓ Ativo' : '✗ Inativo' %>
+                        <%= cliente.ativo ? ' Ativo' : '� Inativo' %>
                       </span>
                     </td>
                     <td class="py-3">
                       <div class="flex gap-2">
                         <a href="/admin/clientes/editar/<%= cliente.id %>"
                            class="bg-yellow-600 hover:bg-yellow-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">
-                          ✏️ Editar
+                           Editar
                         </a>
                         <a href="/admin/clientes/excluir/<%= cliente.id %>"
                            class="bg-red-700 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition"
                            onclick="return confirm('Excluir este cliente permanentemente?')">
-                          🗑️ Excluir
+                          � Excluir
                         </a>
                       </div>
                     </td>

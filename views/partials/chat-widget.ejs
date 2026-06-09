@@ -145,26 +145,26 @@
 </style>
 
 <button id="chat-widget-btn" title="Fale conosco" aria-label="Abrir chat">
-  <span id="chat-icon-open">💬</span>
-  <span id="chat-icon-close" style="display:none;">✕</span>
+  <span id="chat-icon-open"></span>
+  <span id="chat-icon-close" style="display:none;">�</span>
   <span id="chat-widget-badge"></span>
 </button>
 
 <div id="chat-widget-janela" role="dialog" aria-label="Chat de suporte">
   <div class="cw-header">
     <div>
-      <div class="cw-header-nome">💬 Fale Conosco</div>
-      <div class="cw-header-sub"><%= locals.loja?.nome || 'Loja' %> • Atendimento online</div>
+      <div class="cw-header-nome">Fale Conosco</div>
+      <div class="cw-header-sub"><%= locals.loja?.nome || 'Loja' %> � Atendimento online</div>
     </div>
-    <button class="cw-fechar" id="cw-fechar-btn" aria-label="Fechar chat">✕</button>
+    <button class="cw-fechar" id="cw-fechar-btn" aria-label="Fechar chat">�</button>
   </div>
 
-  <!-- Tela de início (pede nome) -->
+  <!-- Tela de in�cio (pede nome) -->
   <div id="cw-inicio">
     <p>Olá! Como podemos te ajudar hoje?<br>Informe seu nome para começar.</p>
     <input id="cw-nome-input" type="text" placeholder="Seu nome..." maxlength="60"
       value="<%= locals.usuario?.nome || '' %>">
-    <button id="cw-btn-iniciar">Iniciar conversa →</button>
+    <button id="cw-btn-iniciar">Iniciar conversa </button>
   </div>
 
   <!-- Área de mensagens (oculta até iniciar) -->
@@ -174,7 +174,7 @@
     <div class="cw-footer" id="cw-footer-area">
       <div class="cw-input-row">
         <input id="cw-input" class="cw-input" type="text" placeholder="Escreva sua mensagem..." maxlength="500">
-        <button id="cw-btn-send" class="cw-send">→</button>
+        <button id="cw-btn-send" class="cw-send"></button>
       </div>
     </div>
   </div>

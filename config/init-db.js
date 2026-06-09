@@ -27,11 +27,11 @@ async function initializeDatabase() {
       CREATE INDEX IF NOT EXISTS idx_sessao_expire ON sessao(expire);
     `);
 
-    console.log('✅ Banco master inicializado (tenants + sessao)');
+    console.log('Banco master inicializado (tenants + sessao)');
 
     await autoProvisionarTenant();
   } catch (err) {
-    console.error('⚠️  Erro ao inicializar banco master:', err.message);
+    console.error('  Erro ao inicializar banco master:', err.message);
   }
 }
 
@@ -74,7 +74,7 @@ async function autoProvisionarTenant() {
     nome_db  = url.pathname.replace(/^\//, '');
     user     = url.username;
     password = decodeURIComponent(url.password);
-    console.log(`[AutoProvision] Parsed → host=${host} port=${port} db=${nome_db} user=${user}`);
+    console.log(`[AutoProvision] Parsed  host=${host} port=${port} db=${nome_db} user=${user}`);
   } catch (err) {
     console.error('[AutoProvision] Falha ao parsear DATABASE_URL:', err.message);
     return;
@@ -86,7 +86,7 @@ async function autoProvisionarTenant() {
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
       [slug, slug, host, port, nome_db, user, password]
     );
-    console.log(`✅ Tenant "${slug}" registrado automaticamente`);
+    console.log(`[OK] Tenant "${slug}" registrado automaticamente`);
   } catch (err) {
     console.error(`[AutoProvision] Erro ao inserir tenant "${slug}":`, err.message);
     return;
@@ -100,7 +100,7 @@ async function autoProvisionarTenant() {
     const adminNome  = process.env.ADMIN_NOME  || 'Administrador';
     const pool = await getPool(slug);
     await initializeTenant(pool, adminEmail, adminSenha, adminNome);
-    console.log(`✅ Banco do tenant "${slug}" inicializado (admin: ${adminEmail})`);
+    console.log(`[OK] Banco do tenant "${slug}" inicializado (admin: ${adminEmail})`);
   } catch (err) {
     console.error(`[AutoProvision] Erro ao inicializar tabelas do tenant "${slug}":`, err.message);
   }

@@ -35,14 +35,14 @@
       <form action="/salvar-produto?_csrf=<%= locals.csrfToken %>" method="POST" enctype="multipart/form-data" class="space-y-4">
 
         <div>
-          <label class="block text-sm font-medium text-gray-300 mb-1">Título *</label>
+          <label class="block text-sm font-medium text-gray-300 mb-1">T�tulo *</label>
           <input type="text" name="titulo" required
             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             placeholder="Nome do produto">
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-300 mb-1">Subtítulo</label>
+          <label class="block text-sm font-medium text-gray-300 mb-1">Subt�tulo</label>
           <input type="text" name="subtitulo"
             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             placeholder="Ex: Modelo XYZ, Cor Azul">
@@ -76,7 +76,7 @@
           <label class="block text-sm font-medium text-gray-300 mb-1">Imagens *</label>
           <input type="file" name="imagens" id="imagens" multiple accept="image/*" required
             class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-gray-300 text-sm file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-600 file:text-white file:text-xs file:cursor-pointer hover:file:bg-blue-700">
-          <p class="text-xs text-gray-500 mt-1">JPG, PNG, WEBP — máx. 5MB cada</p>
+          <p class="text-xs text-gray-500 mt-1">JPG, PNG, WEBP � máx. 5MB cada</p>
           <div id="previewArea" class="flex flex-wrap gap-2 mt-3"></div>
         </div>
 
@@ -105,9 +105,9 @@
           <table class="w-full">
             <% if (configs.controla_estoque !== 'true') { %>
             <div class="mb-4 bg-yellow-900/30 border border-yellow-700/50 text-yellow-300 rounded-lg px-4 py-3 text-xs">
-              ⚠️ O controle de estoque está <strong>desativado</strong> — você pode definir as quantidades abaixo,
+               O controle de estoque está <strong>desativado</strong> � você pode definir as quantidades abaixo,
               mas elas só serão <strong>bloqueadas na vitrine e debitadas nos pedidos</strong> após ativar em
-              <a href="/admin/configuracoes" class="underline hover:text-yellow-100">Configurações → Controle de Estoque</a>.
+              <a href="/admin/configuracoes" class="underline hover:text-yellow-100">Configurações  Controle de Estoque</a>.
             </div>
             <% } %>
             <thead>
@@ -147,14 +147,14 @@
                       <input type="hidden" name="_csrf" value="<%= locals.csrfToken %>">
                       <input type="number" name="estoque" min="0"
                              value="<%= produto.estoque !== null && produto.estoque !== undefined ? produto.estoque : '' %>"
-                             placeholder="∞"
+                             placeholder="��"
                              title="Deixe em branco para ilimitado"
                              class="w-20 bg-gray-800 border border-gray-700 text-white rounded-lg px-2 py-1.5 text-sm text-center focus:outline-none focus:border-blue-500
                                     <%= produto.estoque === 0 ? 'border-red-700 text-red-400' : produto.estoque !== null && produto.estoque <= 5 ? 'border-yellow-700 text-yellow-400' : '' %>">
                       <button type="submit"
                               title="Salvar quantidade"
                               class="bg-gray-700 hover:bg-gray-600 text-gray-300 px-2 py-1.5 rounded-lg text-xs font-bold transition">
-                        ✓
+                        
                       </button>
                     </form>
                     <div class="text-xs mt-0.5
@@ -177,16 +177,16 @@
                     <div class="flex gap-2">
                       <a href="/produto/<%= produto.id %>"
                          class="bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1.5 rounded-lg text-xs font-medium transition">
-                        👁️ Ver
+                        � Ver
                       </a>
                       <a href="/editar/<%= produto.id %>"
                          class="bg-yellow-600 hover:bg-yellow-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">
-                        ✏️ Editar
+                         Editar
                       </a>
                       <a href="/excluir/<%= produto.id %>"
                          class="bg-red-700 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition"
                          onclick="return confirm('Excluir este produto permanentemente?')">
-                        🗑️ Excluir
+                        � Excluir
                       </a>
                     </div>
                   </td>

@@ -36,7 +36,7 @@ function validateCheckoutData(body) {
 
   // Validar campos obrigatórios
   if (!body.nome_entrega || String(body.nome_entrega).trim().length < 3) {
-    errors.push('Nome de entrega inválido (mínimo 3 caracteres)');
+    errors.push('Nome de entrega inválido (m�nimo 3 caracteres)');
   }
 
   if (!validateEmail(body.email_entrega)) {

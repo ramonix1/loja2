@@ -41,7 +41,7 @@ const plans = [
 
 async function seed() {
   try {
-    console.log('🌱 Iniciando seed de planos de billing...');
+    console.log(' Iniciando seed de planos de billing...');
 
     for (const plan of plans) {
       await db.query(`
@@ -64,19 +64,19 @@ async function seed() {
         plan.commission_percentage,
         plan.features
       ]);
-      console.log(`  ✅ ${plan.name}`);
+      console.log(`  ${plan.name}`);
     }
 
-    console.log('\n✨ Seed de planos concluído!');
-    console.log('\nPlanos disponíveis:');
+    console.log('\n Seed de planos conclu�do!');
+    console.log('\nPlanos dispon�veis:');
     console.log('  - Básico (R$ 99,90/mês)');
     console.log('  - Profissional (R$ 199,90/mês)');
     console.log('  - Enterprise Revenue Share (2% por venda)');
-    console.log('  - Premium Híbrido (R$ 99,90/mês + 1% por venda)');
+    console.log('  - Premium H�brido (R$ 99,90/mês + 1% por venda)');
 
     process.exit(0);
   } catch (error) {
-    console.error('❌ Erro no seed:', error.message);
+    console.error('[ERRO] Erro no seed:', error.message);
     process.exit(1);
   }
 }

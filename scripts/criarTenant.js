@@ -25,7 +25,7 @@ function parseArgs() {
 
 async function criarTenant({ slug, nome, adminEmail, adminSenha, adminNome }) {
   if (!slug || !nome || !adminEmail || !adminSenha) {
-    console.error('❌  Uso: node scripts/criarTenant.js --slug=X --nome="Y" --admin-email=Z --admin-senha=W');
+    console.error('[ERRO]  Uso: node scripts/criarTenant.js --slug=X --nome="Y" --admin-email=Z --admin-senha=W');
     process.exit(1);
   }
 
@@ -35,7 +35,7 @@ async function criarTenant({ slug, nome, adminEmail, adminSenha, adminNome }) {
   const dbUser = process.env.DB_USER || 'postgres';
   const dbPassword = process.env.DB_PASSWORD || '123456';
 
-  console.log(`\n🚀 Criando tenant: ${nome} (${slug})`);
+  console.log(`\n� Criando tenant: ${nome} (${slug})`);
   console.log(`   Banco de dados: ${dbName}`);
 
   // 1. Criar o banco de dados
@@ -46,10 +46,10 @@ async function criarTenant({ slug, nome, adminEmail, adminSenha, adminNome }) {
 
   try {
     await adminPool.query(`CREATE DATABASE "${dbName}"`);
-    console.log(`✅ Banco "${dbName}" criado`);
+    console.log(`[OK] Banco "${dbName}" criado`);
   } catch (err) {
     if (err.code === '42P04') {
-      console.log(`⚠️  Banco "${dbName}" já existe, continuando...`);
+      console.log(`  Banco "${dbName}" já existe, continuando...`);
     } else {
       throw err;
     }
@@ -64,7 +64,7 @@ async function criarTenant({ slug, nome, adminEmail, adminSenha, adminNome }) {
 
   try {
     await initializeTenant(tenantPool, adminEmail, adminSenha, adminNome || 'Administrador');
-    console.log(`✅ Schema e admin criados em "${dbName}"`);
+    console.log(`[OK] Schema e admin criados em "${dbName}"`);
   } finally {
     await tenantPool.end();
   }
@@ -76,8 +76,8 @@ async function criarTenant({ slug, nome, adminEmail, adminSenha, adminNome }) {
     ON CONFLICT (slug) DO UPDATE SET nome = $2, ativo = true
   `, [slug, nome, dbHost, dbPort, dbName, dbUser, dbPassword]);
 
-  console.log(`✅ Tenant registrado no banco master`);
-  console.log(`\n🎉 Tenant "${nome}" criado com sucesso!`);
+  console.log(`[OK] Tenant registrado no banco master`);
+  console.log(`\n� Tenant "${nome}" criado com sucesso!`);
   console.log(`   Slug:  ${slug}`);
   console.log(`   Login: ${adminEmail} / ${adminSenha}`);
   console.log(`   Para testar localmente, use o header: X-Tenant-Slug: ${slug}\n`);
@@ -91,6 +91,6 @@ criarTenant({
   adminSenha: args['admin-senha'],
   adminNome:  args['admin-nome'],
 }).then(() => process.exit(0)).catch((err) => {
-  console.error('❌ Erro:', err.message);
+  console.error('[ERRO] Erro:', err.message);
   process.exit(1);
 });

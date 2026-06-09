@@ -135,12 +135,12 @@
 <%- include("../partials/header") %>
 
 <div class="container">
-  <a href="/carrinho" style="color:#2563eb;font-size:14px;text-decoration:none;display:inline-block;margin-bottom:24px;">â† Voltar ao carrinho</a>
+  <a href="/carrinho" style="color:#2563eb;font-size:14px;text-decoration:none;display:inline-block;margin-bottom:24px;"> Voltar ao carrinho</a>
 
   <% if (erro === 'data_evento_obrigatoria') { %>
-    <div class="erro-box">âš ï¸ Selecione a data do evento antes de finalizar.</div>
+    <div class="erro-box"> Selecione a data do evento antes de finalizar.</div>
   <% } else if (erro === 'data_indisponivel') { %>
-    <div class="erro-box"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('error', 'w-5 h-5') %></span> A data escolhida nÃ£o tem vagas disponÃ­veis. Por favor, selecione outra data.</div>
+    <div class="erro-box"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('error', 'w-5 h-5') %></span> A data escolhida nÃ£o tem vagas disponÃveis. Por favor, selecione outra data.</div>
   <% } else if (erro === 'metodo_invalido') { %>
     <div class="erro-box"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('error', 'w-5 h-5') %></span> MÃ©todo de pagamento invÃ¡lido. Selecione uma opÃ§Ã£o e tente novamente.</div>
   <% } else if (erro === 'pagamento') { %>
@@ -200,17 +200,17 @@
 
           <div id="agenda-calendario">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-              <button type="button" id="cal-prev" style="background:#f3f4f6;border:none;cursor:pointer;padding:6px 12px;border-radius:8px;font-size:14px;">â†</button>
+              <button type="button" id="cal-prev" style="background:#f3f4f6;border:none;cursor:pointer;padding:6px 12px;border-radius:8px;font-size:14px;"></button>
               <span id="cal-titulo" style="font-weight:700;font-size:15px;color:#111827;"></span>
-              <button type="button" id="cal-next" style="background:#f3f4f6;border:none;cursor:pointer;padding:6px 12px;border-radius:8px;font-size:14px;">â†’</button>
+              <button type="button" id="cal-next" style="background:#f3f4f6;border:none;cursor:pointer;padding:6px 12px;border-radius:8px;font-size:14px;"></button>
             </div>
 
             <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;"></div>
 
             <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;font-size:11px;color:#6b7280;">
-              <span><span style="display:inline-block;width:10px;height:10px;background:#dcfce7;border-radius:3px;margin-right:4px;"></span>DisponÃ­vel</span>
+              <span><span style="display:inline-block;width:10px;height:10px;background:#dcfce7;border-radius:3px;margin-right:4px;"></span>DisponÃvel</span>
               <span><span style="display:inline-block;width:10px;height:10px;background:#fef9c3;border-radius:3px;margin-right:4px;"></span>Poucos lugares</span>
-              <span><span style="display:inline-block;width:10px;height:10px;background:#fee2e2;border-radius:3px;margin-right:4px;"></span>IndisponÃ­vel</span>
+              <span><span style="display:inline-block;width:10px;height:10px;background:#fee2e2;border-radius:3px;margin-right:4px;"></span>IndisponÃvel</span>
             </div>
           </div>
 
@@ -274,7 +274,7 @@
             Preencha o CEP acima para calcular o frete.
           </div>
           <div id="frete-loading" style="display:none;font-size:13px;color:#6b7280;">
-            â³ Calculando opÃ§Ãµes de frete...
+            ³ Calculando opÃ§Ãµes de frete...
           </div>
           <div id="frete-erro" style="display:none;background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:10px 14px;border-radius:8px;font-size:13px;"></div>
           <div id="frete-opcoes" class="metodo-pagamento" style="display:none;"></div>
@@ -288,17 +288,17 @@
 
             <label class="metodo-opcao" id="opcao-pix">
               <input type="radio" name="metodo_pagamento" value="pix" checked>
-              <div class="metodo-icon">âš¡</div>
+              <div class="metodo-icon">¡</div>
               <div class="metodo-info">
                 <div class="metodo-nome">PIX</div>
-                <div class="metodo-desc">AprovaÃ§Ã£o instantÃ¢nea, 24h por dia</div>
+                <div class="metodo-desc">AprovaÃ§Ã£o instantÃnea, 24h por dia</div>
               </div>
-              <span class="metodo-badge">InstantÃ¢neo</span>
+              <span class="metodo-badge">InstantÃneo</span>
             </label>
 
             <label class="metodo-opcao" id="opcao-cartao">
               <input type="radio" name="metodo_pagamento" value="cartao">
-              <div class="metodo-icon">ğŸ’³</div>
+              <div class="metodo-icon">³</div>
               <div class="metodo-info">
                 <div class="metodo-nome">CartÃ£o de CrÃ©dito / DÃ©bito</div>
                 <div class="metodo-desc">Visa, Mastercard, Elo, Hipercard e mais</div>
@@ -307,7 +307,7 @@
 
             <label class="metodo-opcao" id="opcao-boleto">
               <input type="radio" name="metodo_pagamento" value="boleto">
-              <div class="metodo-icon">ğŸ“„</div>
+              <div class="metodo-icon">„</div>
               <div class="metodo-info">
                 <div class="metodo-nome">Boleto BancÃ¡rio</div>
                 <div class="metodo-desc">Vencimento em 3 dias Ãºteis</div>
@@ -317,7 +317,7 @@
             <% if (sumupHabilitado) { %>
             <label class="metodo-opcao" id="opcao-sumup_online">
               <input type="radio" name="metodo_pagamento" value="sumup_online">
-              <div class="metodo-icon">ğŸ’³</div>
+              <div class="metodo-icon">³</div>
               <div class="metodo-info">
                 <div class="metodo-nome">CartÃ£o via SumUp</div>
                 <div class="metodo-desc">Pague com cartÃ£o na pÃ¡gina segura da SumUp</div>
@@ -329,10 +329,10 @@
             <% if (process.env.NODE_ENV !== 'production') { %>
             <label class="metodo-opcao" id="opcao-teste">
               <input type="radio" name="metodo_pagamento" value="teste">
-              <div class="metodo-icon">ğŸ§ª</div>
+              <div class="metodo-icon">§ª</div>
               <div class="metodo-info">
                 <div class="metodo-nome">Pagamento de Teste</div>
-                <div class="metodo-desc">Aprova o pedido instantaneamente â€” apenas em desenvolvimento</div>
+                <div class="metodo-desc">Aprova o pedido instantaneamente € apenas em desenvolvimento</div>
               </div>
               <span class="metodo-badge" style="background:#fef3c7;color:#92400e;">DEV</span>
             </label>
@@ -375,7 +375,7 @@
           <!-- Painel: Teste -->
           <div class="painel-pagamento" id="painel-teste">
             <div style="background:#fefce8;border-radius:10px;padding:16px;margin-top:4px;font-size:14px;color:#854d0e;">
-              <strong>ğŸ§ª Modo de Teste:</strong><br>
+              <strong>§ª Modo de Teste:</strong><br>
               O pedido serÃ¡ criado e marcado como pago automaticamente, sem chamar nenhuma API de pagamento. Use apenas para testar o fluxo de checkout.
             </div>
           </div>
@@ -425,16 +425,16 @@
             </div>
             <div class="resumo-item">
               <span>Frete</span>
-              <span id="freteValorDisplay" style="color:#9ca3af;">â€”</span>
+              <span id="freteValorDisplay" style="color:#9ca3af;">€</span>
             </div>
             <div class="resumo-total">
               <span>Total</span>
-              <span id="totalValorDisplay">â€”</span>
+              <span id="totalValorDisplay">€</span>
             </div>
           </div>
 
           <button type="submit" class="btn-checkout" id="btnFinalizar">
-            Finalizar pedido â†’
+            Finalizar pedido 
           </button>
 
           <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:14px;font-size:12px;color:#9ca3af;">
@@ -456,7 +456,7 @@
   var cardMounted = false;
   var metodoAtual = 'pix';
 
-  // â”€â”€ SeleÃ§Ã£o de mÃ©todo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // €€ SeleÃ§Ã£o de mÃ©todo €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
   var metodos = document.querySelectorAll('.metodo-opcao');
   var paineis = {
     pix: 'painel-pix', cartao: 'painel-cartao', boleto: 'painel-boleto',
@@ -490,7 +490,7 @@
     });
   });
 
-  // â”€â”€ Stripe Elements: campos do cartÃ£o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // €€ Stripe Elements: campos do cartÃ£o €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
   function inicializarCartao() {
     if (!stripePublicKey || cardMounted) return;
     try {
@@ -515,7 +515,7 @@
     } catch(e) { console.error('Stripe init error', e); }
   }
 
-  // â”€â”€ Estado do botÃ£o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // €€ Estado do botÃ£o €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
   function setBtnLoading() {
     var btn = document.getElementById('btnFinalizar');
     btn.disabled = true;
@@ -524,10 +524,10 @@
   function setBtnNormal() {
     var btn = document.getElementById('btnFinalizar');
     btn.disabled = false;
-    btn.textContent = 'Finalizar pedido â†’';
+    btn.textContent = 'Finalizar pedido ';
   }
 
-  // â”€â”€ MÃ¡scaras â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // €€ MÃ¡scaras €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
   document.getElementById('cepInput').addEventListener('input', function() {
     this.value = this.value.replace(/\D/g,'').replace(/(\d{5})(\d)/,'$1-$2').substring(0,9);
   });
@@ -553,7 +553,7 @@
       .catch(function() { alert('Erro ao buscar CEP.'); });
   });
 
-  // â”€â”€ Submit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // €€ Submit €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
   document.getElementById('checkoutForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -642,7 +642,7 @@
         ? '<div class="metodo-desc">' + opcao.prazo + ' dias Ãºteis</div>'
         : '';
       var transportadoraHtml = opcao.transportadora
-        ? ' <span style="font-size:12px;color:#6b7280;">â€” ' + opcao.transportadora + '</span>'
+        ? ' <span style="font-size:12px;color:#6b7280;">€ ' + opcao.transportadora + '</span>'
         : '';
       var precoHtml = opcao.valor === 0
         ? '<span style="color:#16a34a;font-weight:700;font-size:15px;">GrÃ¡tis</span>'
@@ -679,9 +679,9 @@
     document.getElementById('frete-placeholder').style.display = 'none';
     document.getElementById('frete_valor').value   = '';
     document.getElementById('frete_servico').value = '';
-    document.getElementById('freteValorDisplay').textContent = 'â€”';
+    document.getElementById('freteValorDisplay').textContent = '€';
     document.getElementById('freteValorDisplay').style.color = '#9ca3af';
-    document.getElementById('totalValorDisplay').textContent = 'â€”';
+    document.getElementById('totalValorDisplay').textContent = '€';
 
     fetch('/frete/calcular', {
       method: 'POST',
@@ -695,7 +695,7 @@
         renderOpcoes(data.opcoes);
       } else {
         var erroEl = document.getElementById('frete-erro');
-        erroEl.textContent = data.erro || 'NÃ£o foi possÃ­vel calcular o frete para este CEP.';
+        erroEl.textContent = data.erro || 'NÃ£o foi possÃvel calcular o frete para este CEP.';
         erroEl.style.display = 'block';
         ultimoCepCalc = '';
       }
@@ -844,7 +844,7 @@
     var nomesMesArr = ['janeiro','fevereiro','marÃ§o','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
     var label = dataObj.getDate() + ' de ' + nomesMesArr[dataObj.getMonth()] + ' de ' + dataObj.getFullYear();
     document.getElementById('data-selecionada-label').textContent = label;
-    document.getElementById('data-vagas-label').textContent = info.vagas_livres + ' vaga' + (info.vagas_livres > 1 ? 's' : '') + ' disponÃ­vel' + (info.vagas_livres > 1 ? 'is' : '');
+    document.getElementById('data-vagas-label').textContent = info.vagas_livres + ' vaga' + (info.vagas_livres > 1 ? 's' : '') + ' disponÃvel' + (info.vagas_livres > 1 ? 'is' : '');
     document.getElementById('data-selecionada-box').style.display = 'block';
     document.getElementById('agenda-calendario').style.display = 'none';
   }

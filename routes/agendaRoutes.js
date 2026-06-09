@@ -9,7 +9,7 @@ router.post('/admin/agenda/config', requireAdmin, agenda.salvarConfig);
 router.post('/admin/agenda/dia', requireAdmin, agenda.salvarDia);
 router.post('/admin/agenda/dia/:data/remover', requireAdmin, agenda.removerDia);
 
-// API pública (usada pelo JS do checkout — requer login)
+// API pública (usada pelo JS do checkout � requer login)
 router.get('/api/agenda/disponibilidade', requireAuth, agenda.disponibilidadeMes);
 router.get('/api/agenda/verificar', requireAuth, agenda.verificarDisponibilidade);
 

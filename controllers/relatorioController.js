@@ -41,7 +41,7 @@ function fmtMoeda(v) {
   return 'R$ ' + Number(v || 0).toFixed(2).replace('.', ',');
 }
 
-// â”€â”€ GET /admin/relatorios â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// €€ GET /admin/relatorios €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
 exports.index = async (req, res) => {
   const aba = req.query.aba || 'vendas';
   const { dataInicio, dataFim } = parseDatas(req.query);
@@ -83,7 +83,7 @@ exports.index = async (req, res) => {
   });
 };
 
-// â”€â”€ GET /admin/relatorios/csv/:tipo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// €€ GET /admin/relatorios/csv/:tipo €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
 exports.exportarCsv = async (req, res) => {
   const { tipo } = req.params;
   const { dataInicio, dataFim } = parseDatas(req.query);
@@ -118,7 +118,7 @@ exports.exportarCsv = async (req, res) => {
         ['Produto', 'Categoria', 'Estoque', 'Status'],
         ...d.produtos.map(p => [
           p.nome,
-          p.categoria_nome || 'â€”',
+          p.categoria_nome || '€',
           p.estoque !== null ? p.estoque : 'Ilimitado',
           p.estoque === null ? 'Sem controle' : p.estoque === 0 ? 'Esgotado' : p.estoque <= 5 ? 'Estoque baixo' : 'OK',
         ]),
@@ -134,7 +134,7 @@ exports.exportarCsv = async (req, res) => {
           fmtDate(p.created_at),
           p.nome_entrega,
           STATUS_LABEL[p.status] || p.status,
-          p.codigo_rastreio || 'â€”',
+          p.codigo_rastreio || '€',
           `${p.cidade || ''}/${p.estado || ''}`,
           p.total,
         ]),
@@ -162,7 +162,7 @@ exports.exportarCsv = async (req, res) => {
     } else if (tipo === 'clientes') {
       const d = await getDadosClientes(db, dataInicio, dataFim);
       linhas = [
-        ['Cliente', 'E-mail', 'Pedidos', 'Total Gasto (R$)', 'Ãšltimo Pedido'],
+        ['Cliente', 'E-mail', 'Pedidos', 'Total Gasto (R$)', 'Ãltimo Pedido'],
         ...d.topClientes.map(c => [c.nome, c.email, c.total_pedidos, c.total_gasto, fmtDate(c.ultimo_pedido)]),
       ];
       filename = `clientes_${dataInicio.toISOString().slice(0,10)}_${dataFim.toISOString().slice(0,10)}`;
@@ -187,7 +187,7 @@ exports.exportarCsv = async (req, res) => {
       filename = `agendamentos_${dataInicio.toISOString().slice(0,10)}_${dataFim.toISOString().slice(0,10)}`;
     }
 
-    const BOM = 'ï»¿';
+    const BOM = '»¿';
     const csv = BOM + linhas
       .map(l => l.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(';'))
       .join('\n');
@@ -202,7 +202,7 @@ exports.exportarCsv = async (req, res) => {
   }
 };
 
-// â”€â”€ Dados por relatÃ³rio â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// €€ Dados por relatÃ³rio €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
 
 async function getDadosVendas(db, dataInicio, dataFim) {
   const [pedidosRes, resumoRes, porDiaRes] = await Promise.all([
@@ -254,10 +254,10 @@ async function getDadosVendas(db, dataInicio, dataFim) {
 }
 
 async function getDadosEstoque(db, filtro) {
-  // Whitelist validation â€” rejeita valores nÃ£o esperados
+  // Whitelist validation € rejeita valores nÃ£o esperados
   const condicao = FILTROS_ESTOQUE_VALIDOS[filtro] || FILTROS_ESTOQUE_VALIDOS['todos'];
   if (!FILTROS_ESTOQUE_VALIDOS.hasOwnProperty(filtro)) {
-    console.warn(`âš ï¸ Filtro de estoque invÃ¡lido recebido: ${filtro}`);
+    console.warn(` Filtro de estoque invÃ¡lido recebido: ${filtro}`);
   }
 
   const [produtosRes, resumoRes] = await Promise.all([

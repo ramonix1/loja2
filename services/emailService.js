@@ -31,7 +31,7 @@ async function enviarEmailRecuperacao(email, nome, token) {
         <p style="color:#666;font-size:0.9rem;">Este link expira em <strong>${expiracao} minutos</strong>.</p>
         <p style="color:#666;font-size:0.9rem;">Se você não solicitou a redefinição, ignore este email.</p>
         <hr style="border:none;border-top:1px solid #eee;margin-top:32px;">
-        <p style="color:#aaa;font-size:0.8rem;">Lojão — não responda este email.</p>
+        <p style="color:#aaa;font-size:0.8rem;">Lojão � não responda este email.</p>
       </div>
     `,
   });
@@ -72,7 +72,7 @@ async function enviarNotificacaoPedidoPago({ lojaNome, lojaEmail, pedido, itens 
   await transporter.sendMail({
     from: process.env.EMAIL_FROM || `"${lojaNome}" <noreply@lojao.com.br>`,
     to: lojaEmail,
-    subject: `Novo pedido pago #${pedido.id} — ${lojaNome}`,
+    subject: `Novo pedido pago #${pedido.id} � ${lojaNome}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#111;">
         <div style="background:#16a34a;padding:24px;border-radius:8px 8px 0 0;">
@@ -93,7 +93,7 @@ async function enviarNotificacaoPedidoPago({ lojaNome, lojaEmail, pedido, itens 
             <tr><td>Cliente</td><td style="text-align:right;color:#111;font-weight:600;">${pedido.nome_entrega}</td></tr>
             <tr><td>E-mail</td><td style="text-align:right;color:#111;">${pedido.email_entrega}</td></tr>
             <tr><td>Pagamento</td><td style="text-align:right;color:#111;">${metodoLabel[pedido.metodo_pagamento] || pedido.metodo_pagamento}</td></tr>
-            <tr><td>Endereço</td><td style="text-align:right;color:#111;">${pedido.logradouro}, ${pedido.numero} — ${pedido.cidade}/${pedido.estado}</td></tr>
+            <tr><td>Endereço</td><td style="text-align:right;color:#111;">${pedido.logradouro}, ${pedido.numero} � ${pedido.cidade}/${pedido.estado}</td></tr>
           </table>
 
           <a href="${baseUrl}/admin/pedidos/${pedido.id}"
@@ -115,7 +115,7 @@ async function enviarEmailRastreio({ lojaNome, lojaEmail, pedido, codigoRastreio
   await transporter.sendMail({
     from: process.env.EMAIL_FROM || `"${lojaNome}" <noreply@lojao.com.br>`,
     to: pedido.email_entrega,
-    subject: `Seu pedido #${pedido.id} foi enviado — ${lojaNome}`,
+    subject: `Seu pedido #${pedido.id} foi enviado � ${lojaNome}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#111;">
         <div style="background:#2563eb;padding:24px;border-radius:8px 8px 0 0;">
@@ -139,7 +139,7 @@ async function enviarEmailRastreio({ lojaNome, lojaEmail, pedido, codigoRastreio
           <div style="background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:12px;margin-top:16px;font-size:13px;color:#374151;">
             <strong>Endereço de entrega:</strong><br>
             ${pedido.logradouro}, ${pedido.numero}${pedido.complemento ? ', ' + pedido.complemento : ''}<br>
-            ${pedido.bairro} — ${pedido.cidade}/${pedido.estado} — CEP ${pedido.cep}
+            ${pedido.bairro} � ${pedido.cidade}/${pedido.estado} � CEP ${pedido.cep}
           </div>
 
           <p style="font-size:13px;color:#6b7280;margin-top:20px;">Total do pedido: <strong>R$ ${fmt(pedido.total)}</strong></p>

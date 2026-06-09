@@ -18,11 +18,11 @@ function parseArgs() {
 }
 
 async function migrarTenant(slug) {
-  console.log(`\n🔧 Migrando tenant "${slug}"...`);
+  console.log(`\n� Migrando tenant "${slug}"...`);
   const pool = await getPool(slug);
 
   await pool.query(`ALTER TABLE produtos ADD COLUMN IF NOT EXISTS estoque INTEGER DEFAULT NULL`);
-  console.log('   ✅ Coluna estoque adicionada (ou já existia)');
+  console.log('   Coluna estoque adicionada (ou já existia)');
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS movimentacoes_estoque (
@@ -37,7 +37,7 @@ async function migrarTenant(slug) {
     );
     CREATE INDEX IF NOT EXISTS idx_movest_produto ON movimentacoes_estoque(produto_id);
   `);
-  console.log('   ✅ Tabela movimentacoes_estoque criada (ou já existia)');
+  console.log('   Tabela movimentacoes_estoque criada (ou já existia)');
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS configuracoes (
@@ -50,9 +50,9 @@ async function migrarTenant(slug) {
       ('reservar_estoque_carrinho', 'false')
     ON CONFLICT (chave) DO NOTHING;
   `);
-  console.log('   ✅ Tabela configuracoes criada com defaults (ou já existia)');
+  console.log('   Tabela configuracoes criada com defaults (ou já existia)');
 
-  console.log(`   ✅ Tenant "${slug}" migrado com sucesso.`);
+  console.log(`   Tenant "${slug}" migrado com sucesso.`);
 }
 
 async function main() {
@@ -63,16 +63,16 @@ async function main() {
     for (const row of r.rows) {
       await migrarTenant(row.slug);
     }
-    console.log(`\n🎉 Todos os tenants migrados!\n`);
+    console.log(`\n� Todos os tenants migrados!\n`);
   } else if (args.slug) {
     await migrarTenant(args.slug);
-    console.log(`\n🎉 Pronto!\n`);
+    console.log(`\n� Pronto!\n`);
   } else {
-    console.error('❌ Use --slug=<slug> ou --all');
+    console.error('[ERRO] Use --slug=<slug> ou --all');
     process.exit(1);
   }
 }
 
 main()
   .then(() => process.exit(0))
-  .catch(err => { console.error('❌ Erro:', err.message); process.exit(1); });
+  .catch(err => { console.error('[ERRO] Erro:', err.message); process.exit(1); });

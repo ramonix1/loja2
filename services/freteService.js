@@ -18,7 +18,7 @@ async function calcularViaMelhorEnvio({ cepOrigem, cepDestino, peso, altura, lar
         height: parseFloat(altura)    || 4,
         width:  parseFloat(largura)   || 12,
         length: parseFloat(comprimento) || 17,
-        weight: (parseInt(peso) || 300) / 1000, // g → kg
+        weight: (parseInt(peso) || 300) / 1000, // g  kg
       },
       services: '1,2', // PAC e SEDEX
       options: { receipt: false, own_hand: false },
@@ -52,7 +52,7 @@ async function calcularOpcoesFrete({ cepDestino, subtotal = 0, configs = {} }) {
   const token            = configs.melhor_envio_token              || '';
   const cepOrigem        = (configs.frete_cep_origem || '').replace(/\D/g, '');
 
-  // Frete grátis por valor mínimo do pedido
+  // Frete grátis por valor m�nimo do pedido
   if (freteGratisAcima > 0 && subtotal >= freteGratisAcima) {
     return [{ id: 'gratis', nome: 'Frete Grátis', transportadora: '', prazo: null, valor: 0 }];
   }

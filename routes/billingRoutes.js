@@ -6,7 +6,7 @@ const billingController = require('../controllers/billingController');
  * SUPER ADMIN ENDPOINTS
  */
 
-// Listar planos dispon√≠veis
+// Listar planos dispon√veis
 router.get('/admin/api/billing/plans', billingController.listPlans);
 
 // Atribuir plano a um tenant
@@ -34,7 +34,7 @@ router.get('/api/billing/my-report', billingController.getMyBillingReport);
 // Listar minhas invoices
 router.get('/api/billing/my-invoices', billingController.listMyInvoices);
 
-// Ver uma invoice espec√≠fica
+// Ver uma invoice espec√fica
 router.get('/api/billing/invoices/:invoiceId', billingController.getInvoice);
 
 module.exports = router;

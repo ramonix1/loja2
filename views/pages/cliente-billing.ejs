@@ -247,7 +247,7 @@
   </div>
 
   <div class="container">
-    <!-- INFORMAÇÕES DO PLANO -->
+    <!-- INFORMA�ÕES DO PLANO -->
     <div class="card">
       <h2>Meu Plano</h2>
       <div class="plano-info">
@@ -305,7 +305,7 @@
 
       <% if (!invoices || invoices.length === 0) { %>
         <div class="empty">
-          <p>📋 Nenhuma invoice gerada ainda</p>
+          <p>� Nenhuma invoice gerada ainda</p>
           <p>Invoices são geradas automaticamente no final de cada mês.</p>
         </div>
       <% } else { %>
@@ -313,7 +313,7 @@
           <thead>
             <tr>
               <th>Número</th>
-              <th>Período</th>
+              <th>Per�odo</th>
               <th>Total</th>
               <th>Status</th>
               <th>Emissão</th>
@@ -330,9 +330,9 @@
                   <span class="badge badge-<%= inv.status %>">
                     <%=
                       inv.status === 'paid' ? '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('check', 'w-5 h-5') %></span> Pago' :
-                      inv.status === 'pending' ? '⏳ Pendente' :
-                      inv.status === 'overdue' ? '⚠️ Vencido' :
-                      inv.status === 'sent' ? '📧 Enviado' :
+                      inv.status === 'pending' ? '� Pendente' :
+                      inv.status === 'overdue' ? ' Vencido' :
+                      inv.status === 'sent' ? '� Enviado' :
                       inv.status.toUpperCase()
                     %>
                   </span>
@@ -348,9 +348,9 @@
       <% } %>
     </div>
 
-    <!-- DÚVIDAS -->
+    <!-- D�VIDAS -->
     <div class="card">
-      <h2>❓ Dúvidas?</h2>
+      <h2> Dúvidas?</h2>
       <p>Entre em contato com nosso suporte:</p>
       <ul style="margin-left: 20px; margin-top: 10px; line-height: 1.8;">
         <li><strong>Email:</strong> suporte@<%= (loja.email || 'empresa.com').split('@')[1] %></li>

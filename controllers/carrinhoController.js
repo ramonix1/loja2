@@ -53,7 +53,7 @@ exports.adicionarItem = async (req, res) => {
         const reservado = parseInt(reservadoRes.rows[0].total);
         if (reservado + qtd > estoqueDisponivel) {
           const disponivel = Math.max(0, estoqueDisponivel - reservado);
-          return res.status(400).json({ erro: disponivel === 0 ? 'Produto esgotado.' : `Apenas ${disponivel} unidade(s) dispon√≠vel(is).` });
+          return res.status(400).json({ erro: disponivel === 0 ? 'Produto esgotado.' : `Apenas ${disponivel} unidade(s) dispon√vel(is).` });
         }
       } else {
         if (estoqueDisponivel <= 0) {
@@ -66,7 +66,7 @@ exports.adicionarItem = async (req, res) => {
         );
         const noCarrinho = parseInt(noCarrinhoRes.rows[0]?.qtd || 0);
         if (noCarrinho + qtd > estoqueDisponivel) {
-          return res.status(400).json({ erro: `Apenas ${Math.max(0, estoqueDisponivel - noCarrinho)} unidade(s) dispon√≠vel(is).` });
+          return res.status(400).json({ erro: `Apenas ${Math.max(0, estoqueDisponivel - noCarrinho)} unidade(s) dispon√vel(is).` });
         }
       }
     }
