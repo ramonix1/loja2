@@ -62,8 +62,8 @@
                         onsubmit="return confirm('Remover categoria <%= cat.nome %>? Os produtos não serão excludos.')">
                     <input type="hidden" name="_csrf" value="<%= locals.csrfToken %>">
                     <button type="submit"
-                            class="text-sm bg-red-900/40 hover:bg-red-900/70 text-red-400 hover:text-red-300 px-3 py-1.5 rounded-lg transition font-medium">
-                      🗑️ Remover
+                            class="text-sm bg-red-900/40 hover:bg-red-900/70 text-red-400 hover:text-red-300 px-3 py-1.5 rounded-lg transition font-medium flex items-center gap-1">
+                      <span style="display:flex;align-items:center;width:16px;height:16px;"><%- icon('trash', 'w-4 h-4') %></span> Remover
                     </button>
                   </form>
                 </div>
