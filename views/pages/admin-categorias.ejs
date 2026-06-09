@@ -33,7 +33,7 @@
       <div class="lg:col-span-2">
         <% if (categorias.length === 0) { %>
           <div class="bg-gray-900 border border-gray-800 rounded-xl p-12 text-center">
-            <div class="text-4xl mb-3"></div>
+            <div class="text-4xl mb-3"><span style="display:flex;align-items:center;width:60px;height:60px;margin:0 auto;"><%- icon('tag', 'w-16 h-16') %></span></div>
             <p class="text-gray-400 text-sm">Nenhuma categoria criada ainda.</p>
             <p class="text-gray-500 text-xs mt-1">Use o formulário ao lado para criar a primeira.</p>
           </div>
@@ -42,8 +42,8 @@
             <% categorias.forEach(function(cat) { %>
               <div class="bg-gray-900 border border-gray-800 rounded-xl p-5 flex items-center justify-between gap-4">
                 <div class="flex items-center gap-4 min-w-0">
-                  <div class="w-10 h-10 bg-blue-600/20 rounded-lg flex items-center justify-content:center text-blue-400 text-xl flex-shrink-0 flex items-center justify-center">
-                    
+                  <div class="w-10 h-10 bg-blue-600/20 rounded-lg flex items-center justify-center text-blue-400 text-xl flex-shrink-0">
+                    <span style="display:flex;align-items:center;width:24px;height:24px;"><%- icon('tag', 'w-6 h-6') %></span>
                   </div>
                   <div class="min-w-0">
                     <div class="font-semibold text-white truncate"><%= cat.nome %></div>
