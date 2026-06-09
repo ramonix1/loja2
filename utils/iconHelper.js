@@ -32,6 +32,7 @@ const iconMap = {
   trophy: 'trophy.svg',
   printer: 'printer.svg',
   download: 'arrow-down-tray.svg',
+  trash: 'trash.svg',
 };
 
 // Cache dos SVGs
