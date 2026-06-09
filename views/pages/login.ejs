@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login � Lojão</title>
+  <title>Login  LojÃ£o</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
     body { background: #f3f4f6; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
@@ -53,9 +53,9 @@
 </head>
 <body>
   <div class="auth-card">
-    <div class="auth-logo"><a href="/"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('shopping_cart', 'w-5 h-5') %></span> Lojão</a></div>
+    <div class="auth-logo"><a href="/"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('shopping_cart', 'w-5 h-5') %></span> LojÃ£o</a></div>
     <h1 class="auth-titulo">Entrar na sua conta</h1>
-    <p class="auth-sub">Bem-vindo de volta! Faça login para continuar.</p>
+    <p class="auth-sub">Bem-vindo de volta! FaÃ§a login para continuar.</p>
 
     <% if (erro) { %>
       <div class="alerta-erro"> <%= erro %></div>
@@ -76,7 +76,7 @@
         <label for="senha">Senha</label>
         <div class="senha-wrapper">
           <input type="password" id="senha" name="senha" placeholder="Sua senha" required autocomplete="current-password">
-          <button type="button" class="toggle-senha" onclick="toggleSenha('senha', this)" title="Mostrar/ocultar senha">�</button>
+          <button type="button" class="toggle-senha" onclick="toggleSenha('senha', this)" title="Mostrar/ocultar senha"></button>
         </div>
       </div>
 
@@ -94,7 +94,7 @@
     function toggleSenha(id, btn) {
       const input = document.getElementById(id);
       input.type = input.type === 'password' ? 'text' : 'password';
-      btn.textContent = input.type === 'password' ? '�' : '�';
+      btn.textContent = input.type === 'password' ? '' : '';
     }
   </script>
 </body>

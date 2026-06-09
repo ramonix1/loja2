@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Diagnóstico - Admin</title>
+  <title>DiagnÃ³stico - Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -19,8 +19,8 @@
   <main class="ml-60 flex-1 p-8">
 
     <div class="mb-6">
-      <h1 class="text-2xl font-bold text-white">� Diagnóstico de Pagamentos</h1>
-      <p class="text-gray-400 mt-1 text-sm">Verifique se as credenciais e conexões estão configuradas corretamente.</p>
+      <h1 class="text-2xl font-bold text-white">§ DiagnÃ³stico de Pagamentos</h1>
+      <p class="text-gray-400 mt-1 text-sm">Verifique se as credenciais e conexÃµes estÃ£o configuradas corretamente.</p>
     </div>
 
     <div class="max-w-2xl space-y-3">
@@ -43,7 +43,7 @@
     </div>
 
     <div class="mt-8 max-w-2xl bg-gray-900 border border-gray-800 rounded-xl p-6">
-      <h2 class="font-bold text-white mb-3">� Como obter as credenciais</h2>
+      <h2 class="font-bold text-white mb-3"> Como obter as credenciais</h2>
 
       <div class="space-y-4 text-sm text-gray-400">
 
@@ -51,9 +51,9 @@
           <p class="font-semibold text-white mb-1">Mercado Pago (credenciais de teste)</p>
           <ol class="list-decimal list-inside space-y-1">
             <li>Acesse <span class="font-mono text-blue-400">mercadopago.com.br</span>  Entre na conta</li>
-            <li>Vá em <strong class="text-gray-200">Seu negócio  Configurações  Credenciais</strong></li>
+            <li>VÃ¡ em <strong class="text-gray-200">Seu negÃ³cio  ConfiguraÃ§Ãµes  Credenciais</strong></li>
             <li>Selecione aba <strong class="text-gray-200">Credenciais de teste</strong></li>
-            <li>Copie o <strong class="text-gray-200">Access Token</strong> (começa com <span class="font-mono">TEST-</span>) e a <strong class="text-gray-200">Public Key</strong></li>
+            <li>Copie o <strong class="text-gray-200">Access Token</strong> (comeÃ§a com <span class="font-mono">TEST-</span>) e a <strong class="text-gray-200">Public Key</strong></li>
             <li>Cole no <span class="font-mono">.env</span>:
               <pre class="bg-gray-800 rounded px-3 py-2 mt-1 text-xs text-green-300 overflow-x-auto">MP_ACCESS_TOKEN=TEST-xxxxxxxxxxxx
 MP_PUBLIC_KEY=TEST-xxxxxxxxxxxx</pre>
@@ -65,8 +65,8 @@ MP_PUBLIC_KEY=TEST-xxxxxxxxxxxx</pre>
           <p class="font-semibold text-white mb-1">SumUp</p>
           <ol class="list-decimal list-inside space-y-1">
             <li>Acesse <span class="font-mono text-blue-400">developer.sumup.com</span>  Login</li>
-            <li>Crie um app ou use o padrão  copie a <strong class="text-gray-200">API Key</strong></li>
-            <li>O <strong class="text-gray-200">Merchant Code</strong> está em <em>Profile  Account</em></li>
+            <li>Crie um app ou use o padrÃ£o  copie a <strong class="text-gray-200">API Key</strong></li>
+            <li>O <strong class="text-gray-200">Merchant Code</strong> estÃ¡ em <em>Profile  Account</em></li>
             <li>Cole no <span class="font-mono">.env</span>:
               <pre class="bg-gray-800 rounded px-3 py-2 mt-1 text-xs text-green-300 overflow-x-auto">SUMUP_API_KEY=sup_sk_xxxxxxxxxxxx
 SUMUP_MERCHANT_CODE=MXXXXXXXX</pre>
@@ -75,18 +75,18 @@ SUMUP_MERCHANT_CODE=MXXXXXXXX</pre>
         </div>
 
         <div>
-          <p class="font-semibold text-white mb-1">Após editar o .env</p>
+          <p class="font-semibold text-white mb-1">ApÃ³s editar o .env</p>
           <p>Reinicie o servidor: <span class="font-mono text-yellow-300">node server.js</span> (ou Ctrl+C e inicie novamente)</p>
-          <p class="mt-1">Então recarregue esta página para ver o status atualizado.</p>
+          <p class="mt-1">EntÃ£o recarregue esta pÃ¡gina para ver o status atualizado.</p>
         </div>
 
       </div>
     </div>
 
     <div class="mt-4">
-      <a href="javascript:location.reload()" class="text-blue-400 hover:underline text-sm">� Atualizar diagnóstico</a>
-      &nbsp;�&nbsp;
-      <a href="/admin/configuracoes" class="text-gray-400 hover:underline text-sm"> Configurações</a>
+      <a href="javascript:location.reload()" class="text-blue-400 hover:underline text-sm">» Atualizar diagnÃ³stico</a>
+      &nbsp;Â&nbsp;
+      <a href="/admin/configuracoes" class="text-gray-400 hover:underline text-sm"> ConfiguraÃ§Ãµes</a>
     </div>
 
   </main>

@@ -96,11 +96,6 @@ const { csrfSynchronisedProtection, generateToken } = csrfSync({
 //  View engine 
 app.set('view engine', 'ejs');
 
-// Charset UTF-8
-app.use((req, res, next) => {
-  res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  next();
-});
 
 //  Inicializar banco master 
 initializeDatabase();

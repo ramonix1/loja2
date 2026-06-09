@@ -38,7 +38,7 @@
         <div class="text-3xl font-bold text-green-400"><%= totais.ativos %></div>
       </div>
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
-        <div class="text-xs text-gray-500 mb-1">Novos este mês</div>
+        <div class="text-xs text-gray-500 mb-1">Novos este mÃªs</div>
         <div class="text-3xl font-bold text-blue-400"><%= totais.novos_mes %></div>
       </div>
     </div>
@@ -103,9 +103,9 @@
                     <div class="text-xs text-gray-500 mt-0.5"><%= c.email %></div>
                     <% if (c.cpf) { %><div class="text-xs text-gray-600 mt-0.5">CPF: <%= c.cpf %></div><% } %>
                   </td>
-                  <td class="px-4 py-4 text-sm text-gray-300"><%= c.telefone || '�' %></td>
+                  <td class="px-4 py-4 text-sm text-gray-300"><%= c.telefone || '' %></td>
                   <td class="px-4 py-4 text-sm text-gray-300">
-                    <%= c.cidade ? `${c.cidade}/${c.estado}` : '�' %>
+                    <%= c.cidade ? `${c.cidade}/${c.estado}` : '' %>
                   </td>
                   <td class="px-4 py-4 text-center">
                     <span class="text-sm font-semibold text-white"><%= c.total_pedidos %></span>

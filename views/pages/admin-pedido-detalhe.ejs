@@ -28,7 +28,7 @@
   <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap;">
     <h1 style="font-size:24px;font-weight:800;color:#111827;">Pedido #<%= pedido.id %></h1>
     <span class="status-badge status-<%= pedido.status %>">
-      <%= {aguardando_pagamento:'Aguardando pagamento',pago:'Pago',em_separacao:'Em separação',enviado:'Enviado',entregue:'Entregue',cancelado:'Cancelado'}[pedido.status] || pedido.status %>
+      <%= {aguardando_pagamento:'Aguardando pagamento',pago:'Pago',em_separacao:'Em separaÃ§Ã£o',enviado:'Enviado',entregue:'Entregue',cancelado:'Cancelado'}[pedido.status] || pedido.status %>
     </span>
   </div>
 
@@ -54,15 +54,15 @@
         <h3>Cliente</h3>
         <div class="info-linha"><span>Nome</span><strong><%= pedido.usuario_nome %></strong></div>
         <div class="info-linha"><span>E-mail</span><strong><%= pedido.usuario_email %></strong></div>
-        <div class="info-linha"><span>Telefone</span><strong><%= pedido.telefone_entrega || '�' %></strong></div>
-        <div class="info-linha"><span>CPF</span><strong><%= pedido.cpf_entrega || '�' %></strong></div>
+        <div class="info-linha"><span>Telefone</span><strong><%= pedido.telefone_entrega || '' %></strong></div>
+        <div class="info-linha"><span>CPF</span><strong><%= pedido.cpf_entrega || '' %></strong></div>
       </div>
 
       <div class="card">
-        <h3>Endereço de entrega</h3>
+        <h3>EndereÃ§o de entrega</h3>
         <div style="font-size:14px;color:#374151;line-height:1.9;">
           <%= pedido.logradouro %>, <%= pedido.numero %><%= pedido.complemento ? ', ' + pedido.complemento : '' %><br>
-          <%= pedido.bairro %> � <%= pedido.cidade %>/<%= pedido.estado %><br>
+          <%= pedido.bairro %>  <%= pedido.cidade %>/<%= pedido.estado %><br>
           CEP: <%= pedido.cep %>
         </div>
       </div>
@@ -72,10 +72,10 @@
     <div>
       <div class="card">
         <h3>Pagamento</h3>
-        <div class="info-linha"><span>Método</span><strong><%= pedido.metodo_pagamento === 'pix' ? 'PIX' : pedido.metodo_pagamento === 'boleto' ? 'Boleto' : 'Cartão' %></strong></div>
+        <div class="info-linha"><span>MÃ©todo</span><strong><%= pedido.metodo_pagamento === 'pix' ? 'PIX' : pedido.metodo_pagamento === 'boleto' ? 'Boleto' : 'CartÃ£o' %></strong></div>
         <% if (pagamento) { %>
-          <div class="info-linha"><span>Status MP</span><strong><%= pagamento.status_mp || '�' %></strong></div>
-          <div class="info-linha"><span>ID MP</span><strong style="font-size:12px;word-break:break-all;"><%= pagamento.mp_payment_id || '�' %></strong></div>
+          <div class="info-linha"><span>Status MP</span><strong><%= pagamento.status_mp || '' %></strong></div>
+          <div class="info-linha"><span>ID MP</span><strong style="font-size:12px;word-break:break-all;"><%= pagamento.mp_payment_id || '' %></strong></div>
         <% } %>
         <div class="info-linha"><span>Data</span><strong><%= new Date(pedido.created_at).toLocaleString('pt-BR') %></strong></div>
       </div>
@@ -88,7 +88,7 @@
             <select name="status" id="statusSelect" onchange="toggleRastreio(this.value)">
               <% ['aguardando_pagamento','pago','em_separacao','enviado','entregue','cancelado'].forEach(function(s) { %>
                 <option value="<%= s %>" <%= pedido.status === s ? 'selected' : '' %>>
-                  <%= {aguardando_pagamento:'Aguardando pagamento',pago:'Pago',em_separacao:'Em separação',enviado:'Enviado',entregue:'Entregue',cancelado:'Cancelado'}[s] %>
+                  <%= {aguardando_pagamento:'Aguardando pagamento',pago:'Pago',em_separacao:'Em separaÃ§Ã£o',enviado:'Enviado',entregue:'Entregue',cancelado:'Cancelado'}[s] %>
                 </option>
               <% }) %>
             </select>
@@ -96,11 +96,11 @@
 
           <div id="rastreioBox" style="display:<%= pedido.status === 'enviado' ? 'block' : 'none' %>;">
             <div class="form-group" style="margin-top:10px;">
-              <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Código de rastreio</label>
+              <label style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">CÃ³digo de rastreio</label>
               <input type="text" name="codigo_rastreio" value="<%= pedido.codigo_rastreio || '' %>"
                      placeholder="Ex: BR123456789BR"
                      style="width:100%;border:1px solid #d1d5db;border-radius:6px;padding:8px 10px;font-size:14px;box-sizing:border-box;">
-              <span style="font-size:11px;color:#6b7280;">Ao salvar como "Enviado" com código, o comprador recebe email automaticamente.</span>
+              <span style="font-size:11px;color:#6b7280;">Ao salvar como "Enviado" com cÃ³digo, o comprador recebe email automaticamente.</span>
             </div>
           </div>
 
@@ -112,7 +112,7 @@
       <div class="card" style="background:#eff6ff;border:1px solid #bfdbfe;">
         <h3 style="color:#1d4ed8;">Rastreio</h3>
         <div style="font-size:20px;font-weight:800;color:#1e3a8a;letter-spacing:.08em;margin-bottom:6px;"><%= pedido.codigo_rastreio %></div>
-        <a href="https://www.correios.com.br/rastreamento" target="_blank" style="font-size:12px;color:#2563eb;">Verificar nos Correios �</a>
+        <a href="https://www.correios.com.br/rastreamento" target="_blank" style="font-size:12px;color:#2563eb;">Verificar nos Correios </a>
       </div>
       <% } %>
     </div>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Editar Cliente - Admin Lojão</title>
+  <title>Editar Cliente - Admin LojÃ£o</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -21,7 +21,7 @@
         <a href="/" class="flex items-center gap-3">
           <span class="text-2xl"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('shopping_cart', 'w-5 h-5') %></span></span>
           <div>
-            <div class="font-bold text-white text-lg leading-tight">Lojão</div>
+            <div class="font-bold text-white text-lg leading-tight">LojÃ£o</div>
             <div class="text-xs text-gray-400 font-medium">Painel Admin</div>
           </div>
         </a>
@@ -54,7 +54,7 @@
       </div>
     </aside>
 
-    <!-- Conteúdo -->
+    <!-- ConteÃºdo -->
     <main class="ml-60 flex-1 p-8">
 
       <!-- Header -->
@@ -67,10 +67,10 @@
           <span class="text-gray-300">Editar</span>
         </div>
         <h1 class="text-2xl font-bold text-white"> Editar Cliente</h1>
-        <p class="text-gray-400 mt-1 text-sm">Modifique as informações do cliente</p>
+        <p class="text-gray-400 mt-1 text-sm">Modifique as informaÃ§Ãµes do cliente</p>
       </div>
 
-      <!-- Formulário de edição -->
+      <!-- FormulÃ¡rio de ediÃ§Ã£o -->
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 max-w-2xl">
         <form action="/admin/clientes/atualizar/<%= cliente.id %>?_csrf=<%= locals.csrfToken %>" method="POST" enctype="multipart/form-data" class="space-y-4">
 
@@ -89,10 +89,10 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-300 mb-1">Ordem de Exibição</label>
+            <label class="block text-sm font-medium text-gray-300 mb-1">Ordem de ExibiÃ§Ã£o</label>
             <input type="number" name="ordem" value="<%= cliente.ordem %>" min="0"
               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-            <p class="text-xs text-gray-500 mt-1">Menor número aparece primeiro</p>
+            <p class="text-xs text-gray-500 mt-1">Menor nÃºmero aparece primeiro</p>
           </div>
 
           <div>
@@ -118,7 +118,7 @@
             <label class="block text-sm font-medium text-gray-300 mb-1">Nova Logo (opcional)</label>
             <input type="file" name="logo" id="logo" accept="image/*"
               class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-gray-300 text-sm file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-600 file:text-white file:text-xs file:cursor-pointer hover:file:bg-blue-700">
-            <p class="text-xs text-gray-500 mt-1">PNG, JPG, WEBP � máx. 5MB</p>
+            <p class="text-xs text-gray-500 mt-1">PNG, JPG, WEBP  mÃ¡x. 5MB</p>
             <div id="previewArea" class="mt-3"></div>
           </div>
 
@@ -139,7 +139,7 @@
   </div>
 
   <script>
-    // Preview de imagem única
+    // Preview de imagem Ãºnica
     const inputLogo = document.getElementById("logo");
     const previewArea = document.getElementById("previewArea");
 
@@ -153,7 +153,7 @@
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        alert("Arquivo muito grande (máx 5MB)");
+        alert("Arquivo muito grande (mÃ¡x 5MB)");
         return;
       }
 

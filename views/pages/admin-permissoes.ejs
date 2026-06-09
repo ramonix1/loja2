@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Permissões - Admin Lojão</title>
+  <title>PermissÃµes - Admin LojÃ£o</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -15,10 +15,10 @@
 
   <%- include('../partials/admin-sidebar') %>
 
-    <!-- Conteúdo -->
+    <!-- ConteÃºdo -->
     <main class="ml-60 flex-1 p-8">
       <div class="mb-6">
-        <h1 class="text-2xl font-bold text-white">Permissões do Sistema</h1>
+        <h1 class="text-2xl font-bold text-white">PermissÃµes do Sistema</h1>
         <p class="text-gray-400 mt-1 text-sm">Gerencie os administradores com acesso ao painel</p>
       </div>
 
@@ -29,7 +29,7 @@
         <div class="bg-red-900 border border-red-700 text-red-300 rounded-xl px-5 py-3 mb-6 text-sm"> <%= erro %></div>
       <% } %>
 
-      <!-- Formulário de novo admin -->
+      <!-- FormulÃ¡rio de novo admin -->
       <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 max-w-2xl mb-8">
         <h2 class="text-lg font-bold text-white mb-5">Adicionar Administrador</h2>
         <form action="/admin/permissoes/criar" method="POST" class="space-y-4">
@@ -52,9 +52,9 @@
             <div>
               <label class="block text-sm font-medium text-gray-300 mb-1">Senha *</label>
               <div class="relative">
-                <input type="password" name="senha" id="senhaAdmin" required placeholder="M�nimo 8 caracteres"
+                <input type="password" name="senha" id="senhaAdmin" required placeholder="MÃnimo 8 caracteres"
                   class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 pr-10">
-                <button type="button" onclick="toggleSenha()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">�</button>
+                <button type="button" onclick="toggleSenha()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></button>
               </div>
             </div>
             <div>
@@ -66,7 +66,7 @@
           </div>
 
           <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition">
-            �� Criar Administrador
+             Criar Administrador
           </button>
         </form>
       </div>
@@ -92,8 +92,8 @@
                   <th class="pb-3 text-left text-xs font-semibold text-gray-500 uppercase">Email</th>
                   <th class="pb-3 text-left text-xs font-semibold text-gray-500 uppercase">CPF</th>
                   <th class="pb-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
-                  <th class="pb-3 text-left text-xs font-semibold text-gray-500 uppercase">�ltimo acesso</th>
-                  <th class="pb-3 text-left text-xs font-semibold text-gray-500 uppercase">Ações</th>
+                  <th class="pb-3 text-left text-xs font-semibold text-gray-500 uppercase">Ãltimo acesso</th>
+                  <th class="pb-3 text-left text-xs font-semibold text-gray-500 uppercase">AÃ§Ãµes</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-800">
@@ -103,7 +103,7 @@
                       <div class="font-medium text-white text-sm"><%= admin.nome %></div>
                     </td>
                     <td class="py-3 pr-4 text-gray-300 text-sm"><%= admin.email %></td>
-                    <td class="py-3 pr-4 text-gray-400 text-sm"><%= admin.cpf || '�' %></td>
+                    <td class="py-3 pr-4 text-gray-400 text-sm"><%= admin.cpf || '' %></td>
                     <td class="py-3 pr-4">
                       <span class="px-2 py-1 rounded-full text-xs font-semibold <%= admin.ativo ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300' %>">
                         <%= admin.ativo ? 'Ativo' : 'Inativo' %>
@@ -119,18 +119,18 @@
                             <input type="hidden" name="_csrf" value="<%= locals.csrfToken %>">
                             <button type="submit"
                               class="<%= admin.ativo ? 'bg-yellow-700 hover:bg-yellow-600 text-yellow-200' : 'bg-green-700 hover:bg-green-600 text-green-200' %> px-3 py-1.5 rounded-lg text-xs font-medium transition">
-                              <%= admin.ativo ? ' Suspender' : '� Ativar' %>
+                              <%= admin.ativo ? ' Suspender' : '¶ Ativar' %>
                             </button>
                           </form>
                           <form action="/admin/permissoes/excluir/<%= admin.id %>" method="POST"
                             onsubmit="return confirm('Remover o acesso de <%= admin.nome %>?')">
                             <input type="hidden" name="_csrf" value="<%= locals.csrfToken %>">
                             <button type="submit" class="bg-red-700 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition">
-                              � Remover
+                               Remover
                             </button>
                           </form>
                         <% } else { %>
-                          <span class="text-xs text-gray-600 italic px-2 py-1">Você mesmo</span>
+                          <span class="text-xs text-gray-600 italic px-2 py-1">VocÃª mesmo</span>
                         <% } %>
                       </div>
                     </td>

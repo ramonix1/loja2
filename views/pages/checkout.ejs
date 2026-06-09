@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Checkout - LojÃ£o</title>
+  <title>Checkout - LojÃƒÂ£o</title>
   <link rel="stylesheet" href="/css/style.css">
   <script src="https://js.stripe.com/v3/"></script>
   <style>
@@ -111,7 +111,7 @@
       font-size: 14px;
       margin-bottom: 20px;
     }
-    /* CartÃ£o */
+    /* CartÃƒÂ£o */
     #card-form-mp { margin-top: 12px; }
     #installments-select { display: none; margin-top: 12px; }
     .btn-checkout {
@@ -140,11 +140,11 @@
   <% if (erro === 'data_evento_obrigatoria') { %>
     <div class="erro-box"> Selecione a data do evento antes de finalizar.</div>
   <% } else if (erro === 'data_indisponivel') { %>
-    <div class="erro-box"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('error', 'w-5 h-5') %></span> A data escolhida nÃ£o tem vagas disponÃveis. Por favor, selecione outra data.</div>
+    <div class="erro-box"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('error', 'w-5 h-5') %></span> A data escolhida nÃƒÂ£o tem vagas disponÃƒveis. Por favor, selecione outra data.</div>
   <% } else if (erro === 'metodo_invalido') { %>
-    <div class="erro-box"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('error', 'w-5 h-5') %></span> MÃ©todo de pagamento invÃ¡lido. Selecione uma opÃ§Ã£o e tente novamente.</div>
+    <div class="erro-box"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('error', 'w-5 h-5') %></span> MÃƒÂ©todo de pagamento invÃƒÂ¡lido. Selecione uma opÃƒÂ§ÃƒÂ£o e tente novamente.</div>
   <% } else if (erro === 'pagamento') { %>
-    <div class="erro-box"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('error', 'w-5 h-5') %></span> Falha ao processar o pagamento. Verifique os dados e tente novamente. Se o problema persistir, escolha outro mÃ©todo.</div>
+    <div class="erro-box"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('error', 'w-5 h-5') %></span> Falha ao processar o pagamento. Verifique os dados e tente novamente. Se o problema persistir, escolha outro mÃƒÂ©todo.</div>
   <% } else if (erro) { %>
     <div class="erro-box"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('error', 'w-5 h-5') %></span> Ocorreu um erro. Tente novamente.</div>
   <% } %>
@@ -208,19 +208,19 @@
             <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;"></div>
 
             <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;font-size:11px;color:#6b7280;">
-              <span><span style="display:inline-block;width:10px;height:10px;background:#dcfce7;border-radius:3px;margin-right:4px;"></span>DisponÃvel</span>
+              <span><span style="display:inline-block;width:10px;height:10px;background:#dcfce7;border-radius:3px;margin-right:4px;"></span>DisponÃƒvel</span>
               <span><span style="display:inline-block;width:10px;height:10px;background:#fef9c3;border-radius:3px;margin-right:4px;"></span>Poucos lugares</span>
-              <span><span style="display:inline-block;width:10px;height:10px;background:#fee2e2;border-radius:3px;margin-right:4px;"></span>IndisponÃvel</span>
+              <span><span style="display:inline-block;width:10px;height:10px;background:#fee2e2;border-radius:3px;margin-right:4px;"></span>IndisponÃƒvel</span>
             </div>
           </div>
 
-          <p id="cal-loading" style="color:#6b7280;font-size:13px;text-align:center;padding:20px 0;">Carregando calendÃ¡rio...</p>
+          <p id="cal-loading" style="color:#6b7280;font-size:13px;text-align:center;padding:20px 0;">Carregando calendÃƒÂ¡rio...</p>
         </div>
         <% } %>
 
-        <!-- EndereÃ§o -->
+        <!-- EndereÃƒÂ§o -->
         <div class="checkout-card">
-          <h2><%= locals.moduloAgenda ? '3' : '2' %>. EndereÃ§o</h2>
+          <h2><%= locals.moduloAgenda ? '3' : '2' %>. EndereÃƒÂ§o</h2>
 
           <div class="form-row">
             <div class="form-group">
@@ -237,7 +237,7 @@
           </div>
           <div class="form-row cols-3">
             <div class="form-group">
-              <label class="form-label">NÃºmero *</label>
+              <label class="form-label">NÃƒÂºmero *</label>
               <input type="text" name="numero" required value="<%= usuario.numero || '' %>">
             </div>
             <div class="form-group">
@@ -274,7 +274,7 @@
             Preencha o CEP acima para calcular o frete.
           </div>
           <div id="frete-loading" style="display:none;font-size:13px;color:#6b7280;">
-            ³ Calculando opÃ§Ãµes de frete...
+            Â³ Calculando opÃƒÂ§ÃƒÂµes de frete...
           </div>
           <div id="frete-erro" style="display:none;background:#fef2f2;border:1px solid #fca5a5;color:#991b1b;padding:10px 14px;border-radius:8px;font-size:13px;"></div>
           <div id="frete-opcoes" class="metodo-pagamento" style="display:none;"></div>
@@ -288,39 +288,39 @@
 
             <label class="metodo-opcao" id="opcao-pix">
               <input type="radio" name="metodo_pagamento" value="pix" checked>
-              <div class="metodo-icon">¡</div>
+              <div class="metodo-icon">Â¡</div>
               <div class="metodo-info">
                 <div class="metodo-nome">PIX</div>
-                <div class="metodo-desc">AprovaÃ§Ã£o instantÃnea, 24h por dia</div>
+                <div class="metodo-desc">AprovaÃƒÂ§ÃƒÂ£o instantÃƒnea, 24h por dia</div>
               </div>
-              <span class="metodo-badge">InstantÃneo</span>
+              <span class="metodo-badge">InstantÃƒneo</span>
             </label>
 
             <label class="metodo-opcao" id="opcao-cartao">
               <input type="radio" name="metodo_pagamento" value="cartao">
-              <div class="metodo-icon">³</div>
+              <div class="metodo-icon">Â³</div>
               <div class="metodo-info">
-                <div class="metodo-nome">CartÃ£o de CrÃ©dito / DÃ©bito</div>
+                <div class="metodo-nome">CartÃƒÂ£o de CrÃƒÂ©dito / DÃƒÂ©bito</div>
                 <div class="metodo-desc">Visa, Mastercard, Elo, Hipercard e mais</div>
               </div>
             </label>
 
             <label class="metodo-opcao" id="opcao-boleto">
               <input type="radio" name="metodo_pagamento" value="boleto">
-              <div class="metodo-icon">„</div>
+              <div class="metodo-icon">Â„</div>
               <div class="metodo-info">
-                <div class="metodo-nome">Boleto BancÃ¡rio</div>
-                <div class="metodo-desc">Vencimento em 3 dias Ãºteis</div>
+                <div class="metodo-nome">Boleto BancÃƒÂ¡rio</div>
+                <div class="metodo-desc">Vencimento em 3 dias ÃƒÂºteis</div>
               </div>
             </label>
 
             <% if (sumupHabilitado) { %>
             <label class="metodo-opcao" id="opcao-sumup_online">
               <input type="radio" name="metodo_pagamento" value="sumup_online">
-              <div class="metodo-icon">³</div>
+              <div class="metodo-icon">Â³</div>
               <div class="metodo-info">
-                <div class="metodo-nome">CartÃ£o via SumUp</div>
-                <div class="metodo-desc">Pague com cartÃ£o na pÃ¡gina segura da SumUp</div>
+                <div class="metodo-nome">CartÃƒÂ£o via SumUp</div>
+                <div class="metodo-desc">Pague com cartÃƒÂ£o na pÃƒÂ¡gina segura da SumUp</div>
               </div>
               <span class="metodo-badge" style="background:#dbeafe;color:#1e40af;">SumUp</span>
             </label>
@@ -329,10 +329,10 @@
             <% if (process.env.NODE_ENV !== 'production') { %>
             <label class="metodo-opcao" id="opcao-teste">
               <input type="radio" name="metodo_pagamento" value="teste">
-              <div class="metodo-icon">§ª</div>
+              <div class="metodo-icon">Â§Âª</div>
               <div class="metodo-info">
                 <div class="metodo-nome">Pagamento de Teste</div>
-                <div class="metodo-desc">Aprova o pedido instantaneamente € apenas em desenvolvimento</div>
+                <div class="metodo-desc">Aprova o pedido instantaneamente Â€ apenas em desenvolvimento</div>
               </div>
               <span class="metodo-badge" style="background:#fef3c7;color:#92400e;">DEV</span>
             </label>
@@ -340,11 +340,11 @@
 
           </div>
 
-          <!-- Painel: CartÃ£o -->
+          <!-- Painel: CartÃƒÂ£o -->
           <div class="painel-pagamento" id="painel-cartao">
             <div id="card-form-mp">
               <div class="form-group">
-                <label class="form-label">NÃºmero do cartÃ£o</label>
+                <label class="form-label">NÃƒÂºmero do cartÃƒÂ£o</label>
                 <div id="cardNumber" style="border:1.5px solid #e5e7eb;border-radius:8px;padding:12px 14px;"></div>
               </div>
               <div class="form-row">
@@ -358,25 +358,25 @@
                 </div>
               </div>
               <div class="form-group">
-                <label class="form-label">Nome no cartÃ£o</label>
-                <input type="text" id="cardholderName" placeholder="Como aparece no cartÃ£o" style="text-transform:uppercase;">
+                <label class="form-label">Nome no cartÃƒÂ£o</label>
+                <input type="text" id="cardholderName" placeholder="Como aparece no cartÃƒÂ£o" style="text-transform:uppercase;">
               </div>
             </div>
           </div>
 
-          <!-- PainÃ©is SumUp -->
+          <!-- PainÃƒÂ©is SumUp -->
           <div class="painel-pagamento" id="painel-sumup_online">
             <div style="background:#eff6ff;border-radius:10px;padding:16px;margin-top:4px;font-size:14px;color:#1e40af;">
               <strong>Checkout SumUp:</strong><br>
-              ApÃ³s confirmar, vocÃª serÃ¡ redirecionado para a pÃ¡gina segura da SumUp para inserir os dados do cartÃ£o.
+              ApÃƒÂ³s confirmar, vocÃƒÂª serÃƒÂ¡ redirecionado para a pÃƒÂ¡gina segura da SumUp para inserir os dados do cartÃƒÂ£o.
             </div>
           </div>
 
           <!-- Painel: Teste -->
           <div class="painel-pagamento" id="painel-teste">
             <div style="background:#fefce8;border-radius:10px;padding:16px;margin-top:4px;font-size:14px;color:#854d0e;">
-              <strong>§ª Modo de Teste:</strong><br>
-              O pedido serÃ¡ criado e marcado como pago automaticamente, sem chamar nenhuma API de pagamento. Use apenas para testar o fluxo de checkout.
+              <strong>Â§Âª Modo de Teste:</strong><br>
+              O pedido serÃƒÂ¡ criado e marcado como pago automaticamente, sem chamar nenhuma API de pagamento. Use apenas para testar o fluxo de checkout.
             </div>
           </div>
 
@@ -384,13 +384,13 @@
           <div class="painel-pagamento" id="painel-pix">
             <div style="background:#f0fdf4;border-radius:10px;padding:16px;margin-top:4px;font-size:14px;color:#166534;">
               <strong>Como funciona o PIX:</strong><br>
-              ApÃ³s confirmar o pedido, vocÃª receberÃ¡ um QR Code e cÃ³digo copia-e-cola para pagar instantaneamente.
+              ApÃƒÂ³s confirmar o pedido, vocÃƒÂª receberÃƒÂ¡ um QR Code e cÃƒÂ³digo copia-e-cola para pagar instantaneamente.
             </div>
           </div>
 
           <div class="painel-pagamento" id="painel-boleto">
             <div style="background:#fffbeb;border-radius:10px;padding:16px;margin-top:4px;font-size:14px;color:#92400e;">
-              <strong>AtenÃ§Ã£o:</strong> O boleto vence em 3 dias Ãºteis. O pedido Ã© confirmado apÃ³s a compensaÃ§Ã£o bancÃ¡ria (1-2 dias Ãºteis).
+              <strong>AtenÃƒÂ§ÃƒÂ£o:</strong> O boleto vence em 3 dias ÃƒÂºteis. O pedido ÃƒÂ© confirmado apÃƒÂ³s a compensaÃƒÂ§ÃƒÂ£o bancÃƒÂ¡ria (1-2 dias ÃƒÂºteis).
             </div>
           </div>
 
@@ -425,11 +425,11 @@
             </div>
             <div class="resumo-item">
               <span>Frete</span>
-              <span id="freteValorDisplay" style="color:#9ca3af;">€</span>
+              <span id="freteValorDisplay" style="color:#9ca3af;">Â€</span>
             </div>
             <div class="resumo-total">
               <span>Total</span>
-              <span id="totalValorDisplay">€</span>
+              <span id="totalValorDisplay">Â€</span>
             </div>
           </div>
 
@@ -456,7 +456,7 @@
   var cardMounted = false;
   var metodoAtual = 'pix';
 
-  // €€ SeleÃ§Ã£o de mÃ©todo €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
+  // Â€Â€ SeleÃƒÂ§ÃƒÂ£o de mÃƒÂ©todo Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€
   var metodos = document.querySelectorAll('.metodo-opcao');
   var paineis = {
     pix: 'painel-pix', cartao: 'painel-cartao', boleto: 'painel-boleto',
@@ -490,7 +490,7 @@
     });
   });
 
-  // €€ Stripe Elements: campos do cartÃ£o €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
+  // Â€Â€ Stripe Elements: campos do cartÃƒÂ£o Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€
   function inicializarCartao() {
     if (!stripePublicKey || cardMounted) return;
     try {
@@ -515,7 +515,7 @@
     } catch(e) { console.error('Stripe init error', e); }
   }
 
-  // €€ Estado do botÃ£o €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
+  // Â€Â€ Estado do botÃƒÂ£o Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€
   function setBtnLoading() {
     var btn = document.getElementById('btnFinalizar');
     btn.disabled = true;
@@ -527,7 +527,7 @@
     btn.textContent = 'Finalizar pedido ';
   }
 
-  // €€ MÃ¡scaras €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
+  // Â€Â€ MÃƒÂ¡scaras Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€
   document.getElementById('cepInput').addEventListener('input', function() {
     this.value = this.value.replace(/\D/g,'').replace(/(\d{5})(\d)/,'$1-$2').substring(0,9);
   });
@@ -544,7 +544,7 @@
     fetch('https://viacep.com.br/ws/' + cep + '/json/')
       .then(function(r) { return r.json(); })
       .then(function(d) {
-        if (d.erro) return alert('CEP nÃ£o encontrado.');
+        if (d.erro) return alert('CEP nÃƒÂ£o encontrado.');
         document.getElementById('logradouro').value = d.logradouro || '';
         document.getElementById('bairro').value = d.bairro || '';
         document.getElementById('cidade').value = d.localidade || '';
@@ -553,7 +553,7 @@
       .catch(function() { alert('Erro ao buscar CEP.'); });
   });
 
-  // €€ Submit €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
+  // Â€Â€ Submit Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€Â€
   document.getElementById('checkoutForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
@@ -567,13 +567,13 @@
 
     if (document.getElementById('frete_valor').value === '') {
       document.getElementById('card-frete').scrollIntoView({ behavior: 'smooth' });
-      alert('Aguarde o cÃ¡lculo do frete ou verifique seu CEP.');
+      alert('Aguarde o cÃƒÂ¡lculo do frete ou verifique seu CEP.');
       return;
     }
 
     if (metodoAtual === 'cartao') {
       if (!stripeObj || !cardMounted) {
-        alert('Preencha os dados do cartÃ£o.');
+        alert('Preencha os dados do cartÃƒÂ£o.');
         return;
       }
       setBtnLoading();
@@ -614,7 +614,7 @@
     var fd = document.getElementById('freteValorDisplay');
     var td = document.getElementById('totalValorDisplay');
     if (freteVal === 0) {
-      fd.innerHTML = '<span style="color:#16a34a;font-weight:700;">GrÃ¡tis</span>';
+      fd.innerHTML = '<span style="color:#16a34a;font-weight:700;">GrÃƒÂ¡tis</span>';
     } else {
       fd.style.color = '#374151';
       fd.textContent = fmt(freteVal);
@@ -639,13 +639,13 @@
       var label = document.createElement('label');
       label.className = 'metodo-opcao';
       var prazoHtml = opcao.prazo
-        ? '<div class="metodo-desc">' + opcao.prazo + ' dias Ãºteis</div>'
+        ? '<div class="metodo-desc">' + opcao.prazo + ' dias ÃƒÂºteis</div>'
         : '';
       var transportadoraHtml = opcao.transportadora
-        ? ' <span style="font-size:12px;color:#6b7280;">€ ' + opcao.transportadora + '</span>'
+        ? ' <span style="font-size:12px;color:#6b7280;">Â€ ' + opcao.transportadora + '</span>'
         : '';
       var precoHtml = opcao.valor === 0
-        ? '<span style="color:#16a34a;font-weight:700;font-size:15px;">GrÃ¡tis</span>'
+        ? '<span style="color:#16a34a;font-weight:700;font-size:15px;">GrÃƒÂ¡tis</span>'
         : '<span style="font-weight:700;font-size:15px;">' + fmt(opcao.valor) + '</span>';
 
       label.innerHTML =
@@ -679,9 +679,9 @@
     document.getElementById('frete-placeholder').style.display = 'none';
     document.getElementById('frete_valor').value   = '';
     document.getElementById('frete_servico').value = '';
-    document.getElementById('freteValorDisplay').textContent = '€';
+    document.getElementById('freteValorDisplay').textContent = 'Â€';
     document.getElementById('freteValorDisplay').style.color = '#9ca3af';
-    document.getElementById('totalValorDisplay').textContent = '€';
+    document.getElementById('totalValorDisplay').textContent = 'Â€';
 
     fetch('/frete/calcular', {
       method: 'POST',
@@ -695,14 +695,14 @@
         renderOpcoes(data.opcoes);
       } else {
         var erroEl = document.getElementById('frete-erro');
-        erroEl.textContent = data.erro || 'NÃ£o foi possÃvel calcular o frete para este CEP.';
+        erroEl.textContent = data.erro || 'NÃƒÂ£o foi possÃƒvel calcular o frete para este CEP.';
         erroEl.style.display = 'block';
         ultimoCepCalc = '';
       }
     })
     .catch(function() {
       document.getElementById('frete-loading').style.display = 'none';
-      document.getElementById('frete-erro').textContent = 'Erro de conexÃ£o ao calcular frete.';
+      document.getElementById('frete-erro').textContent = 'Erro de conexÃƒÂ£o ao calcular frete.';
       document.getElementById('frete-erro').style.display = 'block';
       ultimoCepCalc = '';
     });
@@ -713,14 +713,14 @@
     calcularFrete(this.value);
   });
 
-  // Recalcula apÃ³s buscar CEP (aguarda o preenchimento do endereÃ§o)
+  // Recalcula apÃƒÂ³s buscar CEP (aguarda o preenchimento do endereÃƒÂ§o)
   var btnBuscar = document.getElementById('btnBuscarCep');
   var origClick = btnBuscar.onclick;
   btnBuscar.addEventListener('click', function() {
     setTimeout(function() { calcularFrete(document.getElementById('cepInput').value); }, 800);
   });
 
-  // Auto-calcula no carregamento se CEP jÃ¡ preenchido
+  // Auto-calcula no carregamento se CEP jÃƒÂ¡ preenchido
   var cepInicial = document.getElementById('cepInput').value.replace(/\D/g, '');
   if (cepInicial.length === 8) calcularFrete(cepInicial);
 })();
@@ -740,8 +740,8 @@
 
   var mesAtual = new Date(minData.getFullYear(), minData.getMonth(), 1);
   var disponibilidadeCache = {};
-  var nomesMes = ['Janeiro','Fevereiro','MarÃ§o','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  var diasSemana = ['Seg','Ter','Qua','Qui','Sex','SÃ¡b','Dom'];
+  var nomesMes = ['Janeiro','Fevereiro','MarÃƒÂ§o','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  var diasSemana = ['Seg','Ter','Qua','Qui','Sex','SÃƒÂ¡b','Dom'];
 
   function mesStr(d) {
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
@@ -764,7 +764,7 @@
     var grid = document.getElementById('cal-grid');
     grid.innerHTML = '';
 
-    // CabeÃ§alho dias da semana
+    // CabeÃƒÂ§alho dias da semana
     diasSemana.forEach(function(d) {
       var th = document.createElement('div');
       th.textContent = d;
@@ -841,10 +841,10 @@
 
   function selecionarData(dataStr, dataObj, info) {
     document.getElementById('data_evento_input').value = dataStr;
-    var nomesMesArr = ['janeiro','fevereiro','marÃ§o','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+    var nomesMesArr = ['janeiro','fevereiro','marÃƒÂ§o','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
     var label = dataObj.getDate() + ' de ' + nomesMesArr[dataObj.getMonth()] + ' de ' + dataObj.getFullYear();
     document.getElementById('data-selecionada-label').textContent = label;
-    document.getElementById('data-vagas-label').textContent = info.vagas_livres + ' vaga' + (info.vagas_livres > 1 ? 's' : '') + ' disponÃvel' + (info.vagas_livres > 1 ? 'is' : '');
+    document.getElementById('data-vagas-label').textContent = info.vagas_livres + ' vaga' + (info.vagas_livres > 1 ? 's' : '') + ' disponÃƒvel' + (info.vagas_livres > 1 ? 'is' : '');
     document.getElementById('data-selecionada-box').style.display = 'block';
     document.getElementById('agenda-calendario').style.display = 'none';
   }

@@ -6,12 +6,12 @@
         <img src="<%= locals.loja.logo %>" alt="<%= locals.loja.nome %>"
              style="height:36px;object-fit:contain;margin-bottom:10px;display:block;">
       <% } else { %>
-        <h3><%= locals.loja?.nome || 'Lojão' %></h3>
+        <h3><%= locals.loja?.nome || 'LojÃ£o' %></h3>
       <% } %>
       <% if (locals.loja?.slogan) { %>
         <p><%= locals.loja.slogan %></p>
       <% } else { %>
-        <p>Produtos de qualidade com entrega rápida.</p>
+        <p>Produtos de qualidade com entrega rÃ¡pida.</p>
       <% } %>
     </div>
 
@@ -39,7 +39,7 @@
     <% if (locals.loja?.rodape) { %>
       <%= locals.loja.rodape %>
     <% } else { %>
-      © <%= new Date().getFullYear() %> <%= locals.loja?.nome || 'Lojão' %> � Todos os direitos reservados
+      Â© <%= new Date().getFullYear() %> <%= locals.loja?.nome || 'LojÃ£o' %>  Todos os direitos reservados
     <% } %>
   </div>
 </footer>

@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lojão - Produtos de qualidade</title>
+  <title>LojÃ£o - Produtos de qualidade</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
-    /* �� Carrossel de Banners �� */
+    /*  Carrossel de Banners  */
     .banner-carousel {
       position: relative;
       width: 100%;
@@ -151,7 +151,7 @@
 
   <% if (banners.length > 1) { %>
     <button class="banner-prev" id="bannerPrev" aria-label="Anterior">&#8249;</button>
-    <button class="banner-next" id="bannerNext" aria-label="Próximo">&#8250;</button>
+    <button class="banner-next" id="bannerNext" aria-label="PrÃ³ximo">&#8250;</button>
     <div class="banner-dots">
       <% banners.forEach(function(_, i) { %>
         <button class="banner-dot <%= i === 0 ? 'active' : '' %>" data-idx="<%= i %>" aria-label="Banner <%= i+1 %>"></button>
@@ -161,11 +161,11 @@
 </div>
 
 <% } else { %>
-<!-- Hero Banner padrão (sem banners cadastrados) -->
+<!-- Hero Banner padrÃ£o (sem banners cadastrados) -->
 <div class="hero">
   <div class="hero-content">
-    <h1>Os melhores produtos, <br>para você.</h1>
-    <p>Qualidade garantida com entrega rápida em todo o Brasil.</p>
+    <h1>Os melhores produtos, <br>para vocÃª.</h1>
+    <p>Qualidade garantida com entrega rÃ¡pida em todo o Brasil.</p>
     <a href="#produtos" class="btn btn-hero">Ver produtos </a>
   </div>
 </div>
@@ -203,7 +203,7 @@
 
   <div class="section-title">
     <h2>Nossos Produtos</h2>
-    <p>Encontre o que você precisa com os melhores preços</p>
+    <p>Encontre o que vocÃª precisa com os melhores preÃ§os</p>
   </div>
 
   <% if (produtos.length === 0) { %>
@@ -224,13 +224,13 @@
 
 </div>
 
-<!-- Seção de Clientes -->
+<!-- SeÃ§Ã£o de Clientes -->
 <% if(clientes && clientes.length > 0){ %>
   <section class="py-16 bg-gray-50">
     <div class="container">
       <div class="section-title">
         <h2>Nossos Clientes</h2>
-        <p>Empresas que confiam em nós</p>
+        <p>Empresas que confiam em nÃ³s</p>
       </div>
 
       <div class="overflow-hidden bg-white py-8 rounded-xl">
