@@ -97,7 +97,7 @@
         <% if (esgotadoDetalhe) { %>
           <button class="btn" disabled style="font-size:15px; padding:14px 28px; background:#374151; color:#9ca3af; cursor:not-allowed;">Produto Esgotado</button>
         <% } else { %>
-          <button class="btn btn-primary" id="btnAddCart" data-id="<%= produto.id %>" style="font-size:15px; padding:14px 28px;">🛒 Adicionar ao Carrinho</button>
+          <button class="btn btn-primary" id="btnAddCart" data-id="<%= produto.id %>" style="font-size:15px; padding:14px 28px;"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('shopping_cart', 'w-5 h-5') %></span> Adicionar ao Carrinho</button>
           <button class="btn" id="btnBuyNow" data-id="<%= produto.id %>" style="background:#16a34a; color:white; font-size:15px; padding:14px 28px;">⚡ Comprar Agora</button>
         <% } %>
       </div>
@@ -111,7 +111,7 @@
           🔄 <span>Troca garantida em até 7 dias</span>
         </div>
         <div style="display:flex; align-items:center; gap:8px; font-size:14px; color:#4b5563;">
-          🔒 <span>Pagamento 100% seguro</span>
+          <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('lock', 'w-5 h-5') %></span> <span>Pagamento 100% seguro</span>
         </div>
       </div>
 
@@ -162,7 +162,8 @@
     .then(function(r) { return r.json(); })
     .then(function(d) {
       if (d.erro) { alert(d.erro); return; }
-      atualizarBadge(d.contagem);
+      atualizarBadgeLocal(d.contagem);
+      if (window.atualizarBadge) window.atualizarBadge();
       if (redirecionar) {
         window.location.href = '/carrinho';
       } else {
@@ -172,7 +173,7 @@
     .catch(function() { alert('Erro ao adicionar. Tente novamente.'); });
   }
 
-  function atualizarBadge(n) {
+  function atualizarBadgeLocal(n) {
     var badge = document.getElementById('cartBadge');
     if (!badge) return;
     badge.textContent = n > 99 ? '99+' : n;

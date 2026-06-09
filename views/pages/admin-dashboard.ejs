@@ -29,7 +29,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-10">
 
       <div class="bg-gray-900 rounded-xl p-5 border border-gray-800">
-        <div class="text-2xl mb-1">📦</div>
+        <div class="text-2xl mb-1"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('package', 'w-5 h-5') %></span></div>
         <div class="text-2xl font-bold text-white"><%= totalProdutos %></div>
         <div class="text-xs text-gray-400 mt-1">Produtos</div>
       </div>
@@ -53,7 +53,7 @@
       </div>
 
       <div class="bg-gray-900 rounded-xl p-5 border border-green-900/50 border">
-        <div class="text-2xl mb-1">💰</div>
+        <div class="text-2xl mb-1"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('money', 'w-5 h-5') %></span></div>
         <div class="text-2xl font-bold text-green-400">
           R$ <%= Number(receitaTotal).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}) %>
         </div>
@@ -121,7 +121,7 @@
 
       <a href="/admin/produtos" class="module-card bg-gray-900 border border-gray-800 hover:border-blue-500 rounded-xl p-6 block">
         <div class="flex items-start justify-between mb-4">
-          <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-2xl">📦</div>
+          <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-2xl"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('package', 'w-5 h-5') %></span></div>
           <span class="text-xs bg-green-900 text-green-400 font-semibold px-2 py-1 rounded-full">Ativo</span>
         </div>
         <h3 class="font-bold text-white text-base mb-1">Produtos</h3>
@@ -171,7 +171,7 @@
 
       <a href="/admin/configuracoes" class="module-card bg-gray-900 border border-gray-800 hover:border-blue-500 rounded-xl p-6 block">
         <div class="flex items-start justify-between mb-4">
-          <div class="w-12 h-12 bg-orange-600 rounded-xl flex items-center justify-center text-2xl">⚙️</div>
+          <div class="w-12 h-12 bg-orange-600 rounded-xl flex items-center justify-center text-2xl"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('settings', 'w-5 h-5') %></span></div>
           <span class="text-xs bg-green-900 text-green-400 font-semibold px-2 py-1 rounded-full">Ativo</span>
         </div>
         <h3 class="font-bold text-white text-base mb-1">Configurações</h3>

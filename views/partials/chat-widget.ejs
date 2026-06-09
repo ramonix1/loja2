@@ -170,7 +170,7 @@
   <!-- Área de mensagens (oculta até iniciar) -->
   <div id="cw-chat-area" style="display:none;flex:1;flex-direction:column;overflow:hidden;display:none;">
     <div id="cw-mensagens"></div>
-    <div id="cw-digitando" class="cw-digitando" style="display:none;">🤖 digitando...</div>
+    <div id="cw-digitando" class="cw-digitando" style="display:none;"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('robot', 'w-5 h-5') %></span> digitando...</div>
     <div class="cw-footer" id="cw-footer-area">
       <div class="cw-input-row">
         <input id="cw-input" class="cw-input" type="text" placeholder="Escreva sua mensagem..." maxlength="500">
@@ -302,7 +302,7 @@
     if (msg.remetente === 'bot') digitando.style.display = 'none';
     const div = document.createElement('div');
     div.className = `cw-msg ${msg.remetente}`;
-    const label = msg.remetente === 'cliente' ? 'Você' : msg.remetente === 'bot' ? '🤖 Bot' : '👨‍💼 Atendente';
+    const label = msg.remetente === 'cliente' ? 'Você' : msg.remetente === 'bot' ? '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('robot', 'w-5 h-5') %></span> Bot' : '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('person', 'w-5 h-5') %></span> Atendente';
     div.innerHTML = `<div class="cw-msg-label">${label}</div><div class="cw-msg-balao">${escHtml(msg.conteudo)}</div>`;
     mensagensEl.appendChild(div);
     if (scroll) mensagensEl.scrollTop = mensagensEl.scrollHeight;

@@ -73,11 +73,11 @@
     <!-- Abas -->
     <div class="flex gap-1 mb-6 bg-gray-900 border border-gray-800 p-1 rounded-xl w-fit no-print">
       <% [
-        { id:'vendas',     icon:'🛒', label:'Vendas' },
-        { id:'estoque',    icon:'📦', label:'Estoque' },
+        { id:'vendas',     icon:'<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('shopping_cart', 'w-5 h-5') %></span>', label:'Vendas' },
+        { id:'estoque',    icon:'<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('package', 'w-5 h-5') %></span>', label:'Estoque' },
         { id:'entregas',   icon:'🚚', label:'Entregas' },
         { id:'produtos',   icon:'🏆', label:'Produtos' },
-        { id:'financeiro', icon:'💰', label:'Financeiro' },
+        { id:'financeiro', icon:'<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('money', 'w-5 h-5') %></span>', label:'Financeiro' },
         { id:'clientes',      icon:'👥', label:'Clientes' },
         { id:'agendamentos',  icon:'📅', label:'Agendamentos' },
       ].forEach(function(a) { %>

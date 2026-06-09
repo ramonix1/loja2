@@ -28,6 +28,7 @@ const initializeDatabase = require('./config/init-db');
 const socketio = require('./config/socketio');
 
 const tenantMiddleware = require('./middlewares/tenant');
+const { icon } = require('./utils/iconHelper');
 
 const app = express();
 
@@ -125,6 +126,7 @@ app.use((req, res, next) => {
   res.locals.usuario = req.session.usuarioId
     ? { id: req.session.usuarioId, nome: req.session.nome, role: req.session.role }
     : null;
+  res.locals.icon = icon;
   next();
 });
 

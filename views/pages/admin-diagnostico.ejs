@@ -27,7 +27,7 @@
 
       <% resultados.forEach(function(r) { %>
       <div class="bg-gray-900 border <%= r.ok ? 'border-green-800' : 'border-red-800' %> rounded-xl px-5 py-4 flex items-start gap-4">
-        <span class="text-2xl mt-0.5"><%= r.ok ? '✅' : '❌' %></span>
+        <span class="text-2xl mt-0.5"><%= r.ok ? '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('check', 'w-5 h-5') %></span>' : '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('error', 'w-5 h-5') %></span>' %></span>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2">
             <span class="font-semibold text-white text-sm"><%= r.nome %></span>

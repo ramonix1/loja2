@@ -140,13 +140,13 @@
   <% if (erro === 'data_evento_obrigatoria') { %>
     <div class="erro-box">⚠️ Selecione a data do evento antes de finalizar.</div>
   <% } else if (erro === 'data_indisponivel') { %>
-    <div class="erro-box">❌ A data escolhida não tem vagas disponíveis. Por favor, selecione outra data.</div>
+    <div class="erro-box"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('error', 'w-5 h-5') %></span> A data escolhida não tem vagas disponíveis. Por favor, selecione outra data.</div>
   <% } else if (erro === 'metodo_invalido') { %>
-    <div class="erro-box">❌ Método de pagamento inválido. Selecione uma opção e tente novamente.</div>
+    <div class="erro-box"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('error', 'w-5 h-5') %></span> Método de pagamento inválido. Selecione uma opção e tente novamente.</div>
   <% } else if (erro === 'pagamento') { %>
-    <div class="erro-box">❌ Falha ao processar o pagamento. Verifique os dados e tente novamente. Se o problema persistir, escolha outro método.</div>
+    <div class="erro-box"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('error', 'w-5 h-5') %></span> Falha ao processar o pagamento. Verifique os dados e tente novamente. Se o problema persistir, escolha outro método.</div>
   <% } else if (erro) { %>
-    <div class="erro-box">❌ Ocorreu um erro. Tente novamente.</div>
+    <div class="erro-box"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('error', 'w-5 h-5') %></span> Ocorreu um erro. Tente novamente.</div>
   <% } %>
 
   <form id="checkoutForm" method="POST" action="/checkout">
@@ -192,7 +192,7 @@
           <input type="hidden" name="data_evento" id="data_evento_input">
 
           <div id="data-selecionada-box" style="display:none;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:14px 16px;margin-bottom:16px;">
-            <div style="font-size:13px;color:#1e40af;font-weight:600;">✅ Data selecionada:</div>
+            <div style="font-size:13px;color:#1e40af;font-weight:600;"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('check', 'w-5 h-5') %></span> Data selecionada:</div>
             <div id="data-selecionada-label" style="font-size:18px;font-weight:800;color:#1e3a8a;margin-top:4px;"></div>
             <div id="data-vagas-label" style="font-size:12px;color:#3b82f6;margin-top:2px;"></div>
             <button type="button" onclick="limparDataEvento()" style="margin-top:8px;font-size:12px;color:#6b7280;background:none;border:none;cursor:pointer;padding:0;">Alterar data</button>
@@ -438,7 +438,7 @@
           </button>
 
           <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:14px;font-size:12px;color:#9ca3af;">
-            🔒 Pagamento 100% seguro via Stripe
+            <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('lock', 'w-5 h-5') %></span> Pagamento 100% seguro via Stripe
           </div>
         </div>
       </div>
@@ -649,7 +649,7 @@
         : '<span style="font-weight:700;font-size:15px;">' + fmt(opcao.valor) + '</span>';
 
       label.innerHTML =
-        '<div class="metodo-icon">📦</div>' +
+        '<div class="metodo-icon"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('package', 'w-5 h-5') %></span></div>' +
         '<div class="metodo-info">' +
           '<div class="metodo-nome">' + opcao.nome + transportadoraHtml + '</div>' +
           prazoHtml +

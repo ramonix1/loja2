@@ -45,7 +45,7 @@
 
     <% if (salvo) { %>
       <div class="mb-6 bg-green-900/50 border border-green-700 text-green-300 rounded-xl px-4 py-3 text-sm">
-        ✅ Aparência salva com sucesso.
+        <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('check', 'w-5 h-5') %></span> Aparência salva com sucesso.
       </div>
     <% } %>
 
@@ -57,7 +57,7 @@
           <% if (cfg.loja_logo) { %>
             <img id="previewLogoImg" src="<%= cfg.loja_logo %>" style="height:32px;object-fit:contain;" alt="">
           <% } else { %>
-            <span>🛒</span>
+            <span><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('shopping_cart', 'w-5 h-5') %></span></span>
             <span id="previewNomeTexto"><%= cfg.loja_nome || 'Nome da loja' %></span>
           <% } %>
         </div>

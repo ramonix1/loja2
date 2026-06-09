@@ -242,7 +242,7 @@
 </head>
 <body>
   <div class="header">
-    <h1>💰 Meu Faturamento</h1>
+    <h1><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('money', 'w-5 h-5') %></span> Meu Faturamento</h1>
     <p>Acompanhe suas invoices e dados de billing</p>
   </div>
 
@@ -329,7 +329,7 @@
                 <td>
                   <span class="badge badge-<%= inv.status %>">
                     <%=
-                      inv.status === 'paid' ? '✅ Pago' :
+                      inv.status === 'paid' ? '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('check', 'w-5 h-5') %></span> Pago' :
                       inv.status === 'pending' ? '⏳ Pendente' :
                       inv.status === 'overdue' ? '⚠️ Vencido' :
                       inv.status === 'sent' ? '📧 Enviado' :

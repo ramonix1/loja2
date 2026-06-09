@@ -53,7 +53,7 @@
 </head>
 <body>
   <div class="auth-card">
-    <div class="auth-logo"><a href="/">🛒 Lojão</a></div>
+    <div class="auth-logo"><a href="/"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('shopping_cart', 'w-5 h-5') %></span> Lojão</a></div>
     <h1 class="auth-titulo">Entrar na sua conta</h1>
     <p class="auth-sub">Bem-vindo de volta! Faça login para continuar.</p>
 
@@ -61,7 +61,7 @@
       <div class="alerta-erro">⚠️ <%= erro %></div>
     <% } %>
     <% if (info) { %>
-      <div class="alerta-info">✅ <%= info %></div>
+      <div class="alerta-info"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('check', 'w-5 h-5') %></span> <%= info %></div>
     <% } %>
 
     <form method="POST" action="/login">

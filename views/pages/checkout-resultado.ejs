@@ -88,7 +88,7 @@
   <!-- Header do resultado -->
   <div class="resultado-hero">
     <% if (pedido.status === 'pago') { %>
-      <div class="resultado-icon">✅</div>
+      <div class="resultado-icon"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('check', 'w-5 h-5') %></span></div>
       <h1 class="resultado-titulo">Pagamento confirmado!</h1>
       <p class="resultado-sub">Obrigado, <%= pedido.nome_entrega.split(' ')[0] %>! Seu pedido #<%= pedido.id %> foi aprovado.</p>
     <% } else if (pedido.metodo_pagamento === 'pix') { %>
@@ -214,7 +214,7 @@ function copiarPix() {
   navigator.clipboard.writeText(code).then(function() {
     var btn = document.querySelector('.btn-copy');
     var orig = btn.textContent;
-    btn.textContent = '✅ Copiado!';
+    btn.textContent = '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('check', 'w-5 h-5') %></span> Copiado!';
     setTimeout(function() { btn.textContent = orig; }, 2000);
   }).catch(function() {
     // fallback

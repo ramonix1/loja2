@@ -28,7 +28,7 @@
         <p class="text-gray-400 text-sm mt-0.5">Atenda seus clientes em tempo real</p>
       </div>
       <button id="btn-bot-config" class="text-sm bg-gray-800 hover:bg-gray-700 px-4 py-2 rounded-lg transition">
-        ⚙️ Configurar Bot
+        <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('settings', 'w-5 h-5') %></span> Configurar Bot
       </button>
     </div>
 
@@ -70,10 +70,10 @@
             </div>
             <div class="flex gap-2">
               <button id="btn-assumir" class="text-xs bg-yellow-600 hover:bg-yellow-500 px-3 py-1.5 rounded-lg transition hidden">
-                👤 Assumir conversa
+                <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('user', 'w-5 h-5') %></span> Assumir conversa
               </button>
               <button id="btn-liberar-bot" class="text-xs bg-gray-700 hover:bg-gray-600 px-3 py-1.5 rounded-lg transition hidden">
-                🤖 Ativar bot
+                <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('robot', 'w-5 h-5') %></span> Ativar bot
               </button>
               <button id="btn-encerrar" class="text-xs bg-red-700 hover:bg-red-600 px-3 py-1.5 rounded-lg transition">
                 ✕ Encerrar
@@ -108,7 +108,7 @@
   <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col">
     <div class="p-6 border-b border-gray-800 flex justify-between items-center">
       <div>
-        <h2 class="text-lg font-bold">🤖 Configuração do Bot</h2>
+        <h2 class="text-lg font-bold"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('robot', 'w-5 h-5') %></span> Configuração do Bot</h2>
         <p class="text-xs text-gray-400 mt-0.5">Separe múltiplas palavras-chave por vírgula (ex: preço, valor, quanto custa)</p>
       </div>
       <button id="fechar-modal-bot" class="text-gray-500 hover:text-white text-xl">✕</button>
@@ -245,7 +245,7 @@ function renderizarLista() {
         </div>
         <div class="flex items-center gap-2 mt-1">
           <span class="text-xs px-1.5 py-0.5 rounded ${c.status === 'encerrada' ? 'bg-gray-700 text-gray-400' : c.bot_ativo ? 'bg-green-900 text-green-400' : 'bg-yellow-900 text-yellow-400'}">
-            ${c.status === 'encerrada' ? 'Encerrada' : c.bot_ativo ? '🤖 Bot' : '👤 Humano'}
+            ${c.status === 'encerrada' ? 'Encerrada' : c.bot_ativo ? '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('robot', 'w-5 h-5') %></span> Bot' : '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('user', 'w-5 h-5') %></span> Humano'}
           </span>
         </div>
       </div>`;
@@ -304,12 +304,12 @@ function atualizarHeaderConversa() {
     btnLiberarBot.classList.add('hidden');
     btnEncerrar.classList.add('hidden');
   } else if (conversaAtiva.bot_ativo) {
-    badge.innerHTML = '<span class="text-green-400">🤖 Bot respondendo</span>';
+    badge.innerHTML = '<span class="text-green-400"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('robot', 'w-5 h-5') %></span> Bot respondendo</span>';
     btnAssumir.classList.remove('hidden');
     btnLiberarBot.classList.add('hidden');
     btnEncerrar.classList.remove('hidden');
   } else {
-    badge.innerHTML = '<span class="text-yellow-400">👤 Você está respondendo</span>';
+    badge.innerHTML = '<span class="text-yellow-400"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('user', 'w-5 h-5') %></span> Você está respondendo</span>';
     btnAssumir.classList.add('hidden');
     btnLiberarBot.classList.remove('hidden');
     btnEncerrar.classList.remove('hidden');
@@ -371,7 +371,7 @@ function adicionarMensagem(msg, scroll = true) {
   div.innerHTML = `
     <div class="max-w-xs lg:max-w-md">
       <div class="text-xs text-gray-500 mb-1 ${isAdmin ? 'text-right' : ''}">
-        ${isCliente ? '👤 Cliente' : isBot ? '🤖 Bot' : '👨‍💼 Você'}
+        ${isCliente ? '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('user', 'w-5 h-5') %></span> Cliente' : isBot ? '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('robot', 'w-5 h-5') %></span> Bot' : '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('person', 'w-5 h-5') %></span> Você'}
         · ${formatarHora(msg.created_at)}
       </div>
       <div class="px-4 py-2.5 rounded-2xl text-sm text-white ${isAdmin ? 'msg-admin rounded-tr-sm' : isBot ? 'msg-bot rounded-tl-sm' : 'msg-cliente rounded-tl-sm'}">

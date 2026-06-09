@@ -17,7 +17,8 @@
       <img src="<%= locals.loja.logo %>" alt="<%= locals.loja.nome %>"
            style="height:40px;max-width:160px;object-fit:contain;">
     <% } else { %>
-      🛒 <%= locals.loja?.nome || 'Lojão' %>
+      <div style="display:flex;align-items:center;width:24px;height:24px;"><%- icon('shopping_cart') %></div>
+      <%= locals.loja?.nome || 'Lojão' %>
     <% } %>
   </a>
 
@@ -26,8 +27,8 @@
     <% if (locals.usuario) { %>
 
       <a href="/meus-pedidos" style="color:#d1d5db;text-decoration:none;font-size:14px;font-weight:500;">Pedidos</a>
-      <a href="/carrinho" class="cart-link" id="cartLink" title="Meu Carrinho">
-        <span class="cart-icon">🛒</span>
+      <a href="/carrinho" class="cart-link" id="cartLink" title="Meu Carrinho" style="display:flex;align-items:center;position:relative;">
+        <span class="cart-icon" style="display:flex;align-items:center;width:24px;height:24px;"><%- icon('shopping_cart') %></span>
         <span class="cart-badge" id="cartBadge" style="display:none;">0</span>
       </a>
 
@@ -53,17 +54,18 @@
 <script>
 (function() {
   function atualizarBadge() {
-    fetch('/carrinho/count').then(r => r.json()).then(d => {
+    fetch('/carrinho/contagem').then(r => r.json()).then(d => {
       var badge = document.getElementById('cartBadge');
       if (!badge) return;
-      if (d.count > 0) {
-        badge.textContent = d.count;
+      if (d.contagem > 0) {
+        badge.textContent = d.contagem;
         badge.style.display = 'inline-flex';
       } else {
         badge.style.display = 'none';
       }
     }).catch(function(){});
   }
+  window.atualizarBadge = atualizarBadge;
   atualizarBadge();
 })();
 </script>

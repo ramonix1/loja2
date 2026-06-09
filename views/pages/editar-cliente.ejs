@@ -19,7 +19,7 @@
     <aside class="w-60 bg-gray-900 border-r border-gray-800 flex flex-col fixed h-full">
       <div class="p-6 border-b border-gray-800">
         <a href="/" class="flex items-center gap-3">
-          <span class="text-2xl">🛒</span>
+          <span class="text-2xl"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('shopping_cart', 'w-5 h-5') %></span></span>
           <div>
             <div class="font-bold text-white text-lg leading-tight">Lojão</div>
             <div class="text-xs text-gray-400 font-medium">Painel Admin</div>
@@ -34,7 +34,7 @@
         </a>
         <a href="/admin/produtos"
            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white font-medium text-sm transition">
-          <span>📦</span> Produtos
+          <span><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('package', 'w-5 h-5') %></span></span> Produtos
         </a>
         <a href="/admin/banners"
            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white font-medium text-sm transition">
@@ -125,7 +125,7 @@
           <div class="flex gap-3">
             <button type="submit"
               class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition">
-              ✅ Atualizar Cliente
+              <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('check', 'w-5 h-5') %></span> Atualizar Cliente
             </button>
             <a href="/admin/clientes"
                class="bg-gray-700 hover:bg-gray-600 text-gray-300 px-5 py-2.5 rounded-lg text-sm font-semibold transition">

@@ -45,7 +45,7 @@
 </head>
 <body>
   <div class="auth-card">
-    <div class="auth-logo"><a href="/">🛒 Lojão</a></div>
+    <div class="auth-logo"><a href="/"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('shopping_cart', 'w-5 h-5') %></span> Lojão</a></div>
     <h1 class="auth-titulo">Recuperar senha</h1>
     <p class="auth-sub">Informe seu email ou telefone cadastrado e enviaremos as instruções para redefinir sua senha.</p>
 
@@ -60,7 +60,7 @@
     <div class="canal-tabs">
       <button type="button" class="canal-tab ativo" onclick="selecionarCanal('email', this)">📧 Email</button>
       <button type="button" class="canal-tab <%= smsDisponivel ? '' : '' %>" onclick="selecionarCanal('sms', this)" <%= smsDisponivel ? '' : 'disabled title="SMS não configurado"' %>>
-        📱 SMS
+        <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('phone', 'w-5 h-5') %></span> SMS
       </button>
     </div>
 

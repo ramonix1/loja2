@@ -208,7 +208,7 @@
 
   <% if (produtos.length === 0) { %>
     <div class="empty-state">
-      <div class="empty-icon">📦</div>
+      <div class="empty-icon"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('package', 'w-5 h-5') %></span></div>
       <h3>Nenhum produto cadastrado ainda</h3>
       <p>Volte em breve ou <a href="/admin">acesse o painel admin</a> para cadastrar produtos.</p>
     </div>
@@ -296,13 +296,6 @@
 (function() {
   var csrf = '<%= csrfToken %>';
 
-  function atualizarBadge(n) {
-    var badge = document.getElementById('cartBadge');
-    if (!badge) return;
-    badge.textContent = n > 99 ? '99+' : n;
-    badge.style.display = n > 0 ? 'flex' : 'none';
-  }
-
   function mostrarToast(msg) {
     var toast = document.getElementById('toastCarrinho');
     var msgEl = document.getElementById('toastMsg');
@@ -335,7 +328,7 @@
       .then(function(d) {
         self.disabled = false;
         if (d.erro) { mostrarToast('Erro: ' + d.erro); return; }
-        atualizarBadge(d.contagem);
+        if (window.atualizarBadge) window.atualizarBadge();
         mostrarToast('Produto adicionado ao carrinho!');
       })
       .catch(function() { self.disabled = false; });

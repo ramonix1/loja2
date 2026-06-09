@@ -75,7 +75,7 @@
 <div class="carrinho-wrap">
   <% if (itens.length === 0) { %>
     <div class="carrinho-vazio">
-      <div class="icon">🛒</div>
+      <div class="icon"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('shopping_cart', 'w-5 h-5') %></span></div>
       <h2>Seu carrinho está vazio</h2>
       <p style="margin-bottom:20px;">Explore nossa vitrine e adicione produtos.</p>
       <a href="/" class="btn btn-primary" style="display:inline-block;padding:12px 28px;">Ver produtos</a>
@@ -154,14 +154,9 @@
     var sub = document.getElementById('resumoSubtotal');
     if (el) el.textContent = fmt(total);
     if (sub) sub.textContent = fmt(total);
-    atualizarBadge(contagem);
-  }
-
-  function atualizarBadge(n) {
-    var badge = document.getElementById('cartBadge');
-    if (!badge) return;
-    badge.textContent = n;
-    badge.style.display = n > 0 ? 'flex' : 'none';
+    if (window.atualizarBadge) {
+      window.atualizarBadge();
+    }
   }
 
   // Botões de incremento/decremento

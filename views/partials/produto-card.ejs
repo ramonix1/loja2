@@ -28,7 +28,7 @@
       <% if (esgotado) { %>
         <button class="btn" disabled style="flex:1;font-size:12px;padding:8px;background:#374151;color:#9ca3af;cursor:not-allowed;">Esgotado</button>
       <% } else { %>
-        <button class="btn btn-primary btn-add-cart" data-id="<%= produto.id %>" style="flex:1;font-size:12px;padding:8px;">🛒 Adicionar</button>
+        <button class="btn btn-primary btn-add-cart" data-id="<%= produto.id %>" style="flex:1;font-size:12px;padding:8px;"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('shopping_cart', 'w-5 h-5') %></span> Adicionar</button>
       <% } %>
     </div>
   </div>

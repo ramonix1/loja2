@@ -24,7 +24,7 @@
         <span class="mx-2">/</span>
         <span class="text-gray-300">Produtos</span>
       </div>
-      <h1 class="text-2xl font-bold text-white">📦 Produtos</h1>
+      <h1 class="text-2xl font-bold text-white"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('package', 'w-5 h-5') %></span> Produtos</h1>
       <p class="text-gray-400 mt-1 text-sm">Cadastre, edite e remova produtos da loja</p>
     </div>
 
@@ -82,7 +82,7 @@
 
         <button type="submit"
           class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition">
-          ✅ Salvar Produto
+          <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('check', 'w-5 h-5') %></span> Salvar Produto
         </button>
       </form>
     </div>
@@ -96,7 +96,7 @@
 
       <% if (produtos.length === 0) { %>
         <div class="text-center py-16 bg-gray-800 rounded-xl">
-          <div class="text-5xl mb-3">📦</div>
+          <div class="text-5xl mb-3"><span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('package', 'w-5 h-5') %></span></div>
           <p class="text-gray-400 font-medium">Nenhum produto cadastrado</p>
           <p class="text-gray-600 text-sm mt-1">Use o formulário acima para adicionar</p>
         </div>

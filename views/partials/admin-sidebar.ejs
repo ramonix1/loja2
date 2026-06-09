@@ -5,7 +5,7 @@
         <img src="<%= locals.loja.logo %>" alt="<%= locals.loja.nome %>"
              style="height:32px;max-width:120px;object-fit:contain;">
       <% } else { %>
-        <span class="text-2xl">🛒</span>
+        <div style="display:flex;align-items:center;width:24px;height:24px;"><%- icon('shopping_cart') %></div>
       <% } %>
       <div>
         <div class="font-bold text-white text-lg leading-tight"><%= locals.loja?.nome || 'Lojão' %></div>
@@ -18,67 +18,67 @@
     <a href="/admin"
        class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition
               <%= locals.activePage === 'dashboard' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
-      <span>🏠</span> Dashboard
+      <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('home', 'w-5 h-5') %></span> Dashboard
     </a>
     <a href="/admin/produtos"
        class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition
               <%= locals.activePage === 'produtos' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
-      <span>📦</span> Produtos
+      <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('package', 'w-5 h-5') %></span> Produtos
     </a>
     <a href="/admin/categorias"
        class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition
               <%= locals.activePage === 'categorias' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
-      <span>🏷️</span> Categorias
+      <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('tag', 'w-5 h-5') %></span> Categorias
     </a>
     <a href="/admin/banners"
        class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition
               <%= locals.activePage === 'banners' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
-      <span>🖼️</span> Banners
+      <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('image', 'w-5 h-5') %></span> Banners
     </a>
     <a href="/admin/clientes"
        class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition
               <%= locals.activePage === 'clientes' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
-      <span>🏢</span> Clientes
+      <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('building', 'w-5 h-5') %></span> Clientes
     </a>
     <a href="/admin/compradores"
        class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition
               <%= locals.activePage === 'compradores' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
-      <span>👥</span> Compradores
+      <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('users', 'w-5 h-5') %></span> Compradores
     </a>
     <a href="/admin/pedidos"
        class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition
               <%= locals.activePage === 'pedidos' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
-      <span>🛍️</span> Pedidos
+      <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('shopping_bag', 'w-5 h-5') %></span> Pedidos
     </a>
     <a href="/admin/permissoes"
        class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition
               <%= locals.activePage === 'permissoes' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
-      <span>🔐</span> Permissões
+      <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('lock_secure', 'w-5 h-5') %></span> Permissões
     </a>
     <a href="/admin/agenda"
        class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition
               <%= locals.activePage === 'agenda' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
-      <span>📅</span> Agenda
+      <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('calendar', 'w-5 h-5') %></span> Agenda
     </a>
     <a href="/admin/aparencia"
        class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition
               <%= locals.activePage === 'aparencia' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
-      <span>🎨</span> Aparência
+      <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('paint', 'w-5 h-5') %></span> Aparência
     </a>
     <a href="/admin/relatorios"
        class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition
               <%= locals.activePage === 'relatorios' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
-      <span>📊</span> Relatórios
+      <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('chart', 'w-5 h-5') %></span> Relatórios
     </a>
     <a href="/admin/chat"
        class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition
               <%= locals.activePage === 'chat' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
-      <span>💬</span> Chat ao Vivo
+      <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('chat', 'w-5 h-5') %></span> Chat ao Vivo
     </a>
     <a href="/admin/configuracoes"
        class="flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition
               <%= locals.activePage === 'configuracoes' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-800 hover:text-white' %>">
-      <span>⚙️</span> Configurações
+      <span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('settings', 'w-5 h-5') %></span> Configurações
     </a>
   </nav>
 
