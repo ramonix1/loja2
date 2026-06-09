@@ -35,7 +35,7 @@
 
       <% if (pedidos.length === 0) { %>
         <div class="text-center py-16 bg-gray-800 rounded-xl">
-          <div class="text-5xl mb-3"></div>
+          <div class="text-5xl mb-3"><span style="display:flex;align-items:center;width:60px;height:60px;margin:0 auto;"><%- icon('shopping_bag', 'w-16 h-16') %></span></div>
           <p class="text-gray-400 font-medium">Nenhum pedido ainda</p>
           <p class="text-gray-600 text-sm mt-1">Os pedidos aparecer√£o aqui quando clientes finalizarem compras</p>
         </div>
@@ -86,7 +86,7 @@
                   R$ <%= Number(p.total).toFixed(2).replace('.', ',') %>
                 </td>
                 <td class="py-3 pr-4 text-gray-400 text-sm">
-                  <%= metodoLabel[p.metodo_pagamento] || p.metodo_pagamento || 'Ä' %>
+                  <%= metodoLabel[p.metodo_pagamento] || p.metodo_pagamento || 'ÔøΩ' %>
                 </td>
                 <td class="py-3 pr-4">
                   <span class="px-2.5 py-1 rounded-full text-xs font-semibold <%= cor %>">
