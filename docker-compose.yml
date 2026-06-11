@@ -1,0 +1,66 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      # Código-fonte montado para refletir alterações em tempo real
+      - .:/app
+      # Volume separado para node_modules do container (binários nativos como argon2)
+      - node_modules:/app/node_modules
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+
+      # Banco de dados — aponta para o serviço "db" abaixo
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/lojao
+
+      # Tenant padrão para desenvolvimento (provisionado automaticamente no boot)
+      TENANT_SLUG: loja
+      ADMIN_EMAIL: admin@loja.com
+      ADMIN_SENHA: admin123
+      ADMIN_NOME: Administrador
+
+      # Segurança — substitua em produção
+      SESSION_SECRET: dev-session-secret-troque-em-producao-por-string-longa
+      CSRF_SECRET: dev-csrf-secret-troque-em-producao-por-string-longa
+
+      # Configurações de bloqueio de login
+      MAX_TENTATIVAS_LOGIN: 5
+      BLOQUEIO_MINUTOS: 15
+      TOKEN_EXPIRACAO_MINUTOS: 30
+
+      # Email (opcional em dev — deixe em branco para desativar envios)
+      EMAIL_HOST: ""
+      EMAIL_PORT: ""
+      EMAIL_USER: ""
+      EMAIL_PASS: ""
+      EMAIL_FROM: ""
+
+    command: npm run dev
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: lojao
+    ports:
+      # Expõe a porta para conexão via Beekeeper, DBeaver, etc.
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d lojao"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  node_modules:
