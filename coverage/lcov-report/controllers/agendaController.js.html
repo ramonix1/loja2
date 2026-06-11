@@ -543,7 +543,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// ── Helpers de disponibilidade ────────────────────────────────────────────────
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">//  Helpers de disponibilidade 
 &nbsp;
 async function <span class="fstat-no" title="function not covered" >getAgendaConfig(</span>db) {
   const r = <span class="cstat-no" title="statement not covered" >await db.query('SELECT * FROM agenda_config WHERE id = 1');</span>
@@ -644,7 +644,7 @@ async function <span class="fstat-no" title="function not covered" >getDisponibi
 <span class="cstat-no" title="statement not covered" >exports.getDisponibilidade = getDisponibilidade;</span>
 <span class="cstat-no" title="statement not covered" >exports.getDisponibilidadeRange = getDisponibilidadeRange;</span>
 &nbsp;
-// ── GET /admin/agenda ─────────────────────────────────────────────────────────
+//  GET /admin/agenda 
 &nbsp;
 <span class="cstat-no" title="statement not covered" >exports.exibirAgenda = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
@@ -687,7 +687,7 @@ async function <span class="fstat-no" title="function not covered" >getDisponibi
   }
 };
 &nbsp;
-// ── POST /admin/agenda/config ─────────────────────────────────────────────────
+//  POST /admin/agenda/config 
 &nbsp;
 <span class="cstat-no" title="statement not covered" >exports.salvarConfig = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
   const { capacidade_diaria, antecedencia_minima_dias, antecedencia_maxima_dias, mes } = <span class="cstat-no" title="statement not covered" >req.body;</span>
@@ -711,7 +711,7 @@ async function <span class="fstat-no" title="function not covered" >getDisponibi
   }
 };
 &nbsp;
-// ── POST /admin/agenda/dia ────────────────────────────────────────────────────
+//  POST /admin/agenda/dia 
 &nbsp;
 <span class="cstat-no" title="statement not covered" >exports.salvarDia = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
   const { data, capacidade, motivo, mes } = <span class="cstat-no" title="statement not covered" >req.body;</span>
@@ -733,7 +733,7 @@ async function <span class="fstat-no" title="function not covered" >getDisponibi
   }
 };
 &nbsp;
-// ── POST /admin/agenda/dia/:data/remover ──────────────────────────────────────
+//  POST /admin/agenda/dia/:data/remover 
 &nbsp;
 <span class="cstat-no" title="statement not covered" >exports.removerDia = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
   const { data } = <span class="cstat-no" title="statement not covered" >req.params;</span>
@@ -747,13 +747,13 @@ async function <span class="fstat-no" title="function not covered" >getDisponibi
   }
 };
 &nbsp;
-// ── GET /api/agenda/disponibilidade  (usado pelo JS do checkout e admin) ──────
+//  GET /api/agenda/disponibilidade  (usado pelo JS do checkout e admin) 
 &nbsp;
 <span class="cstat-no" title="statement not covered" >exports.disponibilidadeMes = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const mes = <span class="cstat-no" title="statement not covered" >req.query.mes || new Date().toISOString().slice(0, 7);</span>
     const [ano, mesNum] = <span class="cstat-no" title="statement not covered" >mes.split('-').map(Number);</span>
-<span class="cstat-no" title="statement not covered" >    if (!ano || !mesNum) <span class="cstat-no" title="statement not covered" >return res.status(400).json({ ok: false, erro: 'mes inválido' });</span></span>
+<span class="cstat-no" title="statement not covered" >    if (!ano || !mesNum) <span class="cstat-no" title="statement not covered" >return res.status(400).json({ ok: false, erro: 'mes invÃ¡lido' });</span></span>
 &nbsp;
     const pad = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >n </span>=&gt; <span class="cstat-no" title="statement not covered" >String(n).padStart(2, '0');</span></span>
     const lastDay = <span class="cstat-no" title="statement not covered" >new Date(ano, mesNum, 0).getDate();</span>
@@ -763,18 +763,18 @@ async function <span class="fstat-no" title="function not covered" >getDisponibi
     const disponibilidade = <span class="cstat-no" title="statement not covered" >await getDisponibilidadeRange(req.db, inicio, fim);</span>
 <span class="cstat-no" title="statement not covered" >    res.json({ ok: true, mes, disponibilidade });</span>
   } catch (err) {
-<span class="cstat-no" title="statement not covered" >    console.error('Erro disponibilidade mês:', err);</span>
+<span class="cstat-no" title="statement not covered" >    console.error('Erro disponibilidade mÃªs:', err);</span>
 <span class="cstat-no" title="statement not covered" >    res.status(500).json({ ok: false, erro: 'Erro interno' });</span>
   }
 };
 &nbsp;
-// ── GET /api/agenda/verificar?data=YYYY-MM-DD ─────────────────────────────────
+//  GET /api/agenda/verificar?data=YYYY-MM-DD 
 &nbsp;
 <span class="cstat-no" title="statement not covered" >exports.verificarDisponibilidade = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const { data } = <span class="cstat-no" title="statement not covered" >req.query;</span>
 <span class="cstat-no" title="statement not covered" >    if (!data || !/^\d{4}-\d{2}-\d{2}$/.test(data)) {</span>
-<span class="cstat-no" title="statement not covered" >      return res.status(400).json({ ok: false, erro: 'Data inválida' });</span>
+<span class="cstat-no" title="statement not covered" >      return res.status(400).json({ ok: false, erro: 'Data invÃ¡lida' });</span>
     }
     const disp = <span class="cstat-no" title="statement not covered" >await getDisponibilidade(req.db, data);</span>
 <span class="cstat-no" title="statement not covered" >    res.json({ ok: true, data, ...disp });</span>
@@ -790,7 +790,7 @@ async function <span class="fstat-no" title="function not covered" >getDisponibi
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-25T16:47:01.995Z
+                at 2026-06-11T13:20:31.239Z
             </div>
         <script src="../prettify.js"></script>
         <script>

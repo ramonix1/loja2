@@ -27,7 +27,30 @@ async function initializeDatabase() {
       CREATE INDEX IF NOT EXISTS idx_sessao_expire ON sessao(expire);
     `);
 
-    console.log('Banco master inicializado (tenants + sessao)');
+    // Colunas de pagamento adicionadas progressivamente
+    await masterDb.query(`
+      ALTER TABLE tenants ADD COLUMN IF NOT EXISTS gateway_type VARCHAR(20) DEFAULT 'asaas_native';
+      ALTER TABLE tenants ADD COLUMN IF NOT EXISTS asaas_account_id VARCHAR(50);
+      ALTER TABLE tenants ADD COLUMN IF NOT EXISTS asaas_wallet_id VARCHAR(50);
+      ALTER TABLE tenants ADD COLUMN IF NOT EXISTS fee_percent_override NUMERIC(5,2);
+      ALTER TABLE tenants ADD COLUMN IF NOT EXISTS gateway_credentials JSONB DEFAULT '{}';
+    `);
+
+    await masterDb.query(`
+      CREATE TABLE IF NOT EXISTS platform_config (
+        chave VARCHAR(100) PRIMARY KEY,
+        valor TEXT,
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      INSERT INTO platform_config (chave, valor) VALUES
+        ('asaas_api_key',             ''),
+        ('asaas_env',                 'sandbox'),
+        ('asaas_default_fee_percent', '1.50'),
+        ('asaas_webhook_token',       '')
+      ON CONFLICT (chave) DO NOTHING;
+    `);
+
+    console.log('Banco master inicializado (tenants + sessao + platform_config)');
 
     await autoProvisionarTenant();
   } catch (err) {

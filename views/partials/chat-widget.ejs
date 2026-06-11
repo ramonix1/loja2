@@ -182,6 +182,9 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
+// Ícones SVG pré-renderizados como template literals (suportam múltiplas linhas)
+const _cwIconRobot  = `<%- icon('robot',  'w-5 h-5') %>`;
+const _cwIconPerson = `<%- icon('person', 'w-5 h-5') %>`;
 (function() {
   const btn = document.getElementById('chat-widget-btn');
   const janela = document.getElementById('chat-widget-janela');
@@ -302,7 +305,10 @@
     if (msg.remetente === 'bot') digitando.style.display = 'none';
     const div = document.createElement('div');
     div.className = `cw-msg ${msg.remetente}`;
-    const label = msg.remetente === 'cliente' ? 'Vocª' : msg.remetente === 'bot' ? '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('robot', 'w-5 h-5') %></span> Bot' : '<span style="display:flex;align-items:center;width:20px;height:20px;"><%- icon('person', 'w-5 h-5') %></span> Atendente';
+    const label = msg.remetente === 'cliente' ? 'Você'
+      : msg.remetente === 'bot'
+        ? `<span style="display:flex;align-items:center;width:20px;height:20px;">${_cwIconRobot}</span> Bot`
+        : `<span style="display:flex;align-items:center;width:20px;height:20px;">${_cwIconPerson}</span> Atendente`;
     div.innerHTML = `<div class="cw-msg-label">${label}</div><div class="cw-msg-balao">${escHtml(msg.conteudo)}</div>`;
     mensagensEl.appendChild(div);
     if (scroll) mensagensEl.scrollTop = mensagensEl.scrollHeight;

@@ -789,8 +789,8 @@
 &nbsp;
 class BillingService {
   /**
-   * Registrar uma transação de comissão quando pedido é criado
-   * Chamado quando novo pedido é confirmado
+   * Registrar uma transaÃ§Ã£o de comissÃ£o quando pedido Ã© criado
+   * Chamado quando novo pedido Ã© confirmado
    */
 <span class="fstat-no" title="function not covered" >  st</span>atic async recordCommissionOnOrder(tenantId, pedidoId, orderTotal) {
 <span class="cstat-no" title="statement not covered" >    try {</span>
@@ -803,13 +803,13 @@ class BillingService {
       `, [tenantId]);
 &nbsp;
 <span class="cstat-no" title="statement not covered" >      if (billing.rows.length === 0) {</span>
-<span class="cstat-no" title="statement not covered" >        console.log(`⚠️ Tenant ${tenantId} não tem billing configurado`);</span>
+<span class="cstat-no" title="statement not covered" >        console.log(` Tenant ${tenantId} nÃ£o tem billing configurado`);</span>
 <span class="cstat-no" title="statement not covered" >        return null;</span>
       }
 &nbsp;
       const config = <span class="cstat-no" title="statement not covered" >billing.rows[0];</span>
 &nbsp;
-      // Se não tem comissão, não registra
+      // Se nÃ£o tem comissÃ£o, nÃ£o registra
 <span class="cstat-no" title="statement not covered" >      if (!config.commission_percentage || config.commission_percentage === 0) {</span>
 <span class="cstat-no" title="statement not covered" >        return null;</span>
       }
@@ -817,7 +817,7 @@ class BillingService {
       const commissionAmount = <span class="cstat-no" title="statement not covered" >(orderTotal * config.commission_percentage) / 100;</span>
       const monthYear = <span class="cstat-no" title="statement not covered" >new Date().toISOString().slice(0, 7);</span> // '2026-05'
 &nbsp;
-      // Registrar transação de comissão
+      // Registrar transaÃ§Ã£o de comissÃ£o
       const result = <span class="cstat-no" title="statement not covered" >await db.query(`</span>
         INSERT INTO commission_transactions
         (tenant_id, pedido_id, order_total, commission_percentage, commission_amount, month_year, status)
@@ -825,17 +825,17 @@ class BillingService {
         RETURNING *
       `, [tenantId, pedidoId, orderTotal, config.commission_percentage, commissionAmount, monthYear]);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >      console.log(`✅ Comissão registrada: ${commissionAmount.toFixed(2)} para tenant ${tenantId}`);</span>
+<span class="cstat-no" title="statement not covered" >      console.log(`[OK] ComissÃ£o registrada: ${commissionAmount.toFixed(2)} para tenant ${tenantId}`);</span>
 <span class="cstat-no" title="statement not covered" >      return result.rows[0];</span>
     } catch (error) {
-<span class="cstat-no" title="statement not covered" >      console.error('❌ Erro ao registrar comissão:', error);</span>
+<span class="cstat-no" title="statement not covered" >      console.error('[ERRO] Erro ao registrar comissÃ£o:', error);</span>
 <span class="cstat-no" title="statement not covered" >      throw error;</span>
     }
   }
 &nbsp;
   /**
    * Gerar invoice mensal para um tenant
-   * Deve ser chamado no início de cada mês
+   * Deve ser chamado no inÃcio de cada mÃªs
    */
 <span class="fstat-no" title="function not covered" >  st</span>atic async generateMonthlyInvoice(tenantId, monthYear) {
 <span class="cstat-no" title="statement not covered" >    try {</span>
@@ -853,7 +853,7 @@ class BillingService {
         `, [tenantId]);
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        if (billing.rows.length === 0) {</span>
-<span class="cstat-no" title="statement not covered" >          throw new Error('Billing não configurado para este tenant');</span>
+<span class="cstat-no" title="statement not covered" >          throw new Error('Billing nÃ£o configurado para este tenant');</span>
         }
 &nbsp;
         const config = <span class="cstat-no" title="statement not covered" >billing.rows[0];</span>
@@ -873,7 +873,7 @@ class BillingService {
 <span class="cstat-no" title="statement not covered" >          invoiceData.subtotal = config.price;</span>
 <span class="cstat-no" title="statement not covered" >          invoiceData.total = config.price;</span>
         } else <span class="cstat-no" title="statement not covered" >if (config.billing_type === 'revenue_share') {</span>
-          // Somar comissões do mês
+          // Somar comissÃµes do mÃªs
           const commissions = <span class="cstat-no" title="statement not covered" >await client.query(`</span>
             SELECT
               SUM(order_total) as total_sales,
@@ -893,7 +893,7 @@ class BillingService {
 <span class="cstat-no" title="statement not covered" >            invoiceData.total = invoiceData.commissionAmount;</span>
           }
         } else <span class="cstat-no" title="statement not covered" >if (config.billing_type === 'hybrid') {</span>
-          // Mensal + comissão
+          // Mensal + comissÃ£o
 <span class="cstat-no" title="statement not covered" >          invoiceData.monthlyFee = config.price;</span>
 &nbsp;
           const commissions = <span class="cstat-no" title="statement not covered" >await client.query(`</span>
@@ -938,7 +938,7 @@ class BillingService {
           invoiceData.total
         ]);
 &nbsp;
-        // Marcar comissões como invoiced
+        // Marcar comissÃµes como invoiced
 <span class="cstat-no" title="statement not covered" >        await client.query(`</span>
           UPDATE commission_transactions
           SET status = 'invoiced', invoice_id = $1
@@ -947,7 +947,7 @@ class BillingService {
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        await client.query('COMMIT');</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        console.log(`✅ Invoice gerada: ${invoiceData.invoiceNumber} - R$ ${invoiceData.total}`);</span>
+<span class="cstat-no" title="statement not covered" >        console.log(`[OK] Invoice gerada: ${invoiceData.invoiceNumber} - R$ ${invoiceData.total}`);</span>
 <span class="cstat-no" title="statement not covered" >        return invoice.rows[0];</span>
       } catch (error) {
 <span class="cstat-no" title="statement not covered" >        await client.query('ROLLBACK');</span>
@@ -956,7 +956,7 @@ class BillingService {
 <span class="cstat-no" title="statement not covered" >        client.release();</span>
       }
     } catch (error) {
-<span class="cstat-no" title="statement not covered" >      console.error('❌ Erro ao gerar invoice:', error);</span>
+<span class="cstat-no" title="statement not covered" >      console.error('[ERRO] Erro ao gerar invoice:', error);</span>
 <span class="cstat-no" title="statement not covered" >      throw error;</span>
     }
   }
@@ -973,12 +973,12 @@ class BillingService {
       );
 &nbsp;
 <span class="cstat-no" title="statement not covered" >      if (plan.rows.length === 0) {</span>
-<span class="cstat-no" title="statement not covered" >        throw new Error('Plano não encontrado');</span>
+<span class="cstat-no" title="statement not covered" >        throw new Error('Plano nÃ£o encontrado');</span>
       }
 &nbsp;
       const planData = <span class="cstat-no" title="statement not covered" >plan.rows[0];</span>
 &nbsp;
-      // Criar configuração de billing
+      // Criar configuraÃ§Ã£o de billing
       const result = <span class="cstat-no" title="statement not covered" >await db.query(`</span>
         INSERT INTO tenant_billing
         (tenant_id, plan_id, billing_type, monthly_fee, commission_percentage, next_billing_date, status)
@@ -998,16 +998,16 @@ class BillingService {
         planData.commission_percentage
       ]);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >      console.log(`✅ Plano ${planSlug} atribuído ao tenant ${tenantId}`);</span>
+<span class="cstat-no" title="statement not covered" >      console.log(`[OK] Plano ${planSlug} atribuÃdo ao tenant ${tenantId}`);</span>
 <span class="cstat-no" title="statement not covered" >      return result.rows[0];</span>
     } catch (error) {
-<span class="cstat-no" title="statement not covered" >      console.error('❌ Erro ao atribuir plano:', error);</span>
+<span class="cstat-no" title="statement not covered" >      console.error('[ERRO] Erro ao atribuir plano:', error);</span>
 <span class="cstat-no" title="statement not covered" >      throw error;</span>
     }
   }
 &nbsp;
   /**
-   * Obter relatório de faturamento
+   * Obter relatÃ³rio de faturamento
    */
 <span class="fstat-no" title="function not covered" >  st</span>atic async getBillingReport(tenantId, monthYear = <span class="branch-0 cbranch-no" title="branch not covered" >null)</span> {
 <span class="cstat-no" title="statement not covered" >    try {</span>
@@ -1055,7 +1055,7 @@ class BillingService {
         }
       };
     } catch (error) {
-<span class="cstat-no" title="statement not covered" >      console.error('❌ Erro ao gerar relatório:', error);</span>
+<span class="cstat-no" title="statement not covered" >      console.error('[ERRO] Erro ao gerar relatÃ³rio:', error);</span>
 <span class="cstat-no" title="statement not covered" >      throw error;</span>
     }
   }
@@ -1087,7 +1087,7 @@ class BillingService {
 &nbsp;
 <span class="cstat-no" title="statement not covered" >      return result.rows;</span>
     } catch (error) {
-<span class="cstat-no" title="statement not covered" >      console.error('❌ Erro ao listar invoices:', error);</span>
+<span class="cstat-no" title="statement not covered" >      console.error('[ERRO] Erro ao listar invoices:', error);</span>
 <span class="cstat-no" title="statement not covered" >      throw error;</span>
     }
   }
@@ -1130,13 +1130,13 @@ class BillingService {
         }
       };
     } catch (error) {
-<span class="cstat-no" title="statement not covered" >      console.error('❌ Erro ao gerar revenue report:', error);</span>
+<span class="cstat-no" title="statement not covered" >      console.error('[ERRO] Erro ao gerar revenue report:', error);</span>
 <span class="cstat-no" title="statement not covered" >      throw error;</span>
     }
   }
 &nbsp;
   /**
-   * Gerar número de invoice único
+   * Gerar nÃºmero de invoice Ãºnico
    */
 <span class="fstat-no" title="function not covered" >  st</span>atic generateInvoiceNumber(tenantId, monthYear) {
     // Formato: INV-2026-05-abc123 (INV-YYYY-MM-TENANTID)
@@ -1153,7 +1153,7 @@ class BillingService {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-25T16:47:01.995Z
+                at 2026-06-11T13:20:31.239Z
             </div>
         <script src="../prettify.js"></script>
         <script>

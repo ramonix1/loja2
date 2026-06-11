@@ -1093,13 +1093,13 @@ const { enviarNotificacaoPedidoPago, enviarEmailRastreio } = <span class="cstat-
 const { validateCheckoutData } = <span class="cstat-no" title="statement not covered" >require('../middlewares/validation');</span>
 const BillingService = <span class="cstat-no" title="statement not covered" >require('../services/billingService');</span>
 &nbsp;
-// ── Helpers ──────────────────────────────────────────────────────────────────
+//  Helpers 
 &nbsp;
 async function <span class="fstat-no" title="function not covered" >getLojaInfo(</span>db) {
   const r = <span class="cstat-no" title="statement not covered" >await db.query("SELECT chave, valor FROM configuracoes WHERE chave IN ('loja_nome','loja_email')").catch(<span class="fstat-no" title="function not covered" >()</span> =&gt; (<span class="cstat-no" title="statement not covered" >{ rows: [] })</span>);</span>
   const cfg = <span class="cstat-no" title="statement not covered" >{};</span>
 <span class="cstat-no" title="statement not covered" >  r.rows.forEach(<span class="fstat-no" title="function not covered" >ro</span>w =&gt; { <span class="cstat-no" title="statement not covered" >cfg[row.chave] = row.valor; </span>});</span>
-<span class="cstat-no" title="statement not covered" >  return { nome: cfg.loja_nome || 'Lojão', email: cfg.loja_email || '' };</span>
+<span class="cstat-no" title="statement not covered" >  return { nome: cfg.loja_nome || 'LojÃ£o', email: cfg.loja_email || '' };</span>
 }
 &nbsp;
 async function <span class="fstat-no" title="function not covered" >notificarPedidoPago(</span>db, pedidoId, itens) {
@@ -1134,7 +1134,7 @@ async function <span class="fstat-no" title="function not covered" >getUsuario(<
 <span class="cstat-no" title="statement not covered" >  return r.rows[0];</span>
 }
 &nbsp;
-// ── GET /checkout ─────────────────────────────────────────────────────────────
+//  GET /checkout 
 &nbsp;
 <span class="cstat-no" title="statement not covered" >exports.exibirCheckout = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
@@ -1167,7 +1167,7 @@ async function <span class="fstat-no" title="function not covered" >getUsuario(<
   }
 };
 &nbsp;
-// ── POST /checkout ────────────────────────────────────────────────────────────
+//  POST /checkout 
 &nbsp;
 <span class="cstat-no" title="statement not covered" >exports.processarCheckout = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
   const usuarioId = <span class="cstat-no" title="statement not covered" >req.session.usuarioId;</span>
@@ -1183,7 +1183,7 @@ async function <span class="fstat-no" title="function not covered" >getUsuario(<
   const errosValidacao = <span class="cstat-no" title="statement not covered" >validateCheckoutData(req.body);</span>
 <span class="cstat-no" title="statement not covered" >  if (errosValidacao.length &gt; 0) {</span>
 <span class="cstat-no" title="statement not covered" >    await db.query('ROLLBACK').catch(<span class="fstat-no" title="function not covered" >()</span> =&gt; {});</span>
-<span class="cstat-no" title="statement not covered" >    console.warn('Validação de checkout falhou:', errosValidacao);</span>
+<span class="cstat-no" title="statement not covered" >    console.warn('ValidaÃ§Ã£o de checkout falhou:', errosValidacao);</span>
 <span class="cstat-no" title="statement not covered" >    return res.redirect(`/checkout?erro=dados_invalidos`);</span>
   }
 &nbsp;
@@ -1194,9 +1194,9 @@ async function <span class="fstat-no" title="function not covered" >getUsuario(<
 <span class="cstat-no" title="statement not covered" >    return res.redirect('/checkout?erro=frete_invalido');</span>
   }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  console.log(`[Checkout] POST recebido — método: ${metodo_pagamento}, usuário: ${usuarioId}`);</span>
+<span class="cstat-no" title="statement not covered" >  console.log(`[Checkout] POST recebido  mÃ©todo: ${metodo_pagamento}, usuÃ¡rio: ${usuarioId}`);</span>
 &nbsp;
-  // Verificar agenda antes de iniciar transação
+  // Verificar agenda antes de iniciar transaÃ§Ã£o
   const cfgsAgenda = <span class="cstat-no" title="statement not covered" >await getConfigs(db);</span>
   const moduloAgenda = <span class="cstat-no" title="statement not covered" >cfgsAgenda.modulo_agenda === 'true';</span>
 <span class="cstat-no" title="statement not covered" >  if (moduloAgenda) {</span>
@@ -1245,7 +1245,7 @@ async function <span class="fstat-no" title="function not covered" >getUsuario(<
       `, [pedidoId, item.produto_id, item.nome, item.quantidade, item.preco_unitario, item.subtotal]);
     }
 &nbsp;
-    // Registrar agendamento (se módulo ativo)
+    // Registrar agendamento (se mÃ³dulo ativo)
 <span class="cstat-no" title="statement not covered" >    if (moduloAgenda &amp;&amp; data_evento) {</span>
 <span class="cstat-no" title="statement not covered" >      await db.query(</span>
         'INSERT INTO agendamentos (pedido_id, data_evento) VALUES ($1, $2)',
@@ -1261,7 +1261,7 @@ async function <span class="fstat-no" title="function not covered" >getUsuario(<
         "SELECT valor FROM configuracoes WHERE chave = 'controla_estoque'"
       );
     } catch (err) {
-<span class="cstat-no" title="statement not covered" >      console.warn('⚠️ Erro ao verificar controle de estoque:', err.message);</span>
+<span class="cstat-no" title="statement not covered" >      console.warn(' Erro ao verificar controle de estoque:', err.message);</span>
 <span class="cstat-no" title="statement not covered" >      cfgEstoqueRes = { rows: [] };</span>
     }
 <span class="cstat-no" title="statement not covered" >    if (cfgEstoqueRes.rows[0]?.valor === 'true') {</span>
@@ -1361,7 +1361,7 @@ async function <span class="fstat-no" title="function not covered" >getUsuario(<
       [statusInterno === 'pago' ? 'pago' : 'aguardando_pagamento', stripeResult.id, pedidoId]
     );
 &nbsp;
-    // Cartão com 3DS: redireciona para página de autenticação do Stripe
+    // CartÃ£o com 3DS: redireciona para pÃ¡gina de autenticaÃ§Ã£o do Stripe
 <span class="cstat-no" title="statement not covered" >    if (metodo_pagamento === 'cartao' &amp;&amp; stripeResult.status === 'requires_action' &amp;&amp;</span>
         stripeResult.next_action?.type === 'redirect_to_url') {
 <span class="cstat-no" title="statement not covered" >      await db.query('DELETE FROM carrinho_itens WHERE usuario_id = $1', [usuarioId]);</span>
@@ -1380,19 +1380,19 @@ async function <span class="fstat-no" title="function not covered" >getUsuario(<
 <span class="cstat-no" title="statement not covered" >    try {</span>
 <span class="cstat-no" title="statement not covered" >      await db.query('ROLLBACK');</span>
     } catch (rollbackErr) {
-<span class="cstat-no" title="statement not covered" >      console.error('⚠️ Erro ao fazer ROLLBACK:', rollbackErr.message);</span>
+<span class="cstat-no" title="statement not covered" >      console.error(' Erro ao fazer ROLLBACK:', rollbackErr.message);</span>
     }
-<span class="cstat-no" title="statement not covered" >    console.error('\n━━━ ERRO NO CHECKOUT ━━━━━━━━━━━━━━━━━━━━━━━━━━━');</span>
+<span class="cstat-no" title="statement not covered" >    console.error('\n ERRO NO CHECKOUT ');</span>
 <span class="cstat-no" title="statement not covered" >    console.error('Mensagem:', err.message);</span>
 <span class="cstat-no" title="statement not covered" >    if (err.cause) <span class="cstat-no" title="statement not covered" >console.error('Causa:', err.cause);</span></span>
 <span class="cstat-no" title="statement not covered" >    if (err.statusCode) <span class="cstat-no" title="statement not covered" >console.error('HTTP Status:', err.statusCode);</span></span>
 <span class="cstat-no" title="statement not covered" >    if (err.body) <span class="cstat-no" title="statement not covered" >console.error('Resposta API:', JSON.stringify(err.body, null, 2));</span></span>
-<span class="cstat-no" title="statement not covered" >    console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');</span>
+<span class="cstat-no" title="statement not covered" >    console.error('\n');</span>
 <span class="cstat-no" title="statement not covered" >    res.redirect('/checkout?erro=pagamento');</span>
   }
 };
 &nbsp;
-// ── GET /checkout/resultado/:id ───────────────────────────────────────────────
+//  GET /checkout/resultado/:id 
 &nbsp;
 <span class="cstat-no" title="statement not covered" >exports.exibirResultado = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
@@ -1434,7 +1434,7 @@ async function <span class="fstat-no" title="function not covered" >getUsuario(<
   }
 };
 &nbsp;
-// ── GET /meus-pedidos ─────────────────────────────────────────────────────────
+//  GET /meus-pedidos 
 &nbsp;
 <span class="cstat-no" title="statement not covered" >exports.meusPedidos = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
@@ -1454,7 +1454,7 @@ async function <span class="fstat-no" title="function not covered" >getUsuario(<
   }
 };
 &nbsp;
-// ── POST /webhook/stripe ──────────────────────────────────────────────────────
+//  POST /webhook/stripe 
 &nbsp;
 <span class="cstat-no" title="statement not covered" >exports.webhookStripe = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
@@ -1491,7 +1491,7 @@ async function <span class="fstat-no" title="function not covered" >getUsuario(<
   }
 };
 &nbsp;
-// ── Admin: listar pedidos ─────────────────────────────────────────────────────
+//  Admin: listar pedidos 
 &nbsp;
 <span class="cstat-no" title="statement not covered" >exports.adminPedidos = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
@@ -1562,7 +1562,7 @@ async function <span class="fstat-no" title="function not covered" >getUsuario(<
 <span class="cstat-no" title="statement not covered" >  res.redirect(`/admin/pedidos/${pedidoId}`);</span>
 };
 &nbsp;
-// ── SumUp: webhook ────────────────────────────────────────────────────────────
+//  SumUp: webhook 
 &nbsp;
 <span class="cstat-no" title="statement not covered" >exports.webhookSumup = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
@@ -1603,7 +1603,7 @@ async function <span class="fstat-no" title="function not covered" >getUsuario(<
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-25T16:47:01.995Z
+                at 2026-06-11T13:20:31.239Z
             </div>
         <script src="../prettify.js"></script>
         <script>

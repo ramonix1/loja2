@@ -685,7 +685,7 @@
 const BillingService = <span class="cstat-no" title="statement not covered" >require('../services/billingService');</span>
 &nbsp;
 /**
- * SUPER ADMIN: Listar planos disponíveis
+ * SUPER ADMIN: Listar planos disponÃveis
  */
 <span class="cstat-no" title="statement not covered" >exports.listPlans = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
@@ -708,7 +708,7 @@ const BillingService = <span class="cstat-no" title="statement not covered" >req
       plans: result.rows
     });
   } catch (error) {
-<span class="cstat-no" title="statement not covered" >    console.error('❌ listPlans error:', error);</span>
+<span class="cstat-no" title="statement not covered" >    console.error('[ERRO] listPlans error:', error);</span>
 <span class="cstat-no" title="statement not covered" >    res.status(500).json({ error: 'Erro ao listar planos' });</span>
   }
 };
@@ -720,14 +720,14 @@ const BillingService = <span class="cstat-no" title="statement not covered" >req
 <span class="cstat-no" title="statement not covered" >  try {</span>
     // Validar super admin
 <span class="cstat-no" title="statement not covered" >    if (req.session.user?.email !== 'ramon.oliveira08@gmail.com') {</span>
-<span class="cstat-no" title="statement not covered" >      return res.status(403).json({ error: 'Não autorizado' });</span>
+<span class="cstat-no" title="statement not covered" >      return res.status(403).json({ error: 'NÃ£o autorizado' });</span>
     }
 &nbsp;
     const { tenantId } = <span class="cstat-no" title="statement not covered" >req.params;</span>
     const { planSlug } = <span class="cstat-no" title="statement not covered" >req.body;</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (!planSlug) {</span>
-<span class="cstat-no" title="statement not covered" >      return res.status(400).json({ error: 'planSlug é obrigatório' });</span>
+<span class="cstat-no" title="statement not covered" >      return res.status(400).json({ error: 'planSlug Ã© obrigatÃ³rio' });</span>
     }
 &nbsp;
     // Atribuir plano
@@ -735,17 +735,17 @@ const BillingService = <span class="cstat-no" title="statement not covered" >req
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    res.json({</span>
       success: true,
-      message: 'Plano atribuído com sucesso',
+      message: 'Plano atribuÃdo com sucesso',
       billing
     });
   } catch (error) {
-<span class="cstat-no" title="statement not covered" >    console.error('❌ assignPlanToTenant error:', error);</span>
+<span class="cstat-no" title="statement not covered" >    console.error('[ERRO] assignPlanToTenant error:', error);</span>
 <span class="cstat-no" title="statement not covered" >    res.status(500).json({ error: error.message || 'Erro ao atribuir plano' });</span>
   }
 };
 &nbsp;
 /**
- * CLIENTE: Ver sua configuração de billing
+ * CLIENTE: Ver sua configuraÃ§Ã£o de billing
  */
 <span class="cstat-no" title="statement not covered" >exports.getMyBilling = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
@@ -769,20 +769,20 @@ const BillingService = <span class="cstat-no" title="statement not covered" >req
     `, [tenantId]);
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (result.rows.length === 0) {</span>
-<span class="cstat-no" title="statement not covered" >      return res.status(404).json({ error: 'Configuração de billing não encontrada' });</span>
+<span class="cstat-no" title="statement not covered" >      return res.status(404).json({ error: 'ConfiguraÃ§Ã£o de billing nÃ£o encontrada' });</span>
     }
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    res.json({</span>
       billing: result.rows[0]
     });
   } catch (error) {
-<span class="cstat-no" title="statement not covered" >    console.error('❌ getMyBilling error:', error);</span>
-<span class="cstat-no" title="statement not covered" >    res.status(500).json({ error: 'Erro ao buscar configuração de billing' });</span>
+<span class="cstat-no" title="statement not covered" >    console.error('[ERRO] getMyBilling error:', error);</span>
+<span class="cstat-no" title="statement not covered" >    res.status(500).json({ error: 'Erro ao buscar configuraÃ§Ã£o de billing' });</span>
   }
 };
 &nbsp;
 /**
- * CLIENTE: Ver relatório de faturamento (seu mês)
+ * CLIENTE: Ver relatÃ³rio de faturamento (seu mÃªs)
  */
 <span class="cstat-no" title="statement not covered" >exports.getMyBillingReport = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
@@ -793,8 +793,8 @@ const BillingService = <span class="cstat-no" title="statement not covered" >req
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    res.json(report);</span>
   } catch (error) {
-<span class="cstat-no" title="statement not covered" >    console.error('❌ getMyBillingReport error:', error);</span>
-<span class="cstat-no" title="statement not covered" >    res.status(500).json({ error: 'Erro ao gerar relatório' });</span>
+<span class="cstat-no" title="statement not covered" >    console.error('[ERRO] getMyBillingReport error:', error);</span>
+<span class="cstat-no" title="statement not covered" >    res.status(500).json({ error: 'Erro ao gerar relatÃ³rio' });</span>
   }
 };
 &nbsp;
@@ -812,13 +812,13 @@ const BillingService = <span class="cstat-no" title="statement not covered" >req
       invoices
     });
   } catch (error) {
-<span class="cstat-no" title="statement not covered" >    console.error('❌ listMyInvoices error:', error);</span>
+<span class="cstat-no" title="statement not covered" >    console.error('[ERRO] listMyInvoices error:', error);</span>
 <span class="cstat-no" title="statement not covered" >    res.status(500).json({ error: 'Erro ao listar invoices' });</span>
   }
 };
 &nbsp;
 /**
- * CLIENTE: Ver uma invoice específica
+ * CLIENTE: Ver uma invoice especÃfica
  */
 <span class="cstat-no" title="statement not covered" >exports.getInvoice = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
@@ -832,10 +832,10 @@ const BillingService = <span class="cstat-no" title="statement not covered" >req
     `, [invoiceId, tenantId]);
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (result.rows.length === 0) {</span>
-<span class="cstat-no" title="statement not covered" >      return res.status(404).json({ error: 'Invoice não encontrada' });</span>
+<span class="cstat-no" title="statement not covered" >      return res.status(404).json({ error: 'Invoice nÃ£o encontrada' });</span>
     }
 &nbsp;
-    // Se for revenue share, listar as comissões que compõem a invoice
+    // Se for revenue share, listar as comissÃµes que compÃµem a invoice
     const invoice = <span class="cstat-no" title="statement not covered" >result.rows[0];</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (invoice.billing_type === 'revenue_share' || invoice.billing_type === 'hybrid') {</span>
@@ -858,19 +858,19 @@ const BillingService = <span class="cstat-no" title="statement not covered" >req
       invoice
     });
   } catch (error) {
-<span class="cstat-no" title="statement not covered" >    console.error('❌ getInvoice error:', error);</span>
+<span class="cstat-no" title="statement not covered" >    console.error('[ERRO] getInvoice error:', error);</span>
 <span class="cstat-no" title="statement not covered" >    res.status(500).json({ error: 'Erro ao buscar invoice' });</span>
   }
 };
 &nbsp;
 /**
- * SUPER ADMIN: Relatório de receita (todos clientes)
+ * SUPER ADMIN: RelatÃ³rio de receita (todos clientes)
  */
 <span class="cstat-no" title="statement not covered" >exports.getRevenueReport = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  try {</span>
     // Validar super admin
 <span class="cstat-no" title="statement not covered" >    if (req.session.user?.email !== 'ramon.oliveira08@gmail.com') {</span>
-<span class="cstat-no" title="statement not covered" >      return res.status(403).json({ error: 'Não autorizado' });</span>
+<span class="cstat-no" title="statement not covered" >      return res.status(403).json({ error: 'NÃ£o autorizado' });</span>
     }
 &nbsp;
     const { monthYear } = <span class="cstat-no" title="statement not covered" >req.query;</span>
@@ -879,8 +879,8 @@ const BillingService = <span class="cstat-no" title="statement not covered" >req
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    res.json(report);</span>
   } catch (error) {
-<span class="cstat-no" title="statement not covered" >    console.error('❌ getRevenueReport error:', error);</span>
-<span class="cstat-no" title="statement not covered" >    res.status(500).json({ error: 'Erro ao gerar relatório de receita' });</span>
+<span class="cstat-no" title="statement not covered" >    console.error('[ERRO] getRevenueReport error:', error);</span>
+<span class="cstat-no" title="statement not covered" >    res.status(500).json({ error: 'Erro ao gerar relatÃ³rio de receita' });</span>
   }
 };
 &nbsp;
@@ -891,7 +891,7 @@ const BillingService = <span class="cstat-no" title="statement not covered" >req
 <span class="cstat-no" title="statement not covered" >  try {</span>
     // Validar super admin
 <span class="cstat-no" title="statement not covered" >    if (req.session.user?.email !== 'ramon.oliveira08@gmail.com') {</span>
-<span class="cstat-no" title="statement not covered" >      return res.status(403).json({ error: 'Não autorizado' });</span>
+<span class="cstat-no" title="statement not covered" >      return res.status(403).json({ error: 'NÃ£o autorizado' });</span>
     }
 &nbsp;
     const { monthYear, status, limit = <span class="branch-0 cbranch-no" title="branch not covered" >50,</span> offset = <span class="branch-0 cbranch-no" title="branch not covered" >0 </span>} = <span class="cstat-no" title="statement not covered" >req.query;</span>
@@ -945,7 +945,7 @@ const BillingService = <span class="cstat-no" title="statement not covered" >req
       }
     });
   } catch (error) {
-<span class="cstat-no" title="statement not covered" >    console.error('❌ listAllInvoices error:', error);</span>
+<span class="cstat-no" title="statement not covered" >    console.error('[ERRO] listAllInvoices error:', error);</span>
 <span class="cstat-no" title="statement not covered" >    res.status(500).json({ error: 'Erro ao listar invoices' });</span>
   }
 };
@@ -957,7 +957,7 @@ const BillingService = <span class="cstat-no" title="statement not covered" >req
 <span class="cstat-no" title="statement not covered" >  try {</span>
     // Validar super admin
 <span class="cstat-no" title="statement not covered" >    if (req.session.user?.email !== 'ramon.oliveira08@gmail.com') {</span>
-<span class="cstat-no" title="statement not covered" >      return res.status(403).json({ error: 'Não autorizado' });</span>
+<span class="cstat-no" title="statement not covered" >      return res.status(403).json({ error: 'NÃ£o autorizado' });</span>
     }
 &nbsp;
     const result = <span class="cstat-no" title="statement not covered" >await db.query(`</span>
@@ -986,8 +986,8 @@ const BillingService = <span class="cstat-no" title="statement not covered" >req
       billings: result.rows
     });
   } catch (error) {
-<span class="cstat-no" title="statement not covered" >    console.error('❌ listTenantBillings error:', error);</span>
-<span class="cstat-no" title="statement not covered" >    res.status(500).json({ error: 'Erro ao listar configurações de billing' });</span>
+<span class="cstat-no" title="statement not covered" >    console.error('[ERRO] listTenantBillings error:', error);</span>
+<span class="cstat-no" title="statement not covered" >    res.status(500).json({ error: 'Erro ao listar configuraÃ§Ãµes de billing' });</span>
   }
 };
 &nbsp;</pre></td></tr></table></pre>
@@ -997,7 +997,7 @@ const BillingService = <span class="cstat-no" title="statement not covered" >req
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-25T16:47:01.995Z
+                at 2026-06-11T13:20:31.239Z
             </div>
         <script src="../prettify.js"></script>
         <script>

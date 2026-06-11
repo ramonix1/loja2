@@ -387,22 +387,22 @@ async function <span class="fstat-no" title="function not covered" >enviarEmailR
   const expiracao = <span class="cstat-no" title="statement not covered" >process.env.TOKEN_EXPIRACAO_MINUTOS || 30;</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  await transporter.sendMail({</span>
-    from: process.env.EMAIL_FROM || '"Lojão" &lt;noreply@lojao.com.br&gt;',
+    from: process.env.EMAIL_FROM || '"LojÃ£o" &lt;noreply@lojao.com.br&gt;',
     to: email,
-    subject: 'Redefinição de senha - Lojão',
+    subject: 'RedefiniÃ§Ã£o de senha - LojÃ£o',
     html: `
       &lt;div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;"&gt;
-        &lt;h2 style="color: #3b82f6;"&gt;Redefinição de senha&lt;/h2&gt;
-        &lt;p&gt;Olá, &lt;strong&gt;${nome}&lt;/strong&gt;!&lt;/p&gt;
-        &lt;p&gt;Recebemos uma solicitação para redefinir a senha da sua conta.&lt;/p&gt;
-        &lt;p&gt;Clique no botão abaixo para criar uma nova senha:&lt;/p&gt;
+        &lt;h2 style="color: #3b82f6;"&gt;RedefiniÃ§Ã£o de senha&lt;/h2&gt;
+        &lt;p&gt;OlÃ¡, &lt;strong&gt;${nome}&lt;/strong&gt;!&lt;/p&gt;
+        &lt;p&gt;Recebemos uma solicitaÃ§Ã£o para redefinir a senha da sua conta.&lt;/p&gt;
+        &lt;p&gt;Clique no botÃ£o abaixo para criar uma nova senha:&lt;/p&gt;
         &lt;a href="${link}" style="display:inline-block;background:#3b82f6;color:#fff;padding:14px 28px;border-radius:6px;text-decoration:none;font-weight:bold;margin:16px 0;"&gt;
           Redefinir minha senha
         &lt;/a&gt;
         &lt;p style="color:#666;font-size:0.9rem;"&gt;Este link expira em &lt;strong&gt;${expiracao} minutos&lt;/strong&gt;.&lt;/p&gt;
-        &lt;p style="color:#666;font-size:0.9rem;"&gt;Se você não solicitou a redefinição, ignore este email.&lt;/p&gt;
+        &lt;p style="color:#666;font-size:0.9rem;"&gt;Se vocÃª nÃ£o solicitou a redefiniÃ§Ã£o, ignore este email.&lt;/p&gt;
         &lt;hr style="border:none;border-top:1px solid #eee;margin-top:32px;"&gt;
-        &lt;p style="color:#aaa;font-size:0.8rem;"&gt;Lojão — não responda este email.&lt;/p&gt;
+        &lt;p style="color:#aaa;font-size:0.8rem;"&gt;LojÃ£o  nÃ£o responda este email.&lt;/p&gt;
       &lt;/div&gt;
     `,
   });
@@ -410,14 +410,14 @@ async function <span class="fstat-no" title="function not covered" >enviarEmailR
 &nbsp;
 async function <span class="fstat-no" title="function not covered" >enviarEmailBoasVindas(</span>email, nome) {
 <span class="cstat-no" title="statement not covered" >  await transporter.sendMail({</span>
-    from: process.env.EMAIL_FROM || '"Lojão" &lt;noreply@lojao.com.br&gt;',
+    from: process.env.EMAIL_FROM || '"LojÃ£o" &lt;noreply@lojao.com.br&gt;',
     to: email,
-    subject: 'Bem-vindo ao Lojão!',
+    subject: 'Bem-vindo ao LojÃ£o!',
     html: `
       &lt;div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;"&gt;
-        &lt;h2 style="color: #3b82f6;"&gt;Bem-vindo ao Lojão!&lt;/h2&gt;
-        &lt;p&gt;Olá, &lt;strong&gt;${nome}&lt;/strong&gt;!&lt;/p&gt;
-        &lt;p&gt;Sua conta foi criada com sucesso. Você já pode fazer login e aproveitar nossas ofertas.&lt;/p&gt;
+        &lt;h2 style="color: #3b82f6;"&gt;Bem-vindo ao LojÃ£o!&lt;/h2&gt;
+        &lt;p&gt;OlÃ¡, &lt;strong&gt;${nome}&lt;/strong&gt;!&lt;/p&gt;
+        &lt;p&gt;Sua conta foi criada com sucesso. VocÃª jÃ¡ pode fazer login e aproveitar nossas ofertas.&lt;/p&gt;
         &lt;a href="${process.env.APP_URL || 'http://localhost:3000'}/login" style="display:inline-block;background:#3b82f6;color:#fff;padding:14px 28px;border-radius:6px;text-decoration:none;font-weight:bold;margin:16px 0;"&gt;
           Acessar minha conta
         &lt;/a&gt;
@@ -430,7 +430,7 @@ async function <span class="fstat-no" title="function not covered" >enviarNotifi
 <span class="cstat-no" title="statement not covered" >  if (!lojaEmail) <span class="cstat-no" title="statement not covered" >return;</span></span>
 &nbsp;
   const fmt = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >v </span>=&gt; <span class="cstat-no" title="statement not covered" >Number(v).toFixed(2).replace('.', ',');</span></span>
-  const metodoLabel = <span class="cstat-no" title="statement not covered" >{ pix: 'PIX', boleto: 'Boleto', cartao: 'Cartão de crédito', teste: 'Teste', sumup_online: 'SumUp' };</span>
+  const metodoLabel = <span class="cstat-no" title="statement not covered" >{ pix: 'PIX', boleto: 'Boleto', cartao: 'CartÃ£o de crÃ©dito', teste: 'Teste', sumup_online: 'SumUp' };</span>
   const itensHtml = <span class="cstat-no" title="statement not covered" >itens.map(<span class="fstat-no" title="function not covered" >i </span>=&gt;</span>
 <span class="cstat-no" title="statement not covered" >    `&lt;tr&gt;</span>
        &lt;td style="padding:5px 0;color:#374151;font-size:14px;"&gt;${i.quantidade}x ${i.nome_produto}&lt;/td&gt;
@@ -443,7 +443,7 @@ async function <span class="fstat-no" title="function not covered" >enviarNotifi
 <span class="cstat-no" title="statement not covered" >  await transporter.sendMail({</span>
     from: process.env.EMAIL_FROM || `"${lojaNome}" &lt;noreply@lojao.com.br&gt;`,
     to: lojaEmail,
-    subject: `Novo pedido pago #${pedido.id} — ${lojaNome}`,
+    subject: `Novo pedido pago #${pedido.id}  ${lojaNome}`,
     html: `
       &lt;div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#111;"&gt;
         &lt;div style="background:#16a34a;padding:24px;border-radius:8px 8px 0 0;"&gt;
@@ -464,7 +464,7 @@ async function <span class="fstat-no" title="function not covered" >enviarNotifi
             &lt;tr&gt;&lt;td&gt;Cliente&lt;/td&gt;&lt;td style="text-align:right;color:#111;font-weight:600;"&gt;${pedido.nome_entrega}&lt;/td&gt;&lt;/tr&gt;
             &lt;tr&gt;&lt;td&gt;E-mail&lt;/td&gt;&lt;td style="text-align:right;color:#111;"&gt;${pedido.email_entrega}&lt;/td&gt;&lt;/tr&gt;
             &lt;tr&gt;&lt;td&gt;Pagamento&lt;/td&gt;&lt;td style="text-align:right;color:#111;"&gt;${metodoLabel[pedido.metodo_pagamento] || pedido.metodo_pagamento}&lt;/td&gt;&lt;/tr&gt;
-            &lt;tr&gt;&lt;td&gt;Endereço&lt;/td&gt;&lt;td style="text-align:right;color:#111;"&gt;${pedido.logradouro}, ${pedido.numero} — ${pedido.cidade}/${pedido.estado}&lt;/td&gt;&lt;/tr&gt;
+            &lt;tr&gt;&lt;td&gt;EndereÃ§o&lt;/td&gt;&lt;td style="text-align:right;color:#111;"&gt;${pedido.logradouro}, ${pedido.numero}  ${pedido.cidade}/${pedido.estado}&lt;/td&gt;&lt;/tr&gt;
           &lt;/table&gt;
 &nbsp;
           &lt;a href="${baseUrl}/admin/pedidos/${pedido.id}"
@@ -486,31 +486,31 @@ async function <span class="fstat-no" title="function not covered" >enviarEmailR
 <span class="cstat-no" title="statement not covered" >  await transporter.sendMail({</span>
     from: process.env.EMAIL_FROM || `"${lojaNome}" &lt;noreply@lojao.com.br&gt;`,
     to: pedido.email_entrega,
-    subject: `Seu pedido #${pedido.id} foi enviado — ${lojaNome}`,
+    subject: `Seu pedido #${pedido.id} foi enviado  ${lojaNome}`,
     html: `
       &lt;div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#111;"&gt;
         &lt;div style="background:#2563eb;padding:24px;border-radius:8px 8px 0 0;"&gt;
-          &lt;h2 style="color:#fff;margin:0;font-size:20px;"&gt;Seu pedido está a caminho!&lt;/h2&gt;
+          &lt;h2 style="color:#fff;margin:0;font-size:20px;"&gt;Seu pedido estÃ¡ a caminho!&lt;/h2&gt;
           &lt;p style="color:#bfdbfe;margin:6px 0 0;font-size:14px;"&gt;Pedido #${pedido.id}&lt;/p&gt;
         &lt;/div&gt;
         &lt;div style="background:#f9fafb;padding:24px;border-radius:0 0 8px 8px;border:1px solid #e5e7eb;border-top:none;"&gt;
-          &lt;p style="font-size:15px;"&gt;Olá, &lt;strong&gt;${pedido.nome_entrega}&lt;/strong&gt;!&lt;/p&gt;
-          &lt;p style="font-size:14px;color:#374151;"&gt;Seu pedido foi enviado e está a caminho do endereço abaixo.&lt;/p&gt;
+          &lt;p style="font-size:15px;"&gt;OlÃ¡, &lt;strong&gt;${pedido.nome_entrega}&lt;/strong&gt;!&lt;/p&gt;
+          &lt;p style="font-size:14px;color:#374151;"&gt;Seu pedido foi enviado e estÃ¡ a caminho do endereÃ§o abaixo.&lt;/p&gt;
 &nbsp;
           &lt;div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:16px;margin:20px 0;text-align:center;"&gt;
-            &lt;div style="font-size:12px;color:#1d4ed8;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px;"&gt;Código de rastreio&lt;/div&gt;
+            &lt;div style="font-size:12px;color:#1d4ed8;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px;"&gt;CÃ³digo de rastreio&lt;/div&gt;
             &lt;div style="font-size:22px;font-weight:800;color:#1e3a8a;letter-spacing:.1em;"&gt;${codigoRastreio}&lt;/div&gt;
           &lt;/div&gt;
 &nbsp;
           &lt;p style="font-size:13px;color:#6b7280;"&gt;
             Rastreie seu pedido em &lt;a href="https://www.correios.com.br/rastreamento" style="color:#2563eb;"&gt;correios.com.br&lt;/a&gt;
-            ou no site da transportadora informando o código acima.
+            ou no site da transportadora informando o cÃ³digo acima.
           &lt;/p&gt;
 &nbsp;
           &lt;div style="background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:12px;margin-top:16px;font-size:13px;color:#374151;"&gt;
-            &lt;strong&gt;Endereço de entrega:&lt;/strong&gt;&lt;br&gt;
+            &lt;strong&gt;EndereÃ§o de entrega:&lt;/strong&gt;&lt;br&gt;
             ${pedido.logradouro}, ${pedido.numero}${pedido.complemento ? ', ' + pedido.complemento : ''}&lt;br&gt;
-            ${pedido.bairro} — ${pedido.cidade}/${pedido.estado} — CEP ${pedido.cep}
+            ${pedido.bairro}  ${pedido.cidade}/${pedido.estado}  CEP ${pedido.cep}
           &lt;/div&gt;
 &nbsp;
           &lt;p style="font-size:13px;color:#6b7280;margin-top:20px;"&gt;Total do pedido: &lt;strong&gt;R$ ${fmt(pedido.total)}&lt;/strong&gt;&lt;/p&gt;
@@ -529,7 +529,7 @@ async function <span class="fstat-no" title="function not covered" >enviarEmailR
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-25T16:47:01.995Z
+                at 2026-06-11T13:20:31.239Z
             </div>
         <script src="../prettify.js"></script>
         <script>

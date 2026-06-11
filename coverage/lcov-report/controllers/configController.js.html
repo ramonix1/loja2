@@ -408,8 +408,8 @@
       erro: req.query.erro === '1',
     });
   } catch (err) {
-<span class="cstat-no" title="statement not covered" >    console.error('Erro configurações:', err);</span>
-<span class="cstat-no" title="statement not covered" >    res.status(500).render('pages/error', { message: 'Erro ao carregar configurações' });</span>
+<span class="cstat-no" title="statement not covered" >    console.error('Erro configuraÃ§Ãµes:', err);</span>
+<span class="cstat-no" title="statement not covered" >    res.status(500).render('pages/error', { message: 'Erro ao carregar configuraÃ§Ãµes' });</span>
   }
 };
 &nbsp;
@@ -454,7 +454,7 @@
     dica: appUrl ? null : 'Configure no .env: APP_URL=https://sua-url.ngrok-free.app',
   });
 &nbsp;
-  // Testar MP API — qualquer resposta da API (mesmo 404) significa token válido
+  // Testar MP API  qualquer resposta da API (mesmo 404) significa token vÃ¡lido
   let mpApiOk = <span class="cstat-no" title="statement not covered" >false,</span> mpApiErro = <span class="cstat-no" title="statement not covered" >null;</span>
 <span class="cstat-no" title="statement not covered" >  if (mpToken) {</span>
 <span class="cstat-no" title="statement not covered" >    try {</span>
@@ -464,11 +464,11 @@
 <span class="cstat-no" title="statement not covered" >      await p.get({ id: '1' }).catch(<span class="fstat-no" title="function not covered" >e </span>=&gt; {</span>
         const status = <span class="cstat-no" title="statement not covered" >e.statusCode || e.status || (e.cause?.status);</span>
         const msg = <span class="cstat-no" title="statement not covered" >(e.message || '').toLowerCase();</span>
-        // 404 / "not found" / "payment not found" = API acessível, token válido
+        // 404 / "not found" / "payment not found" = API acessÃvel, token vÃ¡lido
 <span class="cstat-no" title="statement not covered" >        if (status === 404 || msg.includes('not found') || msg.includes('payment')) {</span>
 <span class="cstat-no" title="statement not covered" >          mpApiOk = true;</span>
         } else <span class="cstat-no" title="statement not covered" >if (status === 401 || status === 403) {</span>
-<span class="cstat-no" title="statement not covered" >          mpApiErro = `Token inválido (HTTP ${status})`;</span>
+<span class="cstat-no" title="statement not covered" >          mpApiErro = `Token invÃ¡lido (HTTP ${status})`;</span>
         } else {
 <span class="cstat-no" title="statement not covered" >          mpApiOk = true; </span>// qualquer outra resposta = conectou
         }
@@ -479,9 +479,9 @@
     }
   }
 <span class="cstat-no" title="statement not covered" >  resultados.push({</span>
-    nome: 'Conexão MP API',
+    nome: 'ConexÃ£o MP API',
     ok: mpApiOk,
-    valor: mpApiOk ? 'OK — token válido, API acessível' : (mpApiErro || 'Não testado'),
+    valor: mpApiOk ? 'OK  token vÃ¡lido, API acessÃvel' : (mpApiErro || 'NÃ£o testado'),
     dica: !mpApiOk &amp;&amp; mpToken ? `Erro: ${mpApiErro}` : null,
   });
 &nbsp;
@@ -497,14 +497,14 @@
 <span class="cstat-no" title="statement not covered" >      if (!sumupApiOk) <span class="cstat-no" title="statement not covered" >sumupApiOk = true;</span></span>
     } catch (e) {
 <span class="cstat-no" title="statement not covered" >      sumupApiErro = e.message || String(e);</span>
-<span class="cstat-no" title="statement not covered" >      if (e.statusCode === 401 || e.statusCode === 403) <span class="cstat-no" title="statement not covered" >sumupApiErro = `Token inválido (${e.statusCode})`;</span></span>
+<span class="cstat-no" title="statement not covered" >      if (e.statusCode === 401 || e.statusCode === 403) <span class="cstat-no" title="statement not covered" >sumupApiErro = `Token invÃ¡lido (${e.statusCode})`;</span></span>
       else <span class="cstat-no" title="statement not covered" >if (e.statusCode === 404) <span class="cstat-no" title="statement not covered" >sumupApiOk = true;</span></span>
     }
   }
 <span class="cstat-no" title="statement not covered" >  resultados.push({</span>
-    nome: 'Conexão SumUp API',
+    nome: 'ConexÃ£o SumUp API',
     ok: sumupApiOk,
-    valor: sumupApiOk ? 'OK — API respondeu' : (sumupApiErro || 'Não testado'),
+    valor: sumupApiOk ? 'OK  API respondeu' : (sumupApiErro || 'NÃ£o testado'),
     dica: !sumupApiOk &amp;&amp; sumupKey ? `Erro: ${sumupApiErro}` : null,
   });
 &nbsp;
@@ -542,7 +542,7 @@
     }
 <span class="cstat-no" title="statement not covered" >    res.redirect('/admin/configuracoes?salvo=1');</span>
   } catch (err) {
-<span class="cstat-no" title="statement not covered" >    console.error('Erro ao salvar configurações:', err);</span>
+<span class="cstat-no" title="statement not covered" >    console.error('Erro ao salvar configuraÃ§Ãµes:', err);</span>
 <span class="cstat-no" title="statement not covered" >    res.redirect('/admin/configuracoes?erro=1');</span>
   }
 };
@@ -553,7 +553,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-25T16:47:01.995Z
+                at 2026-06-11T13:20:31.239Z
             </div>
         <script src="../prettify.js"></script>
         <script>

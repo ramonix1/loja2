@@ -961,7 +961,7 @@ const ARGON2_OPTIONS = <span class="cstat-no" title="statement not covered" >{</
   parallelism: 4,
 };
 &nbsp;
-// ── Login ──────────────────────────────────────────────────────────────────
+//  Login 
 &nbsp;
 <span class="cstat-no" title="statement not covered" >exports.exibirLogin = <span class="fstat-no" title="function not covered" >(r</span>eq, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  res.render('pages/login', { erro: null, info: req.session.info || null });</span>
@@ -1023,13 +1023,13 @@ const ARGON2_OPTIONS = <span class="cstat-no" title="statement not covered" >{</
       });
     }
 &nbsp;
-    // Login bem-sucedido — limpar tentativas
+    // Login bem-sucedido  limpar tentativas
 <span class="cstat-no" title="statement not covered" >    await limparTentativas(req.db, ip, usuario.id);</span>
 &nbsp;
-    // Preservar tenantSlug antes de regenerar (regenerate apaga toda a sessão)
+    // Preservar tenantSlug antes de regenerar (regenerate apaga toda a sessÃ£o)
     const tenantSlug = <span class="cstat-no" title="statement not covered" >req.session.tenantSlug;</span>
 &nbsp;
-    // Regenerar sessão para prevenir session fixation
+    // Regenerar sessÃ£o para prevenir session fixation
 <span class="cstat-no" title="statement not covered" >    await new Promise(<span class="fstat-no" title="function not covered" >(r</span>esolve, reject) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >      req.session.regenerate(<span class="fstat-no" title="function not covered" >(e</span>rr) =&gt; (<span class="cstat-no" title="statement not covered" >err ? reject(err) : resolve())</span>);</span>
     });
@@ -1040,12 +1040,12 @@ const ARGON2_OPTIONS = <span class="cstat-no" title="statement not covered" >{</
 <span class="cstat-no" title="statement not covered" >    req.session.email = usuario.email;</span>
 <span class="cstat-no" title="statement not covered" >    req.session.role = usuario.role;</span>
 &nbsp;
-    // Salvar sessão antes de redirecionar
+    // Salvar sessÃ£o antes de redirecionar
 <span class="cstat-no" title="statement not covered" >    await new Promise(<span class="fstat-no" title="function not covered" >(r</span>esolve, reject) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >      req.session.save(<span class="fstat-no" title="function not covered" >(e</span>rr) =&gt; (<span class="cstat-no" title="statement not covered" >err ? reject(err) : resolve())</span>);</span>
     });
 &nbsp;
-    // Atualizar último acesso
+    // Atualizar Ãºltimo acesso
 <span class="cstat-no" title="statement not covered" >    await req.db.query('UPDATE usuarios SET ultimo_acesso = NOW() WHERE id = $1', [usuario.id]);</span>
 &nbsp;
     const destino = <span class="cstat-no" title="statement not covered" >req.session.redirecionarPara || (usuario.role === 'admin' ? '/admin' : '/');</span>
@@ -1058,10 +1058,10 @@ const ARGON2_OPTIONS = <span class="cstat-no" title="statement not covered" >{</
   }
 };
 &nbsp;
-// ── Logout ─────────────────────────────────────────────────────────────────
+//  Logout 
 &nbsp;
 <span class="cstat-no" title="statement not covered" >exports.logout = <span class="fstat-no" title="function not covered" >(r</span>eq, res) =&gt; {</span>
-  // Preservar tenantSlug para não perder o contexto de dev após logout
+  // Preservar tenantSlug para nÃ£o perder o contexto de dev apÃ³s logout
   const tenantSlug = <span class="cstat-no" title="statement not covered" >req.session.tenantSlug;</span>
 <span class="cstat-no" title="statement not covered" >  req.session.usuarioId = null;</span>
 <span class="cstat-no" title="statement not covered" >  req.session.nome = null;</span>
@@ -1073,7 +1073,7 @@ const ARGON2_OPTIONS = <span class="cstat-no" title="statement not covered" >{</
 <span class="cstat-no" title="statement not covered" >  req.session.save(<span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >res.redirect('/login'))</span>;</span>
 };
 &nbsp;
-// ── Recuperação de senha ───────────────────────────────────────────────────
+//  RecuperaÃ§Ã£o de senha 
 &nbsp;
 <span class="cstat-no" title="statement not covered" >exports.exibirRecuperarSenha = <span class="fstat-no" title="function not covered" >(r</span>eq, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  res.render('pages/recuperar-senha', { erro: null, info: null, smsDisponivel: twilioDisponivel() });</span>
@@ -1101,10 +1101,10 @@ const ARGON2_OPTIONS = <span class="cstat-no" title="statement not covered" >{</
 <span class="cstat-no" title="statement not covered" >      usuario = r.rows[0];</span>
     }
 &nbsp;
-    // Resposta genérica para não vazar se email/telefone existe
+    // Resposta genÃ©rica para nÃ£o vazar se email/telefone existe
     const msgGenerica = <span class="cstat-no" title="statement not covered" >canal === 'sms'</span>
-      ? 'Se o telefone estiver cadastrado, você receberá um SMS com o código.'
-      : 'Se o email estiver cadastrado, você receberá um link de redefinição.';
+      ? 'Se o telefone estiver cadastrado, vocÃª receberÃ¡ um SMS com o cÃ³digo.'
+      : 'Se o email estiver cadastrado, vocÃª receberÃ¡ um link de redefiniÃ§Ã£o.';
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (!usuario) {</span>
 <span class="cstat-no" title="statement not covered" >      return res.render(view, { erro: null, info: msgGenerica, ...opts });</span>
@@ -1128,7 +1128,7 @@ const ARGON2_OPTIONS = <span class="cstat-no" title="statement not covered" >{</
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (canal === 'sms') {</span>
       const codigo = <span class="cstat-no" title="statement not covered" >tokenBruto.slice(0, 6).toUpperCase();</span>
-      // Sobrescrever token com versão curta para SMS
+      // Sobrescrever token com versÃ£o curta para SMS
 <span class="cstat-no" title="statement not covered" >      await req.db.query('UPDATE tokens_recuperacao SET token_hash = $1 WHERE usuario_id = $2 AND usado = false AND expira_em = $3',</span>
         [crypto.createHash('sha256').update(codigo).digest('hex'), usuario.id, expiracao]);
 <span class="cstat-no" title="statement not covered" >      await enviarSmsCodigo(</span>
@@ -1141,7 +1141,7 @@ const ARGON2_OPTIONS = <span class="cstat-no" title="statement not covered" >{</
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    res.render(view, { erro: null, info: msgGenerica, ...opts });</span>
   } catch (err) {
-<span class="cstat-no" title="statement not covered" >    console.error('Erro na recuperação:', err);</span>
+<span class="cstat-no" title="statement not covered" >    console.error('Erro na recuperaÃ§Ã£o:', err);</span>
 <span class="cstat-no" title="statement not covered" >    res.render(view, { erro: 'Erro ao enviar. Tente novamente.', info: null, ...opts });</span>
   }
 };
@@ -1157,7 +1157,7 @@ const ARGON2_OPTIONS = <span class="cstat-no" title="statement not covered" >{</
   );
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  if (!r.rows[0]) {</span>
-<span class="cstat-no" title="statement not covered" >    return res.render('pages/error', { message: 'Link inválido ou expirado. Solicite um novo.' });</span>
+<span class="cstat-no" title="statement not covered" >    return res.render('pages/error', { message: 'Link invÃ¡lido ou expirado. Solicite um novo.' });</span>
   }
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  res.render('pages/redefinir-senha', { token, erro: null });</span>
@@ -1168,10 +1168,10 @@ const ARGON2_OPTIONS = <span class="cstat-no" title="statement not covered" >{</
   const { senha, confirmacao } = <span class="cstat-no" title="statement not covered" >req.body;</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  if (!senha || senha.length &lt; 8) {</span>
-<span class="cstat-no" title="statement not covered" >    return res.render('pages/redefinir-senha', { token, erro: 'A senha deve ter no mínimo 8 caracteres.' });</span>
+<span class="cstat-no" title="statement not covered" >    return res.render('pages/redefinir-senha', { token, erro: 'A senha deve ter no mÃnimo 8 caracteres.' });</span>
   }
 <span class="cstat-no" title="statement not covered" >  if (senha !== confirmacao) {</span>
-<span class="cstat-no" title="statement not covered" >    return res.render('pages/redefinir-senha', { token, erro: 'As senhas não coincidem.' });</span>
+<span class="cstat-no" title="statement not covered" >    return res.render('pages/redefinir-senha', { token, erro: 'As senhas nÃ£o coincidem.' });</span>
   }
 &nbsp;
   const tokenHash = <span class="cstat-no" title="statement not covered" >crypto.createHash('sha256').update(token).digest('hex');</span>
@@ -1184,7 +1184,7 @@ const ARGON2_OPTIONS = <span class="cstat-no" title="statement not covered" >{</
     );
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    if (!r.rows[0]) {</span>
-<span class="cstat-no" title="statement not covered" >      return res.render('pages/error', { message: 'Link inválido ou expirado. Solicite um novo.' });</span>
+<span class="cstat-no" title="statement not covered" >      return res.render('pages/error', { message: 'Link invÃ¡lido ou expirado. Solicite um novo.' });</span>
     }
 &nbsp;
     const senhaHash = <span class="cstat-no" title="statement not covered" >await argon2.hash(senha, ARGON2_OPTIONS);</span>
@@ -1194,7 +1194,7 @@ const ARGON2_OPTIONS = <span class="cstat-no" title="statement not covered" >{</
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    await req.db.query('UPDATE tokens_recuperacao SET usado = true WHERE id = $1', [r.rows[0].id]);</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    req.session.info = 'Senha redefinida com sucesso! Faça login.';</span>
+<span class="cstat-no" title="statement not covered" >    req.session.info = 'Senha redefinida com sucesso! FaÃ§a login.';</span>
 <span class="cstat-no" title="statement not covered" >    res.redirect('/login');</span>
   } catch (err) {
 <span class="cstat-no" title="statement not covered" >    console.error('Erro ao redefinir senha:', err);</span>
@@ -1202,7 +1202,7 @@ const ARGON2_OPTIONS = <span class="cstat-no" title="statement not covered" >{</
   }
 };
 &nbsp;
-// ── Cadastro público (usuário comum) ─────────────────────────────────────
+//  Cadastro pÃºblico (usuÃ¡rio comum) 
 &nbsp;
 <span class="cstat-no" title="statement not covered" >exports.exibirCadastro = <span class="fstat-no" title="function not covered" >(r</span>eq, res) =&gt; {</span>
 <span class="cstat-no" title="statement not covered" >  res.render('pages/cadastro', { erros: [], dados: {} });</span>
@@ -1218,23 +1218,23 @@ const ARGON2_OPTIONS = <span class="cstat-no" title="statement not covered" >{</
   const dados = <span class="cstat-no" title="statement not covered" >req.body;</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  if (!nome || nome.trim().length &lt; 3) <span class="cstat-no" title="statement not covered" >erros.push('Nome deve ter pelo menos 3 caracteres.');</span></span>
-<span class="cstat-no" title="statement not covered" >  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) <span class="cstat-no" title="statement not covered" >erros.push('Email inválido.');</span></span>
-<span class="cstat-no" title="statement not covered" >  if (!senha || senha.length &lt; 8) <span class="cstat-no" title="statement not covered" >erros.push('Senha deve ter no mínimo 8 caracteres.');</span></span>
-<span class="cstat-no" title="statement not covered" >  if (senha !== confirmacao) <span class="cstat-no" title="statement not covered" >erros.push('As senhas não coincidem.');</span></span>
-<span class="cstat-no" title="statement not covered" >  if (!telefone || telefone.replace(/\D/g, '').length &lt; 10) <span class="cstat-no" title="statement not covered" >erros.push('Telefone inválido.');</span></span>
-<span class="cstat-no" title="statement not covered" >  if (!cep || cep.replace(/\D/g, '').length !== 8) <span class="cstat-no" title="statement not covered" >erros.push('CEP inválido.');</span></span>
-<span class="cstat-no" title="statement not covered" >  if (!logradouro) <span class="cstat-no" title="statement not covered" >erros.push('Logradouro obrigatório.');</span></span>
-<span class="cstat-no" title="statement not covered" >  if (!numero) <span class="cstat-no" title="statement not covered" >erros.push('Número obrigatório.');</span></span>
-<span class="cstat-no" title="statement not covered" >  if (!bairro) <span class="cstat-no" title="statement not covered" >erros.push('Bairro obrigatório.');</span></span>
-<span class="cstat-no" title="statement not covered" >  if (!cidade) <span class="cstat-no" title="statement not covered" >erros.push('Cidade obrigatória.');</span></span>
-<span class="cstat-no" title="statement not covered" >  if (!estado) <span class="cstat-no" title="statement not covered" >erros.push('Estado obrigatório.');</span></span>
+<span class="cstat-no" title="statement not covered" >  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) <span class="cstat-no" title="statement not covered" >erros.push('Email invÃ¡lido.');</span></span>
+<span class="cstat-no" title="statement not covered" >  if (!senha || senha.length &lt; 8) <span class="cstat-no" title="statement not covered" >erros.push('Senha deve ter no mÃnimo 8 caracteres.');</span></span>
+<span class="cstat-no" title="statement not covered" >  if (senha !== confirmacao) <span class="cstat-no" title="statement not covered" >erros.push('As senhas nÃ£o coincidem.');</span></span>
+<span class="cstat-no" title="statement not covered" >  if (!telefone || telefone.replace(/\D/g, '').length &lt; 10) <span class="cstat-no" title="statement not covered" >erros.push('Telefone invÃ¡lido.');</span></span>
+<span class="cstat-no" title="statement not covered" >  if (!cep || cep.replace(/\D/g, '').length !== 8) <span class="cstat-no" title="statement not covered" >erros.push('CEP invÃ¡lido.');</span></span>
+<span class="cstat-no" title="statement not covered" >  if (!logradouro) <span class="cstat-no" title="statement not covered" >erros.push('Logradouro obrigatÃ³rio.');</span></span>
+<span class="cstat-no" title="statement not covered" >  if (!numero) <span class="cstat-no" title="statement not covered" >erros.push('NÃºmero obrigatÃ³rio.');</span></span>
+<span class="cstat-no" title="statement not covered" >  if (!bairro) <span class="cstat-no" title="statement not covered" >erros.push('Bairro obrigatÃ³rio.');</span></span>
+<span class="cstat-no" title="statement not covered" >  if (!cidade) <span class="cstat-no" title="statement not covered" >erros.push('Cidade obrigatÃ³ria.');</span></span>
+<span class="cstat-no" title="statement not covered" >  if (!estado) <span class="cstat-no" title="statement not covered" >erros.push('Estado obrigatÃ³rio.');</span></span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  if (erros.length) <span class="cstat-no" title="statement not covered" >return res.render('pages/cadastro', { erros, dados });</span></span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  try {</span>
     const existe = <span class="cstat-no" title="statement not covered" >await req.db.query('SELECT id FROM usuarios WHERE email = $1', [email.toLowerCase().trim()]);</span>
 <span class="cstat-no" title="statement not covered" >    if (existe.rows[0]) {</span>
-<span class="cstat-no" title="statement not covered" >      return res.render('pages/cadastro', { erros: ['Este email já está cadastrado.'], dados });</span>
+<span class="cstat-no" title="statement not covered" >      return res.render('pages/cadastro', { erros: ['Este email jÃ¡ estÃ¡ cadastrado.'], dados });</span>
     }
 &nbsp;
     const senhaHash = <span class="cstat-no" title="statement not covered" >await argon2.hash(senha, ARGON2_OPTIONS);</span>
@@ -1252,7 +1252,7 @@ const ARGON2_OPTIONS = <span class="cstat-no" title="statement not covered" >{</
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    try { <span class="cstat-no" title="statement not covered" >await enviarEmailBoasVindas(email, nome); </span>} catch (_) {}</span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >    req.session.info = 'Cadastro realizado! Faça login para continuar.';</span>
+<span class="cstat-no" title="statement not covered" >    req.session.info = 'Cadastro realizado! FaÃ§a login para continuar.';</span>
 <span class="cstat-no" title="statement not covered" >    res.redirect('/login');</span>
   } catch (err) {
 <span class="cstat-no" title="statement not covered" >    console.error('Erro no cadastro:', err);</span>
@@ -1260,7 +1260,7 @@ const ARGON2_OPTIONS = <span class="cstat-no" title="statement not covered" >{</
   }
 };
 &nbsp;
-// ── Gestão de admins (tela de permissões) ─────────────────────────────────
+//  GestÃ£o de admins (tela de permissÃµes) 
 &nbsp;
 <span class="cstat-no" title="statement not covered" >exports.exibirPermissoes = <span class="fstat-no" title="function not covered" >as</span>ync (req, res) =&gt; {</span>
   const admins = <span class="cstat-no" title="statement not covered" >await req.db.query(</span>
@@ -1273,10 +1273,10 @@ const ARGON2_OPTIONS = <span class="cstat-no" title="statement not covered" >{</
   const { nome, email, senha, cpf } = <span class="cstat-no" title="statement not covered" >req.body;</span>
 &nbsp;
   const erros = <span class="cstat-no" title="statement not covered" >[];</span>
-<span class="cstat-no" title="statement not covered" >  if (!nome || nome.trim().length &lt; 3) <span class="cstat-no" title="statement not covered" >erros.push('Nome inválido.');</span></span>
-<span class="cstat-no" title="statement not covered" >  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) <span class="cstat-no" title="statement not covered" >erros.push('Email inválido.');</span></span>
-<span class="cstat-no" title="statement not covered" >  if (!senha || senha.length &lt; 8) <span class="cstat-no" title="statement not covered" >erros.push('Senha deve ter no mínimo 8 caracteres.');</span></span>
-<span class="cstat-no" title="statement not covered" >  if (cpf &amp;&amp; !validarCPF(cpf)) <span class="cstat-no" title="statement not covered" >erros.push('CPF inválido.');</span></span>
+<span class="cstat-no" title="statement not covered" >  if (!nome || nome.trim().length &lt; 3) <span class="cstat-no" title="statement not covered" >erros.push('Nome invÃ¡lido.');</span></span>
+<span class="cstat-no" title="statement not covered" >  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) <span class="cstat-no" title="statement not covered" >erros.push('Email invÃ¡lido.');</span></span>
+<span class="cstat-no" title="statement not covered" >  if (!senha || senha.length &lt; 8) <span class="cstat-no" title="statement not covered" >erros.push('Senha deve ter no mÃnimo 8 caracteres.');</span></span>
+<span class="cstat-no" title="statement not covered" >  if (cpf &amp;&amp; !validarCPF(cpf)) <span class="cstat-no" title="statement not covered" >erros.push('CPF invÃ¡lido.');</span></span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  if (erros.length) {</span>
     const admins = <span class="cstat-no" title="statement not covered" >await req.db.query("SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at FROM usuarios WHERE role = 'admin' ORDER BY created_at DESC");</span>
@@ -1287,7 +1287,7 @@ const ARGON2_OPTIONS = <span class="cstat-no" title="statement not covered" >{</
     const existe = <span class="cstat-no" title="statement not covered" >await req.db.query('SELECT id FROM usuarios WHERE email = $1', [email.toLowerCase()]);</span>
 <span class="cstat-no" title="statement not covered" >    if (existe.rows[0]) {</span>
       const admins = <span class="cstat-no" title="statement not covered" >await req.db.query("SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at FROM usuarios WHERE role = 'admin' ORDER BY created_at DESC");</span>
-<span class="cstat-no" title="statement not covered" >      return res.render('pages/admin-permissoes', { admins: admins.rows, erro: 'Email já cadastrado.', sucesso: null, activePage: 'permissoes' });</span>
+<span class="cstat-no" title="statement not covered" >      return res.render('pages/admin-permissoes', { admins: admins.rows, erro: 'Email jÃ¡ cadastrado.', sucesso: null, activePage: 'permissoes' });</span>
     }
 &nbsp;
     const cpfLimpo = <span class="cstat-no" title="statement not covered" >cpf ? cpf.replace(/\D/g, '').replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4') : null;</span>
@@ -1325,7 +1325,7 @@ const ARGON2_OPTIONS = <span class="cstat-no" title="statement not covered" >{</
 <span class="cstat-no" title="statement not covered" >  res.redirect('/admin/permissoes');</span>
 };
 &nbsp;
-// ── Helpers internos ──────────────────────────────────────────────────────
+//  Helpers internos 
 &nbsp;
 function <span class="fstat-no" title="function not covered" >validarCPF(</span>cpf) {
   const n = <span class="cstat-no" title="statement not covered" >cpf.replace(/\D/g, '');</span>
@@ -1342,7 +1342,7 @@ function <span class="fstat-no" title="function not covered" >validarCPF(</span>
 <span class="cstat-no" title="statement not covered" >  return r === parseInt(n[10]);</span>
 }
 &nbsp;
-// ── Helpers internos ──────────────────────────────────────────────────────
+//  Helpers internos 
 &nbsp;
 async function <span class="fstat-no" title="function not covered" >registrarTentativaFalha(</span>db, ip, email) {
 <span class="cstat-no" title="statement not covered" >  await db.query(</span>
@@ -1393,7 +1393,7 @@ async function <span class="fstat-no" title="function not covered" >limparTentat
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-25T16:47:01.995Z
+                at 2026-06-11T13:20:31.239Z
             </div>
         <script src="../prettify.js"></script>
         <script>

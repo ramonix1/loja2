@@ -25,28 +25,28 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/9</span>
+                <span class='fraction'>0/11</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/14</span>
+                <span class='fraction'>0/16</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/5</span>
+                <span class='fraction'>0/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/9</span>
+                <span class='fraction'>0/10</span>
             </div>
         
             
@@ -135,8 +135,16 @@
 <a name='L70'></a><a href='#L70'>70</a>
 <a name='L71'></a><a href='#L71'>71</a>
 <a name='L72'></a><a href='#L72'>72</a>
-<a name='L73'></a><a href='#L73'>73</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<a name='L73'></a><a href='#L73'>73</a>
+<a name='L74'></a><a href='#L74'>74</a>
+<a name='L75'></a><a href='#L75'>75</a>
+<a name='L76'></a><a href='#L76'>76</a>
+<a name='L77'></a><a href='#L77'>77</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -208,10 +216,14 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">const Stripe = <span class="cstat-no" title="statement not covered" >require('stripe');</span>
-const stripe = <span class="cstat-no" title="statement not covered" >Stripe(process.env.STRIPE_SECRET_KEY);</span>
+&nbsp;
+function <span class="fstat-no" title="function not covered" >getStripe(</span>) {
+<span class="cstat-no" title="statement not covered" >  if (!process.env.STRIPE_SECRET_KEY) <span class="cstat-no" title="statement not covered" >throw new Error('STRIPE_SECRET_KEY não configurado');</span></span>
+<span class="cstat-no" title="statement not covered" >  return Stripe(process.env.STRIPE_SECRET_KEY);</span>
+}
 &nbsp;
 async function <span class="fstat-no" title="function not covered" >criarPagamentoPix(</span>{ pedidoId, valor, descricao }) {
-<span class="cstat-no" title="statement not covered" >  return stripe.paymentIntents.create({</span>
+<span class="cstat-no" title="statement not covered" >  return getStripe().paymentIntents.create({</span>
     amount: Math.round(parseFloat(valor) * 100),
     currency: 'brl',
     payment_method_types: ['pix'],
@@ -224,7 +236,7 @@ async function <span class="fstat-no" title="function not covered" >criarPagamen
 }
 &nbsp;
 async function <span class="fstat-no" title="function not covered" >criarPagamentoCartao(</span>{ pedidoId, valor, paymentMethodId, descricao }) {
-<span class="cstat-no" title="statement not covered" >  return stripe.paymentIntents.create({</span>
+<span class="cstat-no" title="statement not covered" >  return getStripe().paymentIntents.create({</span>
     amount: Math.round(parseFloat(valor) * 100),
     currency: 'brl',
     payment_method_types: ['card'],
@@ -237,7 +249,7 @@ async function <span class="fstat-no" title="function not covered" >criarPagamen
 }
 &nbsp;
 async function <span class="fstat-no" title="function not covered" >criarBoleto(</span>{ pedidoId, valor, nome, email, cpf, cep, logradouro, numero, cidade, estado, descricao }) {
-<span class="cstat-no" title="statement not covered" >  return stripe.paymentIntents.create({</span>
+<span class="cstat-no" title="statement not covered" >  return getStripe().paymentIntents.create({</span>
     amount: Math.round(parseFloat(valor) * 100),
     currency: 'brl',
     payment_method_types: ['boleto'],
@@ -263,7 +275,7 @@ async function <span class="fstat-no" title="function not covered" >criarBoleto(
 }
 &nbsp;
 async function <span class="fstat-no" title="function not covered" >consultarPagamento(</span>paymentIntentId) {
-<span class="cstat-no" title="statement not covered" >  return stripe.paymentIntents.retrieve(paymentIntentId);</span>
+<span class="cstat-no" title="statement not covered" >  return getStripe().paymentIntents.retrieve(paymentIntentId);</span>
 }
 &nbsp;
 function <span class="fstat-no" title="function not covered" >mapearStatus(</span>stripeStatus) {
@@ -286,7 +298,7 @@ function <span class="fstat-no" title="function not covered" >mapearStatus(</spa
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-05-25T16:47:01.995Z
+                at 2026-06-11T13:20:31.239Z
             </div>
         <script src="../prettify.js"></script>
         <script>
