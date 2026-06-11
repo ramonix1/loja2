@@ -24,6 +24,8 @@ const tenantManagementRoutes = require('./routes/tenantManagementRoutes');
 const billingRoutes = require('./routes/billingRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 const compradorRoutes = require('./routes/compradorRoutes');
+const onboardingRoutes = require('./routes/onboardingRoutes');
+const masterRoutes     = require('./routes/masterRoutes');
 const initializeDatabase = require('./config/init-db');
 const socketio = require('./config/socketio');
 
@@ -110,6 +112,10 @@ app.use(express.json());
 //  Painel de gestÃ£o de tenants (dev only, antes do tenant middleware) 
 app.use('/_tenants', tenantManagementRoutes);
 
+//  Onboarding público (antes do tenant middleware)
+app.use('/onboarding', onboardingRoutes);
+app.use('/_master',    masterRoutes);
+
 //  Rotas de Billing (Super Admin + APIs) 
 app.use('/', billingRoutes);
 
@@ -155,7 +161,7 @@ app.use(async (req, res, next) => {
 
 //  CSRF: valida em POST/PUT/DELETE (exceto webhooks externos) 
 app.use((req, res, next) => {
-  if (req.path === '/webhook/stripe' || req.path === '/webhook/sumup') return next();
+  if (req.path === '/webhook/stripe' || req.path === '/webhook/sumup' || req.path === '/onboarding/webhook') return next();
   csrfSynchronisedProtection(req, res, next);
 });
 

@@ -150,4 +150,25 @@ async function enviarEmailRastreio({ lojaNome, lojaEmail, pedido, codigoRastreio
   });
 }
 
-module.exports = { enviarEmailRecuperacao, enviarEmailBoasVindas, enviarNotificacaoPedidoPago, enviarEmailRastreio };
+async function enviarEmailBoasVindasPlataforma({ email, nome, empresa, slug, senha, appUrl }) {
+  await transporter.sendMail({
+    from: process.env.EMAIL_FROM || 'noreply@plataforma.com',
+    to: email,
+    subject: `Sua loja ${empresa} está pronta!`,
+    html: `
+      <div style="font-family:Inter,sans-serif;max-width:540px;margin:0 auto;padding:32px 24px;background:#f9fafb;border-radius:12px;">
+        <h2 style="color:#1e40af;margin-bottom:8px;">Bem-vindo, ${nome}!</h2>
+        <p style="color:#374151;">Sua loja <strong>${empresa}</strong> foi criada e já está no ar.</p>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:20px;margin:24px 0;">
+          <p style="margin:0 0 8px;color:#6b7280;font-size:13px;font-weight:600;">DADOS DE ACESSO</p>
+          <p style="margin:4px 0;color:#111827;"><strong>Endereço:</strong> ${appUrl.replace('localhost:3000', slug + '.sualoja.com.br')}</p>
+          <p style="margin:4px 0;color:#111827;"><strong>Email:</strong> ${email}</p>
+          <p style="margin:4px 0;color:#111827;"><strong>Senha temporária:</strong> <code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;">${senha}</code></p>
+        </div>
+        <p style="color:#6b7280;font-size:13px;">Altere sua senha após o primeiro acesso. Qualquer dúvida, responda este email.</p>
+      </div>
+    `,
+  });
+}
+
+module.exports = { enviarEmailRecuperacao, enviarEmailBoasVindas, enviarNotificacaoPedidoPago, enviarEmailRastreio, enviarEmailBoasVindasPlataforma };

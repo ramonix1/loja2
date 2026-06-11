@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagamento — Plataforma de Lojas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <header class="bg-white border-b border-gray-200">
+    <div class="max-w-3xl mx-auto px-4 py-4">
+      <span class="text-blue-600 font-bold text-xl">Plataforma de Lojas</span>
+    </div>
+  </header>
+
+  <!-- Stepper -->
+  <div class="max-w-3xl mx-auto px-4 pt-8">
+    <div class="flex items-center gap-2 mb-8 text-sm">
+      <span class="flex items-center justify-center w-7 h-7 rounded-full bg-green-500 text-white font-bold text-xs">✓</span>
+      <span class="text-gray-400">Dados da empresa</span>
+      <div class="flex-1 h-px bg-gray-200 mx-2"></div>
+      <span class="flex items-center justify-center w-7 h-7 rounded-full bg-blue-600 text-white font-bold text-xs">2</span>
+      <span class="font-semibold text-blue-600">Pagamento</span>
+      <div class="flex-1 h-px bg-gray-200 mx-2"></div>
+      <span class="flex items-center justify-center w-7 h-7 rounded-full bg-gray-200 text-gray-400 font-bold text-xs">3</span>
+      <span class="text-gray-400">Pronto!</span>
+    </div>
+  </div>
+
+  <main class="max-w-3xl mx-auto px-4 pb-16">
+    <div class="bg-white rounded-2xl shadow p-8">
+
+      <% if (pix) { %>
+      <!-- PIX -->
+      <div class="text-center">
+        <h1 class="text-xl font-bold text-gray-800 mb-1">Pague com PIX</h1>
+        <p class="text-sm text-gray-500 mb-6">Escaneie o QR code ou copie o código para pagar.</p>
+
+        <div class="inline-block bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-6">
+          <img src="data:image/png;base64,<%= pix.qrcode %>" alt="QR Code PIX" class="w-48 h-48 mx-auto">
+        </div>
+
+        <div class="mb-2">
+          <p class="text-xs text-gray-500 mb-1">Código copia e cola:</p>
+          <div class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+            <code id="copiacola" class="text-xs text-gray-700 flex-1 text-left break-all"><%= pix.copiacola %></code>
+            <button onclick="copiar()" class="text-blue-600 text-xs font-semibold whitespace-nowrap hover:text-blue-800 transition">Copiar</button>
+          </div>
+        </div>
+
+        <div class="mt-4 mb-6 text-sm font-semibold text-gray-700">
+          Valor: <span class="text-blue-600">R$ <%= parseFloat(pix.valor).toFixed(2).replace('.', ',') %></span>
+        </div>
+
+        <div id="status-box" class="bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm rounded-lg px-4 py-3 mb-6">
+          Aguardando confirmação do pagamento...
+        </div>
+
+        <p class="text-xs text-gray-400">Após o pagamento, sua loja será criada automaticamente.</p>
+      </div>
+
+      <% } else { %>
+      <!-- Modo manual (Asaas não configurado) -->
+      <div class="text-center">
+        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <h1 class="text-xl font-bold text-gray-800 mb-2">Cadastro recebido!</h1>
+        <p class="text-sm text-gray-600 mb-4 max-w-sm mx-auto">
+          Recebemos seus dados. Nossa equipe entrará em contato em até <strong>1 dia útil</strong> para finalizar o cadastro e ativar sua loja.
+        </p>
+        <p class="text-sm text-gray-500">Um email de confirmação foi enviado para <strong><%= lead.email %></strong>.</p>
+
+        <div class="mt-8 bg-gray-50 rounded-xl p-4 text-left max-w-sm mx-auto">
+          <p class="text-xs font-semibold text-gray-500 mb-2">Resumo do seu pedido</p>
+          <p class="text-sm text-gray-700"><strong>Empresa:</strong> <%= lead.nome_empresa %></p>
+          <p class="text-sm text-gray-700"><strong>Plano:</strong> <%= plano.nome %> — R$ <%= plano.preco %>/mês</p>
+          <p class="text-sm text-gray-700"><strong>Subdomínio:</strong> <%= lead.slug_desejado %>.sualoja.com.br</p>
+        </div>
+      </div>
+      <% } %>
+
+    </div>
+  </main>
+
+  <% if (pix) { %>
+  <script>
+    function copiar() {
+      navigator.clipboard.writeText(document.getElementById('copiacola').textContent.trim())
+        .then(() => alert('Código copiado!'));
+    }
+
+    // Polling a cada 5s
+    const poll = setInterval(async () => {
+      try {
+        const r = await fetch('/onboarding/status');
+        const data = await r.json();
+        if (data.status === 'ativo') {
+          clearInterval(poll);
+          document.getElementById('status-box').className = 'bg-green-50 border border-green-200 text-green-800 text-sm rounded-lg px-4 py-3 mb-6';
+          document.getElementById('status-box').textContent = 'Pagamento confirmado! Redirecionando...';
+          setTimeout(() => { window.location.href = '/onboarding/sucesso'; }, 2000);
+        }
+      } catch {}
+    }, 5000);
+  </script>
+  <% } %>
+
+</body>
+</html>

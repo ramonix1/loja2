@@ -23,7 +23,13 @@ function resolveSlug(req) {
   return null;
 }
 
+const ROTAS_PUBLICAS_PLATAFORMA = ['/onboarding', '/_tenants', '/_master'];
+
 async function tenantMiddleware(req, res, next) {
+  if (ROTAS_PUBLICAS_PLATAFORMA.some(p => req.path === p || req.path.startsWith(p + '/'))) {
+    return next();
+  }
+
   const slug = resolveSlug(req);
 
   if (!slug) {
