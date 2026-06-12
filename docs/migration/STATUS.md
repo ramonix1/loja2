@@ -6,9 +6,9 @@
 
 | Campo | Valor |
 |-------|-------|
-| **Fase ativa** | 3 — Admin completo (próxima) |
-| **Iniciada em** | 2026-06-11 |
-| **Concluída em** | 2026-06-11 (Fase 2) |
+| **Fase ativa** | — (Fase 4 concluída; mód. 13 done) |
+| **Iniciada em** | 2026-06-12 |
+| **Concluída em** | 2026-06-12 (Fase 4) |
 | **Responsável** | Agente implementador |
 
 ## Progresso por fase
@@ -18,8 +18,8 @@
 | 0 | Fundação | `done` | 2026-06-11 | Monorepo pnpm+turbo, legacy movido, api `/health`, e2e+test-utils scaffold, Docker/Makefile |
 | 1 | API + auth + tenant | `done` | 2026-06-11 | Auth/tenant Fastify + sessão compartilhada (cross-check API↔legacy ok) |
 | 2 | Primeiro admin React | `done` | 2026-06-11 | apps/admin (login/dashboard/pedidos) + API admin + packages/ui + e2e smoke 5/5 |
-| 3 | Admin completo | `pending` | — | — |
-| 4 | API crítica (checkout) | `pending` | — | — |
+| 3 | Admin completo | `done` | 2026-06-12 | 12 módulos + dashboard/pedidos expand; `admin-clientes.ejs` permanece |
+| 4 | API crítica (checkout) | `done` | 2026-06-12 | cart, frete, checkout, webhooks, billing, socket chat, flags USE_NEW_* |
 | 5 | Vitrine Next (público) | `pending` | — | — |
 | 6 | Comprador Next | `pending` | — | — |
 | 7 | Drizzle + migrations | `pending` | — | — |
@@ -34,10 +34,11 @@ Status permitidos: `pending` | `in_progress` | `blocked` | `done`
 | Rotas Express ativas | 100% | 0% |
 | Páginas EJS restantes | 34 | 0 |
 | Apps no monorepo | 2 (api, admin) | 3 (api, admin, storefront) |
-| Rotas API `/api/v1` | 6 (login, logout, me, tenant/config, admin/dashboard/stats, admin/pedidos) | — |
+| Rotas API `/api/v1` | 55+ (cart, checkout, shipping, billing, chat store, public) | — |
+| Páginas admin EJS restantes | 1 (`admin-clientes.ejs`) | 0 |
 | Legacy removido | não | sim |
-| Telas com data-testid (admin+store) | 3 (login, dashboard, pedidos) | 100% das telas React/Next |
-| Specs Playwright | 4 (login smoke+erro, pedidos smoke, sidebar) + setup | smoke críticos (login, pedidos, checkout) |
+| Telas com data-testid (admin+store) | 100% admin React (+ charts) | 100% das telas React/Next |
+| Specs Playwright | 19 (+ dashboard, pedidos expand) + setup | smoke críticos por módulo admin |
 
 ## Equipe
 
@@ -47,16 +48,39 @@ Status permitidos: `pending` | `in_progress` | `blocked` | `done`
 | Dev back | API + testes integração |
 | Testador QA | Playwright + catálogo — ver [TESTING-STRATEGY.md](./TESTING-STRATEGY.md) |
 
+## Fase 3 — progresso por módulo
+
+| # | Módulo | API | UI | testids | vitest | e2e | redirect | EJS removido | Status |
+|---|--------|-----|----|---------|--------|-----|----------|--------------|--------|
+| 1 | Categorias | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | `done` |
+| 2 | Banners | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | `done` |
+| 3 | Aparência | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | `done` |
+| 4 | Produtos | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | `done` |
+| 5 | Compradores | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓* | `done` |
+| 6 | Configurações | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | `done` |
+| 7 | Relatórios | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | `done` |
+| 8 | Agenda | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | `done` |
+| 9 | Permissões | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | `done` |
+| 10 | Chat | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | `done` |
+| 11 | Diagnóstico | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | `done` |
+| 12 | Pedidos detalhe | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | `done` |
+| — | Dashboard expand | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | `done` |
+| — | Pedidos expand | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | `done` |
+| 13 | Dashboard gráficos (Recharts) | ✓ | ✓ | ✓ | ✓ | ✓ | n/a | n/a | `done` |
+
+> **Melhoria opcional (mód. 13):** pode ser executada **antes da Fase 5** como sessão focada de UX admin. Não bloqueia vitrine Next. Ver [phases/03-admin-modules.md § Dashboard — gráficos Recharts](./phases/03-admin-modules.md#melhoria--dashboard--gráficos-recharts).
+
 ## Bloqueios / decisões pendentes
 
-_Nenhum._
+- **E-mail de rastreio no PATCH status:** legacy envia e-mail via `enviarEmailRastreio` quando status=`enviado` + código; API ainda **não** replica (desvio documentado; UI avisa). Migrar com serviço de e-mail na Fase 4+.
+- **`admin-clientes.ejs`** (showcase logos) permanece no legacy — feature distinta de compradores.
 
 ### Notas / desvios da Fase 0
 
 - **Não existiam `docker-compose.yml`, `Makefile` nem `Dockerfile` na raiz** (apesar de citados em CONTEXT/DEPLOY). Foram criados do zero conforme DEPLOY.md § Fase 0.
 - **`apps/legacy/config/masterDb.js`**: ajuste mínimo e seguro — SSL continua ligado em produção/quando há `DATABASE_URL`, mas pode ser desligado via `PGSSL=disable` (usado no `docker-compose.yml`, pois o Postgres dev não tem SSL). Comportamento de produção inalterado.
 - **`apps/legacy/package.json`**: adicionado `nodemon` em devDeps (script `dev` usa `nodemon server.js`, conforme spec).
-- **Docker dev**: cada serviço (`legacy`, `api`) usa volumes de `node_modules` **separados** (`*_root_node_modules` + `*_app_node_modules`). Compartilhar `/app/node_modules` entre imagens com `pnpm install --filter` diferente causava deps faltando (quem populava o volume primeiro vencia).
+- **Docker dev**: cada serviço (`legacy`, `api`, `admin`) usa volumes de `node_modules` **separados** (`*_root_node_modules` + `*_app_node_modules`). Compartilhar `/app/node_modules` entre imagens com `pnpm install --filter` diferente causava deps faltando (quem populava o volume primeiro vencia). **Entrypoint** `docker/docker-entrypoint-dev.sh` sincroniza deps quando `pnpm-lock.yaml` muda ou volume sem marker.
 - **Engine**: ambiente dev local é Node 20; imagens Docker usam Node 24. `.npmrc` com `engine-strict=false` para o `pnpm install` local não falhar (root declara `engines.node >=24`).
 - Removido `package-lock.json` (npm) da raiz — monorepo usa `pnpm-lock.yaml`.
 
@@ -94,17 +118,150 @@ _Nenhum._
 - **Link "Novo painel (beta)"** adicionado no `admin-sidebar.ejs` do legacy (apenas um link para `http://localhost:5173/admin/dashboard`; **sem** `data-testid` no EJS). Legacy `/admin/pedidos` segue funcionando em paralelo.
 - **Docker admin**: serviço `admin` sob profile `full` (`make up-full`). No browser, `VITE_API_URL=http://localhost:3001` (não hostname Docker).
 
-### Handoff para Fase 3
+### Notas / desvios da Fase 3 (sessão 1 — módulo Categorias)
 
-- **`packages/ui`** com Button/Card/Table/Sidebar/LayoutAdmin reutilizáveis; padrão de página admin estabelecido (route + TanStack Query + testids).
-- **Auth no front:** `AuthProvider`/`useAuth` (`apps/admin/src/lib/auth-context.tsx`) + `ProtectedRoute`. `api-client.ts` com `credentials` + `X-Tenant-Slug` e `ApiError` (preserva `code`).
-- **Guard admin reutilizável:** `requireAdmin` (`apps/api/src/plugins/auth-guard.ts`) para novas rotas `/api/v1/admin/*`.
-- **Testids:** constantes em `@lojao/test-utils/test-ids` (`testIds.admin.*`, `testIds.auth.*`); catálogo atualizado. Para novos módulos (produtos, categorias...), seguir a convenção `{app}-{pagina}-{elemento}`.
-- **Falta na Fase 3:** CRUD (forms), demais módulos admin, edição de status de pedido, detalhe de pedido.
+- **Escopo parcial**: Fase 3 permanece `in_progress`. Nesta sessão concluído **módulo 1 (Categorias)**; módulos 2–12 + expansões dashboard/pedidos ficam para próximas sessões (ainda Fase 3).
+- **Redirect legacy**: helper `apps/legacy/utils/adminRedirect.js` + `ADMIN_URL` (default `http://localhost:5173`). Rotas POST do legacy também redirecionam (não processam mais CRUD).
+- **EJS removidos**: `admin-categorias.ejs`, `admin-categoria-editar.ejs`.
+- **Zod em `@lojao/types`**: schemas `createCategoriaSchema`/`updateCategoriaSchema` exportados em `@lojao/types/categorias`.
+- **Rota React edição**: `/admin/categorias/:id` (sem `/editar` no path; redirect legacy `/editar` → React).
+
+### Notas / desvios da Fase 3 (sessão 2 — módulo Banners)
+
+- **Upload `@fastify/multipart`**: imagens salvas em `apps/legacy/public/images` (mesmo path do multer legacy); URL retornada `/images/{timestamp}{ext}`. Env opcional `UPLOAD_DIR` na API.
+- **Admin exibe imagens** via `VITE_LEGACY_URL` (default `http://localhost:3000`) + helper `legacyImageUrl()`.
+- **Rotas React**: `/admin/banners`, `/admin/banners/novo`, `/admin/banners/:id` (edição).
+- **EJS removidos**: `admin-banners.ejs`, `admin-banner-form.ejs`.
+
+### Notas / desvios da Fase 3 (sessão 3 — módulo Aparência)
+
+- **API GET/PUT** `/admin/aparencia` — config `loja_*` com upload opcional de `logo` e `favicon` (multipart).
+- **Parser multipart múltiplo:** `parseMultipartMulti` em `apps/api/src/lib/multipart.ts`.
+- **Rota React:** `/admin/aparencia` (form único com preview ao vivo).
+- **EJS removido:** `admin-aparencia.ejs`.
+
+### Notas / desvios da Fase 3 (sessão 4 — módulo Produtos)
+
+- **API CRUD** `/admin/produtos` + upload múltiplo (`imagens[]`), `PATCH .../estoque`, `DELETE .../imagens/:imagemId`.
+- **Parser** `parseMultipartAll` para vários arquivos no mesmo campo.
+- **Rotas React:** `/admin/produtos` (lista + criar), `/admin/produtos/:id` (editar).
+- **EJS removidos:** `admin.ejs`, `editar.ejs` (páginas admin de produtos; `detail.ejs` público permanece no legacy).
+- **Compat legacy:** API aceita campo `titulo` como alias de `nome` no multipart.
+
+### Notas / desvios da Fase 3 (sessão 5 — módulo Compradores)
+
+- **Escopo parcial da spec EJS:** removidos `admin-compradores.ejs` e `admin-comprador-detalhe.ejs`. **`admin-clientes.ejs`** (logos showcase, CRUD em `/admin/clientes`) permanece — feature distinta de compradores (usuários `role=usuario`); não consta nas rotas React do módulo 5 (`/admin/compradores`). Migrar em módulo futuro ou extensão documentada.
+- **API** `GET /admin/compradores` (lista + busca + totais) e `GET /admin/compradores/:id` (ficha com pedidos/agendamentos/resumo). Queries portadas de `compradorController.js`.
+- **Agendamentos:** query de detalhe usa `.catch(() => [])` se tabela `agendamentos` não existir no tenant (dev parcial).
+- **Rotas React:** `/admin/compradores`, `/admin/compradores/:id`. Link na sidebar admin React.
+- **Redirect legacy:** `compradorRoutes.js` → `ADMIN_URL`.
+- **testids:** `testIds.adminCompradores.*`. vitest 6 casos. Playwright `compradores.spec.ts`.
+
+### Notas / desvios da Fase 3 (sessão 6 — módulo Configurações)
+
+- **API** `GET/PUT /admin/configuracoes` — estoque, SumUp, frete (Melhor Envio + dimensões), módulo agenda. JSON body (sem upload). Porta `configController.salvarConfiguracoes`.
+- **Diagnóstico de pagamentos** migrado no módulo 11 (`/admin/diagnostico`); link na UI React usa React Router.
+- **Rota React:** `/admin/configuracoes`. Link na sidebar admin React.
+- **Redirect legacy:** GET/POST `/admin/configuracoes` → `ADMIN_URL`.
+- **EJS removido:** `admin-configuracoes.ejs`.
+- **testids:** `testIds.adminConfiguracoes.*`. vitest 5 casos. Playwright `configuracoes.spec.ts`.
+
+### Notas / desvios da Fase 3 (sessão 7 — módulo Relatórios)
+
+- **API** `GET /admin/relatorios?aba=&inicio=&fim=&filtro_estoque=` + `GET /admin/relatorios/csv/:tipo`. Lógica portada de `relatorioController.js` (7 abas + export CSV UTF-8 BOM).
+- **Agendamentos:** query retorna vazio se tabela `agendamentos` não existir no tenant.
+- **Rota React:** `/admin/relatorios` com abas, filtro de datas, filtros estoque, export CSV via API.
+- **Redirect legacy:** GET `/admin/relatorios` e `/admin/relatorios/csv/:tipo` → React (CSV baixado pela UI via `/api/v1`).
+- **EJS removido:** `admin-relatorios.ejs`.
+- **testids:** `testIds.adminRelatorios.*`. vitest 6 casos. Playwright `relatorios.spec.ts`.
+
+### Notas / desvios da Fase 3 (sessão 8 — módulo Agenda)
+
+- **API admin** `GET /admin/agenda?mes=` + `PUT /admin/agenda/config` + `PUT /admin/agenda/dias` + `DELETE /admin/agenda/dias/:data`. Lógica portada de `agendaController.js` (config + dias especiais + mapa agendados).
+- **API pública checkout** (`GET /api/agenda/disponibilidade`, `/api/agenda/verificar`) permanece no legacy até Fase 4.
+- **Rota React:** `/admin/agenda` com calendário mensal, config geral, painel de dia especial. Link na sidebar admin React.
+- **Redirect legacy:** GET/POST admin agenda → `ADMIN_URL`; rotas públicas intactas.
+- **EJS removido:** `admin-agenda.ejs`.
+- **testids:** `testIds.adminAgenda.*`. vitest 7 casos. Playwright `agenda.spec.ts`.
+
+### Notas / desvios da Fase 3 (sessão 9 — módulo Permissões)
+
+- **API** `GET/POST /admin/permissoes`, `PATCH /admin/permissoes/:id/toggle`, `DELETE /admin/permissoes/:id`. CRUD admins portado de `authController` (criar/toggle/excluir/exibirPermissoes).
+- **Proteção:** toggle/delete retorna `403 CANNOT_MODIFY_SELF` ao tentar alterar a própria conta.
+- **Senha:** hash argon2id com mesmas opções do legacy.
+- **Rota React:** `/admin/permissoes` — form criar + tabela com suspender/remover. Link na sidebar.
+- **Redirect legacy:** rotas `/admin/permissoes/*` → React.
+- **EJS removido:** `admin-permissoes.ejs`.
+- **testids:** `testIds.adminPermissoes.*`. vitest 8 casos. Playwright `permissoes.spec.ts`.
+
+### Notas / desvios da Fase 3 (sessão 10 — módulo Chat)
+
+- **API REST** `GET/POST/PUT/DELETE /admin/chat/*` — conversas, mensagens (marca lidas), CRUD bot_respostas. Portado de `chatController.js`.
+- **Socket.IO permanece no legacy** (`apps/legacy/config/socketio.js`): admin React conecta via `socket.io-client` + `VITE_LEGACY_URL` com `withCredentials`. CORS adicionado no legacy para `ADMIN_URL`. Migração do socket para API prevista Fase 4+.
+- **Rota React:** `/admin/chat` — lista, chat ativo, assumir/liberar bot, encerrar, modal bot. Link na sidebar.
+- **Redirect legacy:** GET `/admin/chat` → React; rotas REST legacy removidas.
+- **EJS removido:** `admin-chat.ejs`.
+- **testids:** `testIds.adminChat.*`. vitest 7 casos. Playwright `chat.spec.ts`.
+
+### Notas / desvios da Fase 3 (sessão 11 — módulo Diagnóstico)
+
+- **API** `GET /admin/diagnostico` — health check de env (MP, SumUp, APP_URL) + testes de conexão via `fetch` (sem SDK mercadopago na API). Portado de `configController.diagnostico`.
+- **Rota React:** `/admin/diagnostico` — cards de status + guia de credenciais + botão atualizar. Acesso via link em Configurações (sem item na sidebar, igual legacy).
+- **Redirect legacy:** GET `/admin/diagnostico` → React.
+- **EJS removido:** `admin-diagnostico.ejs`.
+- **testids:** `testIds.adminDiagnostico.*`. vitest 4 casos. Playwright `diagnostico.spec.ts`.
+
+### Notas / desvios da Fase 3 (sessão 12 — módulo Pedidos detalhe + expansões)
+
+- **API** `GET /admin/pedidos/:id` + `PATCH /admin/pedidos/:id/status`. `listPedidos` expandido (`metodo_pagamento`, `total_itens`). `getDashboardStats` expandido (totais legacy + `pedidos_recentes`).
+- **Rotas React:** `/admin/pedidos/:id` (detalhe + form status/rastreio), listagem com filtro status + colunas extras, dashboard com 5 cards legacy + pedidos recentes.
+- **Redirect legacy:** `checkoutRoutes.js` pedidos + `produtoRoutes.js` `/admin` → React.
+- **EJS removidos:** `admin-pedido-detalhe.ejs`, `admin-pedidos.ejs`, `admin-dashboard.ejs`.
+- **E-mail rastreio:** não portado na API (desvio; ver bloqueios).
+- **testids:** `testIds.adminPedidoDetail.*`, `admin.pedidosFilterStatus`, `admin.pedidosViewBtn`, `admin.dashboardRecentOrders`. vitest +8 casos pedidos, +4 dashboard. Playwright `pedidos.spec.ts` expand + `dashboard.spec.ts`.
+
+### Handoff para Fase 5
+
+- **Checkout automatizável via API** — método `teste` (dev), fixture `seedPedidoTeste` em `@lojao/test-utils`.
+- **Contratos:** `GET/POST /api/v1/checkout`, `POST /api/v1/shipping/calculate`, `GET /api/v1/public/payment-config`.
+- **Webhooks:** `POST /webhook/stripe`, `POST /webhook/sumup` na API (sem CSRF, idempotência `webhook_events`).
+- **Feature flags** `USE_NEW_*` no legacy — proxy checkout/cart/frete; socket legacy desliga com `USE_NEW_CHAT=true`.
+- **Seed dev:** `make seed` popula produtos, compradores e pedidos em vários status — útil para gráficos do dashboard (mód. 13).
+- **Opcional antes da vitrine:** módulo 13 — dashboard com gráficos Recharts — **done** (2026-06-12).
+- **Próximo:** vitrine Next (Fase 5), checkout UI Next (Fase 6).
+
+### Notas / desvios da Fase 4
+
+- **E-mail transacional na API:** log-only quando SMTP ausente (legacy nodemailer intacto); notificação pedido pago não bloqueia checkout.
+- **Socket.io:** anexo ao server HTTP Fastify (`plugins/socketio.ts`); admin React pode migrar de `VITE_LEGACY_URL` para API quando `USE_NEW_CHAT=true`.
+- **Billing super-admin:** mesma regra e-mail hardcoded do legacy (`SUPER_ADMIN_EMAIL`, default `ramon.oliveira08@gmail.com`).
+- **Commission `pedido_id`:** coluna INTEGER na seed de teste (legacy migration UUID não usado na prática).
+- **Testes:** 98 vitest (28 arquivos) incl. 10 novos integração Fase 4 + 3 unit frete; fixture IDs via `.fixture-ids.json` (globalSetup).
+- **Frete legacy proxy:** flag `USE_NEW_CHECKOUT` (não `USE_NEW_CART`) — frete é parte do fluxo checkout.
+
+### Notas / desvios — módulo 13 (Dashboard Recharts)
+
+- **API** `GET /api/v1/admin/dashboard/charts?periodo=7d|30d|90d` — agregações em `order-analytics.ts` compartilhadas com `relatorios.service.ts` (financeiro por dia/método).
+- **UI** 4 gráficos Recharts + seletor de período; `ChartCard` em `packages/ui`; animação desligada com `prefers-reduced-motion`.
+- **testids** `admin-dashboard-chart-*`. vitest 4 casos charts. Playwright dashboard @smoke expand.
+- **Seed:** `make seed` popula pedidos `[DEV]` — gráficos exibem dados após seed.
 
 ## Log de entregas
 
 <!-- Formato: YYYY-MM-DD — Fase N — resumo -->
+- 2026-06-12 — Módulo 13 — **Dashboard Recharts.** API charts + order-analytics compartilhado. UI 4 gráficos + período 7d/30d/90d. recharts + ChartCard. vitest charts 4/4. typecheck ✓. Próximo: Fase 5 vitrine Next.
+- 2026-06-12 — Fase 4 — **API crítica checkout.** Módulos Fastify: cart, shipping, checkout (pix/boleto/cartao/sumup/teste), webhooks Stripe/SumUp, billing, store-chat REST + Socket.io. Feature flags `USE_NEW_*` + proxy legacy. Fixture `seedPedidoTeste` + `loginComprador` em test-utils. vitest 98/98 ✓. typecheck ✓. Docker/env pagamento na API. Rollback: `docs/migration/runbooks/checkout-rollback.md`. Próximo: Fase 5 vitrine Next.
+- 2026-06-12 — Fase 3 (concluída, sessão 12) — Módulo **Pedidos detalhe** + expansões **Dashboard** e **Pedidos**. API GET/PATCH pedido, stats expandidos. UI React detalhe/listagem/dashboard. Redirect legacy + 3 EJS removidos. testids `adminPedidoDetail.*`. vitest +12 casos. Playwright expand. **Fase 3 done.** Próximo: Fase 4 checkout API.
+- 2026-06-12 — Fase 3 (parcial, sessão 10) — Módulo **Chat** migrado. API REST conversas/mensagens/bot. UI React com socket.io-client → legacy. testids `adminChat.*`. vitest 7 casos. Playwright `chat.spec.ts`. Redirect legacy + EJS removido. **Próximo:** módulo 11 Diagnóstico.
+- 2026-06-12 — Fase 3 (parcial, sessão 9) — Módulo **Permissões** migrado. API CRUD admins + toggle ativo. UI React form + tabela. testids `adminPermissoes.*`. vitest 8 casos. Playwright `permissoes.spec.ts`. Redirect legacy + EJS removido. **Próximo:** módulo 10 Chat.
+- 2026-06-12 — Fase 3 (parcial, sessão 8) — Módulo **Agenda** migrado. API GET agenda (mês) + PUT config/dias + DELETE dia. UI React calendário + config + dias especiais. testids `adminAgenda.*`. vitest 7 casos. Playwright `agenda.spec.ts`. Redirect legacy admin + EJS removido. API pública checkout permanece legacy. **Próximo:** módulo 9 Permissões.
+- 2026-06-12 — Fase 3 (parcial, sessão 7) — Módulo **Relatórios** migrado. API GET relatórios (7 abas) + GET CSV export. UI React com abas/filtros/export. testids `adminRelatorios.*`. vitest 6 casos. Playwright `relatorios.spec.ts`. Redirect legacy + EJS removido. **Próximo:** módulo 8 Agenda.
+- 2026-06-12 — Fase 3 (parcial, sessão 6) — Módulo **Configurações** migrado. API GET/PUT `/admin/configuracoes` (estoque, SumUp, frete, agenda). UI React form completo. testids `adminConfiguracoes.*`. vitest 5 casos. Playwright `configuracoes.spec.ts`. Redirect legacy + EJS removido. Diagnóstico permanece legacy (mód. 11). **Próximo:** módulo 7 Relatórios.
+- 2026-06-12 — Fase 3 (parcial, sessão 5) — Módulo **Compradores** migrado. API listagem (busca + totais) + detalhe (pedidos/agendamentos/resumo). UI React listagem + ficha. testids `adminCompradores.*`. vitest 6 casos. Playwright `compradores.spec.ts`. Redirect legacy + EJS compradores removidos. **Nota:** `admin-clientes.ejs` (showcase) permanece. **Próximo:** módulo 6 Configurações.
+- 2026-06-11 — Fase 3 (parcial, sessão 4) — Módulo **Produtos** migrado. API CRUD + upload múltiplo + estoque + exclusão de imagem. UI listagem com form criar + edição. testids `adminProdutos.*`. vitest 5 casos. Playwright `produtos.spec.ts`. Redirect legacy + EJS removidos. **Próximo:** módulo 5 Compradores.
+- 2026-06-11 — Fase 3 (parcial, sessão 3) — Módulo **Aparência** migrado. API GET/PUT `/admin/aparencia` (config `loja_*` + upload logo/favicon). UI React com preview ao vivo. testids `adminAparencia.*`. vitest 5 casos. Playwright `aparencia.spec.ts`. Redirect legacy + EJS removido. **Próximo:** módulo 4 Produtos.
+- 2026-06-11 — Fase 3 (parcial, sessão 2) — Módulo **Banners** migrado. API CRUD + multipart (`@fastify/multipart`), toggle ativo, form-options (produtos). UI listagem + form novo/editar. Upload compatível legacy `/images/`. testids `adminBanners.*`. vitest 6 casos. Playwright `banners.spec.ts`. Redirect legacy + EJS removidos. **Próximo:** módulo 3 Aparência.
+- 2026-06-11 — Fase 3 (parcial, sessão 1) — Módulo **Categorias** migrado. API CRUD `GET/POST /admin/categorias`, `GET/PUT/DELETE /admin/categorias/:id`. UI React listagem + criar + editar (produtos vinculados). testids `testIds.adminCategorias.*`. vitest 4 casos ✓. Playwright `categorias.spec.ts` (listagem @smoke + criar) ✓. Redirect legacy + EJS removidos. Verificações: typecheck ✓, api 17/17 ✓, legacy Jest 56/56 ✓. **Próximo:** módulo 2 Banners.
 - 2026-06-11 — Fase 2 — Primeiro admin React. `apps/admin` (Vite + React 19 + React Router 7 + Tailwind 4 + TanStack Query): login, dashboard (4 cards) e pedidos (tabela read-only paginada). `packages/ui` (Button, Card, Table, Sidebar, LayoutAdmin). API: `GET /api/v1/admin/dashboard/stats` e `GET /api/v1/admin/pedidos` com guard `requireAdmin` (401/403). `data-testid` em login/dashboard/pedidos via `@lojao/test-utils` (`testIds.auth.*`/`testIds.admin.*`), catálogo atualizado. Playwright: `fixtures/auth.setup.ts` + `tests/admin/login.spec.ts` + `pedidos.spec.ts` (`@smoke`) — 5/5 ✓. Docker: serviço `admin` (profile `full`), `Dockerfile.admin`, `make up-full`/`logs-admin`/`test-e2e[-smoke]`. Link "Novo painel" no sidebar EJS legacy (sem testid). Verificações: typecheck ✓, api vitest 13/13 ✓, legacy Jest 56/56 ✓, admin `vite build` ✓, e2e 5/5 ✓.
 - 2026-06-11 — Fase 1 — Auth + tenant no Fastify (`/api/v1`). Plugin de sessão próprio compatível com `express-session`/`connect-pg-simple` (cookie `lojao.sid`, tabela `sessao`, assinatura `s:`/HMAC). Rotas `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`, `GET /tenant/config`. Plugin de tenant (`resolveSlug` + `request.db`/`tenantId`, 404 `TENANT_NOT_FOUND`). Libs `master-db`, `tenant-db` (`getPool`), `session-signature`. CORS credentials. 7 testes vitest+inject (login ok/erro, me anon/auth, logout, tenant config, tenant not-found) — 7/7 ✓. Helper `loginAdmin` em `@lojao/test-utils`. `openapi.yaml` parcial. **Verificação cruzada validada**: API login → legacy `/admin` (200) e legacy login → API `/me` (200). Legacy Jest 56/56 ✓. Typecheck ✓.
 - 2026-06-11 — Fase 0 — Monorepo pnpm+Turborepo. Legacy movido para `apps/legacy` (comportamento idêntico, 56 testes Jest passando). `apps/api` Fastify+TS com `GET /health`. Packages `types`, `eslint-config`, `test-utils`. Scaffold `apps/e2e` (Playwright). Docker (`Dockerfile.legacy`, `Dockerfile.api`, `docker-compose.yml`), `Makefile`, `.env.example`, `.gitignore`, `LEIA-ME.md` atualizados. Verificado: `make up` (legacy :3000 + api :3001/health + db), `make test`, `pnpm turbo typecheck`.

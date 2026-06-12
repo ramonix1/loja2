@@ -1,5 +1,6 @@
 # Dependências
 node_modules
+apps/api/tests/helpers/.fixture-ids.json
 .pnpm-store
 
 # Ambiente

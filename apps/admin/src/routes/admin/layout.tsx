@@ -6,7 +6,17 @@ import { useAuth } from '../../lib/auth-context';
 
 const NAV_ITEMS = [
   { to: '/admin/dashboard', label: 'Dashboard' },
+  { to: '/admin/categorias', label: 'Categorias' },
+  { to: '/admin/banners', label: 'Banners' },
+  { to: '/admin/aparencia', label: 'Aparência' },
+  { to: '/admin/produtos', label: 'Produtos' },
+  { to: '/admin/compradores', label: 'Compradores' },
   { to: '/admin/pedidos', label: 'Pedidos' },
+  { to: '/admin/configuracoes', label: 'Configurações' },
+  { to: '/admin/relatorios', label: 'Relatórios' },
+  { to: '/admin/agenda', label: 'Agenda' },
+  { to: '/admin/permissoes', label: 'Permissões' },
+  { to: '/admin/chat', label: 'Chat' },
 ];
 
 export function AdminLayout() {

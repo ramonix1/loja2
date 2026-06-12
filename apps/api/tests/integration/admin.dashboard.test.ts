@@ -29,6 +29,11 @@ describe('GET /api/v1/admin/dashboard/stats', () => {
     expect(typeof data.pedidos_pendentes).toBe('number');
     expect(typeof data.receita_mes).toBe('number');
     expect(typeof data.produtos_ativos).toBe('number');
+    expect(typeof data.total_categorias).toBe('number');
+    expect(typeof data.total_banners).toBe('number');
+    expect(typeof data.total_pedidos).toBe('number');
+    expect(typeof data.receita_total).toBe('number');
+    expect(Array.isArray(data.pedidos_recentes)).toBe(true);
   });
 
   it('sem autenticação: 401 UNAUTHORIZED', async () => {

@@ -1,0 +1,21 @@
+/** data-testid do módulo admin Agenda (Fase 3). */
+export const adminAgenda = {
+  panel: 'admin-agenda-panel',
+  calendar: 'admin-agenda-calendar',
+  calendarPrevBtn: 'admin-agenda-calendar-prev-btn',
+  calendarNextBtn: 'admin-agenda-calendar-next-btn',
+  calendarMonthLabel: 'admin-agenda-calendar-month-label',
+  configForm: 'admin-agenda-config-form',
+  configCapacidadeInput: 'admin-agenda-config-capacidade-input',
+  configAntMinInput: 'admin-agenda-config-ant-min-input',
+  configAntMaxInput: 'admin-agenda-config-ant-max-input',
+  configSaveBtn: 'admin-agenda-config-save-btn',
+  dayPanel: 'admin-agenda-day-panel',
+  dayCapacidadeInput: 'admin-agenda-day-capacidade-input',
+  dayMotivoInput: 'admin-agenda-day-motivo-input',
+  daySaveBtn: 'admin-agenda-day-save-btn',
+  dayRemoveBtn: 'admin-agenda-day-remove-btn',
+  dayCell: (data: string): string => `admin-agenda-day-${data}`,
+  successMsg: 'admin-agenda-success-msg',
+  errorMsg: 'admin-agenda-error-msg',
+} as const;

@@ -1,6 +1,18 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 /**
+ * preHandler que exige sessão autenticada (qualquer role).
+ */
+export async function requireAuth(
+  request: FastifyRequest,
+  reply: FastifyReply,
+): Promise<void> {
+  if (!request.session?.usuarioId) {
+    await reply.code(401).send({ error: 'Não autenticado.', code: 'UNAUTHORIZED' });
+  }
+}
+
+/**
  * preHandler que exige sessão autenticada com `role === 'admin'`.
  * Aplicado às rotas `/api/v1/admin/*`.
  *

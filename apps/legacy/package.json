@@ -14,6 +14,7 @@
     "migrate:billing": "node scripts/migrations-billing.js up",
     "migrate:billing:down": "node scripts/migrations-billing.js down",
     "seed:billing": "node scripts/seed-billing.js",
+    "seed:dev": "node scripts/seed-dev.js",
     "invoices:generate": "node scripts/generate-invoices.js"
   },
   "keywords": [],

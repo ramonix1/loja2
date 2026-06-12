@@ -1,5 +1,12 @@
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
 const TENANT_SLUG = import.meta.env.VITE_TENANT_SLUG ?? 'loja';
+const LEGACY_URL = (import.meta.env.VITE_LEGACY_URL ?? 'http://localhost:3000').replace(/\/$/, '');
+
+/** URL absoluta para imagens legacy (`/images/...`). */
+export function legacyImageUrl(path: string): string {
+  if (path.startsWith('http')) return path;
+  return `${LEGACY_URL}${path.startsWith('/') ? path : `/${path}`}`;
+}
 
 export class ApiError extends Error {
   constructor(
@@ -26,6 +33,27 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
       'X-Tenant-Slug': TENANT_SLUG,
       ...options.headers,
     },
+  });
+
+  const body = (await res.json().catch(() => ({}))) as {
+    error?: string;
+    code?: string;
+  } & Record<string, unknown>;
+
+  if (!res.ok) {
+    throw new ApiError(res.status, body.code ?? 'INTERNAL_ERROR', body.error ?? 'Erro inesperado.');
+  }
+
+  return body as T;
+}
+
+/** POST/PUT multipart (upload de imagem) — não define Content-Type (boundary automático). */
+export async function apiUpload<T>(path: string, formData: FormData, method = 'POST'): Promise<T> {
+  const res = await fetch(`${API_URL}${path}`, {
+    method,
+    credentials: 'include',
+    headers: { 'X-Tenant-Slug': TENANT_SLUG },
+    body: formData,
   });
 
   const body = (await res.json().catch(() => ({}))) as {

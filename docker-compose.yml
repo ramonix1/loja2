@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.legacy
+      target: dev
     working_dir: /app/apps/legacy
     ports:
       - "3000:3000"
@@ -14,9 +15,15 @@ services:
       SESSION_SECRET: ${SESSION_SECRET:-dev-session-secret-troque-em-producao}
       CSRF_SECRET: ${CSRF_SECRET:-dev-csrf-secret-troque-em-producao}
       TENANT_SLUG: loja
+      ADMIN_URL: http://localhost:5173
       ADMIN_EMAIL: admin@loja.com
       ADMIN_SENHA: admin123
       ADMIN_NOME: Administrador
+      API_URL: http://api:3001
+      USE_NEW_CHECKOUT: ${USE_NEW_CHECKOUT:-false}
+      USE_NEW_CART: ${USE_NEW_CART:-false}
+      USE_NEW_WEBHOOKS: ${USE_NEW_WEBHOOKS:-false}
+      USE_NEW_CHAT: ${USE_NEW_CHAT:-false}
     depends_on:
       db:
         condition: service_healthy
@@ -24,11 +31,22 @@ services:
       - .:/app
       - legacy_root_node_modules:/app/node_modules
       - legacy_app_node_modules:/app/apps/legacy/node_modules
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\"",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 
   api:
     build:
       context: .
       dockerfile: docker/Dockerfile.api
+      target: dev
     working_dir: /app/apps/api
     ports:
       - "3001:3001"
@@ -38,6 +56,24 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/lojao
       PGSSL: disable
       SESSION_SECRET: ${SESSION_SECRET:-dev-session-secret-troque-em-producao}
+      TENANT_SLUG: loja
+      APP_URL: http://localhost:3000
+      ADMIN_URL: http://localhost:5173
+      API_URL: http://api:3001
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_PUBLIC_KEY: ${STRIPE_PUBLIC_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      SUMUP_API_KEY: ${SUMUP_API_KEY:-}
+      SUMUP_MERCHANT_CODE: ${SUMUP_MERCHANT_CODE:-}
+      EMAIL_HOST: ${EMAIL_HOST:-}
+      EMAIL_PORT: ${EMAIL_PORT:-587}
+      EMAIL_USER: ${EMAIL_USER:-}
+      EMAIL_PASS: ${EMAIL_PASS:-}
+      EMAIL_FROM: ${EMAIL_FROM:-}
+      USE_NEW_CHECKOUT: ${USE_NEW_CHECKOUT:-false}
+      USE_NEW_CART: ${USE_NEW_CART:-false}
+      USE_NEW_WEBHOOKS: ${USE_NEW_WEBHOOKS:-false}
+      USE_NEW_CHAT: ${USE_NEW_CHAT:-false}
     depends_on:
       db:
         condition: service_healthy
@@ -45,12 +81,23 @@ services:
       - .:/app
       - api_root_node_modules:/app/node_modules
       - api_app_node_modules:/app/apps/api/node_modules
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"fetch('http://127.0.0.1:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\"",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 
   admin:
     profiles: ["full"]
     build:
       context: .
       dockerfile: docker/Dockerfile.admin
+      target: dev
     working_dir: /app/apps/admin
     ports:
       - "5173:5173"
@@ -58,12 +105,24 @@ services:
       # No browser, o admin fala com a API via localhost (host), não hostname Docker
       VITE_API_URL: http://localhost:3001
       VITE_TENANT_SLUG: loja
+      VITE_LEGACY_URL: http://localhost:3000
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     volumes:
       - .:/app
       - admin_root_node_modules:/app/node_modules
       - admin_app_node_modules:/app/apps/admin/node_modules
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"fetch('http://127.0.0.1:5173/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\"",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
 
   db:
     image: postgres:16-alpine

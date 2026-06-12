@@ -1,4 +1,16 @@
 import { admin } from './admin.js';
+import { adminAparencia } from './admin-aparencia.js';
+import { adminBanners } from './admin-banners.js';
+import { adminCategorias } from './admin-categorias.js';
+import { adminCompradores } from './admin-compradores.js';
+import { adminConfiguracoes } from './admin-configuracoes.js';
+import { adminRelatorios } from './admin-relatorios.js';
+import { adminAgenda } from './admin-agenda.js';
+import { adminPermissoes } from './admin-permissoes.js';
+import { adminChat } from './admin-chat.js';
+import { adminDiagnostico } from './admin-diagnostico.js';
+import { adminPedidoDetail } from './admin-pedido-detail.js';
+import { adminProdutos } from './admin-produtos.js';
 import { auth } from './auth.js';
 
 /**
@@ -10,6 +22,33 @@ import { auth } from './auth.js';
 export const testIds = {
   auth,
   admin,
+  adminCategorias,
+  adminBanners,
+  adminAparencia,
+  adminProdutos,
+  adminCompradores,
+  adminConfiguracoes,
+  adminRelatorios,
+  adminAgenda,
+  adminPermissoes,
+  adminChat,
+  adminDiagnostico,
+  adminPedidoDetail,
 } as const;
 
-export { auth, admin };
+export {
+  auth,
+  admin,
+  adminCategorias,
+  adminBanners,
+  adminAparencia,
+  adminProdutos,
+  adminCompradores,
+  adminConfiguracoes,
+  adminRelatorios,
+  adminAgenda,
+  adminPermissoes,
+  adminChat,
+  adminDiagnostico,
+  adminPedidoDetail,
+};

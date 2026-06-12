@@ -1,19 +1,48 @@
-# Lojão Admin — React + Vite (dev server)
-FROM node:24-alpine
+# syntax=docker/dockerfile:1
+# Lojão Admin — dev (Vite) + prod (nginx estático)
+# Dev:  docker compose --profile full up admin  (target dev)
+# Prod: docker build --target prod -f docker/Dockerfile.admin .
 
+FROM node:24-alpine AS base
 RUN apk add --no-cache libc6-compat
-
 RUN corepack enable
-
 WORKDIR /app
 
-# Copia o monorepo e instala o necessário para o admin (+ deps de workspace)
+# --- deps (cache de camadas — só package.json + lock) ---
+FROM base AS deps
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc* ./
+COPY apps/admin/package.json apps/admin/
+COPY packages/types/package.json packages/types/
+COPY packages/ui/package.json packages/ui/
+COPY packages/test-utils/package.json packages/test-utils/
+COPY packages/eslint-config/package.json packages/eslint-config/
+RUN pnpm install --filter admin... --frozen-lockfile
+
+# --- dev: bind mount + entrypoint sincroniza volumes node_modules ---
+FROM deps AS dev
 COPY . .
-RUN pnpm install --filter admin...
-
+COPY docker/docker-entrypoint-dev.sh /usr/local/bin/docker-entrypoint-dev.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint-dev.sh
+ENV PNPM_FILTER=admin...
 WORKDIR /app/apps/admin
-
 EXPOSE 5173
-
-# --host expõe o Vite fora do container
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint-dev.sh"]
 CMD ["pnpm", "--filter", "admin", "dev"]
+
+# --- prod: build estático + nginx alpine ---
+FROM deps AS builder
+COPY . .
+ARG VITE_API_URL=http://localhost:3001
+ARG VITE_TENANT_SLUG=loja
+ARG VITE_LEGACY_URL=http://localhost:3000
+ENV VITE_API_URL=$VITE_API_URL \
+    VITE_TENANT_SLUG=$VITE_TENANT_SLUG \
+    VITE_LEGACY_URL=$VITE_LEGACY_URL
+RUN pnpm --filter admin build
+
+FROM nginx:1.27-alpine AS prod
+COPY docker/nginx/admin.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/apps/admin/dist /usr/share/nginx/html
+EXPOSE 80
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget -qO- http://127.0.0.1/ || exit 1

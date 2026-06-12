@@ -41,3 +41,20 @@ export interface ApiError {
   code: string;
   details?: unknown;
 }
+
+export {
+  createCategoriaSchema,
+  updateCategoriaSchema,
+  type CreateCategoriaInput,
+  type UpdateCategoriaInput,
+  type CategoriaListItem,
+  type CategoriaDetail,
+} from './categorias.js';
+
+export {
+  bannerFieldsSchema,
+  type BannerFieldsInput,
+  type BannerListItem,
+  type BannerDetail,
+  type ProdutoOption,
+} from './banners.js';

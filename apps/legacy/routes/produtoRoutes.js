@@ -1,23 +1,35 @@
 const express = require("express");
 const router = express.Router();
 const produtoController = require("../controllers/produtoController");
-const upload = require("../middlewares/upload");
 const { requireAdmin } = require("../middlewares/auth");
+const { adminRedirect } = require("../utils/adminRedirect");
 
-// Loja pública
+const adminBase = (process.env.ADMIN_URL || "http://localhost:5173").replace(/\/$/, "");
+
+// Loja pública — permanecem no legacy
 router.get("/", produtoController.home);
 router.get("/produto/:id", produtoController.detail);
 
-// Admin - dashboard
-router.get("/admin", requireAdmin, produtoController.dashboard);
+// Fase 3: dashboard migrado para React
+router.get("/admin", requireAdmin, adminRedirect("/admin/dashboard"));
 
-// Admin - módulo Produtos
-router.get("/admin/produtos", requireAdmin, produtoController.admin);
-router.post("/salvar-produto", requireAdmin, upload.array("imagens", 10), produtoController.salvar);
-router.get("/editar/:id", requireAdmin, produtoController.editar);
-router.post("/atualizar/:id", requireAdmin, upload.array("imagens", 10), produtoController.atualizar);
-router.get("/excluir/:id", requireAdmin, produtoController.excluir);
-router.get("/excluir-imagem/:id", requireAdmin, produtoController.excluirImagem);
-router.post("/admin/produtos/:id/estoque", requireAdmin, produtoController.atualizarEstoque);
+// Fase 3: módulo Produtos migrado para React — redirect 302
+router.get("/admin/produtos", requireAdmin, adminRedirect("/admin/produtos"));
+router.post("/salvar-produto", requireAdmin, adminRedirect("/admin/produtos"));
+router.get("/editar/:id", requireAdmin, (req, res) => {
+  res.redirect(302, `${adminBase}/admin/produtos/${req.params.id}`);
+});
+router.post("/atualizar/:id", requireAdmin, (req, res) => {
+  res.redirect(302, `${adminBase}/admin/produtos/${req.params.id}`);
+});
+router.get("/excluir/:id", requireAdmin, adminRedirect("/admin/produtos"));
+router.get("/excluir-imagem/:id", requireAdmin, (req, res) => {
+  const produtoId = req.query.produto;
+  if (produtoId) {
+    return res.redirect(302, `${adminBase}/admin/produtos/${produtoId}`);
+  }
+  res.redirect(302, `${adminBase}/admin/produtos`);
+});
+router.post("/admin/produtos/:id/estoque", requireAdmin, adminRedirect("/admin/produtos"));
 
 module.exports = router;

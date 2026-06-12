@@ -47,7 +47,15 @@ async function botResponder(db, conversa_id, mensagem, tenantSlug) {
 }
 
 function init(httpServer, sessionMiddleware) {
-  io = new Server(httpServer);
+  io = new Server(httpServer, {
+    cors: {
+      origin: [
+        (process.env.ADMIN_URL || 'http://localhost:5173').replace(/\/$/, ''),
+        /^https?:\/\/localhost(:\d+)?$/,
+      ],
+      credentials: true,
+    },
+  });
 
   io.use((socket, next) => {
     sessionMiddleware(socket.request, socket.request.res || {}, next);

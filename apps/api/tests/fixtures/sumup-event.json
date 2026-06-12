@@ -1,0 +1,5 @@
+{
+  "event_type": "CHECKOUT_STATUS_CHANGED",
+  "id": "sumup_checkout_fixture_001",
+  "checkout_id": "sumup_checkout_fixture_001"
+}

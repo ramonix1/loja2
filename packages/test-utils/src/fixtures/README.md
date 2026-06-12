@@ -17,7 +17,13 @@ Dados de apoio para testes locais e E2E (QA). **Nunca** usar estas credenciais e
 | Senha | `admin123` |
 | Role | `admin` |
 
-Definido pelas envs `ADMIN_EMAIL` / `ADMIN_SENHA` / `ADMIN_NOME` no `docker-compose.yml` (serviço `legacy`).
+## Usuário comprador (checkout)
+
+| Campo | Valor |
+|-------|-------|
+| Email | `comprador-test@loja.com` |
+| Senha | `comprador123` |
+| Role | `usuario` |
 
 ## URLs dev
 
@@ -27,8 +33,24 @@ Definido pelas envs `ADMIN_EMAIL` / `ADMIN_SENHA` / `ADMIN_NOME` no `docker-comp
 | API (Fastify) | http://localhost:3001 |
 | API health | http://localhost:3001/health |
 
-## Uso futuro
+## Checkout via API (Fase 4+)
 
-A partir da Fase 2, este diretório recebe helpers de seed (`createTestOrder()`,
-`storageState` de login) consumidos pelos specs Playwright em `apps/e2e/`.
-Na Fase 0 contém apenas documentação — sem código executável.
+Helpers em `@lojao/test-utils`:
+
+```typescript
+import { loginComprador, seedPedidoTeste } from '@lojao/test-utils';
+
+const cookie = await loginComprador('http://localhost:3001');
+const { pedidoId } = await seedPedidoTeste({
+  apiUrl: 'http://localhost:3001',
+  sessionCookie: cookie,
+  tenantSlug: 'loja',
+  produtoId: 1, // opcional — default E2E_PRODUCT_ID ou 1
+});
+```
+
+Pré-requisito: `make up` (db + api), seed de teste com produto checkout.
+
+## Webhooks dev
+
+Com `USE_NEW_WEBHOOKS=true`, apontar Stripe/SumUp para `http://localhost:3001/webhook/*` (use ngrok em staging).

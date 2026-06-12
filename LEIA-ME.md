@@ -22,19 +22,45 @@ Plataforma SaaS de e-commerce multi-tenant. **Monorepo** (pnpm + Turborepo) em m
 ## Início rápido (Docker — recomendado)
 
 ```bash
-make up        # sobe legacy + api + db (build)
-# ou em background:
-make up-d
+make up-full-d   # legacy + api + admin + db (profile full, background)
+# ou foreground:
+make up-full
 ```
+
+> **Volumes `node_modules`:** cada serviço tem volume próprio. Ao adicionar pacotes (`pnpm add`), o **entrypoint sincroniza deps automaticamente** na subida do container (hash do `pnpm-lock.yaml`). Se algo falhar: `make admin-install` ou `make deps-sync`.
 
 Acesse:
 
 - Vitrine / Admin legacy: http://localhost:3000 (admin: http://localhost:3000/admin)
+- **Admin React (novo):** http://localhost:5173/admin/dashboard
 - Health da API: http://localhost:3001/health → `{ "status": "ok", "service": "lojao-api" }`
 
 Credenciais dev (provisionadas automaticamente no boot): **admin@loja.com / admin123**
 
 Outros comandos: `make help` (lista tudo), `make logs`, `make logs-api`, `make down`, `make reset`.
+
+### Seed de desenvolvimento (dados demo)
+
+Popula produtos, compradores, pedidos em vários status, pagamentos, carrinho, banners e billing demo:
+
+```bash
+make up-d          # db + legacy + api no ar
+make seed          # idempotente (pula se já aplicado)
+make seed-fresh    # remove dados [DEV] e recria
+```
+
+Fora do Docker: `pnpm seed` ou `pnpm seed:fresh` (exige `DATABASE_URL` apontando para o Postgres).
+
+| Papel | E-mail | Senha |
+|-------|--------|-------|
+| Admin | admin@loja.com | admin123 |
+| Comprador | comprador-test@loja.com | comprador123 |
+| Comprador | maria.silva@email.com | comprador123 |
+| Comprador | joao.santos@email.com | comprador123 |
+
+Pedidos criados: `pago`, `em_separacao`, `enviado` (com rastreio), `aguardando_pagamento`, `cancelado`, `entregue`. Produtos prefixados com `[DEV]`.
+
+**Dashboard (gráficos Recharts):** após `make seed`, abra `/admin/dashboard` — os 4 gráficos exibem dados do período (padrão 30 dias). Útil para validar E2E `dashboard.spec.ts`.
 
 ### API de autenticação (Fase 1)
 
@@ -80,6 +106,39 @@ Rotas admin da API (exigem sessão `role=admin` — 401 sem sessão, 403 se não
 curl -b cookies.txt "http://localhost:3001/api/v1/admin/dashboard/stats" -H "X-Tenant-Slug: loja"
 curl -b cookies.txt "http://localhost:3001/api/v1/admin/pedidos?page=1&perPage=20" -H "X-Tenant-Slug: loja"
 ```
+
+### Checkout via API (Fase 4)
+
+Rotas críticas migradas para `:3001`. Feature flags no `.env` / `docker-compose.yml`:
+
+```env
+USE_NEW_CHECKOUT=false   # true → legacy POST /checkout proxy para API
+USE_NEW_CART=false       # true → legacy carrinho proxy para API
+USE_NEW_WEBHOOKS=false   # true → webhooks só na API (:3001/webhook/*)
+USE_NEW_CHAT=false       # true → Socket.io na API; legacy desliga socket
+```
+
+Exemplo fim-a-fim (método `teste`, só dev):
+
+```bash
+# Login comprador
+curl -c buyer.txt -X POST http://localhost:3001/api/v1/auth/login \
+  -H "Content-Type: application/json" -H "X-Tenant-Slug: loja" \
+  -d '{"email":"comprador-test@loja.com","senha":"comprador123"}'
+
+# Adicionar ao carrinho + checkout
+curl -b buyer.txt -X POST http://localhost:3001/api/v1/cart/items \
+  -H "Content-Type: application/json" -H "X-Tenant-Slug: loja" \
+  -d '{"produto_id":1,"quantidade":1}'
+
+curl -b buyer.txt -X POST http://localhost:3001/api/v1/checkout \
+  -H "Content-Type: application/json" -H "X-Tenant-Slug: loja" \
+  -d '{"nome_entrega":"Teste","email_entrega":"comprador-test@loja.com","cep":"01310-100","logradouro":"Av Paulista","numero":"100","cidade":"São Paulo","estado":"SP","metodo_pagamento":"teste","frete_valor":0}'
+```
+
+Webhooks Stripe/SumUp em dev: use [ngrok](https://ngrok.com/) apontando para `http://localhost:3001/webhook/stripe` quando `USE_NEW_WEBHOOKS=true`.
+
+Fixture QA: `seedPedidoTeste()` em `@lojao/test-utils` — ver `packages/test-utils/src/fixtures/README.md`.
 
 ### Testes E2E (Playwright)
 

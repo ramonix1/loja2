@@ -82,6 +82,10 @@ Volumes:
 - `pnpm-store` ou instalar na imagem
 - Montar monorepo root: `.:/app`
 - **Evitar** volume único `node_modules` na raiz — usar `pnpm install` no build ou volume por app
+- **Entrypoint dev** (`docker/docker-entrypoint-dev.sh`): compara SHA256 do `pnpm-lock.yaml` com marker em `node_modules/.docker-lock-sha256`; roda `pnpm install --filter $PNPM_FILTER` quando lockfile mudou ou volume vazio/sem marker. Evita `Failed to resolve import` após `pnpm add` no host.
+- **Makefile:** `make admin-install`, `make api-install`, `make deps-sync` para forçar sync manual.
+- **Imagens multi-stage:** `target: dev` no compose; `target: prod` no build de deploy (admin: nginx + `dist/` estático).
+- **Cache de build:** Dockerfiles copiam `package.json` + lock antes do código (`deps` stage) — rebuild mais rápido.
 
 #### Makefile — adições Fase 0
 
@@ -224,7 +228,15 @@ Usar `profiles:` no compose para admin/proxy serem opcionais no início.
 
 #### Dockerfile.admin (produção)
 
-Multi-stage: `pnpm build` → nginx alpine servindo `dist/`
+Multi-stage: `deps` → `builder` (`pnpm build`) → `prod` (nginx alpine servindo `dist/`). Build:
+
+```bash
+docker build --target prod -f docker/Dockerfile.admin \
+  --build-arg VITE_API_URL=https://api.seudominio.com \
+  -t lojao-admin:prod .
+```
+
+Dev usa `target: dev` + entrypoint de sync de deps (ver seção Fase 0 volumes).
 
 ---
 

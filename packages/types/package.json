@@ -10,10 +10,65 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./categorias": {
+      "types": "./src/categorias.ts",
+      "default": "./src/categorias.ts"
+    },
+    "./banners": {
+      "types": "./src/banners.ts",
+      "default": "./src/banners.ts"
+    },
+    "./aparencia": {
+      "types": "./src/aparencia.ts",
+      "default": "./src/aparencia.ts"
+    },
+    "./produtos": {
+      "types": "./src/produtos.ts",
+      "default": "./src/produtos.ts"
+    },
+    "./compradores": {
+      "types": "./src/compradores.ts",
+      "default": "./src/compradores.ts"
+    },
+    "./configuracoes": {
+      "types": "./src/configuracoes.ts",
+      "default": "./src/configuracoes.ts"
+    },
+    "./relatorios": {
+      "types": "./src/relatorios.ts",
+      "default": "./src/relatorios.ts"
+    },
+    "./agenda": {
+      "types": "./src/agenda.ts",
+      "default": "./src/agenda.ts"
+    },
+    "./permissoes": {
+      "types": "./src/permissoes.ts",
+      "default": "./src/permissoes.ts"
+    },
+    "./chat": {
+      "types": "./src/chat.ts",
+      "default": "./src/chat.ts"
+    },
+    "./diagnostico": {
+      "types": "./src/diagnostico.ts",
+      "default": "./src/diagnostico.ts"
+    },
+    "./pedidos": {
+      "types": "./src/pedidos.ts",
+      "default": "./src/pedidos.ts"
+    },
+    "./dashboard": {
+      "types": "./src/dashboard.ts",
+      "default": "./src/dashboard.ts"
     }
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@lojao/eslint-config": "workspace:*",

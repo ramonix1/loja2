@@ -1,14 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const aparencia = require('../controllers/aparenciaController');
 const { requireAdmin } = require('../middlewares/auth');
-const upload = require('../middlewares/upload');
+const { adminRedirect } = require('../utils/adminRedirect');
 
-router.get('/admin/aparencia', requireAdmin, aparencia.exibir);
-router.post('/admin/aparencia',
-  requireAdmin,
-  upload.fields([{ name: 'logo', maxCount: 1 }, { name: 'favicon', maxCount: 1 }]),
-  aparencia.salvar
-);
+// Fase 3: UI admin migrada para React — redirect 302 (sem data-testid no EJS).
+router.get('/admin/aparencia', requireAdmin, adminRedirect('/admin/aparencia'));
+router.post('/admin/aparencia', requireAdmin, adminRedirect('/admin/aparencia'));
 
 module.exports = router;

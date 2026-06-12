@@ -229,7 +229,12 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 3000;
 const httpServer = http.createServer(app);
-socketio.init(httpServer, sessionMiddleware);
+const { skipLegacySocket } = require('./utils/newApiProxy');
+if (skipLegacySocket()) {
+  socketio.init(httpServer, sessionMiddleware);
+} else {
+  console.log('[Socket.io] Legacy desligado — USE_NEW_CHAT=true (chat na API :3001)');
+}
 httpServer.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });

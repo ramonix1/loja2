@@ -198,6 +198,77 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
 
+  /api/v1/admin/dashboard/charts:
+    get:
+      tags: [admin]
+      summary: Dados agregados para gráficos do dashboard (auth admin)
+      parameters:
+        - $ref: '#/components/parameters/TenantSlug'
+        - name: periodo
+          in: query
+          schema:
+            type: string
+            enum: [7d, 30d, 90d]
+            default: 30d
+      responses:
+        '200':
+          description: Séries para Recharts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      periodo: { type: string, enum: [7d, 30d, 90d] }
+                      receita_por_dia:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            dia: { type: string, format: date }
+                            receita: { type: number }
+                            pedidos: { type: integer }
+                      pedidos_por_status:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            status: { type: string }
+                            total: { type: integer }
+                      receita_por_metodo:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            metodo: { type: string }
+                            receita: { type: number }
+                            pedidos: { type: integer }
+                      top_produtos:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            nome: { type: string }
+                            quantidade: { type: integer }
+                            receita: { type: number }
+        '400':
+          description: periodo inválido (code VALIDATION_ERROR)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401':
+          description: Não autenticado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '403':
+          description: Sem permissão de admin
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
   /api/v1/admin/pedidos:
     get:
       tags: [admin]

@@ -1,5 +1,7 @@
 **/node_modules
 **/.git
+**/.cursor
+**/.agent
 **/coverage
 **/dist
 **/.next
@@ -7,5 +9,8 @@
 **/test-results
 **/playwright-report
 **/.auth
-*.log
+**/*.log
 .env
+.env.*
+!.env.example
+**/agent-transcripts
