@@ -1,0 +1,18 @@
+# Lojão API — Fastify + TypeScript
+FROM node:24-alpine
+
+# Build tools mantidos para futuros módulos nativos (ex.: argon2 na Fase 1)
+RUN apk add --no-cache python3 make g++ libc6-compat
+
+RUN corepack enable
+
+WORKDIR /app
+
+COPY . .
+RUN pnpm install --filter api...
+
+WORKDIR /app/apps/api
+
+EXPOSE 3001
+
+CMD ["pnpm", "--filter", "api", "dev"]

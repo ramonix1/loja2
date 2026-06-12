@@ -1,0 +1,10 @@
+{
+  "extends": "@lojao/eslint-config/base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler"
+  },
+  "include": ["playwright.config.ts", "tests", "fixtures", "pages"]
+}

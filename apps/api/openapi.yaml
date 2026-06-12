@@ -1,0 +1,244 @@
+openapi: 3.1.0
+info:
+  title: Lojão API
+  version: 0.2.0
+  description: >
+    API Fastify do Lojão (migração Strangler Fig). Fase 1: autenticação e tenant.
+    Fase 2: rotas admin read-only (dashboard + pedidos), guard `role=admin`.
+    Sessão compartilhada com o legacy via cookie `lojao.sid` (PostgreSQL, tabela
+    `sessao`). Clientes devem enviar credenciais (`credentials: 'include'`).
+servers:
+  - url: http://localhost:3001
+    description: Dev (acesso direto à API)
+tags:
+  - name: auth
+  - name: tenant
+  - name: admin
+
+components:
+  parameters:
+    TenantSlug:
+      name: X-Tenant-Slug
+      in: header
+      required: false
+      schema: { type: string, example: loja }
+      description: >
+        Slug do tenant. Prioridade de resolução: sessão > env TENANT_SLUG >
+        header X-Tenant-Slug > subdomínio.
+  schemas:
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+        code: { type: string }
+        details: { type: object, additionalProperties: true }
+      required: [error, code]
+    LoginRequest:
+      type: object
+      properties:
+        email: { type: string, example: admin@loja.com }
+        senha: { type: string, example: admin123 }
+      required: [email, senha]
+    Usuario:
+      type: object
+      properties:
+        id: { type: integer }
+        nome: { type: string }
+        email: { type: string }
+        role: { type: string, enum: [admin, usuario] }
+
+paths:
+  /api/v1/auth/login:
+    post:
+      tags: [auth]
+      summary: Autentica e abre sessão (cookie lojao.sid)
+      parameters:
+        - $ref: '#/components/parameters/TenantSlug'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Autenticado
+          headers:
+            Set-Cookie:
+              schema: { type: string, example: 'lojao.sid=s%3A...; Path=/; HttpOnly' }
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Usuario' }
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401':
+          description: Credenciais inválidas (code UNAUTHORIZED)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: Tenant não encontrado (code TENANT_NOT_FOUND)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/auth/logout:
+    post:
+      tags: [auth]
+      summary: Encerra a sessão
+      parameters:
+        - $ref: '#/components/parameters/TenantSlug'
+      responses:
+        '200':
+          description: Sessão encerrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      ok: { type: boolean }
+
+  /api/v1/auth/me:
+    get:
+      tags: [auth]
+      summary: Identidade do usuário autenticado
+      parameters:
+        - $ref: '#/components/parameters/TenantSlug'
+      responses:
+        '200':
+          description: Sessão válida
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      usuario:
+                        type: object
+                        properties:
+                          id: { type: integer }
+                          nome: { type: string }
+                          role: { type: string }
+                      tenant:
+                        type: object
+                        properties:
+                          slug: { type: string }
+        '401':
+          description: Não autenticado (code UNAUTHORIZED)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/tenant/config:
+    get:
+      tags: [tenant]
+      summary: Identidade visual da loja (configs loja_*)
+      parameters:
+        - $ref: '#/components/parameters/TenantSlug'
+      responses:
+        '200':
+          description: Config do tenant
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      nome: { type: string }
+                      cor_primaria: { type: string }
+                      logo: { type: string }
+                      slogan: { type: string }
+        '404':
+          description: Tenant não encontrado (code TENANT_NOT_FOUND)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/admin/dashboard/stats:
+    get:
+      tags: [admin]
+      summary: Estatísticas do dashboard (auth admin)
+      parameters:
+        - $ref: '#/components/parameters/TenantSlug'
+      responses:
+        '200':
+          description: Stats do tenant
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      pedidos_hoje: { type: integer }
+                      pedidos_pendentes: { type: integer }
+                      receita_mes: { type: number }
+                      produtos_ativos: { type: integer }
+        '401':
+          description: Não autenticado (code UNAUTHORIZED)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '403':
+          description: Sem permissão de admin (code FORBIDDEN)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/admin/pedidos:
+    get:
+      tags: [admin]
+      summary: Lista paginada de pedidos read-only (auth admin)
+      parameters:
+        - $ref: '#/components/parameters/TenantSlug'
+        - { name: page, in: query, schema: { type: integer, default: 1 } }
+        - { name: perPage, in: query, schema: { type: integer, default: 20, maximum: 100 } }
+        - { name: status, in: query, required: false, schema: { type: string } }
+      responses:
+        '200':
+          description: Página de pedidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: integer }
+                        created_at: { type: string }
+                        status: { type: string }
+                        total: { type: number }
+                        cliente_nome: { type: string, nullable: true }
+                        cliente_email: { type: string, nullable: true }
+                  meta:
+                    type: object
+                    properties:
+                      page: { type: integer }
+                      perPage: { type: integer }
+                      total: { type: integer }
+        '401':
+          description: Não autenticado (code UNAUTHORIZED)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '403':
+          description: Sem permissão de admin (code FORBIDDEN)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }

@@ -1,5 +1,26 @@
+# Dependências
 node_modules
+.pnpm-store
+
+# Ambiente
 .env
-public/images/*.png
-public/images/*.jpeg
-.env
+.env.*
+!.env.example
+
+# Build / cache
+dist
+.next
+.turbo
+coverage
+
+# Uploads legacy (imagens geradas)
+apps/legacy/public/images/*.png
+apps/legacy/public/images/*.jpeg
+
+# Playwright (apps/e2e)
+apps/e2e/.auth/
+apps/e2e/test-results/
+playwright-report/
+
+# Logs
+*.log

@@ -1,0 +1,11 @@
+**/node_modules
+**/.git
+**/coverage
+**/dist
+**/.next
+**/.turbo
+**/test-results
+**/playwright-report
+**/.auth
+*.log
+.env

@@ -10,7 +10,12 @@ Convenção: `{app}-{pagina}-{elemento}[-{id}]` — ver [TESTING-STRATEGY.md](./
 
 | data-testid | App | Elemento | Fase | Spec |
 |-------------|-----|----------|------|------|
-| _a definir_ | — | — | 2+ | — |
+| `auth-login-email-input` | admin | Input e-mail | 2 | admin/login.spec.ts |
+| `auth-login-password-input` | admin | Input senha | 2 | admin/login.spec.ts |
+| `auth-login-submit-btn` | admin | Botão entrar | 2 | admin/login.spec.ts |
+| `auth-login-error-msg` | admin | Erro de credencial | 2 | admin/login.spec.ts |
+
+Constantes: `@lojao/test-utils/test-ids` → `testIds.auth.*`.
 
 ---
 
@@ -18,7 +23,14 @@ Convenção: `{app}-{pagina}-{elemento}[-{id}]` — ver [TESTING-STRATEGY.md](./
 
 | data-testid | Página | Elemento | Fase | Spec |
 |-------------|--------|----------|------|------|
-| _a definir_ | — | — | 2+ | — |
+| `admin-sidebar-nav` | layout | Nav lateral | 2 | admin/pedidos.spec.ts |
+| `admin-dashboard-stats` | dashboard | Container de cards | 2 | admin/login.spec.ts |
+| `admin-pedidos-table` | pedidos | Tabela | 2 | admin/pedidos.spec.ts |
+| `admin-pedidos-row-{id}` | pedidos | Linha (id dinâmico) | 2 | admin/pedidos.spec.ts |
+| `admin-pedidos-empty-state` | pedidos | Estado vazio | 2 | — |
+| `admin-pedidos-loading` | pedidos | Loading | 2 | — |
+
+Constantes: `@lojao/test-utils/test-ids` → `testIds.admin.*` (`pedidosRow(id)` é função).
 
 ---
 

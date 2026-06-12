@@ -1,0 +1,19 @@
+# Lojão Admin — React + Vite (dev server)
+FROM node:24-alpine
+
+RUN apk add --no-cache libc6-compat
+
+RUN corepack enable
+
+WORKDIR /app
+
+# Copia o monorepo e instala o necessário para o admin (+ deps de workspace)
+COPY . .
+RUN pnpm install --filter admin...
+
+WORKDIR /app/apps/admin
+
+EXPOSE 5173
+
+# --host expõe o Vite fora do container
+CMD ["pnpm", "--filter", "admin", "dev"]

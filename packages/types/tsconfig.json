@@ -1,0 +1,8 @@
+{
+  "extends": "@lojao/eslint-config/base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "./src"
+  },
+  "include": ["src"]
+}

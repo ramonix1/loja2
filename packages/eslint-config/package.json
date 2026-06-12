@@ -1,0 +1,12 @@
+{
+  "name": "@lojao/eslint-config",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Configuração base compartilhada (tsconfig) do monorepo Lojão",
+  "files": [
+    "base.json"
+  ],
+  "exports": {
+    "./base.json": "./base.json"
+  }
+}

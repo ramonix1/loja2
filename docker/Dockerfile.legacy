@@ -1,0 +1,19 @@
+# Lojão legacy — Express 5 + EJS (temporário até Fase 8)
+FROM node:24-alpine
+
+# Build tools para módulos nativos (argon2) em musl/alpine
+RUN apk add --no-cache python3 make g++ libc6-compat
+
+RUN corepack enable
+
+WORKDIR /app
+
+# Copia o monorepo e instala apenas o necessário para o legacy
+COPY . .
+RUN pnpm install --filter legacy...
+
+WORKDIR /app/apps/legacy
+
+EXPOSE 3000
+
+CMD ["pnpm", "--filter", "legacy", "dev"]
