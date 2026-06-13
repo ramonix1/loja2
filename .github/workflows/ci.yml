@@ -68,7 +68,7 @@ jobs:
       - name: Install dependencies
         run: |
           pnpm install --frozen-lockfile
-          pnpm install --filter api... --filter e2e... --frozen-lockfile
+          pnpm install --filter api... --filter admin... --filter storefront... --filter e2e... --frozen-lockfile
 
       - name: Verify Playwright CLI
         run: node apps/e2e/scripts/run-playwright.mjs --version
@@ -91,11 +91,13 @@ jobs:
 
       - name: Start app stack
         run: |
-          docker compose -f docker-compose.yml -f docker-compose.ci.yml up --build -d api admin storefront
+          chmod +x scripts/ci-wait-url.sh
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml up --build -d api
+          scripts/ci-wait-url.sh api http://localhost:3001/health 180
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml up --build -d admin storefront
           docker compose ps
-          timeout 180 bash -c 'until curl -sf http://localhost:3001/health; do sleep 3; done'
-          timeout 180 bash -c 'until curl -sf http://localhost:5173/; do sleep 3; done'
-          timeout 180 bash -c 'until curl -sf http://localhost:3000/; do sleep 3; done'
+          scripts/ci-wait-url.sh admin http://localhost:5173/ 180
+          scripts/ci-wait-url.sh storefront http://localhost:3000/ 300
 
       - name: E2E smoke
         env:

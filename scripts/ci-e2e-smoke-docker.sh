@@ -10,7 +10,7 @@ COMPOSE="${COMPOSE:-docker compose -f docker-compose.yml -f docker-compose.ci.ym
 echo "[ci-e2e] Instalando deps..."
 corepack enable 2>/dev/null || true
 pnpm install --frozen-lockfile
-pnpm install --filter api... --filter e2e... --frozen-lockfile
+pnpm install --filter api... --filter admin... --filter storefront... --filter e2e... --frozen-lockfile
 
 echo "[ci-e2e] Playwright (antes do Docker)..."
 node apps/e2e/scripts/run-playwright.mjs --version
@@ -24,11 +24,13 @@ echo "[ci-e2e] Seed no host..."
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/lojao \
   node apps/api/scripts/run-seed.mjs || true
 
-echo "[ci-e2e] Subindo api + admin + storefront..."
-$COMPOSE up --build -d api admin storefront
-timeout 180 bash -c 'until curl -sf http://localhost:3001/health; do sleep 3; done'
-timeout 180 bash -c 'until curl -sf http://localhost:5173/; do sleep 3; done'
-timeout 180 bash -c 'until curl -sf http://localhost:3000/; do sleep 3; done'
+echo "[ci-e2e] Subindo api, depois admin + storefront..."
+chmod +x scripts/ci-wait-url.sh
+$COMPOSE up --build -d api
+scripts/ci-wait-url.sh api http://localhost:3001/health 180
+$COMPOSE up --build -d admin storefront
+scripts/ci-wait-url.sh admin http://localhost:5173/ 180
+scripts/ci-wait-url.sh storefront http://localhost:3000/ 300
 
 echo "[ci-e2e] E2E smoke..."
 E2E_BASE_URL=http://localhost:5173 E2E_STORE_URL=http://localhost:3000 \

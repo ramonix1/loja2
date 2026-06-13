@@ -2,14 +2,23 @@
 # Evita volumes vazios que mascaram deps + entrypoints que rodam pnpm como root no workspace.
 services:
   api:
+    environment:
+      GITHUB_ACTIONS: "true"
+      SKIP_DOCKER_DEPS_SYNC: "true"
     volumes: !override
       - .:/app
       - upload_data:/app/data/uploads/images
 
   admin:
+    environment:
+      GITHUB_ACTIONS: "true"
+      SKIP_DOCKER_DEPS_SYNC: "true"
     volumes: !override
       - .:/app
 
   storefront:
+    environment:
+      GITHUB_ACTIONS: "true"
+      SKIP_DOCKER_DEPS_SYNC: "true"
     volumes: !override
       - .:/app
