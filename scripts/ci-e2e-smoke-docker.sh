@@ -10,7 +10,7 @@ COMPOSE="${COMPOSE:-docker compose -f docker-compose.yml -f docker-compose.ci.ym
 echo "[ci-e2e] Instalando deps..."
 corepack enable 2>/dev/null || true
 pnpm install --frozen-lockfile
-pnpm install --filter api... --filter admin... --filter storefront... --filter e2e... --frozen-lockfile
+pnpm install --filter api... --filter e2e... --frozen-lockfile
 
 echo "[ci-e2e] Playwright (antes do Docker)..."
 node apps/e2e/scripts/run-playwright.mjs --version

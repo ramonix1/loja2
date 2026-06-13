@@ -1,5 +1,8 @@
-# Override para CI (GitHub Actions): bind mount usa node_modules do host.
-# Evita volumes vazios que mascaram deps + entrypoints que rodam pnpm como root no workspace.
+# Override para CI (GitHub Actions).
+#
+# Código via bind mount; node_modules via volumes anônimos da imagem Docker (Alpine/musl).
+# O host GHA é Ubuntu/glibc — montar node_modules do runner quebra Rollup/SWC no container
+# (ex.: @rollup/rollup-linux-x64-musl). Entrypoint não sincroniza deps no CI.
 services:
   api:
     environment:
@@ -8,6 +11,8 @@ services:
     volumes: !override
       - .:/app
       - upload_data:/app/data/uploads/images
+      - /app/node_modules
+      - /app/apps/api/node_modules
 
   admin:
     environment:
@@ -15,6 +20,8 @@ services:
       SKIP_DOCKER_DEPS_SYNC: "true"
     volumes: !override
       - .:/app
+      - /app/node_modules
+      - /app/apps/admin/node_modules
 
   storefront:
     environment:
@@ -22,3 +29,5 @@ services:
       SKIP_DOCKER_DEPS_SYNC: "true"
     volumes: !override
       - .:/app
+      - /app/node_modules
+      - /app/apps/storefront/node_modules

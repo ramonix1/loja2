@@ -65,10 +65,12 @@ jobs:
           node-version: 24
           cache: pnpm
 
+      # Host: deps só para seed (api) + Playwright (e2e).
+      # Containers usam node_modules da imagem Docker (musl), não do runner (glibc).
       - name: Install dependencies
         run: |
           pnpm install --frozen-lockfile
-          pnpm install --filter api... --filter admin... --filter storefront... --filter e2e... --frozen-lockfile
+          pnpm install --filter api... --filter e2e... --frozen-lockfile
 
       - name: Verify Playwright CLI
         run: node apps/e2e/scripts/run-playwright.mjs --version
@@ -77,8 +79,7 @@ jobs:
         run: node apps/e2e/scripts/run-playwright.mjs install --with-deps chromium
 
       # Ordem importa: deps + Playwright no host ANTES dos containers dev.
-      # Entrypoints Docker rodam pnpm como root no bind mount → EACCES no runner.
-      # Seed precisa de @lojao/db no host; sobe só db, seed, depois api/admin/storefront.
+      # Containers CI usam node_modules da imagem (volumes anônimos), não do runner.
       - name: Start database
         run: |
           docker compose -f docker-compose.yml -f docker-compose.ci.yml up --build -d db
