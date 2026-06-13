@@ -11,9 +11,11 @@ export class UploadError extends Error {
   }
 }
 
-/** Mesmo diretório do legacy (`apps/legacy/public/images`). */
+/** Diretório de uploads servido em `/images/*` pela API. */
 export function getUploadDir(): string {
-  return process.env.UPLOAD_DIR ?? path.resolve(process.cwd(), '../legacy/public/images');
+  return (
+    process.env.UPLOAD_DIR ?? path.resolve(process.cwd(), '../../data/uploads/images')
+  );
 }
 
 export async function saveImageFile(

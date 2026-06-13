@@ -19,7 +19,7 @@ Migrar **vitrine pública** (não autenticada + browse) para Next.js com SSR. Le
 
 ### IN
 
-- [ ] `apps/storefront/` — Next.js 15 App Router + TypeScript + Tailwind 4
+- [x] `apps/storefront/` — Next.js 15 App Router + TypeScript + Tailwind 4
 - [ ] Middleware tenant (`middleware.ts`) — mesma lógica de slug
 - [ ] Páginas:
   - `/` — home (categorias + produtos)

@@ -23,8 +23,7 @@ Você está migrando o **Lojão** para monorepo TypeScript. Leia isto antes de q
 | apps/api | Fastify + TS + Zod |
 | apps/admin | React + Vite |
 | apps/storefront | Next.js 15 |
-| apps/legacy | Express (temporário) |
-| packages/db | Drizzle (Fase 7+) |
+| packages/db | Drizzle |
 | e2e | Playwright (QA + CI) |
 
 ## Testes
@@ -53,7 +52,8 @@ Detalhes: `docs/migration/DEPLOY.md`
 
 ```bash
 pnpm install
-make test          # legacy até Fase 8
+make test-api       # vitest API
+pnpm test:all       # api + e2e smoke
 pnpm turbo typecheck
 ```
 

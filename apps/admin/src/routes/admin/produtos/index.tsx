@@ -20,7 +20,9 @@ function fetchProdutos() {
   return apiFetch<{ data: Produto[] }>('/api/v1/admin/produtos').then((r) => r.data);
 }
 
-const LEGACY_URL = (import.meta.env.VITE_LEGACY_URL ?? 'http://localhost:3000').replace(/\/$/, '');
+const STOREFRONT_URL = (import.meta.env.VITE_STOREFRONT_URL ?? 'http://localhost:3000').replace(
+  /\/$/,
+  '');
 
 export function ProdutosPage() {
   const queryClient = useQueryClient();
@@ -284,7 +286,7 @@ export function ProdutosPage() {
                         <td className="py-3">
                           <div className="flex gap-2">
                             <a
-                              href={`${LEGACY_URL}/produto/${p.id}`}
+                              href={`${STOREFRONT_URL}/produto/${p.id}`}
                               target="_blank"
                               rel="noreferrer"
                               className="rounded-lg bg-gray-700 px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-600"

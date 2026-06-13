@@ -12,6 +12,7 @@ import { adminDiagnostico } from './admin-diagnostico.js';
 import { adminPedidoDetail } from './admin-pedido-detail.js';
 import { adminProdutos } from './admin-produtos.js';
 import { auth } from './auth.js';
+import { store } from './store.js';
 
 /**
  * Catálogo central de data-testid do produto.
@@ -34,6 +35,7 @@ export const testIds = {
   adminChat,
   adminDiagnostico,
   adminPedidoDetail,
+  store,
 } as const;
 
 export {
@@ -51,4 +53,5 @@ export {
   adminChat,
   adminDiagnostico,
   adminPedidoDetail,
+  store,
 };

@@ -9,6 +9,7 @@ WORKDIR /app
 FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc* ./
 COPY apps/api/package.json apps/api/
+COPY packages/db/package.json packages/db/
 COPY packages/types/package.json packages/types/
 COPY packages/eslint-config/package.json packages/eslint-config/
 RUN pnpm install --filter api... --frozen-lockfile

@@ -1,4 +1,6 @@
 import type { PedidoDetalhe, PedidoRecente, UpdatePedidoStatusInput } from '@lojao/types/pedidos';
+import type { TenantDatabase } from '@lojao/db';
+import { count, desc, eq, pedidos, sql, usuarios } from '@lojao/db';
 import type pg from 'pg';
 
 import type { PedidosQuery } from './admin.schemas.js';
@@ -81,67 +83,72 @@ export async function getDashboardStats(db: pg.Pool): Promise<DashboardStats> {
   };
 }
 
-/** Lista paginada de pedidos (read-only) com dados do cliente. */
+/** Lista paginada de pedidos (read-only) com dados do cliente — Drizzle. */
 export async function listPedidos(
-  db: pg.Pool,
+  db: TenantDatabase,
   { page, perPage, status }: PedidosQuery,
 ): Promise<{ data: PedidoResumo[]; total: number }> {
   const offset = (page - 1) * perPage;
 
-  const totalRes = status
-    ? await db.query<{ total: number }>(
-        'SELECT COUNT(*)::int AS total FROM pedidos WHERE status = $1',
-        [status],
-      )
-    : await db.query<{ total: number }>('SELECT COUNT(*)::int AS total FROM pedidos');
+  const totalQuery = status
+    ? db.select({ total: count() }).from(pedidos).where(eq(pedidos.status, status))
+    : db.select({ total: count() }).from(pedidos);
+
+  const [totalRow] = await totalQuery;
+  const total = Number(totalRow?.total ?? 0);
 
   const rowsRes = status
-    ? await db.query(
-        `SELECT p.id, p.created_at, p.status, p.total, p.metodo_pagamento,
-                u.nome AS cliente_nome, u.email AS cliente_email,
-                (SELECT COUNT(*)::int FROM pedido_itens pi WHERE pi.pedido_id = p.id) AS total_itens
-         FROM pedidos p
-         JOIN usuarios u ON u.id = p.usuario_id
-         WHERE p.status = $3
-         ORDER BY p.created_at DESC
-         LIMIT $1 OFFSET $2`,
-        [perPage, offset, status],
-      )
-    : await db.query(
-        `SELECT p.id, p.created_at, p.status, p.total, p.metodo_pagamento,
-                u.nome AS cliente_nome, u.email AS cliente_email,
-                (SELECT COUNT(*)::int FROM pedido_itens pi WHERE pi.pedido_id = p.id) AS total_itens
-         FROM pedidos p
-         JOIN usuarios u ON u.id = p.usuario_id
-         ORDER BY p.created_at DESC
-         LIMIT $1 OFFSET $2`,
-        [perPage, offset],
-      );
+    ? await db
+        .select({
+          id: pedidos.id,
+          createdAt: pedidos.createdAt,
+          status: pedidos.status,
+          total: pedidos.total,
+          metodoPagamento: pedidos.metodoPagamento,
+          clienteNome: usuarios.nome,
+          clienteEmail: usuarios.email,
+          totalItens: sql<number>`(
+            SELECT COUNT(*)::int FROM pedido_itens pi WHERE pi.pedido_id = ${pedidos.id}
+          )`.as('total_itens'),
+        })
+        .from(pedidos)
+        .innerJoin(usuarios, eq(usuarios.id, pedidos.usuarioId))
+        .where(eq(pedidos.status, status))
+        .orderBy(desc(pedidos.createdAt))
+        .limit(perPage)
+        .offset(offset)
+    : await db
+        .select({
+          id: pedidos.id,
+          createdAt: pedidos.createdAt,
+          status: pedidos.status,
+          total: pedidos.total,
+          metodoPagamento: pedidos.metodoPagamento,
+          clienteNome: usuarios.nome,
+          clienteEmail: usuarios.email,
+          totalItens: sql<number>`(
+            SELECT COUNT(*)::int FROM pedido_itens pi WHERE pi.pedido_id = ${pedidos.id}
+          )`.as('total_itens'),
+        })
+        .from(pedidos)
+        .innerJoin(usuarios, eq(usuarios.id, pedidos.usuarioId))
+        .orderBy(desc(pedidos.createdAt))
+        .limit(perPage)
+        .offset(offset);
 
-  const data: PedidoResumo[] = rowsRes.rows.map(
-    (row: {
-      id: number;
-      created_at: Date | string;
-      status: string;
-      total: string | number;
-      metodo_pagamento: string | null;
-      total_itens: number;
-      cliente_nome: string | null;
-      cliente_email: string | null;
-    }) => ({
-      id: row.id,
-      created_at:
-        row.created_at instanceof Date ? row.created_at.toISOString() : String(row.created_at),
-      status: row.status,
-      total: Number(row.total),
-      metodo_pagamento: row.metodo_pagamento,
-      total_itens: Number(row.total_itens ?? 0),
-      cliente_nome: row.cliente_nome,
-      cliente_email: row.cliente_email,
-    }),
-  );
+  const data: PedidoResumo[] = rowsRes.map((row) => ({
+    id: row.id,
+    created_at:
+      row.createdAt instanceof Date ? row.createdAt.toISOString() : String(row.createdAt ?? ''),
+    status: row.status,
+    total: Number(row.total),
+    metodo_pagamento: row.metodoPagamento,
+    total_itens: Number(row.totalItens ?? 0),
+    cliente_nome: row.clienteNome,
+    cliente_email: row.clienteEmail,
+  }));
 
-  return { data, total: totalRes.rows[0]?.total ?? 0 };
+  return { data, total };
 }
 
 /** Porta `checkoutController.adminDetalhePedido`. */

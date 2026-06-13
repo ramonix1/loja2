@@ -1,0 +1,25 @@
+:8080 {
+  handle /api/* {
+    reverse_proxy api:3001
+  }
+
+  handle /webhook/* {
+    reverse_proxy api:3001
+  }
+
+  handle /socket.io* {
+    reverse_proxy api:3001
+  }
+
+  handle /images/* {
+    reverse_proxy api:3001
+  }
+
+  handle /admin* {
+    reverse_proxy admin:5173
+  }
+
+  handle {
+    reverse_proxy storefront:3000
+  }
+}

@@ -1,5 +1,6 @@
 import 'fastify';
 import type pg from 'pg';
+import type { TenantDatabase } from '@lojao/db';
 
 import type { Session } from '../plugins/session.js';
 
@@ -13,5 +14,7 @@ declare module 'fastify' {
     tenantId?: number;
     /** Pool do banco do tenant (injetado em rotas com tenant resolvido). */
     db: pg.Pool;
+    /** Drizzle ORM do tenant (Fase 7+). */
+    drizzle: TenantDatabase;
   }
 }

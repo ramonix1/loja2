@@ -62,6 +62,10 @@
     "./dashboard": {
       "types": "./src/dashboard.ts",
       "default": "./src/dashboard.ts"
+    },
+    "./public-store": {
+      "types": "./src/public-store.ts",
+      "default": "./src/public-store.ts"
     }
   },
   "scripts": {

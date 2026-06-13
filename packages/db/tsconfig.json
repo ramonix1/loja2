@@ -1,0 +1,8 @@
+{
+  "extends": "@lojao/eslint-config/base.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["src/**/*.ts", "drizzle.config.ts"],
+  "exclude": ["tests/**/*.ts"]
+}

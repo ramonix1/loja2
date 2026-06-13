@@ -21,6 +21,7 @@ export default defineConfig({
       PGSSL: 'disable',
       DATABASE_URL: process.env.DATABASE_URL,
       SESSION_SECRET: process.env.SESSION_SECRET,
+      TENANT_SLUG: '',
     },
   },
 });

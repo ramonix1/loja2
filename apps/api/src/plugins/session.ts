@@ -54,6 +54,19 @@ function sessionSecret(): string {
   return process.env.SESSION_SECRET ?? 'fallback-secret-troque-em-producao';
 }
 
+/** Em dev local, cookie compartilhado entre :3000/:3001/:3002 via domain `localhost`. */
+function sharedCookieDomain(): string | undefined {
+  return process.env.NODE_ENV !== 'production' ? 'localhost' : undefined;
+}
+
+function clearSessionCookie(reply: FastifyReply): void {
+  reply.clearCookie(COOKIE_NAME, { path: '/' });
+  const domain = sharedCookieDomain();
+  if (domain) {
+    reply.clearCookie(COOKIE_NAME, { path: '/', domain });
+  }
+}
+
 function buildCookieMeta(): CookieMeta {
   return {
     originalMaxAge: MAX_AGE_MS,
@@ -129,6 +142,7 @@ async function persist(
 
   reply.setCookie(COOKIE_NAME, signSid(state.sid, sessionSecret()), {
     path: '/',
+    domain: sharedCookieDomain(),
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
@@ -158,7 +172,7 @@ function attachMethods(
         for (const key of DATA_KEYS) delete data[key];
         state.destroyed = true;
         state.original = '{}';
-        reply.clearCookie(COOKIE_NAME, { path: '/' });
+        clearSessionCookie(reply);
       },
     },
     regenerate: {

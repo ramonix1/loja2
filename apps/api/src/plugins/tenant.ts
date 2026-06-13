@@ -1,5 +1,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
+import { getCachedTenantDb } from '@lojao/db';
+
 import { getTenant } from '../lib/tenant-db.js';
 
 /**
@@ -49,6 +51,7 @@ export async function tenantPreHandler(
     request.tenantSlug = slug;
     request.tenantId = tenant.id;
     request.db = pool;
+    request.drizzle = getCachedTenantDb(slug, pool);
   } catch {
     await reply
       .code(404)

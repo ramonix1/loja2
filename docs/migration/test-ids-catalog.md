@@ -268,7 +268,30 @@ Constantes: `testIds.adminDiagnostico.*` (`item(nome)` é função).
 
 | data-testid | Página | Elemento | Fase | Spec |
 |-------------|--------|----------|------|------|
-| _a definir_ | — | — | 5+ | — |
+| `store-header` | layout | Header | 5 | store/vitrine.spec.ts |
+| `store-home-product-grid` | home | Grade de produtos | 5 | store/vitrine.spec.ts |
+| `store-home-product-card-{id}` | home | Card produto (dinâmico) | 5 | store/vitrine.spec.ts, store/cart.spec.ts |
+| `store-home-banner-carousel` | home | Carrossel banners | 6 | — |
+| `store-product-detail` | produto | Container detalhe | 5 | store/vitrine.spec.ts |
+| `store-product-title` | produto | Nome | 5 | store/vitrine.spec.ts |
+| `store-product-price` | produto | Preço | 5 | store/vitrine.spec.ts |
+| `store-product-add-cart-btn` | produto / card | Adicionar ao carrinho | 6 | store/vitrine.spec.ts, store/checkout.spec.ts |
+| `auth-login-email-input` | /login | E-mail | 6 | store/auth.spec.ts |
+| `auth-login-password-input` | /login | Senha | 6 | store/auth.spec.ts |
+| `auth-login-submit-btn` | /login | Entrar | 6 | store/auth.spec.ts |
+| `auth-login-error-msg` | /login | Erro login | 6 | — |
+| `store-cart-table` | /carrinho | Tabela itens | 6 | store/cart.spec.ts |
+| `store-cart-item-row-{id}` | /carrinho | Linha item (dinâmico) | 6 | — |
+| `store-cart-checkout-btn` | /carrinho | Ir para checkout | 6 | store/checkout.spec.ts |
+| `store-checkout-form` | /checkout | Formulário | 6 | — |
+| `store-checkout-payment-{metodo}` | /checkout | Opção pagamento | 6 | store/checkout.spec.ts |
+| `store-checkout-payment-teste` | /checkout | Pagamento teste (dev) | 6 | store/checkout.spec.ts |
+| `store-checkout-submit-btn` | /checkout | Finalizar pedido | 6 | store/checkout.spec.ts |
+| `store-checkout-success-msg` | /checkout/resultado | Mensagem sucesso | 6 | store/checkout.spec.ts |
+| `store-orders-table` | /meus-pedidos | Tabela pedidos | 6 | store/orders.spec.ts |
+| `store-order-row-{id}` | /meus-pedidos | Linha pedido (dinâmico) | 6 | store/orders.spec.ts |
+
+Constantes: `@lojao/test-utils/test-ids/store` → `testIds.store.*`; auth em `@lojao/test-utils/test-ids/auth`. **No storefront Next**, importar subpaths (não o barrel `test-ids/index` — quebra Webpack).
 
 ---
 

@@ -44,7 +44,7 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
     }
 
     const { page, perPage, status } = parsed.data;
-    const { data, total } = await listPedidos(request.db, parsed.data);
+    const { data, total } = await listPedidos(request.drizzle, parsed.data);
 
     return reply.send({ data, meta: { page, perPage, total, ...(status ? { status } : {}) } });
   });

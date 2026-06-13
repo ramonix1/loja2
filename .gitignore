@@ -14,9 +14,9 @@ dist
 .turbo
 coverage
 
-# Uploads legacy (imagens geradas)
-apps/legacy/public/images/*.png
-apps/legacy/public/images/*.jpeg
+# Uploads (imagens geradas)
+data/uploads/images/*
+!data/uploads/images/.gitkeep
 
 # Playwright (apps/e2e)
 apps/e2e/.auth/

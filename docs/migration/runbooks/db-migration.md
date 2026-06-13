@@ -1,27 +1,73 @@
-# Runbook — migrations Drizzle
+# Runbook — migrations Drizzle (Fase 7)
 
-## Criar nova migration
+## Visão geral
 
-1. Alterar schema em `packages/db/src/schema/`
-2. `pnpm --filter @lojao/db db:generate`
-3. Revisar SQL gerado em `packages/db/drizzle/`
-4. `pnpm --filter @lojao/db db:migrate` em dev
-5. Testar api + smoke relevante
-6. Commit migration SQL + schema juntos
+- Pacote: `packages/db` (`@lojao/db`)
+- Baseline: `packages/db/drizzle/0000_baseline.sql` — espelha schema legacy **sem alterar dados**
+- Novas alterações de banco: **somente** via `drizzle-kit generate` + `db:migrate`
+- Multi-tenant: **opção A** — instância Drizzle por tenant (cache por slug), compatível com `tenants` + `getPool(slug)`
 
-## Baseline (Fase 7 inicial)
+## Comandos
 
-1. Banco dev populado via legacy boot
-2. `drizzle-kit introspect` ou pull
-3. Ajustar relations manualmente
-4. Marcar baseline como applied sem executar DROP
+```bash
+# Aplicar migrations (dev/CI)
+make db-migrate
+# ou
+pnpm --filter @lojao/db db:migrate
+
+# Gerar migration após editar schema em packages/db/src/schema/
+make db-generate
+
+# Inspecionar dados
+make db-studio
+```
+
+## Fluxo para nova migration
+
+1. Editar arquivos em `packages/db/src/schema/master/` ou `tenant/`
+2. `make db-generate` — cria SQL em `packages/db/drizzle/`
+3. Revisar SQL gerado (proibido DROP/rename sem doc + backup)
+4. `make db-migrate`
+5. `pnpm --filter api test` + `pnpm test:e2e:smoke`
+
+## Banco limpo (dev)
+
+```bash
+make reset          # apaga volume Postgres
+make up-d           # sobe db + api + legacy
+make db-migrate     # cria todas as tabelas
+make seed           # popula tenant loja (api seed:dev)
+```
+
+O legacy `init-db.js` / `tenantSchema.js` continuam funcionando em paralelo até Fase 8; a baseline Drizzle é **idempotente** (`IF NOT EXISTS`).
+
+## Módulos API migrados para Drizzle (Fase 7)
+
+| Módulo | Funções |
+|--------|---------|
+| auth | `login`, `register`, `recoverPassword`, `resetPassword`, `isResetTokenValid` |
+| public | `listPublicProducts`, `getPublicProductById` |
+| admin | `listPedidos` |
+
+Demais rotas permanecem em `pool.query()` até migração gradual.
 
 ## Produção
 
-- **Nunca** `db:push` em produção
-- Rodar `db:migrate` como step de deploy antes de subir api
-- Backup Postgres antes de migration destrutiva
+- **Não** rodar migrate automaticamente no boot da API em produção
+- Step de deploy: `pnpm --filter @lojao/db db:migrate` antes de subir nova versão
+- Backup obrigatório antes de migrations destrutivas (proibidas sem runbook dedicado)
 
-## Multi-tenant
+## Testes
 
-Migrations tenant schema aplicam em **cada** database de tenant ou schema único — seguir decisão documentada em Fase 7 spec.
+```bash
+pnpm --filter @lojao/db test     # migrate baseline + tabelas
+pnpm --filter api test           # regressão API
+pnpm test:e2e:smoke              # regressão UI
+```
+
+## Rollback
+
+Baseline não altera dados existentes. Para reverter uma migration futura:
+
+1. Restaurar backup do Postgres
+2. Ou criar migration compensatória (preferível a editar migration já aplicada)

@@ -22,3 +22,19 @@ export async function enviarNotificacaoPedidoPago(input: PedidoPagoEmailInput): 
     `[Email] Notificação pedido pago #${input.pedido.id} para ${input.lojaEmail} (${input.itens.length} itens).`,
   );
 }
+
+export async function enviarEmailRecuperacao(
+  email: string,
+  nome: string,
+  token: string,
+): Promise<void> {
+  const appUrl = (process.env.APP_URL ?? 'http://localhost:3000').replace(/\/$/, '');
+  const link = `${appUrl}/redefinir-senha/${token}`;
+
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.log(`[Email] Recuperação senha para ${email} — link: ${link}`);
+    return;
+  }
+
+  console.log(`[Email] Recuperação senha enviada para ${email} (${nome}). Link: ${link}`);
+}

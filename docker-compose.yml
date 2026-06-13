@@ -1,47 +1,4 @@
 services:
-  legacy:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.legacy
-      target: dev
-    working_dir: /app/apps/legacy
-    ports:
-      - "3000:3000"
-    environment:
-      NODE_ENV: development
-      PORT: 3000
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/lojao
-      PGSSL: disable
-      SESSION_SECRET: ${SESSION_SECRET:-dev-session-secret-troque-em-producao}
-      CSRF_SECRET: ${CSRF_SECRET:-dev-csrf-secret-troque-em-producao}
-      TENANT_SLUG: loja
-      ADMIN_URL: http://localhost:5173
-      ADMIN_EMAIL: admin@loja.com
-      ADMIN_SENHA: admin123
-      ADMIN_NOME: Administrador
-      API_URL: http://api:3001
-      USE_NEW_CHECKOUT: ${USE_NEW_CHECKOUT:-false}
-      USE_NEW_CART: ${USE_NEW_CART:-false}
-      USE_NEW_WEBHOOKS: ${USE_NEW_WEBHOOKS:-false}
-      USE_NEW_CHAT: ${USE_NEW_CHAT:-false}
-    depends_on:
-      db:
-        condition: service_healthy
-    volumes:
-      - .:/app
-      - legacy_root_node_modules:/app/node_modules
-      - legacy_app_node_modules:/app/apps/legacy/node_modules
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "node -e \"fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\"",
-        ]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 40s
-
   api:
     build:
       context: .
@@ -57,9 +14,13 @@ services:
       PGSSL: disable
       SESSION_SECRET: ${SESSION_SECRET:-dev-session-secret-troque-em-producao}
       TENANT_SLUG: loja
+      ADMIN_EMAIL: admin@loja.com
+      ADMIN_SENHA: admin123
+      ADMIN_NOME: Administrador
       APP_URL: http://localhost:3000
       ADMIN_URL: http://localhost:5173
       API_URL: http://api:3001
+      UPLOAD_DIR: /app/data/uploads/images
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_PUBLIC_KEY: ${STRIPE_PUBLIC_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
@@ -70,10 +31,6 @@ services:
       EMAIL_USER: ${EMAIL_USER:-}
       EMAIL_PASS: ${EMAIL_PASS:-}
       EMAIL_FROM: ${EMAIL_FROM:-}
-      USE_NEW_CHECKOUT: ${USE_NEW_CHECKOUT:-false}
-      USE_NEW_CART: ${USE_NEW_CART:-false}
-      USE_NEW_WEBHOOKS: ${USE_NEW_WEBHOOKS:-false}
-      USE_NEW_CHAT: ${USE_NEW_CHAT:-false}
     depends_on:
       db:
         condition: service_healthy
@@ -81,6 +38,7 @@ services:
       - .:/app
       - api_root_node_modules:/app/node_modules
       - api_app_node_modules:/app/apps/api/node_modules
+      - upload_data:/app/data/uploads/images
     healthcheck:
       test:
         [
@@ -93,7 +51,6 @@ services:
       start_period: 40s
 
   admin:
-    profiles: ["full"]
     build:
       context: .
       dockerfile: docker/Dockerfile.admin
@@ -102,10 +59,9 @@ services:
     ports:
       - "5173:5173"
     environment:
-      # No browser, o admin fala com a API via localhost (host), não hostname Docker
       VITE_API_URL: http://localhost:3001
       VITE_TENANT_SLUG: loja
-      VITE_LEGACY_URL: http://localhost:3000
+      VITE_STOREFRONT_URL: http://localhost:3000
     depends_on:
       api:
         condition: service_healthy
@@ -123,6 +79,49 @@ services:
       timeout: 5s
       retries: 5
       start_period: 60s
+
+  storefront:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.storefront
+      target: dev
+    working_dir: /app/apps/storefront
+    ports:
+      - "3000:3000"
+    environment:
+      API_URL: http://api:3001
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      TENANT_SLUG: loja
+      NEXT_PUBLIC_TENANT_SLUG: loja
+    depends_on:
+      api:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - storefront_root_node_modules:/app/node_modules
+      - storefront_app_node_modules:/app/apps/storefront/node_modules
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\"",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+
+  caddy:
+    profiles: ["proxy"]
+    image: caddy:2.8-alpine
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - api
+      - storefront
+      - admin
 
   db:
     image: postgres:16-alpine
@@ -142,9 +141,10 @@ services:
 
 volumes:
   pgdata:
-  legacy_root_node_modules:
-  legacy_app_node_modules:
+  upload_data:
   api_root_node_modules:
   api_app_node_modules:
   admin_root_node_modules:
   admin_app_node_modules:
+  storefront_root_node_modules:
+  storefront_app_node_modules:

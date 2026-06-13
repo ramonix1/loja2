@@ -6,9 +6,9 @@
 
 | Campo | Valor |
 |-------|-------|
-| **Fase ativa** | — (Fase 4 concluída; mód. 13 done) |
+| **Fase ativa** | — (migração concluída) |
 | **Iniciada em** | 2026-06-12 |
-| **Concluída em** | 2026-06-12 (Fase 4) |
+| **Concluída em** | 2026-06-12 |
 | **Responsável** | Agente implementador |
 
 ## Progresso por fase
@@ -20,10 +20,10 @@
 | 2 | Primeiro admin React | `done` | 2026-06-11 | apps/admin (login/dashboard/pedidos) + API admin + packages/ui + e2e smoke 5/5 |
 | 3 | Admin completo | `done` | 2026-06-12 | 12 módulos + dashboard/pedidos expand; `admin-clientes.ejs` permanece |
 | 4 | API crítica (checkout) | `done` | 2026-06-12 | cart, frete, checkout, webhooks, billing, socket chat, flags USE_NEW_* |
-| 5 | Vitrine Next (público) | `pending` | — | — |
-| 6 | Comprador Next | `pending` | — | — |
-| 7 | Drizzle + migrations | `pending` | — | — |
-| 8 | Descomissionar legacy | `pending` | — | — |
+| 5 | Vitrine Next (público) | `done` | 2026-06-12 | storefront :3002, API public, redirect legacy, e2e vitrine |
+| 6 | Comprador Next | `done` | 2026-06-12 | auth, carrinho, checkout, pedidos, banner; e2e store 6 specs @smoke |
+| 7 | Drizzle + migrations | `done` | 2026-06-12 | `@lojao/db` baseline + migrate; API auth/public/listPedidos Drizzle |
+| 8 | Descomissionar legacy | `done` | 2026-06-12 | legacy removido; stack api+admin+storefront+db; CI test:all |
 
 Status permitidos: `pending` | `in_progress` | `blocked` | `done`
 
@@ -31,14 +31,14 @@ Status permitidos: `pending` | `in_progress` | `blocked` | `done`
 
 | Métrica | Valor | Meta final |
 |---------|-------|------------|
-| Rotas Express ativas | 100% | 0% |
-| Páginas EJS restantes | 34 | 0 |
-| Apps no monorepo | 2 (api, admin) | 3 (api, admin, storefront) |
-| Rotas API `/api/v1` | 55+ (cart, checkout, shipping, billing, chat store, public) | — |
-| Páginas admin EJS restantes | 1 (`admin-clientes.ejs`) | 0 |
-| Legacy removido | não | sim |
-| Telas com data-testid (admin+store) | 100% admin React (+ charts) | 100% das telas React/Next |
-| Specs Playwright | 19 (+ dashboard, pedidos expand) + setup | smoke críticos por módulo admin |
+| Rotas Express ativas | 0% | 0% |
+| Páginas EJS restantes | 0 | 0 |
+| Apps no monorepo | 3 (api, admin, storefront) | 3 (api, admin, storefront) |
+| Rotas API `/api/v1` | 59+ | — |
+| Páginas admin EJS restantes | 0 | 0 |
+| Legacy removido | sim | sim |
+| Telas com data-testid (admin+store) | 100% admin + vitrine Next | 100% das telas React/Next |
+| Specs Playwright | 38 (admin + store @smoke) + setup | smoke críticos admin + vitrine + comprador |
 
 ## Equipe
 
@@ -246,10 +246,71 @@ Status permitidos: `pending` | `in_progress` | `blocked` | `done`
 - **testids** `admin-dashboard-chart-*`. vitest 4 casos charts. Playwright dashboard @smoke expand.
 - **Seed:** `make seed` popula pedidos `[DEV]` — gráficos exibem dados após seed.
 
+### Handoff para Fase 6
+
+- **Vitrine Next** em `apps/storefront` — home + detalhe SSR, tema tenant, testids + e2e smoke.
+- **API pública:** `GET /api/v1/public/store|categories|products|products/:id`.
+- **Legacy:** `USE_NEW_STOREFRONT=true` redireciona `/` e `/produto/:id` → `:3002`.
+- **Docker:** serviço `storefront` no profile `full`; Caddy opcional (`--profile proxy`) em `:8080`.
+- **Próximo:** carrinho, checkout, área comprador (Fase 6).
+
+### Notas / desvios da Fase 5
+
+- **Auth vitrine:** `/login` e `/cadastro` no Next redirecionam para legacy (302).
+- **Carrinho:** botão `store-product-add-cart-btn` desabilitado até Fase 6.
+- **Imagens:** servidas via `NEXT_PUBLIC_LEGACY_URL` + path `/images/...`.
+- **SSR Docker:** `API_URL=http://api:3001` no container; browser usa `NEXT_PUBLIC_API_URL`.
+- **Testes:** vitest public.store + public.products; Playwright `store/vitrine.spec.ts` @smoke.
+- **testid home:** `store-home-product-grid` no wrapper único da página (evita strict mode Playwright com várias categorias).
+- **pnpm-lock.yaml:** atualizado com deps do `apps/storefront` (necessário para `Dockerfile.storefront` frozen-lockfile).
+- **Verificação pós-queda WSL (2026-06-12):** typecheck ✓, build prod storefront ✓, e2e store 2/2 ✓, legacy redirect 302→:3002 ✓, SSR home/detalhe ✓.
+
+### Notas / desvios da Fase 6
+
+- **API comprador:** `POST /auth/register`, `POST /auth/recover-password`, `GET/POST /auth/reset-password/:token`, `GET /orders`, `GET /public/banners`; `GET /auth/me` expõe `email`.
+- **Storefront:** páginas login/cadastro/recuperar/redefinir, carrinho, checkout, resultado, meus-pedidos, billing; `BannerCarousel` + `AddToCartButton`; middleware protege rotas autenticadas.
+- **Proxy API no browser:** rewrites Next `/api/v1/*` → API; `API_URL` vazio no client para cookies same-site (logout/credenciais).
+- **Logout:** `POST` com body `{}` (Fastify rejeita JSON vazio); `clearCookie` com `domain=localhost` em dev.
+- **test-utils:** export `./test-ids/auth`; storefront importa subpaths (`test-ids/store`, `test-ids/auth`), não o barrel `test-ids/index`.
+- **Legacy redirect:** `storefrontRedirect.js` — GET auth/carrinho/checkout/meus-pedidos/billing → `:3002` quando `USE_NEW_STOREFRONT=true`; POST legacy intacto.
+- **E2E:** `buyer.setup.ts` via login UI; specs `store/auth|cart|checkout|orders`; projeto `store` serial (`fullyParallel: false`); `outputDir` em `/tmp`.
+- **Desvios DoD:** Stripe Elements UI não portado (métodos pix/boleto/teste ok); e-mail recuperação log-only sem SMTP.
+
+### Notas / desvios da Fase 7
+
+- **`packages/db`:** Drizzle ORM + drizzle-kit; baseline `0000_baseline.sql` espelha schema legacy (IF NOT EXISTS, sem alterar dados).
+- **Multi-tenant:** opção A — `getCachedTenantDb(slug)` injetado em `request.drizzle` via plugin tenant.
+- **API Drizzle:** auth (`usuarios`, `tentativas_login`, `tokens_recuperacao`), public products, admin `listPedidos`. Checkout/cart/admin demais módulos permanecem SQL raw.
+- **Makefile:** `db-migrate`, `db-generate`, `db-studio`.
+- **Testes:** `packages/db/tests/migrate.test.ts` (baseline + journal); regressão api 112/112; e2e smoke 23/23.
+- **Fix:** `package.json` raiz `test:e2e:smoke` → `pnpm --filter e2e test:smoke` (grep não era repassado ao Playwright).
+- **Coexistência (Fase 7):** Drizzle baseline idempotente coexistia com legacy até Fase 8.
+
+### Notas / desvios da Fase 8
+
+- **`apps/legacy` removido** — Express/EJS, Jest legacy, `Dockerfile.legacy`, volumes Docker legacy.
+- **Stack final:** `make up-d` → api + admin + storefront (:3000) + db; `make up-proxy` → Caddy :8080.
+- **Bootstrap API:** migrations Drizzle + auto-provision tenant no boot (`bootstrap.ts`).
+- **Seed:** `apps/api/scripts/seed-dev.mjs` + `make seed` / `pnpm seed`.
+- **Uploads:** `data/uploads/images` servidos em `/images/*` via `@fastify/static`.
+- **Admin/storefront:** imagens via API (`assetImageUrl`); chat Socket.io na API; `VITE_STOREFRONT_URL`.
+- **CI:** `.github/workflows/ci.yml` — typecheck + api test + e2e smoke.
+- **Desvio:** `admin-clientes.ejs` (showcase logos) descontinuado com legacy — sem equivalente React.
+- **Tag sugerida:** `v2.0.0-monorepo`.
+
+### Handoff pós-migração
+
+- Monorepo TS-only: api + admin + storefront + packages.
+- SQL raw restante na API (módulos não migrados para Drizzle) — migração gradual opcional.
+- Documentação: `docs/ARCHITECTURE.md`, `LEIA-ME.md`.
+
 ## Log de entregas
 
 <!-- Formato: YYYY-MM-DD — Fase N — resumo -->
-- 2026-06-12 — Módulo 13 — **Dashboard Recharts.** API charts + order-analytics compartilhado. UI 4 gráficos + período 7d/30d/90d. recharts + ChartCard. vitest charts 4/4. typecheck ✓. Próximo: Fase 5 vitrine Next.
+- 2026-06-12 — Fase 8 — **Descomissionar legacy.** Removido `apps/legacy` + Dockerfile. Stack final api/admin/storefront/db. Storefront :3000. Bootstrap API + seed migrados. Uploads `/images/*` na API. CI GitHub Actions. docs/ARCHITECTURE.md + LEIA-ME.md. api 112/112 ✓, e2e 38/38 ✓, smoke 23/23 ✓. Tag sugerida: v2.0.0-monorepo.
+- 2026-06-12 — Fase 7 — **Drizzle + migrations.** `packages/db` (`@lojao/db`): schema master+tenant, baseline `0000_baseline.sql`, `db:migrate|generate|studio`. Makefile `db-migrate`. API: auth/public/listPedidos via `request.drizzle`. Runbook `db-migration.md`. vitest db 1/1 ✓, api 112/112 ✓, e2e smoke 23/23 ✓. Fix `test:e2e:smoke` script. Próximo: Fase 8 descomissionar legacy.
+- 2026-06-12 — Fase 6 — **Comprador Next.** Auth register/recover/reset + orders + banners API. Storefront fluxo completo (carrinho, checkout teste, meus-pedidos, banner). Legacy redirect comprador. testids store/auth + e2e 6 specs @smoke. vitest api 112/112 ✓. make test-e2e 38/38 ✓. Próximo: Fase 7 Drizzle.
+- 2026-06-12 — Fase 5 — **Vitrine Next pública.** `apps/storefront` (home + produto SSR, middleware tenant, SEO). API public store/products. Legacy redirect `USE_NEW_STOREFRONT`. Docker storefront + Caddyfile. testids store + e2e vitrine. vitest public ✓. Próximo: Fase 6 comprador.
 - 2026-06-12 — Fase 4 — **API crítica checkout.** Módulos Fastify: cart, shipping, checkout (pix/boleto/cartao/sumup/teste), webhooks Stripe/SumUp, billing, store-chat REST + Socket.io. Feature flags `USE_NEW_*` + proxy legacy. Fixture `seedPedidoTeste` + `loginComprador` em test-utils. vitest 98/98 ✓. typecheck ✓. Docker/env pagamento na API. Rollback: `docs/migration/runbooks/checkout-rollback.md`. Próximo: Fase 5 vitrine Next.
 - 2026-06-12 — Fase 3 (concluída, sessão 12) — Módulo **Pedidos detalhe** + expansões **Dashboard** e **Pedidos**. API GET/PATCH pedido, stats expandidos. UI React detalhe/listagem/dashboard. Redirect legacy + 3 EJS removidos. testids `adminPedidoDetail.*`. vitest +12 casos. Playwright expand. **Fase 3 done.** Próximo: Fase 4 checkout API.
 - 2026-06-12 — Fase 3 (parcial, sessão 10) — Módulo **Chat** migrado. API REST conversas/mensagens/bot. UI React com socket.io-client → legacy. testids `adminChat.*`. vitest 7 casos. Playwright `chat.spec.ts`. Redirect legacy + EJS removido. **Próximo:** módulo 11 Diagnóstico.

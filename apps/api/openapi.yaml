@@ -166,6 +166,52 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
 
+  /api/v1/public/store:
+    get:
+      tags: [public]
+      summary: Dados da vitrine (loja + categorias + produtos)
+      parameters:
+        - $ref: '#/components/parameters/TenantSlug'
+      responses:
+        '200':
+          description: Payload home vitrine
+
+  /api/v1/public/categories:
+    get:
+      tags: [public]
+      summary: Categorias ativas com produtos
+      parameters:
+        - $ref: '#/components/parameters/TenantSlug'
+      responses:
+        '200':
+          description: Lista de categorias
+
+  /api/v1/public/products:
+    get:
+      tags: [public]
+      summary: Lista pública de produtos
+      parameters:
+        - $ref: '#/components/parameters/TenantSlug'
+      responses:
+        '200':
+          description: Lista de produtos
+
+  /api/v1/public/products/{id}:
+    get:
+      tags: [public]
+      summary: Detalhe público do produto
+      parameters:
+        - $ref: '#/components/parameters/TenantSlug'
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Produto com imagens
+        '404':
+          description: Produto não encontrado
+
   /api/v1/admin/dashboard/stats:
     get:
       tags: [admin]

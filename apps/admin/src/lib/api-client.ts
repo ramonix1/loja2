@@ -1,12 +1,18 @@
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
 const TENANT_SLUG = import.meta.env.VITE_TENANT_SLUG ?? 'loja';
-const LEGACY_URL = (import.meta.env.VITE_LEGACY_URL ?? 'http://localhost:3000').replace(/\/$/, '');
+const STOREFRONT_URL = (import.meta.env.VITE_STOREFRONT_URL ?? 'http://localhost:3000').replace(
+  /\/$/,
+  '',
+);
 
-/** URL absoluta para imagens legacy (`/images/...`). */
-export function legacyImageUrl(path: string): string {
+/** URL absoluta para imagens uploadadas (`/images/...` servidas pela API). */
+export function assetImageUrl(path: string): string {
   if (path.startsWith('http')) return path;
-  return `${LEGACY_URL}${path.startsWith('/') ? path : `/${path}`}`;
+  return `${API_URL}${path.startsWith('/') ? path : `/${path}`}`;
 }
+
+/** @deprecated use assetImageUrl */
+export const legacyImageUrl = assetImageUrl;
 
 export class ApiError extends Error {
   constructor(

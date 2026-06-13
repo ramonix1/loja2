@@ -1,7 +1,7 @@
 {
   "name": "lojao",
-  "version": "1.0.0",
-  "description": "Lojão — monorepo SaaS e-commerce multi-tenant (migração Strangler Fig)",
+  "version": "2.0.0",
+  "description": "Lojão — monorepo SaaS e-commerce multi-tenant",
   "private": true,
   "packageManager": "pnpm@10.33.0",
   "engines": {
@@ -14,12 +14,11 @@
     "typecheck": "turbo typecheck",
     "lint": "turbo lint",
     "test:api": "pnpm --filter api test",
-    "test:legacy": "pnpm --filter legacy test",
     "test:e2e": "pnpm --filter e2e test",
-    "test:e2e:smoke": "pnpm --filter e2e test -- --grep @smoke",
-    "test:all": "pnpm test && pnpm test:e2e:smoke",
-    "seed": "pnpm --filter legacy seed:dev",
-    "seed:fresh": "pnpm --filter legacy seed:dev -- --fresh"
+    "test:e2e:smoke": "pnpm --filter e2e test:smoke",
+    "test:all": "pnpm --filter api test && pnpm test:e2e:smoke",
+    "seed": "pnpm --filter api seed:dev",
+    "seed:fresh": "pnpm --filter api seed:fresh"
   },
   "devDependencies": {
     "turbo": "^2.5.8"

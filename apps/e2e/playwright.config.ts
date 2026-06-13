@@ -1,4 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
+import os from 'node:os';
+import path from 'node:path';
 
 /**
  * Configuração padrão da suíte E2E.
@@ -9,6 +11,7 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests',
+  outputDir: process.env.PLAYWRIGHT_OUTPUT_DIR ?? path.join(os.tmpdir(), 'loja2-e2e-results'),
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -18,21 +21,23 @@ export default defineConfig({
     testIdAttribute: 'data-testid',
   },
   projects: [
-    { name: 'setup', testDir: './fixtures', testMatch: /.*\.setup\.ts/ },
+    { name: 'setup', testDir: './fixtures', testMatch: /auth\.setup\.ts/ },
     {
       name: 'admin',
       use: { ...devices['Desktop Chrome'], storageState: '.auth/admin.json' },
       dependencies: ['setup'],
       testMatch: /admin\/.*\.spec\.ts/,
     },
+    { name: 'buyer-setup', testDir: './fixtures', testMatch: /buyer\.setup\.ts/ },
     {
       name: 'store',
+      fullyParallel: false,
       use: {
         ...devices['Desktop Chrome'],
-        baseURL: process.env.E2E_STORE_URL ?? 'http://localhost:3002',
+        baseURL: process.env.E2E_STORE_URL ?? 'http://localhost:3000',
         storageState: '.auth/buyer.json',
       },
-      dependencies: ['setup'],
+      dependencies: ['buyer-setup'],
       testMatch: /store\/.*\.spec\.ts/,
     },
   ],

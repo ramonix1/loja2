@@ -1,50 +1,48 @@
 # E2E — Playwright (QA)
 
-Suíte end-to-end do Lojão. A partir da **Fase 2**, cobre o admin React; vitrine (Next) entra nas Fases 5–6. **Nunca** aponta specs para o EJS legacy.
-
-Seletores usam **`data-testid`** via constantes de `@lojao/test-utils/test-ids` (nunca strings literais ou CSS/texto).
+Suíte end-to-end do Lojão. Cobre **admin React** (`:5173`) e **storefront Next** (`:3000`). Seletores via `data-testid` de `@lojao/test-utils/test-ids`.
 
 ## Estrutura
 
 ```
 apps/e2e/
   fixtures/
-    auth.setup.ts        # login admin via UI → salva .auth/admin.json
+    auth.setup.ts        # login admin → .auth/admin.json
+    buyer.setup.ts       # login comprador → .auth/buyer.json
   tests/
-    admin/
-      login.spec.ts      # login ok (@smoke) + credencial inválida
-      pedidos.spec.ts    # lista pedidos (@smoke) + sidebar
+    admin/               # specs @smoke dos 12 módulos admin
+    store/               # vitrine, auth, carrinho, checkout, pedidos
   playwright.config.ts
 ```
 
-Projetos do Playwright:
+Projetos:
 
-- **setup** — roda `fixtures/auth.setup.ts`, gera o storageState autenticado.
-- **admin** — specs `tests/admin/*.spec.ts`, reaproveita `.auth/admin.json` (baseURL `:5173`). `login.spec.ts` sobrescreve o storageState para começar deslogado.
-- **store** — reservado para a vitrine (Fases 5–6).
+- **setup** — auth admin
+- **admin** — specs admin com storageState
+- **buyer-setup** — auth comprador via UI
+- **store** — specs storefront (serial, baseURL `:3000`)
 
 ## Variáveis de ambiente
 
 ```env
-E2E_BASE_URL=http://localhost:5173      # admin (Vite)
-E2E_API_URL=http://localhost:3001       # Fastify
+E2E_BASE_URL=http://localhost:5173
+E2E_STORE_URL=http://localhost:3000
+E2E_API_URL=http://localhost:3001
 E2E_TENANT_SLUG=loja
 E2E_ADMIN_EMAIL=admin@loja.com
 E2E_ADMIN_PASSWORD=admin123
 ```
 
-Defaults já apontam para o ambiente dev local; só exporte se precisar sobrescrever.
-
 ## Pré-requisitos
 
-1. Stack no ar (admin + api + db):
+1. Stack no ar:
 
 ```bash
-make up-d                  # legacy + api + db
-pnpm --filter admin dev    # admin em :5173 (ou via Docker: make up-full)
+make up-d
+make seed          # recomendado para dados demo
 ```
 
-2. Navegador do Playwright instalado (uma vez):
+2. Chromium Playwright (uma vez):
 
 ```bash
 pnpm --filter e2e exec playwright install chromium
@@ -53,19 +51,15 @@ pnpm --filter e2e exec playwright install chromium
 ## Comandos
 
 ```bash
-# todos os specs
-pnpm --filter e2e test
-
-# só os smoke (login + pedidos)
-pnpm --filter e2e test:smoke
-pnpm test:e2e:smoke        # atalho a partir da raiz
-
-# modo UI (debug)
-pnpm --filter e2e test:ui
+pnpm --filter e2e test              # suite completa
+pnpm --filter e2e test:smoke        # só @smoke
+pnpm test:e2e:smoke                 # atalho raiz
+pnpm test:all                       # api vitest + smoke E2E
 ```
 
 ## Para o testador QA
 
-- Specs smoke (`@smoke`) cobrem login → dashboard e listagem de pedidos.
-- Para novos casos (filtros, paginação, status), use os testids já existentes em `@lojao/test-utils/test-ids` (`testIds.admin.*`, `testIds.auth.*`) — ver catálogo em `docs/migration/test-ids-catalog.md`.
-- Não adicione `data-testid` no EJS legacy.
+- Smoke (`@smoke`): login admin, dashboard, módulos admin, vitrine, carrinho, checkout teste, meus-pedidos.
+- Catálogo testids: `docs/migration/test-ids-catalog.md`
+- Antes de release: rodar suite completa (`pnpm --filter e2e test`), não só smoke.
+- Tag sugerida pós-migração: `v2.0.0-monorepo`

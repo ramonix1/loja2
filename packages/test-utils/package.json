@@ -15,9 +15,21 @@
       "types": "./src/test-ids/index.ts",
       "default": "./src/test-ids/index.ts"
     },
+    "./test-ids/store": {
+      "types": "./src/test-ids/store.ts",
+      "default": "./src/test-ids/store.ts"
+    },
+    "./test-ids/auth": {
+      "types": "./src/test-ids/auth.ts",
+      "default": "./src/test-ids/auth.ts"
+    },
     "./fixtures/auth": {
       "types": "./src/fixtures/auth.ts",
       "default": "./src/fixtures/auth.ts"
+    },
+    "./fixtures/seed-pedido": {
+      "types": "./src/fixtures/seed-pedido.ts",
+      "default": "./src/fixtures/seed-pedido.ts"
     }
   },
   "scripts": {

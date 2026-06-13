@@ -1,55 +1,48 @@
 .DEFAULT_GOAL := help
-.PHONY: help install up up-d up-full up-full-d down restart reset \
-        logs logs-all logs-api logs-legacy logs-admin \
-        shell shell-api db api-install admin-install deps-sync docker-rebuild \
-        seed seed-fresh \
-        test test-api test-all test-e2e test-e2e-smoke typecheck
+.PHONY: help install up up-d down restart reset \
+        logs logs-all logs-api logs-admin logs-storefront \
+        shell shell-api db api-install admin-install storefront-install deps-sync docker-rebuild \
+        seed seed-fresh db-migrate db-generate db-studio \
+        test test-api test-all test-e2e test-e2e-smoke typecheck build deploy-check
 
 help: ## Lista os comandos disponíveis
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
-		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
+		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
 
 install: ## pnpm install na raiz do monorepo
 	pnpm install
 
-up: ## Sobe legacy + api + db (build)
+up: ## Sobe api + admin + storefront + db (build)
 	docker compose up --build
 
-up-d: ## Sobe legacy + api + db em background
+up-d: ## Sobe api + admin + storefront + db em background
 	docker compose up --build -d
 
-up-full: ## Sobe legacy + api + admin + db (profile full)
-	docker compose --profile full up --build
-
-up-full-d: ## Sobe legacy + api + admin + db (profile full) em background
-	docker compose --profile full up --build -d
+up-proxy: ## Stack + Caddy proxy unificado (:8080)
+	docker compose --profile proxy up --build -d
 
 down: ## Para os containers
 	docker compose down
 
-restart: ## Reinicia o serviço legacy
-	docker compose restart legacy
+restart: ## Reinicia todos os serviços
+	docker compose restart
 
 reset: ## Para containers e apaga o banco (down -v)
 	docker compose down -v
 
-logs: ## Logs do legacy
-	docker compose logs -f legacy
-
-logs-all: ## Logs de todos os serviços
+logs: ## Logs de todos os serviços
 	docker compose logs -f
+
+logs-all: logs ## Alias para logs
 
 logs-api: ## Logs do Fastify (api)
 	docker compose logs -f api
 
-logs-legacy: ## Logs do Express (legacy)
-	docker compose logs -f legacy
-
-logs-admin: ## Logs do admin (Vite) — requer profile full
+logs-admin: ## Logs do admin (Vite)
 	docker compose logs -f admin
 
-shell: ## Shell no container legacy
-	docker compose exec legacy sh
+logs-storefront: ## Logs do storefront (Next)
+	docker compose logs -f storefront
 
 shell-api: ## Shell no container api
 	docker compose exec api sh
@@ -57,46 +50,65 @@ shell-api: ## Shell no container api
 db: ## psql no Postgres
 	docker compose exec db psql -U postgres -d lojao
 
-api-install: ## Reinstala deps da api nos volumes Docker (após pnpm add na api)
+api-install: ## Reinstala deps da api nos volumes Docker
 	docker compose exec -e CI=true api sh -c "rm -f /app/node_modules/.docker-lock-sha256 && cd /app && pnpm install --filter api..."
 	docker compose restart api
 
-admin-install: ## Reinstala deps do admin nos volumes Docker (após pnpm add no admin)
-	docker compose --profile full exec -e CI=true admin sh -c "rm -f /app/node_modules/.docker-lock-sha256 && cd /app && pnpm install --filter admin..."
-	docker compose --profile full restart admin
+admin-install: ## Reinstala deps do admin nos volumes Docker
+	docker compose exec -e CI=true admin sh -c "rm -f /app/node_modules/.docker-lock-sha256 && cd /app && pnpm install --filter admin..."
+	docker compose restart admin
 
-deps-sync: ## Força sync de deps em api + admin + legacy (após mudança no lockfile)
+storefront-install: ## Reinstala deps do storefront nos volumes Docker
+	docker compose exec -e CI=true storefront sh -c "rm -f /app/node_modules/.docker-lock-sha256 && cd /app && pnpm install --filter storefront..."
+	docker compose restart storefront
+
+deps-sync: ## Força sync de deps em api + admin + storefront
 	docker compose exec -e CI=true api sh -c "rm -f /app/node_modules/.docker-lock-sha256"
-	docker compose --profile full exec -e CI=true admin sh -c "rm -f /app/node_modules/.docker-lock-sha256" 2>/dev/null || true
-	docker compose exec -e CI=true legacy sh -c "rm -f /app/node_modules/.docker-lock-sha256"
-	docker compose --profile full up -d --build
+	docker compose exec -e CI=true admin sh -c "rm -f /app/node_modules/.docker-lock-sha256"
+	docker compose exec -e CI=true storefront sh -c "rm -f /app/node_modules/.docker-lock-sha256"
+	docker compose up -d --build
 
 docker-rebuild: ## Rebuild completo das imagens (sem cache)
-	docker compose --profile full build --no-cache
+	docker compose build --no-cache
 
 seed: ## Popula banco dev (produtos, compradores, pedidos, pagamentos)
-	docker compose exec legacy node scripts/seed-dev.js
+	docker compose exec api pnpm seed:dev
 
 seed-fresh: ## Recria dados [DEV] do zero
-	docker compose exec legacy node scripts/seed-dev.js --fresh
+	docker compose exec api pnpm seed:fresh
 
-test: ## Testes do legacy (Jest) — escopo até Fase 8
-	pnpm --filter legacy test
+db-migrate: ## Roda migrations Drizzle (@lojao/db)
+	pnpm --filter @lojao/db db:migrate
 
-test-api: ## Testes de integração da api (vitest) — requer Postgres (make up-d db)
+db-generate: ## Gera migration após alteração de schema
+	pnpm --filter @lojao/db db:generate
+
+db-studio: ## Drizzle Studio (inspecionar banco)
+	pnpm --filter @lojao/db db:studio
+
+test: ## Testes turbo (api + packages)
+	pnpm turbo test
+
+test-api: ## Testes de integração da api (vitest) — requer Postgres
 	pnpm --filter api test
 
-test-api-smoke: ## Smoke bootstrap da api (health + login) — falha cedo se deps/import quebrados
+test-api-smoke: ## Smoke bootstrap da api (health + login)
 	pnpm --filter api test -- 00-bootstrap
 
-test-all: ## Testes legacy (Jest) + api (vitest) — requer Postgres p/ api
-	pnpm --filter legacy --filter api test
+test-all: ## api vitest + e2e @smoke — requer stack no ar
+	pnpm test:all
 
-test-e2e: ## Playwright admin — requer stack no ar (make up-full-d) + browsers
+test-e2e: ## Playwright completo — requer stack + browsers
 	pnpm --filter e2e test
 
-test-e2e-smoke: ## Playwright smoke (@smoke) — requer stack no ar + browsers
+test-e2e-smoke: ## Playwright smoke (@smoke)
 	pnpm test:e2e:smoke
 
-typecheck: ## turbo typecheck em api e packages
+typecheck: ## turbo typecheck
 	pnpm turbo typecheck
+
+build: ## turbo build (api + admin + storefront + packages)
+	pnpm turbo build
+
+deploy-check: ## Gate release: typecheck + test + build
+	pnpm turbo typecheck && pnpm --filter api test && pnpm turbo build

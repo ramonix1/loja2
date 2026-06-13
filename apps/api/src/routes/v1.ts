@@ -10,6 +10,7 @@ import { categoriasRoutes } from '../modules/categorias/categorias.routes.js';
 import { checkoutRoutes } from '../modules/checkout/checkout.routes.js';
 import { configuracoesRoutes } from '../modules/configuracoes/configuracoes.routes.js';
 import { compradoresRoutes } from '../modules/compradores/compradores.routes.js';
+import { ordersRoutes } from '../modules/orders/orders.routes.js';
 import { produtosRoutes } from '../modules/produtos/produtos.routes.js';
 import { publicRoutes } from '../modules/public/public.routes.js';
 import { relatoriosRoutes } from '../modules/relatorios/relatorios.routes.js';
@@ -35,6 +36,7 @@ export async function v1Routes(app: FastifyInstance): Promise<void> {
   await app.register(cartRoutes);
   await app.register(shippingRoutes);
   await app.register(checkoutRoutes);
+  await app.register(ordersRoutes);
   await app.register(billingRoutes);
   await app.register(storeChatRoutes);
   await app.register(adminRoutes);

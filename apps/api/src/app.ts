@@ -8,13 +8,12 @@ import { v1Routes } from './routes/v1.js';
 import { webhookRoutes } from './modules/webhooks/webhook.routes.js';
 import { sessionPlugin } from './plugins/session.js';
 import { registerSocketIO } from './plugins/socketio.js';
+import { registerStaticAssets } from './plugins/static-assets.js';
 
 /**
  * Monta a instância Fastify.
  *
- * Fase 1: CORS (credentials), cookie + sessão compartilhada com o legacy,
- * resolução de tenant e rotas `/api/v1` (auth + tenant). Health check sem prefixo.
- * Fase 4: webhooks `/webhook/*`, Socket.io chat, checkout/cart/shipping/billing.
+ * Auth/tenant, `/api/v1`, webhooks `/webhook/*`, Socket.io, uploads `/images/*`.
  */
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -26,7 +25,6 @@ export async function buildApp(): Promise<FastifyInstance> {
     origin: [
       'http://localhost:3000',
       'http://localhost:5173',
-      'http://localhost:3002',
     ],
     credentials: true,
   });
@@ -38,6 +36,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(sessionPlugin);
 
   await app.register(healthRoutes);
+  await registerStaticAssets(app);
   await app.register(webhookRoutes);
   await app.register(v1Routes, { prefix: '/api/v1' });
 
