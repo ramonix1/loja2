@@ -68,8 +68,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Verify Playwright CLI
+        run: node apps/e2e/scripts/run-playwright.mjs --version
+
       - name: Install Playwright browsers
-        run: pnpm --filter e2e run install:browsers
+        run: node apps/e2e/scripts/run-playwright.mjs install --with-deps chromium
 
       - name: Start stack
         run: |
@@ -82,13 +85,13 @@ jobs:
       - name: Seed database
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/lojao
-        run: pnpm --filter api seed:dev || true
+        run: node apps/api/scripts/run-seed.mjs || true
 
       - name: E2E smoke
         env:
           E2E_BASE_URL: http://localhost:5173
           E2E_STORE_URL: http://localhost:3000
-        run: pnpm --filter e2e run test:smoke
+        run: node apps/e2e/scripts/run-playwright.mjs test --grep @smoke --pass-with-no-tests
 
       - name: Stop stack
         if: always()

@@ -12,8 +12,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "seed:dev": "tsx scripts/seed-dev.mjs",
-    "seed:fresh": "tsx scripts/seed-dev.mjs --fresh"
+    "seed:dev": "node ./scripts/run-seed.mjs",
+    "seed:fresh": "node ./scripts/run-seed.mjs --fresh"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.2",

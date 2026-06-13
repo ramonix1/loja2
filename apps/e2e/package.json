@@ -5,10 +5,10 @@
   "description": "Suíte E2E Playwright (QA) — specs de UI nova a partir da Fase 2",
   "type": "module",
   "scripts": {
-    "install:browsers": "playwright install --with-deps chromium",
-    "test": "playwright test --pass-with-no-tests",
-    "test:ui": "playwright test --ui",
-    "test:smoke": "playwright test --grep @smoke --pass-with-no-tests",
+    "install:browsers": "node ./scripts/run-playwright.mjs install chromium",
+    "test": "node ./scripts/run-playwright.mjs test --pass-with-no-tests",
+    "test:ui": "node ./scripts/run-playwright.mjs test --ui",
+    "test:smoke": "node ./scripts/run-playwright.mjs test --grep @smoke --pass-with-no-tests",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

@@ -4,7 +4,7 @@
         shell shell-api db api-install admin-install storefront-install deps-sync docker-rebuild \
         seed seed-fresh db-migrate db-generate db-studio \
         test test-api test-all test-e2e test-e2e-smoke typecheck build deploy-check \
-        ci-check ci-check-docker
+        ci-check ci-check-docker ci-e2e-smoke-docker
 
 help: ## Lista os comandos disponíveis
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -120,3 +120,7 @@ ci-check: ## Mesmo gate do job CI "test" (typecheck + api + db) — requer Node 
 ci-check-docker: ## Gate CI no Docker (Node 24, banco limpo) — use antes de push
 	@chmod +x scripts/ci-check-docker.sh
 	@./scripts/ci-check-docker.sh
+
+ci-e2e-smoke-docker: ## Gate CI e2e-smoke (stack + Playwright @smoke)
+	@chmod +x scripts/ci-e2e-smoke-docker.sh
+	@./scripts/ci-e2e-smoke-docker.sh
