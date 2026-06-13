@@ -5,9 +5,9 @@
   "description": "Suíte E2E Playwright (QA) — specs de UI nova a partir da Fase 2",
   "type": "module",
   "scripts": {
-    "test": "playwright test --pass-with-no-tests",
-    "test:ui": "playwright test --ui",
-    "test:smoke": "playwright test --grep @smoke --pass-with-no-tests",
+    "test": "pnpm exec playwright test --pass-with-no-tests",
+    "test:ui": "pnpm exec playwright test --ui",
+    "test:smoke": "pnpm exec playwright test --grep @smoke --pass-with-no-tests",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

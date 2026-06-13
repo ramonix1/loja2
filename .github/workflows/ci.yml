@@ -71,6 +71,9 @@ jobs:
       - name: Install Playwright
         run: pnpm --filter e2e exec playwright install --with-deps chromium
 
+      - name: Verify Playwright CLI
+        run: pnpm --filter e2e exec playwright --version
+
       - name: Start stack
         run: |
           docker compose up --build -d
@@ -81,7 +84,7 @@ jobs:
           docker compose exec -T api pnpm seed:dev || true
 
       - name: E2E smoke
-        run: pnpm test:e2e:smoke
+        run: pnpm --filter e2e exec playwright test --grep @smoke --pass-with-no-tests
 
       - name: Stop stack
         if: always()
