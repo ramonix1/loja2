@@ -76,21 +76,26 @@ jobs:
       - name: Install Playwright browsers
         run: node apps/e2e/scripts/run-playwright.mjs install --with-deps chromium
 
-      - name: Start stack
+      # Ordem importa: deps + Playwright no host ANTES dos containers dev.
+      # Entrypoints Docker rodam pnpm como root no bind mount → EACCES no runner.
+      # Seed precisa de @lojao/db no host; sobe só db, seed, depois api/admin/storefront.
+      - name: Start database
         run: |
-          docker compose up --build -d
-          docker compose ps
-          timeout 180 bash -c 'until curl -sf http://localhost:3001/health; do sleep 3; done'
-          timeout 180 bash -c 'until curl -sf http://localhost:5173/; do sleep 3; done'
-          timeout 180 bash -c 'until curl -sf http://localhost:3000/; do sleep 3; done'
-
-      - name: Reinstall deps after Docker (entrypoint pode alterar bind mount)
-        run: pnpm install --filter api... --filter e2e... --frozen-lockfile
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml up --build -d db
+          timeout 60 bash -c 'until docker compose exec -T db pg_isready -U postgres -d lojao; do sleep 2; done'
 
       - name: Seed database
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/lojao
         run: node apps/api/scripts/run-seed.mjs || true
+
+      - name: Start app stack
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml up --build -d api admin storefront
+          docker compose ps
+          timeout 180 bash -c 'until curl -sf http://localhost:3001/health; do sleep 3; done'
+          timeout 180 bash -c 'until curl -sf http://localhost:5173/; do sleep 3; done'
+          timeout 180 bash -c 'until curl -sf http://localhost:3000/; do sleep 3; done'
 
       - name: E2E smoke
         env:
@@ -100,4 +105,4 @@ jobs:
 
       - name: Stop stack
         if: always()
-        run: docker compose down -v
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml down -v

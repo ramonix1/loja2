@@ -4,6 +4,14 @@
 set -e
 
 FILTER="${PNPM_FILTER:?PNPM_FILTER is required (ex.: admin...)}"
+
+# No CI o host já rodou pnpm install; sync aqui escreve como root no bind mount,
+# apaga apps/e2e/node_modules e causa EACCES no runner.
+if [ "${GITHUB_ACTIONS:-}" = "true" ] || [ "${SKIP_DOCKER_DEPS_SYNC:-}" = "true" ]; then
+  echo "[entrypoint] SKIP sync deps (CI/host)."
+  exec "$@"
+fi
+
 LOCK="/app/pnpm-lock.yaml"
 MARKER="/app/node_modules/.docker-lock-sha256"
 

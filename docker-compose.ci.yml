@@ -1,0 +1,15 @@
+# Override para CI (GitHub Actions): bind mount usa node_modules do host.
+# Evita volumes vazios que mascaram deps + entrypoints que rodam pnpm como root no workspace.
+services:
+  api:
+    volumes: !override
+      - .:/app
+      - upload_data:/app/data/uploads/images
+
+  admin:
+    volumes: !override
+      - .:/app
+
+  storefront:
+    volumes: !override
+      - .:/app
