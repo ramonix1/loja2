@@ -1,5 +1,5 @@
 {
-  "extends": "@lojao/eslint-config/base.json",
+  "extends": "../../packages/eslint-config/base.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
