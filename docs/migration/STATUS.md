@@ -296,7 +296,7 @@ Status permitidos: `pending` | `in_progress` | `blocked` | `done`
 - **Admin/storefront:** imagens via API (`assetImageUrl`); chat Socket.io na API; `VITE_STOREFRONT_URL`.
 - **CI:** `.github/workflows/ci.yml` — typecheck + api test + e2e smoke.
 - **Desvio:** `admin-clientes.ejs` (showcase logos) descontinuado com legacy — sem equivalente React.
-- **Tag sugerida:** `v2.0.0-monorepo`.
+- **Tag sugerida:** `v2.0.0-monorepo` — **criada** em `e864909` (rollback: `legacy/final` → `e341c57`).
 
 ### Handoff pós-migração
 
