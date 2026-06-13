@@ -233,6 +233,18 @@ async function createTenantTables(pool: pg.Pool): Promise<void> {
       preco_unitario NUMERIC(10,2) NOT NULL DEFAULT 0,
       subtotal NUMERIC(10,2) NOT NULL DEFAULT 0
     );
+    CREATE TABLE IF NOT EXISTS pagamentos (
+      id SERIAL PRIMARY KEY,
+      pedido_id INTEGER NOT NULL REFERENCES pedidos(id) ON DELETE CASCADE,
+      mp_payment_id VARCHAR(100),
+      status VARCHAR(20) NOT NULL DEFAULT 'pendente',
+      status_mp VARCHAR(30),
+      valor NUMERIC(10,2),
+      metodo VARCHAR(20),
+      resposta_json TEXT,
+      created_at TIMESTAMP DEFAULT NOW(),
+      updated_at TIMESTAMP DEFAULT NOW()
+    );
     CREATE TABLE IF NOT EXISTS agendamentos (
       id SERIAL PRIMARY KEY,
       pedido_id INTEGER NOT NULL REFERENCES pedidos(id) ON DELETE CASCADE,
@@ -374,15 +386,8 @@ async function ensureTestPedido(pool: pg.Pool): Promise<void> {
     ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS numero VARCHAR(20);
     ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS complemento VARCHAR(100);
     ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS bairro VARCHAR(100);
-    CREATE TABLE IF NOT EXISTS pagamentos (
-      id SERIAL PRIMARY KEY,
-      pedido_id INTEGER REFERENCES pedidos(id) ON DELETE CASCADE,
-      mp_payment_id VARCHAR(100),
-      status VARCHAR(40) DEFAULT 'pending',
-      status_mp VARCHAR(40),
-      metodo VARCHAR(20),
-      created_at TIMESTAMP DEFAULT NOW()
-    );
+    ALTER TABLE pagamentos ADD COLUMN IF NOT EXISTS valor NUMERIC(10,2);
+    ALTER TABLE pagamentos ADD COLUMN IF NOT EXISTS resposta_json TEXT;
   `);
 
   const userRes = await pool.query<{ id: number }>(
