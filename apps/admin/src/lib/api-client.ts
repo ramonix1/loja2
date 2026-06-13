@@ -31,14 +31,19 @@ export class ApiError extends Error {
  * do contrato da API (`{ error, code }`).
  */
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const hasBody = options.body != null && options.body !== '';
+  const headers: Record<string, string> = {
+    'X-Tenant-Slug': TENANT_SLUG,
+    ...((options.headers as Record<string, string> | undefined) ?? {}),
+  };
+  if (hasBody) {
+    headers['Content-Type'] = 'application/json';
+  }
+
   const res = await fetch(`${API_URL}${path}`, {
     ...options,
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Tenant-Slug': TENANT_SLUG,
-      ...options.headers,
-    },
+    headers,
   });
 
   const body = (await res.json().catch(() => ({}))) as {

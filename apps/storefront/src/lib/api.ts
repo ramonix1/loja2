@@ -9,11 +9,9 @@ const TENANT_SLUG = process.env.TENANT_SLUG ?? process.env.NEXT_PUBLIC_TENANT_SL
 export function assetUrl(path: string): string {
   if (!path) return '';
   if (path.startsWith('http')) return path;
-  const base =
-    typeof window !== 'undefined'
-      ? (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001')
-      : API_URL;
-  return `${base.replace(/\/$/, '')}${path.startsWith('/') ? path : `/${path}`}`;
+  // URLs exibidas no browser — sempre host público, não API_URL interna do Docker
+  const base = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001').replace(/\/$/, '');
+  return `${base}${path.startsWith('/') ? path : `/${path}`}`;
 }
 
 /** @deprecated use assetUrl */
@@ -33,7 +31,7 @@ export class ApiError extends Error {
 async function fetchApi<T>(path: string): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
     headers: { 'X-Tenant-Slug': TENANT_SLUG },
-    next: { revalidate: 60 },
+    cache: 'no-store',
   });
 
   const body = (await res.json().catch(() => ({}))) as {

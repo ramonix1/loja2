@@ -11,10 +11,15 @@ const nextConfig: NextConfig = {
         source: '/api/v1/:path*',
         destination: `${apiUrl}/api/v1/:path*`,
       },
+      {
+        source: '/images/:path*',
+        destination: `${apiUrl}/images/:path*`,
+      },
     ];
   },
   images: {
     remotePatterns: [
+      { protocol: 'http', hostname: 'localhost', port: '3001', pathname: '/**' },
       { protocol: 'http', hostname: 'localhost', port: '3000', pathname: '/**' },
       { protocol: 'https', hostname: 'placehold.co', pathname: '/**' },
     ],

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 import { StoreFooter } from '@/components/layout/store-footer';
 import { StoreHeader } from '@/components/layout/store-header';
-import { buildStoreMetadata, fetchPublicStore } from '@/lib/api';
+import { buildStoreMetadata, assetUrl, fetchPublicStore } from '@/lib/api';
 
 import './globals.css';
 
@@ -21,13 +21,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="pt-BR">
       <head>
         {storeData.loja.favicon ? (
-          <link rel="icon" href={storeData.loja.favicon} />
+          <link rel="icon" href={assetUrl(storeData.loja.favicon)} />
         ) : null}
         <style>{`:root { --cor-primaria: ${cor}; }`}</style>
       </head>
-      <body>
+      <body className="flex min-h-screen flex-col">
         <StoreHeader store={storeData.loja} />
-        <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
         <StoreFooter store={storeData.loja} />
       </body>
     </html>

@@ -1,6 +1,6 @@
 import { store as testIds } from '@lojao/test-utils/test-ids/store';
 import type { Metadata } from 'next';
-import { AddToCartButton } from '@/components/add-to-cart-button';
+import { ProductPurchaseActions } from '@/components/product-purchase-actions';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -137,12 +137,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <p className="leading-relaxed text-gray-700">{product.descricao}</p>
           ) : null}
 
-          <div className="flex flex-wrap gap-3 pt-2">
-            <AddToCartButton produtoId={product.id} disabled={esgotado} />
-            <Link href="/login" className="btn-outline px-6 py-3 text-base">
-              Entrar para comprar
-            </Link>
-          </div>
+          <ProductPurchaseActions produtoId={product.id} esgotado={esgotado} />
         </div>
       </div>
     </div>

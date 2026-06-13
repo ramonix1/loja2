@@ -17,14 +17,19 @@ async function apiFetch<T>(
   path: string,
   init: RequestInit = {},
 ): Promise<T> {
+  const hasBody = init.body != null && init.body !== '';
+  const headers: Record<string, string> = {
+    'X-Tenant-Slug': TENANT_SLUG,
+    ...((init.headers as Record<string, string> | undefined) ?? {}),
+  };
+  if (hasBody) {
+    headers['Content-Type'] = 'application/json';
+  }
+
   const res = await fetch(`${API_URL}${path}`, {
     ...init,
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Tenant-Slug': TENANT_SLUG,
-      ...(init.headers ?? {}),
-    },
+    headers,
   });
 
   const body = (await res.json().catch(() => ({}))) as {
