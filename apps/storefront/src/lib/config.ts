@@ -1,7 +1,5 @@
-import { getServerApiUrl } from '@/lib/server-api-url';
-
-/** Browser: paths relativos (rewrites Next). Servidor: host interno Docker via API_URL. */
-export const API_URL = typeof window !== 'undefined' ? '' : getServerApiUrl();
+/** Paths relativos — Next.js rewrites proxiam /api/v1 e /images para a API. */
+export const API_URL = '';
 
 export const TENANT_SLUG =
   process.env.TENANT_SLUG ?? process.env.NEXT_PUBLIC_TENANT_SLUG ?? 'loja';
