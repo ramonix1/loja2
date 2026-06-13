@@ -1,7 +1,7 @@
-export const API_URL =
-  typeof window !== 'undefined'
-    ? ''
-    : (process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001');
+import { getServerApiUrl } from '@/lib/server-api-url';
+
+/** Browser: paths relativos (rewrites Next). Servidor: host interno Docker via API_URL. */
+export const API_URL = typeof window !== 'undefined' ? '' : getServerApiUrl();
 
 export const TENANT_SLUG =
   process.env.TENANT_SLUG ?? process.env.NEXT_PUBLIC_TENANT_SLUG ?? 'loja';

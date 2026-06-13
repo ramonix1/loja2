@@ -3,7 +3,6 @@ import type { NextRequest } from 'next/server';
 
 const PROTECTED_PREFIXES = ['/carrinho', '/checkout', '/meus-pedidos', '/dashboard/billing'];
 
-const API_URL = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 const TENANT_SLUG = process.env.TENANT_SLUG ?? process.env.NEXT_PUBLIC_TENANT_SLUG ?? 'loja';
 
 /**
@@ -23,7 +22,8 @@ export async function middleware(request: NextRequest) {
 
   if (isProtected) {
     const cookie = request.headers.get('cookie') ?? '';
-    const meRes = await fetch(`${API_URL}/api/v1/auth/me`, {
+    const meUrl = new URL('/api/v1/auth/me', request.url);
+    const meRes = await fetch(meUrl, {
       headers: { cookie, 'X-Tenant-Slug': TENANT_SLUG },
       cache: 'no-store',
     });

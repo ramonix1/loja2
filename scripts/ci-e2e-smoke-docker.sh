@@ -30,7 +30,8 @@ $COMPOSE up --build -d api
 scripts/ci-wait-url.sh api http://localhost:3001/health 180
 $COMPOSE up --build -d admin storefront
 scripts/ci-wait-url.sh admin http://localhost:5173/ 180
-scripts/ci-wait-url.sh storefront http://localhost:3000/ 300
+scripts/ci-wait-url.sh storefront http://localhost:3000/health 180
+scripts/ci-wait-url.sh storefront http://localhost:3000/ 120
 
 echo "[ci-e2e] E2E smoke..."
 E2E_BASE_URL=http://localhost:5173 E2E_STORE_URL=http://localhost:3000 \

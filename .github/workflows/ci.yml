@@ -98,7 +98,8 @@ jobs:
           docker compose -f docker-compose.yml -f docker-compose.ci.yml up --build -d admin storefront
           docker compose ps
           scripts/ci-wait-url.sh admin http://localhost:5173/ 180
-          scripts/ci-wait-url.sh storefront http://localhost:3000/ 300
+          scripts/ci-wait-url.sh storefront http://localhost:3000/health 180
+          scripts/ci-wait-url.sh storefront http://localhost:3000/ 120
 
       - name: E2E smoke
         env:

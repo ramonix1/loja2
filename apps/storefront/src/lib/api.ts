@@ -2,8 +2,8 @@ import type { PublicBanner, PublicProduct, PublicStoreData } from '@lojao/types/
 import type { Metadata } from 'next';
 import { cache } from 'react';
 
-const API_URL =
-  process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+import { getServerApiUrl } from '@/lib/server-api-url';
+
 const TENANT_SLUG = process.env.TENANT_SLUG ?? process.env.NEXT_PUBLIC_TENANT_SLUG ?? 'loja';
 
 export function assetUrl(path: string): string {
@@ -29,7 +29,7 @@ export class ApiError extends Error {
 }
 
 async function fetchApi<T>(path: string): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, {
+  const res = await fetch(`${getServerApiUrl()}${path}`, {
     headers: { 'X-Tenant-Slug': TENANT_SLUG },
     cache: 'no-store',
   });
