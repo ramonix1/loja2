@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 
-import { ApiError, apiFetch, apiUpload, legacyImageUrl } from '../../../lib/api-client';
+import { ApiError, apiFetch, apiUpload, legacyImageUrl, STOREFRONT_URL } from '../../../lib/api-client';
 import { formatBRL, maskBRLInput, parseBRLInput } from '../../../lib/currency';
 
 interface Produto {
@@ -19,10 +19,6 @@ interface Produto {
 function fetchProdutos() {
   return apiFetch<{ data: Produto[] }>('/api/v1/admin/produtos').then((r) => r.data);
 }
-
-const STOREFRONT_URL = (import.meta.env.VITE_STOREFRONT_URL ?? 'http://localhost:3000').replace(
-  /\/$/,
-  '');
 
 export function ProdutosPage() {
   const queryClient = useQueryClient();

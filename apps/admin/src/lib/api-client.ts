@@ -1,6 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
 const TENANT_SLUG = import.meta.env.VITE_TENANT_SLUG ?? 'loja';
-const STOREFRONT_URL = (import.meta.env.VITE_STOREFRONT_URL ?? 'http://localhost:3000').replace(
+export const STOREFRONT_URL = (import.meta.env.VITE_STOREFRONT_URL ?? 'http://localhost:3000').replace(
   /\/$/,
   '',
 );
