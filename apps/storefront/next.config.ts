@@ -4,7 +4,12 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   transpilePackages: ['@lojao/test-utils', '@lojao/types'],
   async rewrites() {
-    const apiUrl = (process.env.API_URL ?? 'http://localhost:3001').replace(/\/$/, '');
+    const apiUrl = (
+      process.env.API_URL ??
+      (process.env.GITHUB_ACTIONS === 'true' || process.env.SKIP_DOCKER_DEPS_SYNC === 'true'
+        ? 'http://api:3001'
+        : 'http://localhost:3001')
+    ).replace(/\/$/, '');
     return [
       {
         source: '/api/v1/:path*',

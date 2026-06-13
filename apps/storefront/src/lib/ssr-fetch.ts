@@ -1,10 +1,20 @@
 /**
- * Base URL para fetch SSR no servidor Next.
- * Usa same-origin para acionar rewrites (/api/v1 → API_URL interna no Docker).
- * Evita localhost:3001 (porta da API) e paths relativos (inválidos no fetch do Node).
+ * URL da API para fetch SSR (servidor Next).
+ * Lê process.env em runtime a cada request.
+ *
+ * Não usar HOSTNAME do container nem NEXT_PUBLIC_API_URL (browser/localhost).
+ * No GHA, HOSTNAME é o ID do container → fetch same-origin quebra com ECONNREFUSED.
  */
-export function getSsrFetchOrigin(): string {
-  const port = process.env.PORT ?? '3000';
-  const host = process.env.HOSTNAME ?? '127.0.0.1';
-  return `http://${host}:${port}`;
+export function getSsrApiBase(): string {
+  const fromEnv = process.env.API_URL;
+  if (fromEnv) return fromEnv.replace(/\/$/, '');
+
+  if (
+    process.env.SKIP_DOCKER_DEPS_SYNC === 'true' ||
+    process.env.GITHUB_ACTIONS === 'true'
+  ) {
+    return 'http://api:3001';
+  }
+
+  return 'http://localhost:3001';
 }

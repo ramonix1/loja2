@@ -2,7 +2,7 @@ import type { PublicBanner, PublicProduct, PublicStoreData } from '@lojao/types/
 import type { Metadata } from 'next';
 import { cache } from 'react';
 
-import { getSsrFetchOrigin } from '@/lib/ssr-fetch';
+import { getSsrApiBase } from '@/lib/ssr-fetch';
 
 const TENANT_SLUG = process.env.TENANT_SLUG ?? process.env.NEXT_PUBLIC_TENANT_SLUG ?? 'loja';
 
@@ -29,7 +29,7 @@ export class ApiError extends Error {
 }
 
 async function fetchApi<T>(path: string): Promise<T> {
-  const res = await fetch(`${getSsrFetchOrigin()}${path}`, {
+  const res = await fetch(`${getSsrApiBase()}${path}`, {
     headers: { 'X-Tenant-Slug': TENANT_SLUG },
     cache: 'no-store',
   });
