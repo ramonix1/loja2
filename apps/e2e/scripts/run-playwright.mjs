@@ -1,18 +1,17 @@
 #!/usr/bin/env node
 /**
- * Invoca o CLI do Playwright via resolução de módulo Node (sem depender de .bin no PATH).
- * Necessário no CI (pnpm + GHA) onde `playwright` no script falha com ENOENT.
+ * Invoca o CLI do Playwright via store .pnpm (sem depender de apps/e2e/node_modules).
  */
 import { spawnSync } from 'node:child_process';
-import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { findRepoRoot, resolvePnpmPackage } from '../../../scripts/pnpm-resolve.mjs';
+
 const here = dirname(fileURLToPath(import.meta.url));
 const pkgRoot = join(here, '..');
-const require = createRequire(join(pkgRoot, 'package.json'));
-
-const cli = require.resolve('@playwright/test/cli');
+const repoRoot = findRepoRoot(pkgRoot);
+const cli = join(resolvePnpmPackage(repoRoot, '@playwright/test'), 'cli.js');
 const args = process.argv.slice(2);
 
 const result = spawnSync(process.execPath, [cli, ...args], {

@@ -1,18 +1,17 @@
 #!/usr/bin/env node
 /**
- * Roda seed-dev via tsx com resolução de módulo Node (sem depender de .bin no PATH).
- * Mesmo padrão de apps/e2e/scripts/run-playwright.mjs — necessário no CI (pnpm + GHA).
+ * Roda seed-dev via tsx resolvido no store .pnpm (sem depender de apps/api/node_modules).
  */
 import { spawnSync } from 'node:child_process';
-import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { findRepoRoot, resolvePnpmPackage } from '../../../scripts/pnpm-resolve.mjs';
+
 const here = dirname(fileURLToPath(import.meta.url));
 const pkgRoot = join(here, '..');
-const require = createRequire(join(pkgRoot, 'package.json'));
-
-const tsxCli = require.resolve('tsx/cli');
+const repoRoot = findRepoRoot(pkgRoot);
+const tsxCli = join(resolvePnpmPackage(repoRoot, 'tsx'), 'dist/cli.mjs');
 const seedScript = join(here, 'seed-dev.mjs');
 const args = process.argv.slice(2);
 

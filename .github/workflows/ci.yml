@@ -66,7 +66,9 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm install --filter api... --filter e2e... --frozen-lockfile
 
       - name: Verify Playwright CLI
         run: node apps/e2e/scripts/run-playwright.mjs --version
@@ -81,6 +83,9 @@ jobs:
           timeout 180 bash -c 'until curl -sf http://localhost:3001/health; do sleep 3; done'
           timeout 180 bash -c 'until curl -sf http://localhost:5173/; do sleep 3; done'
           timeout 180 bash -c 'until curl -sf http://localhost:3000/; do sleep 3; done'
+
+      - name: Reinstall deps after Docker (entrypoint pode alterar bind mount)
+        run: pnpm install --filter api... --filter e2e... --frozen-lockfile
 
       - name: Seed database
         env:
