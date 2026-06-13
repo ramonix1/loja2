@@ -50,14 +50,14 @@ export async function getTenant(slug: string): Promise<{ pool: pg.Pool; tenant: 
 
   const isProduction = process.env.NODE_ENV === 'production';
 
-  // Em testes, master e tenant são o mesmo Postgres: conectamos o pool do
-  // tenant via DATABASE_URL (o host varia entre Docker `db` e host `localhost`,
-  // então não dependemos do `db_host` gravado na linha do tenant).
-  const testOverrideUrl =
-    process.env.NODE_ENV === 'test' ? process.env.DATABASE_URL : undefined;
+  // Dev/test: Postgres único — DATABASE_URL da API prevalece sobre db_host gravado
+  // no seed (host usa localhost; no GHA Linux localhost dentro do container não
+  // alcança o Postgres, só db:5432 ou host gateway do Docker Desktop).
+  const singleDbUrl =
+    !isProduction && process.env.DATABASE_URL ? process.env.DATABASE_URL : undefined;
 
-  const pool = testOverrideUrl
-    ? new Pool({ connectionString: testOverrideUrl, ssl: false })
+  const pool = singleDbUrl
+    ? new Pool({ connectionString: singleDbUrl, ssl: false })
     : new Pool({
         host: row.db_host,
         port: row.db_port ?? 5432,

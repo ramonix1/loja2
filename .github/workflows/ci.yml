@@ -94,18 +94,20 @@ jobs:
             if [ "$i" -eq 30 ]; then exit 124; fi
             sleep 2
           done
+          $COMPOSE exec -T db psql -U postgres -d lojao -v ON_ERROR_STOP=1 -c \
+            "DROP SCHEMA IF EXISTS drizzle CASCADE; DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;"
 
-      - name: Seed database
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/lojao
-        run: node apps/api/scripts/run-seed.mjs || true
-
-      - name: Start app stack
+      - name: Start API and seed
         run: |
           COMPOSE="docker compose -f docker-compose.yml -f docker-compose.ci.yml"
           chmod +x scripts/ci-wait-url.sh
           $COMPOSE up --build -d api
           scripts/ci-wait-url.sh api http://localhost:3001/health 180
+          $COMPOSE exec -T api node scripts/run-seed.mjs
+
+      - name: Start app stack
+        run: |
+          COMPOSE="docker compose -f docker-compose.yml -f docker-compose.ci.yml"
           $COMPOSE up --build -d admin storefront
           $COMPOSE ps
           scripts/ci-wait-url.sh admin http://localhost:5173/ 180

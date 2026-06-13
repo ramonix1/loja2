@@ -140,7 +140,13 @@ async function ensureTenantRegistered() {
   await masterDb.query(
     `INSERT INTO tenants (slug, nome, db_host, db_port, db_name, db_user, db_password, ativo)
      VALUES ($1, $2, $3, $4, $5, $6, $7, true)
-     ON CONFLICT (slug) DO UPDATE SET ativo = true`,
+     ON CONFLICT (slug) DO UPDATE SET
+       ativo = true,
+       db_host = EXCLUDED.db_host,
+       db_port = EXCLUDED.db_port,
+       db_name = EXCLUDED.db_name,
+       db_user = EXCLUDED.db_user,
+       db_password = EXCLUDED.db_password`,
     [
       SLUG,
       'Lojão Dev',

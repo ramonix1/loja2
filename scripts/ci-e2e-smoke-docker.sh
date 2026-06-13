@@ -42,18 +42,19 @@ for i in $(seq 1 30); do
   sleep 2
 done
 
-echo "[ci-e2e] Seed no host (Node 24)..."
-docker run --rm --network host -v "$ROOT:/app" -w /app \
-  -e DATABASE_URL=postgresql://postgres:postgres@localhost:5432/lojao \
-  "$NODE_IMAGE" sh -ec '
-    corepack enable
-    node apps/api/scripts/run-seed.mjs || true
-  '
+echo "[ci-e2e] Banco limpo (como runner GHA fresco)..."
+$COMPOSE exec -T db psql -U postgres -d lojao -v ON_ERROR_STOP=1 -c \
+  "DROP SCHEMA IF EXISTS drizzle CASCADE; DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;"
 
-echo "[ci-e2e] Subindo api, depois admin + storefront..."
+echo "[ci-e2e] Subindo api (bootstrap migrations)..."
 chmod +x scripts/ci-wait-url.sh scripts/ci-verify-storefront.sh
 $COMPOSE up --build -d api
 scripts/ci-wait-url.sh api http://localhost:3001/health 180
+
+echo "[ci-e2e] Seed dentro do container api (DATABASE_URL=db:5432)..."
+$COMPOSE exec -T api node scripts/run-seed.mjs
+
+echo "[ci-e2e] Subindo admin + storefront..."
 $COMPOSE up --build -d admin storefront
 $COMPOSE ps
 scripts/ci-wait-url.sh admin http://localhost:5173/ 180
