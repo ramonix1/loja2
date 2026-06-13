@@ -32,6 +32,11 @@ fi
 if [ "$SYNC" = true ]; then
   echo "[entrypoint] Sincronizando deps (${FILTER})..."
   CI=true pnpm install --filter "${FILTER}" --prefer-offline
+  # Workspace packages (ex.: @lojao/db) precisam de node_modules próprio no bind mount;
+  # o volume nomeado só cobre /app/node_modules e apps/*/node_modules.
+  if echo "$FILTER" | grep -q 'api'; then
+    CI=true pnpm install --filter @lojao/db... --prefer-offline
+  fi
   mkdir -p node_modules
   echo "$CURRENT" > "$MARKER"
   echo "[entrypoint] Deps OK."

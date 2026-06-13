@@ -68,11 +68,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright
-        run: pnpm --filter e2e exec playwright install --with-deps chromium
-
-      - name: Verify Playwright CLI
-        run: pnpm --filter e2e exec playwright --version
+      - name: Install Playwright browsers
+        run: pnpm --filter e2e run install:browsers
 
       - name: Start stack
         run: |
@@ -81,10 +78,17 @@ jobs:
           timeout 180 bash -c 'until curl -sf http://localhost:3001/health; do sleep 3; done'
           timeout 180 bash -c 'until curl -sf http://localhost:5173/; do sleep 3; done'
           timeout 180 bash -c 'until curl -sf http://localhost:3000/; do sleep 3; done'
-          docker compose exec -T api pnpm seed:dev || true
+
+      - name: Seed database
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/lojao
+        run: pnpm --filter api seed:dev || true
 
       - name: E2E smoke
-        run: pnpm --filter e2e exec playwright test --grep @smoke --pass-with-no-tests
+        env:
+          E2E_BASE_URL: http://localhost:5173
+          E2E_STORE_URL: http://localhost:3000
+        run: pnpm --filter e2e run test:smoke
 
       - name: Stop stack
         if: always()

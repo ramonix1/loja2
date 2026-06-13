@@ -5,15 +5,17 @@
   "description": "Suíte E2E Playwright (QA) — specs de UI nova a partir da Fase 2",
   "type": "module",
   "scripts": {
-    "test": "pnpm exec playwright test --pass-with-no-tests",
-    "test:ui": "pnpm exec playwright test --ui",
-    "test:smoke": "pnpm exec playwright test --grep @smoke --pass-with-no-tests",
+    "install:browsers": "playwright install --with-deps chromium",
+    "test": "playwright test --pass-with-no-tests",
+    "test:ui": "playwright test --ui",
+    "test:smoke": "playwright test --grep @smoke --pass-with-no-tests",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@lojao/eslint-config": "workspace:*",
     "@lojao/test-utils": "workspace:*",
     "@playwright/test": "^1.49.0",
+    "playwright": "^1.49.0",
     "@types/node": "^22.9.0",
     "typescript": "^5.6.3"
   }
