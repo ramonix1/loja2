@@ -85,8 +85,15 @@ jobs:
       # Containers CI usam node_modules da imagem (volumes anônimos), não do runner.
       - name: Start database
         run: |
-          docker compose -f docker-compose.yml -f docker-compose.ci.yml up --build -d db
-          timeout 60 bash -c 'until docker compose exec -T db pg_isready -U postgres -d lojao; do sleep 2; done'
+          COMPOSE="docker compose -f docker-compose.yml -f docker-compose.ci.yml"
+          $COMPOSE up --build -d db
+          for i in $(seq 1 30); do
+            if $COMPOSE exec -T db pg_isready -U postgres -d lojao >/dev/null 2>&1; then
+              break
+            fi
+            if [ "$i" -eq 30 ]; then exit 124; fi
+            sleep 2
+          done
 
       - name: Seed database
         env:
@@ -95,11 +102,12 @@ jobs:
 
       - name: Start app stack
         run: |
+          COMPOSE="docker compose -f docker-compose.yml -f docker-compose.ci.yml"
           chmod +x scripts/ci-wait-url.sh
-          docker compose -f docker-compose.yml -f docker-compose.ci.yml up --build -d api
+          $COMPOSE up --build -d api
           scripts/ci-wait-url.sh api http://localhost:3001/health 180
-          docker compose -f docker-compose.yml -f docker-compose.ci.yml up --build -d admin storefront
-          docker compose ps
+          $COMPOSE up --build -d admin storefront
+          $COMPOSE ps
           scripts/ci-wait-url.sh admin http://localhost:5173/ 180
           scripts/ci-wait-url.sh storefront http://localhost:3000/health 180
           chmod +x scripts/ci-verify-storefront.sh

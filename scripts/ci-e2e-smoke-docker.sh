@@ -30,7 +30,17 @@ docker run --rm --network host -v "$ROOT:/app" -w /app "$NODE_IMAGE" sh -ec '
 
 echo "[ci-e2e] Subindo só Postgres..."
 $COMPOSE up --build -d db
-timeout 60 bash -c 'until docker compose exec -T db pg_isready -U postgres -d lojao; do sleep 2; done'
+for i in $(seq 1 30); do
+  if $COMPOSE exec -T db pg_isready -U postgres -d lojao >/dev/null 2>&1; then
+    echo "[ci-e2e] Postgres pronto."
+    break
+  fi
+  if [ "$i" -eq 30 ]; then
+    echo "[ci-e2e] TIMEOUT: Postgres não ficou pronto em 60s"
+    exit 124
+  fi
+  sleep 2
+done
 
 echo "[ci-e2e] Seed no host (Node 24)..."
 docker run --rm --network host -v "$ROOT:/app" -w /app \
@@ -45,7 +55,7 @@ chmod +x scripts/ci-wait-url.sh scripts/ci-verify-storefront.sh
 $COMPOSE up --build -d api
 scripts/ci-wait-url.sh api http://localhost:3001/health 180
 $COMPOSE up --build -d admin storefront
-docker compose ps
+$COMPOSE ps
 scripts/ci-wait-url.sh admin http://localhost:5173/ 180
 scripts/ci-wait-url.sh storefront http://localhost:3000/health 180
 scripts/ci-verify-storefront.sh
