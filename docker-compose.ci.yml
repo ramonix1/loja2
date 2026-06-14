@@ -1,0 +1,37 @@
+# Override para CI (GitHub Actions).
+#
+# Código via bind mount; node_modules via volumes anônimos da imagem Docker (Alpine/musl).
+# O host GHA é Ubuntu/glibc — montar node_modules do runner quebra Rollup/SWC no container
+# (ex.: @rollup/rollup-linux-x64-musl). Entrypoint não sincroniza deps no CI.
+services:
+  api:
+    environment:
+      GITHUB_ACTIONS: "true"
+      SKIP_DOCKER_DEPS_SYNC: "true"
+    volumes: !override
+      - .:/app
+      - upload_data:/app/data/uploads/images
+      - /app/node_modules
+      - /app/apps/api/node_modules
+
+  admin:
+    environment:
+      GITHUB_ACTIONS: "true"
+      SKIP_DOCKER_DEPS_SYNC: "true"
+    volumes: !override
+      - .:/app
+      - /app/node_modules
+      - /app/apps/admin/node_modules
+
+  storefront:
+    environment:
+      GITHUB_ACTIONS: "true"
+      SKIP_DOCKER_DEPS_SYNC: "true"
+      API_URL: http://api:3001
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      TENANT_SLUG: loja
+      NEXT_PUBLIC_TENANT_SLUG: loja
+    volumes: !override
+      - .:/app
+      - /app/node_modules
+      - /app/apps/storefront/node_modules

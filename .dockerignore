@@ -1,0 +1,16 @@
+**/node_modules
+**/.git
+**/.cursor
+**/.agent
+**/coverage
+**/dist
+**/.next
+**/.turbo
+**/test-results
+**/playwright-report
+**/.auth
+**/*.log
+.env
+.env.*
+!.env.example
+**/agent-transcripts

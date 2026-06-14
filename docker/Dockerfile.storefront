@@ -1,0 +1,51 @@
+# syntax=docker/dockerfile:1
+# Lojão Storefront — Next.js 15 (dev + prod)
+
+FROM node:24-alpine AS base
+RUN apk add --no-cache libc6-compat
+RUN corepack enable
+WORKDIR /app
+
+FROM base AS deps
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc* ./
+COPY apps/storefront/package.json apps/storefront/
+COPY packages/types/package.json packages/types/
+COPY packages/test-utils/package.json packages/test-utils/
+COPY packages/eslint-config/package.json packages/eslint-config/
+RUN pnpm install --filter storefront... --frozen-lockfile
+
+FROM deps AS dev
+COPY . .
+COPY docker/docker-entrypoint-dev.sh /usr/local/bin/docker-entrypoint-dev.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint-dev.sh
+ENV PNPM_FILTER=storefront...
+WORKDIR /app/apps/storefront
+EXPOSE 3000
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint-dev.sh"]
+CMD ["pnpm", "--filter", "storefront", "dev"]
+
+FROM deps AS builder
+COPY . .
+ARG NEXT_PUBLIC_API_URL=http://localhost:3001
+ARG NEXT_PUBLIC_TENANT_SLUG=loja
+ARG API_URL=http://api:3001
+ARG TENANT_SLUG=loja
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
+    NEXT_PUBLIC_TENANT_SLUG=$NEXT_PUBLIC_TENANT_SLUG \
+    API_URL=$API_URL \
+    TENANT_SLUG=$TENANT_SLUG
+RUN pnpm --filter storefront build
+
+FROM base AS prod
+ENV NODE_ENV=production
+WORKDIR /app
+COPY --from=builder /app/apps/storefront/.next/standalone ./
+COPY --from=builder /app/apps/storefront/.next/static ./apps/storefront/.next/static
+COPY --from=builder /app/apps/storefront/public ./apps/storefront/public
+WORKDIR /app/apps/storefront
+EXPOSE 3000
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+CMD ["node", "server.js"]

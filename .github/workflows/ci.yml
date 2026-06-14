@@ -1,0 +1,126 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, feat/**]
+  pull_request:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: lojao
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d lojao"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/lojao
+      PGSSL: disable
+      SESSION_SECRET: ci-session-secret
+      TENANT_SLUG: loja
+      NODE_ENV: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm turbo typecheck
+
+      - name: API tests
+        run: pnpm --filter api test
+
+      - name: DB migrate tests
+        run: pnpm --filter @lojao/db test
+
+  e2e-smoke:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      # Host: deps só para seed (api) + Playwright (e2e).
+      # Containers usam node_modules da imagem Docker (musl), não do runner (glibc).
+      - name: Install dependencies
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm install --filter api... --filter e2e... --frozen-lockfile
+
+      - name: Verify Playwright CLI
+        run: node apps/e2e/scripts/run-playwright.mjs --version
+
+      - name: Install Playwright browsers
+        run: node apps/e2e/scripts/run-playwright.mjs install --with-deps chromium
+
+      # Ordem importa: deps + Playwright no host ANTES dos containers dev.
+      # Containers CI usam node_modules da imagem (volumes anônimos), não do runner.
+      - name: Start database
+        run: |
+          COMPOSE="docker compose -f docker-compose.yml -f docker-compose.ci.yml"
+          $COMPOSE up --build -d db
+          for i in $(seq 1 30); do
+            if $COMPOSE exec -T db pg_isready -U postgres -d lojao >/dev/null 2>&1; then
+              break
+            fi
+            if [ "$i" -eq 30 ]; then exit 124; fi
+            sleep 2
+          done
+          $COMPOSE exec -T db psql -U postgres -d lojao -v ON_ERROR_STOP=1 -c \
+            "DROP SCHEMA IF EXISTS drizzle CASCADE; DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;"
+
+      - name: Start API and seed
+        run: |
+          COMPOSE="docker compose -f docker-compose.yml -f docker-compose.ci.yml"
+          chmod +x scripts/ci-wait-url.sh
+          $COMPOSE up --build -d api
+          scripts/ci-wait-url.sh api http://localhost:3001/health 180
+          $COMPOSE exec -T api node scripts/run-seed.mjs
+
+      - name: Start app stack
+        run: |
+          COMPOSE="docker compose -f docker-compose.yml -f docker-compose.ci.yml"
+          $COMPOSE up --build -d admin storefront
+          $COMPOSE ps
+          scripts/ci-wait-url.sh admin http://localhost:5173/ 180
+          scripts/ci-wait-url.sh storefront http://localhost:3000/health 180
+          chmod +x scripts/ci-verify-storefront.sh
+          scripts/ci-verify-storefront.sh
+
+      - name: E2E smoke
+        env:
+          E2E_BASE_URL: http://localhost:5173
+          E2E_STORE_URL: http://localhost:3000
+        run: node apps/e2e/scripts/run-playwright.mjs test --grep @smoke --pass-with-no-tests
+
+      - name: Stop stack
+        if: always()
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml down -v

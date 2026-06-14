@@ -1,5 +1,27 @@
+# Dependências
 node_modules
+apps/api/tests/helpers/.fixture-ids.json
+.pnpm-store
+
+# Ambiente
 .env
-public/images/*.png
-public/images/*.jpeg
-.env
+.env.*
+!.env.example
+
+# Build / cache
+dist
+.next
+.turbo
+coverage
+
+# Uploads (imagens geradas)
+data/uploads/images/*
+!data/uploads/images/.gitkeep
+
+# Playwright (apps/e2e)
+apps/e2e/.auth/
+apps/e2e/test-results/
+playwright-report/
+
+# Logs
+*.log

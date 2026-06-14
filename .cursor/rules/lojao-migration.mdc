@@ -1,0 +1,73 @@
+---
+description: Regras obrigatórias para migração do Lojão (monorepo TS + Fastify + React + Next)
+alwaysApply: true
+---
+
+# Lojão — Regras de migração
+
+## Antes de qualquer implementação
+
+1. Ler `docs/migration/README.md` → `CONTEXT.md` → `STATUS.md` → spec da fase ativa em `docs/migration/phases/`
+2. Ler `docs/migration/TESTING-IMPLEMENTATION.md` + seção **Testes automatizados** da fase
+3. Ler `docs/migration/DEPLOY.md` (seção da fase atual)
+3. Implementar **apenas a fase indicada em STATUS.md**
+4. Ao concluir: atualizar `docs/migration/STATUS.md` e verificar critérios de aceite da fase
+
+## Produto
+
+- **Lojão**: SaaS e-commerce **multi-tenant** (PostgreSQL, slug por loja)
+- Legacy: Express 5 + EJS + Socket.io + sessão PostgreSQL (cookie `lojao.sid`)
+- Alvo: monorepo pnpm — `apps/api` (Fastify), `apps/admin` (React/Vite), `apps/storefront` (Next.js), `apps/legacy` (temporário)
+
+## Decisões fechadas
+
+- Backend: **Fastify** (não NestJS)
+- Admin: **React + Vite** (não Next)
+- Vitrine: **Next.js 15** App Router
+- Banco: **PostgreSQL** existente; schema intacto até Fase 7
+- PM: **pnpm** workspaces + **Turborepo**
+- Padrão migração: **Strangler Fig** — legacy no ar até Fase 8
+
+## Código
+
+- TypeScript `strict` nos apps/packages novos
+- API prefixo `/api/v1`; erros `{ error, code, details? }`; sucesso `{ data }`
+- Zod para validação; tipos em `packages/types`
+- Componentes compartilhados em `packages/ui`
+- **UI nova (Fase 2+):** `data-testid` em ações, inputs e containers assertáveis — ver `docs/migration/TESTING-STRATEGY.md` e atualizar `test-ids-catalog.md`
+- Idioma: pt-BR em docs/commits; código pode seguir inglês para nomes técnicos
+- **Não** refatorar legacy além do escopo da fase
+- **Não** quebrar testes Jest existentes em legacy
+- **Não** adicionar `data-testid` em massa no EJS legacy
+
+## Testes automatizados
+
+- Estratégia: `docs/migration/TESTING-STRATEGY.md`
+- Implementação por fase: `docs/migration/TESTING-IMPLEMENTATION.md` + seção em cada `phases/XX-*.md`
+- **Legacy EJS:** sem `data-testid`, sem Playwright
+- Dev: implementar vitest (api) + testids + specs smoke Playwright conforme fase
+- QA: expandir `apps/e2e/`; usar constantes `@lojao/test-utils/test-ids`
+
+## Segurança (nunca relaxar)
+
+- Webhooks `/webhook/stripe`, `/webhook/sumup`: sem CSRF
+- Sessão: mesma tabela `sessao`, cookie `lojao.sid`, env `SESSION_SECRET`
+- Checkout: feature flag até testes completos (Fase 4)
+- Admin routes: exigir `role === 'admin'`
+
+## Deploy
+
+- Alterações em `docker-compose.yml`, `Makefile`, `LEIA-ME.md` são **parte da entrega** quando a fase exigir
+- Ver `docs/migration/DEPLOY.md` para portas: legacy 3000, api 3001, admin 5173, storefront 3002
+- `VITE_*` / `NEXT_PUBLIC_*` usam `localhost` no browser, não hostname Docker interno
+
+## Proibido sem nova spec
+
+- Microserviços, GraphQL, NestJS, reescrita total de schema, remover legacy antes Fase 8, migrar checkout antes Fase 4
+
+## Time (contexto)
+
+- Dev front + integração (admin/Next, testids)
+- Dev back PHP→TS (Fastify, testes API)
+- **Testador QA** (Playwright E2E)
+- Priorizar API antes de UI; checkout é responsabilidade crítica do back (Fase 4)

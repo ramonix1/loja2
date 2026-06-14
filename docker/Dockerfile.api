@@ -1,0 +1,25 @@
+# syntax=docker/dockerfile:1
+# Lojão API — Fastify + TypeScript (dev)
+
+FROM node:24-alpine AS base
+RUN apk add --no-cache python3 make g++ libc6-compat
+RUN corepack enable
+WORKDIR /app
+
+FROM base AS deps
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc* ./
+COPY apps/api/package.json apps/api/
+COPY packages/db/package.json packages/db/
+COPY packages/types/package.json packages/types/
+COPY packages/eslint-config/package.json packages/eslint-config/
+RUN pnpm install --filter api... --frozen-lockfile
+
+FROM deps AS dev
+COPY . .
+COPY docker/docker-entrypoint-dev.sh /usr/local/bin/docker-entrypoint-dev.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint-dev.sh
+ENV PNPM_FILTER=api...
+WORKDIR /app/apps/api
+EXPOSE 3001
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint-dev.sh"]
+CMD ["pnpm", "--filter", "api", "dev"]

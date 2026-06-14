@@ -1,0 +1,20 @@
+@import 'tailwindcss';
+
+@source "../**/*.{ts,tsx}";
+
+:root {
+  --cor-primaria: #2563eb;
+}
+
+body {
+  @apply min-h-screen bg-gray-50 text-gray-900 antialiased;
+}
+
+.btn-primary {
+  background-color: var(--cor-primaria);
+  @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.btn-outline {
+  @apply inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50;
+}
