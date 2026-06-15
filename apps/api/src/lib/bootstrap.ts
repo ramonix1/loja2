@@ -2,6 +2,14 @@ import argon2 from 'argon2';
 import pg from 'pg';
 import { runMigrations } from '@lojao/db';
 
+const sslEnabled =
+  (process.env.NODE_ENV === 'production' || !!process.env.DATABASE_URL) &&
+  process.env.PGSSL !== 'disable';
+
+function pgSsl(): boolean | { rejectUnauthorized: false } {
+  return sslEnabled ? { rejectUnauthorized: false } : false;
+}
+
 /**
  * Bootstrap dev/prod: migrations Drizzle + auto-provision do tenant padrão.
  * Substitui `apps/legacy/config/init-db.js` (removido na Fase 8).
@@ -36,7 +44,7 @@ async function autoProvisionTenant(dbUrl: string): Promise<void> {
   const user = url.username;
   const password = decodeURIComponent(url.password);
 
-  const pool = new pg.Pool({ connectionString: dbUrl, ssl: false });
+  const pool = new pg.Pool({ connectionString: dbUrl, ssl: pgSsl() });
 
   try {
     const existe = await pool.query('SELECT id FROM tenants WHERE slug = $1', [slug]);

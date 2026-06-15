@@ -36,7 +36,7 @@ interface CookieMeta {
   secure: boolean;
   httpOnly: boolean;
   path: string;
-  sameSite: 'lax';
+  sameSite: 'lax' | 'none';
 }
 
 const DATA_KEYS: (keyof SessionFields)[] = [
@@ -59,6 +59,12 @@ function sharedCookieDomain(): string | undefined {
   return process.env.NODE_ENV !== 'production' ? 'localhost' : undefined;
 }
 
+/** Cross-origin admin (Render static) exige `none` + `secure` em produção. */
+function cookieSameSite(): 'lax' | 'none' {
+  if (process.env.NODE_ENV !== 'production') return 'lax';
+  return process.env.COOKIE_SAME_SITE === 'lax' ? 'lax' : 'none';
+}
+
 function clearSessionCookie(reply: FastifyReply): void {
   reply.clearCookie(COOKIE_NAME, { path: '/' });
   const domain = sharedCookieDomain();
@@ -74,7 +80,7 @@ function buildCookieMeta(): CookieMeta {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
     path: '/',
-    sameSite: 'lax',
+    sameSite: cookieSameSite(),
   };
 }
 
@@ -144,7 +150,7 @@ async function persist(
     path: '/',
     domain: sharedCookieDomain(),
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: cookieSameSite(),
     secure: process.env.NODE_ENV === 'production',
     maxAge: Math.floor(MAX_AGE_MS / 1000),
     expires: new Date(cookie.expires),

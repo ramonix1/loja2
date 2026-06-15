@@ -370,6 +370,8 @@ services:
 
 #### Produção (Render / VPS)
 
+Blueprint versionado: [`render.yaml`](../../render.yaml) + runbook [`runbooks/render-blueprint.md`](./runbooks/render-blueprint.md).
+
 | Serviço | Sugestão |
 |---------|----------|
 | api | Web service Node (Fastify) |

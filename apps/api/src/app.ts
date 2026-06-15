@@ -21,11 +21,17 @@ export async function buildApp(): Promise<FastifyInstance> {
     trustProxy: true,
   });
 
+  const corsOrigins = [
+    process.env.APP_URL,
+    process.env.ADMIN_URL,
+    'http://localhost:3000',
+    'http://localhost:5173',
+  ]
+    .filter((url): url is string => Boolean(url))
+    .map((url) => url.replace(/\/$/, ''));
+
   await app.register(cors, {
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:5173',
-    ],
+    origin: [...new Set(corsOrigins)],
     credentials: true,
   });
 

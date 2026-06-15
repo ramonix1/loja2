@@ -42,6 +42,14 @@ export function invalidateTenantDbCache(slug: string): void {
 
 const migrationsFolder = join(dirname(fileURLToPath(import.meta.url)), '../drizzle');
 
+const sslEnabled =
+  (process.env.NODE_ENV === 'production' || !!process.env.DATABASE_URL) &&
+  process.env.PGSSL !== 'disable';
+
+function pgSsl(): boolean | { rejectUnauthorized: false } {
+  return sslEnabled ? { rejectUnauthorized: false } : false;
+}
+
 /** Aplica migrations Drizzle (baseline + futuras). Idempotente com IF NOT EXISTS no baseline. */
 export async function runMigrations(connectionString?: string): Promise<void> {
   const url = connectionString ?? process.env.DATABASE_URL;
@@ -49,7 +57,7 @@ export async function runMigrations(connectionString?: string): Promise<void> {
     throw new Error('DATABASE_URL não definida para db:migrate');
   }
 
-  const pool = new Pool({ connectionString: url, ssl: false });
+  const pool = new Pool({ connectionString: url, ssl: pgSsl() });
   const db = drizzle(pool);
 
   try {

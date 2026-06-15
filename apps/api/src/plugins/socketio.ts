@@ -67,6 +67,7 @@ export async function registerSocketIO(app: FastifyInstance): Promise<void> {
   const corsOrigins: ServerOptions['cors'] = {
     origin: [
       (process.env.ADMIN_URL || 'http://localhost:5173').replace(/\/$/, ''),
+      (process.env.APP_URL || 'http://localhost:3000').replace(/\/$/, ''),
       /^https?:\/\/localhost(:\d+)?$/,
     ],
     credentials: true,

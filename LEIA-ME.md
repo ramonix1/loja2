@@ -136,6 +136,18 @@ Copie `.env.example` → `.env` e ajuste conforme necessário.
 
 ---
 
+## Deploy Render (Blueprint)
+
+Monorepo pronto para **Render Blueprint** (`render.yaml` na raiz):
+
+1. Render → **New → Blueprint** → repo + branch `master`
+2. Suspenda/apague o serviço legado que usava `server.js`
+3. Preencha secrets no dashboard (`ADMIN_SENHA`, Stripe, e-mail, etc.)
+
+Runbook completo: [`docs/migration/runbooks/render-blueprint.md`](docs/migration/runbooks/render-blueprint.md)
+
+---
+
 ## Migração (histórico)
 
 A migração Strangler Fig (Express/EJS → monorepo TS) concluiu na **Fase 8**. Specs e status em [`docs/migration/`](docs/migration/).
