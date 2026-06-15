@@ -1,5 +1,10 @@
-/** Paths relativos — Route Handlers em `/api/v1` e `/images` proxiam para a API em runtime. */
-export const API_URL = '';
+/**
+ * URL da API para chamadas do browser (cross-origin com credentials).
+ * Cookie `lojao.sid` fica no domínio da API — compartilhado entre storefront e admin.
+ */
+export const API_URL = (
+  process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
+).replace(/\/$/, '');
 
 export const TENANT_SLUG =
   process.env.TENANT_SLUG ?? process.env.NEXT_PUBLIC_TENANT_SLUG ?? 'loja';

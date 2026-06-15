@@ -68,6 +68,8 @@ Vincule domínios em cada serviço no dashboard. Atualize `APP_URL`, `ADMIN_URL`
 | Redirect admin vai para `localhost:5173` | Falta `NEXT_PUBLIC_ADMIN_URL` no build do storefront — rebuild após push |
 | Página 500 (carrinho, checkout, home) | Proxy runtime `/api/v1` — confirme `API_URL` no storefront apontando para `lojao-api` |
 | Imagens quebradas | Use paths `/images/...`; storefront faz proxy para a API |
+| Admin pede login após entrar pelo storefront | Cookie estava no domínio do storefront — rebuild com `NEXT_PUBLIC_API_URL` apontando para API |
+| Logout no admin não desloga storefront | Mesma causa — sessão deve ser só no domínio da API |
 | Admin login falha (401 após login) | CORS/cookie: `COOKIE_SAME_SITE=none` na API; `ADMIN_URL` deve bater com URL do admin |
 | Imagens 404 após redeploy | Free tier: uploads efêmeros; upgrade ou storage externo |
 | Imagens 404 (geral) | `UPLOAD_DIR` incorreto ou arquivo nunca persistido |
@@ -75,7 +77,18 @@ Vincule domínios em cada serviço no dashboard. Atualize `APP_URL`, `ADMIN_URL`
 | Build falha com `frozen-lockfile` | Build usa `NODE_ENV=development` no install (devDeps como `tsx`/`typescript`); runtime continua `production` |
 | Build falha Node 20 | Defina `NODE_VERSION=24` (já no blueprint) |
 
-## Verificação local antes do push
+## Sessão compartilhada (storefront + admin)
+
+O cookie `lojao.sid` fica no **domínio da API** (`lojao-api.onrender.com`), não no storefront.
+
+- Storefront e admin chamam a API **diretamente** (`NEXT_PUBLIC_API_URL` / `VITE_API_URL`) com `credentials: include`
+- Login no storefront → admin abre já autenticado (mesmo cookie)
+- Logout no admin → storefront também desloga na próxima request
+- Requisito: `COOKIE_SAME_SITE=none` na API + CORS com `APP_URL` e `ADMIN_URL`
+
+Proxy `/api/v1` no storefront serve só fallback; imagens usam `/images/*` (same-origin).
+
+---
 
 ```bash
 pnpm install
