@@ -107,6 +107,11 @@ services:
           type: web
           name: lojao-api
           envVarKey: RENDER_EXTERNAL_URL
+      - key: NEXT_PUBLIC_ADMIN_URL
+        fromService:
+          type: web
+          name: lojao-admin
+          envVarKey: RENDER_EXTERNAL_URL
 
   # --- Admin (Vite → static site) ---
   - type: web

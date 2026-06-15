@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import { fetchMe, logout, type AuthUser } from '@/lib/client-api';
+import { adminDashboardUrl } from '@/lib/config';
 
 export function StoreNav() {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -40,7 +41,7 @@ export function StoreNav() {
   if (user.role === 'admin') {
     return (
       <a
-        href={process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://localhost:5173/admin/dashboard'}
+        href={adminDashboardUrl()}
         className="btn-primary text-sm"
       >
         Painel admin

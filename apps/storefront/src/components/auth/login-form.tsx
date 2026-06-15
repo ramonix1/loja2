@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 
 import { ApiError, login } from '@/lib/client-api';
+import { adminDashboardUrl } from '@/lib/config';
 
 export function LoginForm() {
   const searchParams = useSearchParams();
@@ -22,7 +23,7 @@ export function LoginForm() {
     try {
       const user = await login(email, senha);
       if (user.role === 'admin') {
-        window.location.href = process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://localhost:5173/admin/dashboard';
+        window.location.href = adminDashboardUrl();
         return;
       }
       window.location.href = redirect;
