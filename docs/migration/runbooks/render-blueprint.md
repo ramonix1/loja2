@@ -63,6 +63,7 @@ Vincule domínios em cada serviço no dashboard. Atualize `APP_URL`, `ADMIN_URL`
 | Sintoma | Causa provável |
 |---------|----------------|
 | `Cannot find module ... server.js` | Serviço legado ainda ativo; use Blueprint, não o serviço antigo |
+| `"root" option must be an absolute path` | `UPLOAD_DIR` relativo — corrigido em `getUploadDir()` (resolve absoluto no boot) |
 | API não conecta ao Postgres | SSL: não defina `PGSSL=disable` em produção Render |
 | Admin login falha (401 após login) | CORS/cookie: `COOKIE_SAME_SITE=none` na API; `ADMIN_URL` deve bater com URL do admin |
 | Imagens 404 após redeploy | Free tier: uploads efêmeros; upgrade ou storage externo |

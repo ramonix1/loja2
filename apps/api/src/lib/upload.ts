@@ -13,9 +13,9 @@ export class UploadError extends Error {
 
 /** Diretório de uploads servido em `/images/*` pela API. */
 export function getUploadDir(): string {
-  return (
-    process.env.UPLOAD_DIR ?? path.resolve(process.cwd(), '../../data/uploads/images')
-  );
+  const configured =
+    process.env.UPLOAD_DIR ?? path.resolve(process.cwd(), '../../data/uploads/images');
+  return path.isAbsolute(configured) ? configured : path.resolve(process.cwd(), configured);
 }
 
 export async function saveImageFile(
