@@ -17,7 +17,7 @@ Deploy do monorepo Lojão via **Render Blueprint** (`render.yaml` na raiz).
    - `lojao-db` (Postgres)
    - `lojao-api` (Web Service)
    - `lojao-storefront` (Web Service)
-   - `lojao-admin` (Static Site)
+   - `lojao-admin` (Static Site — sem `plan`; static sites não usam tier no blueprint)
 5. Preencha variáveis marcadas **sync: false** no dashboard:
    - `ADMIN_EMAIL`, `ADMIN_SENHA` (não use defaults em produção)
    - Stripe, SumUp, e-mail (se aplicável)

@@ -112,7 +112,6 @@ services:
   - type: web
     name: lojao-admin
     runtime: static
-    plan: free
     buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter admin... build
     staticPublishPath: apps/admin/dist
     routes:
