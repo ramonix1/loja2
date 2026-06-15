@@ -102,9 +102,6 @@ importers:
       stripe:
         specifier: ^22.2.0
         version: 22.2.0(@types/node@22.19.21)
-      tsx:
-        specifier: ^4.19.2
-        version: 4.22.4
       zod:
         specifier: ^3.23.8
         version: 3.25.76
@@ -121,6 +118,9 @@ importers:
       '@types/pg':
         specifier: ^8.11.10
         version: 8.20.0
+      tsx:
+        specifier: ^4.19.2
+        version: 4.22.4
       typescript:
         specifier: ^5.6.3
         version: 5.9.3

@@ -21,8 +21,8 @@ services:
     runtime: node
     plan: free
     region: oregon
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter api... build
-    startCommand: pnpm --filter api start
+    buildCommand: corepack enable && NODE_ENV=development CI=true pnpm install --frozen-lockfile && pnpm --filter api... build
+    startCommand: pnpm --filter api exec tsx src/index.ts
     healthCheckPath: /health
     # Disco persistente exige plano pago — no free tier uploads são efêmeros (somem no redeploy).
     envVars:
@@ -85,7 +85,7 @@ services:
     runtime: node
     plan: free
     region: oregon
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter storefront... build
+    buildCommand: corepack enable && NODE_ENV=development CI=true pnpm install --frozen-lockfile && pnpm --filter storefront... build
     startCommand: pnpm --filter storefront start:render
     healthCheckPath: /
     envVars:
@@ -112,7 +112,7 @@ services:
   - type: web
     name: lojao-admin
     runtime: static
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter admin... build
+    buildCommand: corepack enable && NODE_ENV=development CI=true pnpm install --frozen-lockfile && pnpm --filter admin... build
     staticPublishPath: apps/admin/dist
     routes:
       - type: rewrite

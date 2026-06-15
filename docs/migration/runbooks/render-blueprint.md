@@ -67,6 +67,8 @@ Vincule domínios em cada serviço no dashboard. Atualize `APP_URL`, `ADMIN_URL`
 | Admin login falha (401 após login) | CORS/cookie: `COOKIE_SAME_SITE=none` na API; `ADMIN_URL` deve bater com URL do admin |
 | Imagens 404 após redeploy | Free tier: uploads efêmeros; upgrade ou storage externo |
 | Imagens 404 (geral) | `UPLOAD_DIR` incorreto ou arquivo nunca persistido |
+| `ERR_PNPM_OUTDATED_LOCKFILE` | `package.json` alterado sem regenerar lockfile — rode `pnpm install` e commite `pnpm-lock.yaml` |
+| Build falha com `frozen-lockfile` | Build usa `NODE_ENV=development` no install (devDeps como `tsx`/`typescript`); runtime continua `production` |
 | Build falha Node 20 | Defina `NODE_VERSION=24` (já no blueprint) |
 
 ## Verificação local antes do push
