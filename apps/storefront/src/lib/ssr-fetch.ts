@@ -1,12 +1,9 @@
 /**
- * URL da API para fetch SSR (servidor Next).
- * Lê process.env em runtime a cada request.
- *
- * Não usar HOSTNAME do container nem NEXT_PUBLIC_API_URL (browser/localhost).
- * No GHA, HOSTNAME é o ID do container → fetch same-origin quebra com ECONNREFUSED.
+ * URL da API para fetch SSR e proxy runtime (servidor Next).
+ * Lê process.env a cada request — não depende de rewrites do next.config (build-time).
  */
 export function getSsrApiBase(): string {
-  const fromEnv = process.env.API_URL;
+  const fromEnv = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
   if (fromEnv) return fromEnv.replace(/\/$/, '');
 
   if (
@@ -14,6 +11,12 @@ export function getSsrApiBase(): string {
     process.env.GITHUB_ACTIONS === 'true'
   ) {
     return 'http://api:3001';
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'API_URL ou NEXT_PUBLIC_API_URL obrigatório em produção (storefront → API Render).',
+    );
   }
 
   return 'http://localhost:3001';

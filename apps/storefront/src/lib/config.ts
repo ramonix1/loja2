@@ -1,4 +1,4 @@
-/** Paths relativos — Next.js rewrites proxiam /api/v1 e /images para a API. */
+/** Paths relativos — Route Handlers em `/api/v1` e `/images` proxiam para a API em runtime. */
 export const API_URL = '';
 
 export const TENANT_SLUG =

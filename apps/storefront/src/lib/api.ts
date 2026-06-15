@@ -9,9 +9,8 @@ const TENANT_SLUG = process.env.TENANT_SLUG ?? process.env.NEXT_PUBLIC_TENANT_SL
 export function assetUrl(path: string): string {
   if (!path) return '';
   if (path.startsWith('http')) return path;
-  // URLs exibidas no browser — sempre host público, não API_URL interna do Docker
-  const base = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001').replace(/\/$/, '');
-  return `${base}${path.startsWith('/') ? path : `/${path}`}`;
+  // Same-origin: proxy `/images/*` → API (dev e produção)
+  return path.startsWith('/') ? path : `/${path}`;
 }
 
 /** @deprecated use assetUrl */

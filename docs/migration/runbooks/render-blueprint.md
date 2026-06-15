@@ -66,6 +66,8 @@ Vincule domínios em cada serviço no dashboard. Atualize `APP_URL`, `ADMIN_URL`
 | `"root" option must be an absolute path` | `UPLOAD_DIR` relativo — corrigido em `getUploadDir()` (resolve absoluto no boot) |
 | API não conecta ao Postgres | SSL: não defina `PGSSL=disable` em produção Render |
 | Redirect admin vai para `localhost:5173` | Falta `NEXT_PUBLIC_ADMIN_URL` no build do storefront — rebuild após push |
+| Página 500 (carrinho, checkout, home) | Proxy runtime `/api/v1` — confirme `API_URL` no storefront apontando para `lojao-api` |
+| Imagens quebradas | Use paths `/images/...`; storefront faz proxy para a API |
 | Admin login falha (401 após login) | CORS/cookie: `COOKIE_SAME_SITE=none` na API; `ADMIN_URL` deve bater com URL do admin |
 | Imagens 404 após redeploy | Free tier: uploads efêmeros; upgrade ou storage externo |
 | Imagens 404 (geral) | `UPLOAD_DIR` incorreto ou arquivo nunca persistido |

@@ -21,14 +21,21 @@ export async function middleware(request: NextRequest) {
   );
 
   if (isProtected) {
-    const cookie = request.headers.get('cookie') ?? '';
-    const meUrl = new URL('/api/v1/auth/me', request.url);
-    const meRes = await fetch(meUrl, {
-      headers: { cookie, 'X-Tenant-Slug': TENANT_SLUG },
-      cache: 'no-store',
-    });
+    try {
+      const meUrl = new URL('/api/v1/auth/me', request.url);
+      const meRes = await fetch(meUrl, {
+        headers: { cookie: request.headers.get('cookie') ?? '', 'X-Tenant-Slug': TENANT_SLUG },
+        cache: 'no-store',
+      });
 
-    if (!meRes.ok) {
+      if (!meRes.ok) {
+        const login = request.nextUrl.clone();
+        login.pathname = '/login';
+        login.searchParams.set('redirect', pathname);
+        return NextResponse.redirect(login);
+      }
+    } catch (err) {
+      console.error('[middleware] auth check failed', err);
       const login = request.nextUrl.clone();
       login.pathname = '/login';
       login.searchParams.set('redirect', pathname);
@@ -42,5 +49,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|api/|images/).*)'],
 };
