@@ -37,7 +37,15 @@ Se já tiver Postgres no Render e não quiser criar `lojao-db`:
 
 ## Uploads de imagem
 
-A API monta disco persistente em `/opt/render/project/src/data/uploads/images` (`UPLOAD_DIR`). Sem o disco, uploads somem a cada redeploy.
+**Plano free:** não há disco persistente no Render. Uploads ficam no filesystem efêmero da API e **somem a cada redeploy**. Para produção com imagens, use plano pago + disco no `render.yaml` ou storage externo (S3, Cloudinary, etc.).
+
+```yaml
+# Exemplo (somente plano pago):
+# disk:
+#   name: lojao-uploads
+#   mountPath: /opt/render/project/src/data/uploads/images
+#   sizeGB: 1
+```
 
 ## Webhooks (Stripe / SumUp)
 
@@ -57,7 +65,8 @@ Vincule domínios em cada serviço no dashboard. Atualize `APP_URL`, `ADMIN_URL`
 | `Cannot find module ... server.js` | Serviço legado ainda ativo; use Blueprint, não o serviço antigo |
 | API não conecta ao Postgres | SSL: não defina `PGSSL=disable` em produção Render |
 | Admin login falha (401 após login) | CORS/cookie: `COOKIE_SAME_SITE=none` na API; `ADMIN_URL` deve bater com URL do admin |
-| Imagens 404 | Disco não montado ou `UPLOAD_DIR` incorreto |
+| Imagens 404 após redeploy | Free tier: uploads efêmeros; upgrade ou storage externo |
+| Imagens 404 (geral) | `UPLOAD_DIR` incorreto ou arquivo nunca persistido |
 | Build falha Node 20 | Defina `NODE_VERSION=24` (já no blueprint) |
 
 ## Verificação local antes do push

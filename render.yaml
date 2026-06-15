@@ -24,10 +24,7 @@ services:
     buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter api... build
     startCommand: pnpm --filter api start
     healthCheckPath: /health
-    disk:
-      name: lojao-uploads
-      mountPath: /opt/render/project/src/data/uploads/images
-      sizeGB: 1
+    # Disco persistente exige plano pago — no free tier uploads são efêmeros (somem no redeploy).
     envVars:
       - key: NODE_VERSION
         value: "24"
@@ -42,7 +39,7 @@ services:
       - key: TENANT_SLUG
         value: loja
       - key: UPLOAD_DIR
-        value: /opt/render/project/src/data/uploads/images
+        value: data/uploads/images
       - key: COOKIE_SAME_SITE
         value: none
       - key: ADMIN_EMAIL
@@ -116,7 +113,6 @@ services:
     name: lojao-admin
     runtime: static
     plan: free
-    region: oregon
     buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter admin... build
     staticPublishPath: apps/admin/dist
     routes:
