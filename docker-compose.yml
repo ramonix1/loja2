@@ -38,6 +38,8 @@ services:
       - .:/app
       - api_root_node_modules:/app/node_modules
       - api_app_node_modules:/app/apps/api/node_modules
+      - api_db_node_modules:/app/packages/db/node_modules
+      - api_types_node_modules:/app/packages/types/node_modules
       - upload_data:/app/data/uploads/images
     healthcheck:
       test:
@@ -144,6 +146,8 @@ volumes:
   upload_data:
   api_root_node_modules:
   api_app_node_modules:
+  api_db_node_modules:
+  api_types_node_modules:
   admin_root_node_modules:
   admin_app_node_modules:
   storefront_root_node_modules:
