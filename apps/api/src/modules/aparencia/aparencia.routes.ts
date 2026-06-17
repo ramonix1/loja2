@@ -2,7 +2,7 @@ import { aparenciaFieldsSchema } from '@lojao/types/aparencia';
 import type { FastifyInstance } from 'fastify';
 
 import { parseMultipartMulti } from '../../lib/multipart.js';
-import { UploadError } from '../../lib/upload.js';
+import { UploadError } from '../../lib/image-validation.js';
 import { requireAdmin } from '../../plugins/auth-guard.js';
 import { getAparencia, updateAparencia } from './aparencia.service.js';
 
@@ -34,7 +34,7 @@ export async function aparenciaRoutes(app: FastifyInstance): Promise<void> {
         });
       }
 
-      await updateAparencia(request.db, parsed.data, {
+      await updateAparencia(request.db, request.server.imageStorage, parsed.data, {
         logo: files.logo,
         favicon: files.favicon,
       });

@@ -1,7 +1,7 @@
 import type { AparenciaConfig, AparenciaFields } from '@lojao/types/aparencia';
 import type { Pool } from 'pg';
 
-import { saveImageFile } from '../../lib/upload.js';
+import type { ImageStorage } from '../../ports/image-storage.js';
 
 const DEFAULTS: AparenciaConfig = {
   loja_nome: 'Lojão',
@@ -30,6 +30,7 @@ export async function getAparencia(db: Pool): Promise<AparenciaConfig> {
 
 export async function updateAparencia(
   db: Pool,
+  storage: ImageStorage,
   fields: AparenciaFields,
   files: {
     logo?: { buffer: Buffer; mimetype: string; filename: string };
@@ -46,15 +47,19 @@ export async function updateAparencia(
   ];
 
   if (files.logo) {
-    const url = await saveImageFile(files.logo.buffer, files.logo.filename, files.logo.mimetype);
+    const url = await storage.save({
+      buffer: files.logo.buffer,
+      originalFilename: files.logo.filename,
+      mimetype: files.logo.mimetype,
+    });
     pares.push(['loja_logo', url]);
   }
   if (files.favicon) {
-    const url = await saveImageFile(
-      files.favicon.buffer,
-      files.favicon.filename,
-      files.favicon.mimetype,
-    );
+    const url = await storage.save({
+      buffer: files.favicon.buffer,
+      originalFilename: files.favicon.filename,
+      mimetype: files.favicon.mimetype,
+    });
     pares.push(['loja_favicon', url]);
   }
 

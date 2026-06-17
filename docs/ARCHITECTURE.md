@@ -57,7 +57,7 @@ Monorepo SaaS e-commerce **multi-tenant** (PostgreSQL, slug por loja). Stack pó
 | `/api/*` | API :3001 |
 | `/webhook/*` | API :3001 |
 | `/socket.io` | API :3001 |
-| `/images/*` | API :3001 (uploads estáticos) |
+| `/images/*` | API :3001 (uploads locais legados) ou CDN R2 (`R2_PUBLIC_URL`) |
 | `/admin/*` | Admin static ou :5173 dev |
 | `/*` | Storefront :3000 |
 
@@ -69,10 +69,22 @@ Monorepo SaaS e-commerce **multi-tenant** (PostgreSQL, slug por loja). Stack pó
 
 ## Deploy desenvolvimento
 
+Dois modos suportados (detalhes em [`LEIA-ME.md`](../LEIA-ME.md)):
+
+**Docker completo:**
+
 ```bash
 make up-d          # api + admin + storefront + db
 make seed          # dados demo (idempotente)
 make up-proxy      # + Caddy :8080
+```
+
+**Híbrido (recomendado para frontend):**
+
+```bash
+make db-up-d       # só Postgres
+# 3 terminais: make dev-api | make dev-admin | make dev-storefront
+make seed
 ```
 
 ## Deploy produção (referência)
@@ -85,7 +97,11 @@ make up-proxy      # + Caddy :8080
 | db | Postgres gerenciado |
 | proxy | Caddy / nginx / Cloudflare |
 
-Variáveis críticas: `DATABASE_URL`, `SESSION_SECRET`, webhooks em `https://api.<domínio>/webhook/*`.
+Variáveis críticas: `DATABASE_URL`, `SESSION_SECRET`, webhooks em `https://api.<domínio>/webhook/*`, storage `STORAGE_PROVIDER` + credenciais R2 em produção.
+
+## Inversão de dependência (API)
+
+Integrações externas (storage, e-mail, pagamentos) usam **ports & adapters**. Detalhes: [`docs/api-dependency-inversion.md`](api-dependency-inversion.md).
 
 ## Testes
 

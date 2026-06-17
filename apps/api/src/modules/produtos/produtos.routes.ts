@@ -3,7 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 
 import { parseMultipartAll } from '../../lib/multipart.js';
-import { UploadError } from '../../lib/upload.js';
+import { UploadError } from '../../lib/image-validation.js';
 import { requireAdmin } from '../../plugins/auth-guard.js';
 import {
   createProduto,
@@ -74,7 +74,7 @@ export async function produtosRoutes(app: FastifyInstance): Promise<void> {
         });
       }
 
-      const { id } = await createProduto(request.db, parsed.data, imagens);
+      const { id } = await createProduto(request.db, request.server.imageStorage, parsed.data, imagens);
       return reply.code(201).send({ data: { id } });
     } catch (err) {
       if (err instanceof UploadError) {
@@ -102,7 +102,7 @@ export async function produtosRoutes(app: FastifyInstance): Promise<void> {
         });
       }
 
-      const ok = await updateProduto(request.db, id, parsed.data, imagens);
+      const ok = await updateProduto(request.db, request.server.imageStorage, id, parsed.data, imagens);
       if (!ok) {
         return reply.code(404).send({ error: 'Produto não encontrado.', code: 'NOT_FOUND' });
       }
@@ -122,7 +122,7 @@ export async function produtosRoutes(app: FastifyInstance): Promise<void> {
       return reply.code(400).send({ error: 'ID inválido.', code: 'VALIDATION_ERROR' });
     }
 
-    const ok = await deleteProduto(request.db, id);
+    const ok = await deleteProduto(request.db, request.server.imageStorage, id);
     if (!ok) {
       return reply.code(404).send({ error: 'Produto não encontrado.', code: 'NOT_FOUND' });
     }
@@ -164,7 +164,7 @@ export async function produtosRoutes(app: FastifyInstance): Promise<void> {
       return reply.code(400).send({ error: 'ID inválido.', code: 'VALIDATION_ERROR' });
     }
 
-    const ok = await deleteProdutoImagem(request.db, imagemId);
+    const ok = await deleteProdutoImagem(request.db, request.server.imageStorage, imagemId);
     if (!ok) {
       return reply.code(404).send({ error: 'Imagem não encontrada.', code: 'NOT_FOUND' });
     }

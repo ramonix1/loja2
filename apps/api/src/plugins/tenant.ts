@@ -52,7 +52,10 @@ export async function tenantPreHandler(
     request.tenantId = tenant.id;
     request.db = pool;
     request.drizzle = getCachedTenantDb(slug, pool);
-  } catch {
+  } catch (err) {
+    if (process.env.NODE_ENV !== 'production') {
+      request.log.warn({ err, slug }, 'Falha ao resolver tenant');
+    }
     await reply
       .code(404)
       .send({ error: 'Loja não encontrada.', code: 'TENANT_NOT_FOUND' });

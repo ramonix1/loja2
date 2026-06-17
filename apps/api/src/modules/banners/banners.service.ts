@@ -1,7 +1,7 @@
 import type { BannerDetail, BannerFieldsInput, BannerListItem, ProdutoOption } from '@lojao/types/banners';
 import type pg from 'pg';
 
-import { deleteImageFile, saveImageFile } from '../../lib/upload.js';
+import type { ImageStorage } from '../../ports/image-storage.js';
 
 function mapRow(row: {
   id: number;
@@ -56,10 +56,15 @@ export async function listProdutoOptions(db: pg.Pool): Promise<ProdutoOption[]> 
 
 export async function createBanner(
   db: pg.Pool,
+  storage: ImageStorage,
   input: BannerFieldsInput,
   image: { buffer: Buffer; mimetype: string; filename: string },
 ): Promise<{ id: number }> {
-  const imagemUrl = await saveImageFile(image.buffer, image.filename, image.mimetype);
+  const imagemUrl = await storage.save({
+    buffer: image.buffer,
+    originalFilename: image.filename,
+    mimetype: image.mimetype,
+  });
   const produtoId = input.produto_id ?? null;
   const ctaUrl = input.cta_url?.trim() || null;
 
@@ -82,6 +87,7 @@ export async function createBanner(
 
 export async function updateBanner(
   db: pg.Pool,
+  storage: ImageStorage,
   id: number,
   input: BannerFieldsInput,
   image?: { buffer: Buffer; mimetype: string; filename: string } | null,
@@ -93,8 +99,12 @@ export async function updateBanner(
   const ctaUrl = input.cta_url?.trim() || null;
 
   if (image) {
-    await deleteImageFile(existing.rows[0].imagem as string);
-    const imagemUrl = await saveImageFile(image.buffer, image.filename, image.mimetype);
+    await storage.delete(existing.rows[0].imagem as string);
+    const imagemUrl = await storage.save({
+      buffer: image.buffer,
+      originalFilename: image.filename,
+      mimetype: image.mimetype,
+    });
     await db.query(
       `UPDATE banners SET titulo=$1, subtitulo=$2, imagem=$3, cta_texto=$4, cta_url=$5,
        produto_id=$6, ativo=$7, ordem=$8, updated_at=NOW() WHERE id=$9`,
@@ -130,11 +140,15 @@ export async function updateBanner(
   return true;
 }
 
-export async function deleteBanner(db: pg.Pool, id: number): Promise<boolean> {
+export async function deleteBanner(
+  db: pg.Pool,
+  storage: ImageStorage,
+  id: number,
+): Promise<boolean> {
   const r = await db.query('SELECT imagem FROM banners WHERE id = $1', [id]);
   if (!r.rows[0]) return false;
 
-  await deleteImageFile(r.rows[0].imagem as string);
+  await storage.delete(r.rows[0].imagem as string);
   await db.query('DELETE FROM banners WHERE id = $1', [id]);
   return true;
 }

@@ -86,10 +86,6 @@ export function DashboardCharts() {
           <p className="text-sm text-gray-400">
             Nenhum pedido no período selecionado.
           </p>
-          <p className="mt-1 text-xs text-gray-500">
-            Execute <code className="text-gray-400">make seed</code> para popular dados de
-            desenvolvimento.
-          </p>
         </div>
       )}
 

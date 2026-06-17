@@ -2,7 +2,7 @@ import { bannerFieldsSchema } from '@lojao/types/banners';
 import type { FastifyInstance } from 'fastify';
 
 import { parseMultipart } from '../../lib/multipart.js';
-import { UploadError } from '../../lib/upload.js';
+import { UploadError } from '../../lib/image-validation.js';
 import { requireAdmin } from '../../plugins/auth-guard.js';
 import {
   createBanner,
@@ -80,7 +80,7 @@ export async function bannersRoutes(app: FastifyInstance): Promise<void> {
         });
       }
 
-      const { id } = await createBanner(request.db, parsed.data, file);
+      const { id } = await createBanner(request.db, request.server.imageStorage, parsed.data, file);
       return reply.code(201).send({ data: { id } });
     } catch (err) {
       if (err instanceof UploadError) {
@@ -107,7 +107,7 @@ export async function bannersRoutes(app: FastifyInstance): Promise<void> {
         });
       }
 
-      const ok = await updateBanner(request.db, id, parsed.data, file);
+      const ok = await updateBanner(request.db, request.server.imageStorage, id, parsed.data, file);
       if (!ok) {
         return reply.code(404).send({ error: 'Banner não encontrado.', code: 'NOT_FOUND' });
       }
@@ -127,7 +127,7 @@ export async function bannersRoutes(app: FastifyInstance): Promise<void> {
       return reply.code(400).send({ error: 'ID inválido.', code: 'VALIDATION_ERROR' });
     }
 
-    const ok = await deleteBanner(request.db, id);
+    const ok = await deleteBanner(request.db, request.server.imageStorage, id);
     if (!ok) {
       return reply.code(404).send({ error: 'Banner não encontrado.', code: 'NOT_FOUND' });
     }

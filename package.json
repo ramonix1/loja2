@@ -9,6 +9,11 @@
   },
   "scripts": {
     "dev": "turbo dev",
+    "dev:all": "turbo dev",
+    "dev:ui": "turbo dev --ui tui",
+    "dev:api": "pnpm --filter api dev",
+    "dev:admin": "pnpm --filter admin dev",
+    "dev:storefront": "pnpm --filter storefront dev",
     "build": "turbo build",
     "test": "turbo test",
     "typecheck": "turbo typecheck",

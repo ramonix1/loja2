@@ -146,7 +146,7 @@ O produto terá cobertura automatizada em camadas (unit → integração API →
 
 | Documento | Conteúdo |
 |-----------|----------|
-| `LEIA-ME.md` | Setup Docker, credenciais dev |
+| `LEIA-ME.md` | Setup dev (Docker completo ou híbrido), credenciais dev |
 | `BILLING_SETUP.md` | Modelo de billing SaaS |
 | `TESTING.md` | Jest, coverage |
 | `.env.example` | Variáveis de ambiente |

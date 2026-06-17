@@ -1,3 +1,5 @@
+import './load-env.js';
+
 import { buildApp } from './app.js';
 import { bootstrapDatabase } from './lib/bootstrap.js';
 

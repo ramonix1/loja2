@@ -17,6 +17,7 @@
     "seed:fresh": "node ./scripts/run-seed.mjs --fresh"
   },
   "dependencies": {
+    "aws4fetch": "^1.0.20",
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^10.0.1",
     "@fastify/multipart": "^9.0.3",

@@ -1,3 +1,5 @@
+import '../load-env.js';
+
 import pg from 'pg';
 
 const { Pool } = pg;
@@ -15,6 +17,6 @@ const sslEnabled =
 
 export const masterPool = new Pool({
   connectionString:
-    process.env.DATABASE_URL ?? 'postgresql://postgres:123456@localhost:5432/lojao',
+    process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5432/lojao',
   ssl: sslEnabled ? { rejectUnauthorized: false } : false,
 });

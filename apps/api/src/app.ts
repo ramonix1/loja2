@@ -8,6 +8,7 @@ import { v1Routes } from './routes/v1.js';
 import { webhookRoutes } from './modules/webhooks/webhook.routes.js';
 import { sessionPlugin } from './plugins/session.js';
 import { registerSocketIO } from './plugins/socketio.js';
+import { imageStoragePlugin } from './plugins/image-storage.js';
 import { registerStaticAssets } from './plugins/static-assets.js';
 
 /**
@@ -40,8 +41,10 @@ export async function buildApp(): Promise<FastifyInstance> {
     limits: { fileSize: 5 * 1024 * 1024 },
   });
   await app.register(sessionPlugin);
+  await app.register(imageStoragePlugin);
 
   await app.register(healthRoutes);
+  // Imagens legadas em disco (`/images/*`) — novos uploads no R2 usam URL pública direta.
   await registerStaticAssets(app);
   await app.register(webhookRoutes);
   await app.register(v1Routes, { prefix: '/api/v1' });

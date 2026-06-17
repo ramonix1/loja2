@@ -24,7 +24,7 @@ services:
     buildCommand: corepack enable && NODE_ENV=development CI=true pnpm install --frozen-lockfile && pnpm --filter api... build
     startCommand: pnpm --filter api exec tsx src/index.ts
     healthCheckPath: /health
-    # Disco persistente exige plano pago — no free tier uploads são efêmeros (somem no redeploy).
+    # Produção: use STORAGE_PROVIDER=r2 (uploads no Cloudflare R2). Disco local no free tier é efêmero.
     envVars:
       - key: NODE_VERSION
         value: "24"
@@ -38,8 +38,20 @@ services:
         generateValue: true
       - key: TENANT_SLUG
         value: loja
+      - key: STORAGE_PROVIDER
+        value: r2
+      - key: R2_DELIVERY
+        value: proxy
       - key: UPLOAD_DIR
         value: data/uploads/images
+      - key: R2_ACCOUNT_ID
+        value: 66836ec0393e82929ae0c3090b013f9d
+      - key: R2_BUCKET
+        value: ata-commerce
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
       - key: COOKIE_SAME_SITE
         value: none
       - key: ADMIN_EMAIL

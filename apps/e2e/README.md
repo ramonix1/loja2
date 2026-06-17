@@ -35,14 +35,19 @@ E2E_ADMIN_PASSWORD=admin123
 
 ## Pré-requisitos
 
-1. Stack no ar:
+1. Stack no ar (qualquer modo):
 
 ```bash
+# Docker completo
 make up-d
-make seed          # recomendado para dados demo
+
+# ou híbrido
+make db-up-d && pnpm dev
 ```
 
-2. Chromium Playwright (uma vez):
+2. Seed recomendado: `make seed`
+
+3. Chromium Playwright (uma vez):
 
 ```bash
 pnpm --filter e2e exec playwright install chromium

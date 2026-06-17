@@ -4,7 +4,45 @@ Documento para o agente implementador e para ops. Descreve **como o ambiente sob
 
 ---
 
-## Estado atual (pré-migração)
+## Estado atual (pós Fase 8)
+
+### Modos de desenvolvimento
+
+| Modo | Comando | Quando usar |
+|------|---------|-------------|
+| **Docker completo** | `make up-d` | Onboarding, espelhar CI, preferência por containers |
+| **Híbrido** | `make db-up-d` + `pnpm dev` | Produtividade frontend, menor uso de recursos |
+
+### docker-compose.yml (stack completa)
+
+Serviços: `api`, `admin`, `storefront`, `db` (+ `caddy` opcional, profile `proxy`).
+
+Usado por: desenvolvimento dockerizado, CI (`docker-compose.ci.yml`), scripts `make ci-*-docker`.
+
+### docker-compose.db.yml (Postgres apenas)
+
+```bash
+docker compose -f docker-compose.db.yml up -d
+```
+
+- Imagem `postgres:16-alpine`, porta `5432`, volume `pgdata` (compartilhado com compose principal)
+- Apps no host conectam via `DATABASE_URL=postgresql://postgres:postgres@localhost:5432/lojao`
+- `.env` na raiz do monorepo; `PGSSL=disable` em dev
+
+### Makefile — comandos atuais (referência)
+
+| Comando | Ação |
+|---------|------|
+| `make up` / `make up-d` | Stack completa |
+| `make db-up` / `make db-up-d` | Só Postgres (híbrido) |
+| `make dev` | `pnpm dev` (apps no host) |
+| `make db-migrate` | Drizzle via host (`pnpm --filter @lojao/db`) |
+| `make seed` | Docker ou host (detecta automaticamente) |
+| `make ci-check-docker` | Gate CI no Docker (inalterado) |
+
+---
+
+## Estado legado (pré-migração)
 
 ### docker-compose.yml
 

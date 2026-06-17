@@ -41,14 +41,17 @@ SaaS e-commerce multi-tenant BR. PostgreSQL. Cookie sessão `lojao.sid`. Não qu
 ## Deploy
 
 Toda fase que altera infra deve atualizar:
-- `docker-compose.yml`
+- `docker-compose.yml` (stack completa)
+- `docker-compose.db.yml` (Postgres apenas — modo híbrido)
 - `Makefile`
 - `LEIA-ME.md`
 - `.env.example`
 
+**Desenvolvimento:** dois modos oficiais — Docker completo (`make up-d`) ou híbrido (`make db-up-d` + `pnpm dev`). Ver `LEIA-ME.md`.
+
 Detalhes: `docs/migration/DEPLOY.md`
 
-## Verificação mínima sempre
+## Testes
 
 ```bash
 pnpm install
@@ -56,6 +59,10 @@ make test-api       # vitest API
 pnpm test:all       # api + e2e smoke
 pnpm turbo typecheck
 ```
+
+## Arquitetura da API
+
+Integrações externas seguem **inversão de dependência** (ports & adapters). Ver `docs/api-dependency-inversion.md` e `.cursor/rules/api-dependency-inversion.mdc`.
 
 ## Contato humano
 

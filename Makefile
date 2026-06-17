@@ -1,5 +1,7 @@
 .DEFAULT_GOAL := help
-.PHONY: help install up up-d down restart reset \
+COMPOSE_DB := docker compose -f docker-compose.db.yml
+.PHONY: help install dev dev-all dev-ui dev-api dev-admin dev-storefront hybrid-setup clean-host clean-node-modules migrate-uploads-from-docker up up-d down restart reset \
+        db-up db-up-d db-down db-reset \
         logs logs-all logs-api logs-admin logs-storefront \
         shell shell-api db api-install admin-install storefront-install deps-sync docker-rebuild \
         seed seed-fresh db-migrate db-generate db-studio \
@@ -13,10 +15,63 @@ help: ## Lista os comandos disponíveis
 install: ## pnpm install na raiz do monorepo
 	pnpm install
 
-up: ## Sobe api + admin + storefront + db (build)
+dev-api: ## API Fastify :3001 — um terminal só da API
+	pnpm dev:api
+
+dev-admin: ## Admin Vite :5173 — um terminal só do admin
+	pnpm dev:admin
+
+dev-storefront: ## Storefront Next :3000 — um terminal só da vitrine
+	pnpm dev:storefront
+
+dev-all: ## Todos no mesmo terminal (turbo — logs misturados)
+	pnpm dev:all
+
+dev-ui: ## Todos com painéis separados no terminal (turbo TUI)
+	pnpm dev:ui
+
+dev: dev-all ## Alias de dev-all (prefira dev-api + dev-admin + dev-storefront)
+
+clean-node-modules: clean-host ## Alias — limpa artefatos Docker no host
+
+clean-host: ## Remove node_modules, .next, dist, .turbo contaminados pelo Docker
+	@chmod +x scripts/clean-host.sh
+	@./scripts/clean-host.sh
+
+hybrid-setup: ## Prepara dev híbrido: para stack Docker, limpa deps, sobe Postgres, instala
+	@$(MAKE) clean-host
+	$(COMPOSE_DB) up -d
+	pnpm install
+	@test -f .env || cp .env.example .env
+	@echo ""
+	@echo "Ambiente híbrido pronto. Abra 3 terminais:"
+	@echo "  make dev-api | make dev-admin | make dev-storefront"
+	@echo "Depois (1ª vez): make seed"
+
+migrate-uploads-from-docker: ## Copia imagens do volume Docker para data/uploads/images (híbrido)
+	@mkdir -p data/uploads/images
+	@docker run --rm \
+		-v loja2_upload_data:/from:ro \
+		-v "$(CURDIR)/data/uploads/images:/to" \
+		alpine sh -c 'for f in /from/*; do [ -f "$$f" ] && cp -n "$$f" /to/; done; ls -la /to'
+	@echo "Imagens copiadas para data/uploads/images"
+
+db-up: ## Sobe só Postgres (modo híbrido)
+	$(COMPOSE_DB) up
+
+db-up-d: ## Sobe só Postgres em background (modo híbrido)
+	$(COMPOSE_DB) up -d
+
+db-down: ## Para Postgres (modo híbrido)
+	$(COMPOSE_DB) down
+
+db-reset: ## Apaga volume Postgres (modo híbrido)
+	$(COMPOSE_DB) down -v
+
+up: ## [Docker completo] Sobe api + admin + storefront + db (build)
 	docker compose up --build
 
-up-d: ## Sobe api + admin + storefront + db em background
+up-d: ## [Docker completo] Sobe api + admin + storefront + db em background
 	docker compose up --build -d
 
 up-proxy: ## Stack + Caddy proxy unificado (:8080)
@@ -48,8 +103,9 @@ logs-storefront: ## Logs do storefront (Next)
 shell-api: ## Shell no container api
 	docker compose exec api sh
 
-db: ## psql no Postgres
-	docker compose exec db psql -U postgres -d lojao
+db: ## psql no Postgres (stack completa ou db-up-d)
+	@docker compose exec db psql -U postgres -d lojao 2>/dev/null || \
+		$(COMPOSE_DB) exec db psql -U postgres -d lojao
 
 api-install: ## Reinstala deps da api nos volumes Docker
 	docker compose exec -e CI=true api sh -c "rm -f /app/node_modules/.docker-lock-sha256 && cd /app && pnpm install --filter api..."
@@ -72,11 +128,11 @@ deps-sync: ## Força sync de deps em api + admin + storefront
 docker-rebuild: ## Rebuild completo das imagens (sem cache)
 	docker compose build --no-cache
 
-seed: ## Popula banco dev (produtos, compradores, pedidos, pagamentos)
-	docker compose exec api pnpm seed:dev
+seed: ## Popula banco dev (Docker ou híbrido)
+	@docker compose exec api pnpm seed:dev 2>/dev/null || pnpm seed
 
-seed-fresh: ## Recria dados [DEV] do zero
-	docker compose exec api pnpm seed:fresh
+seed-fresh: ## Recria dados [DEV] do zero (Docker ou híbrido)
+	@docker compose exec api pnpm seed:fresh 2>/dev/null || pnpm seed:fresh
 
 db-migrate: ## Roda migrations Drizzle (@lojao/db)
 	pnpm --filter @lojao/db db:migrate

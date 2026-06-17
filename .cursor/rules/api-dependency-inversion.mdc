@@ -1,0 +1,34 @@
+---
+description: API — inversão de dependência (ports & adapters)
+globs: "apps/api/**"
+alwaysApply: false
+---
+
+# API — Ports & Adapters (inversão de dependência)
+
+Toda integração externa na API (`apps/api`) deve seguir **inversão de dependência**:
+
+1. **Port** (`src/ports/`) — interface/contrato que os módulos de domínio consomem.
+2. **Adapter** (`src/adapters/`) — implementação concreta (R2, disco, SMTP, gateway de pagamento, etc.).
+3. **Factory** (`src/adapters/*/create-*.ts`) — escolhe o adapter via variáveis de ambiente.
+4. **Plugin Fastify** (`src/plugins/`) — injeta a dependência em `app.*` para as rotas repassarem aos services.
+
+## Regras
+
+- Services **não** importam SDKs externos diretamente — recebem a port por parâmetro.
+- Rotas passam `request.server.<port>` aos services (ex.: `request.server.imageStorage`).
+- Testes usam adapter local/in-memory; produção troca via env sem alterar regras de negócio.
+- Novos providers = novo adapter + entrada na factory; **não** alterar services.
+
+## Exemplo implementado: imagens
+
+| Camada | Arquivo |
+|--------|---------|
+| Port | `src/ports/image-storage.ts` |
+| Adapters | `src/adapters/storage/local-image-storage.ts`, `r2-image-storage.ts` |
+| Factory | `src/adapters/storage/create-image-storage.ts` |
+| Plugin | `src/plugins/image-storage.ts` |
+
+Env: `STORAGE_PROVIDER=local|r2` (+ credenciais R2 quando `r2`).
+
+Documentação: `docs/api-dependency-inversion.md`.

@@ -1,7 +1,7 @@
 import type { ProdutoDetail, ProdutoFieldsInput, ProdutoListItem } from '@lojao/types/produtos';
 import type pg from 'pg';
 
-import { deleteImageFile, saveImageFile } from '../../lib/upload.js';
+import type { ImageStorage } from '../../ports/image-storage.js';
 
 function mapListRow(row: {
   id: number;
@@ -58,6 +58,7 @@ export async function getProduto(db: pg.Pool, id: number): Promise<ProdutoDetail
 
 export async function createProduto(
   db: pg.Pool,
+  storage: ImageStorage,
   input: ProdutoFieldsInput,
   images: Array<{ buffer: Buffer; mimetype: string; filename: string }>,
 ): Promise<{ id: number }> {
@@ -76,7 +77,11 @@ export async function createProduto(
   const id = ins.rows[0].id as number;
 
   for (const file of images) {
-    const url = await saveImageFile(file.buffer, file.filename, file.mimetype);
+    const url = await storage.save({
+      buffer: file.buffer,
+      originalFilename: file.filename,
+      mimetype: file.mimetype,
+    });
     await db.query('INSERT INTO produtos_imagens (produto_id, url) VALUES ($1, $2)', [id, url]);
   }
 
@@ -85,6 +90,7 @@ export async function createProduto(
 
 export async function updateProduto(
   db: pg.Pool,
+  storage: ImageStorage,
   id: number,
   input: ProdutoFieldsInput,
   images: Array<{ buffer: Buffer; mimetype: string; filename: string }>,
@@ -106,26 +112,38 @@ export async function updateProduto(
   if ((upd.rowCount ?? 0) === 0) return false;
 
   for (const file of images) {
-    const url = await saveImageFile(file.buffer, file.filename, file.mimetype);
+    const url = await storage.save({
+      buffer: file.buffer,
+      originalFilename: file.filename,
+      mimetype: file.mimetype,
+    });
     await db.query('INSERT INTO produtos_imagens (produto_id, url) VALUES ($1, $2)', [id, url]);
   }
 
   return true;
 }
 
-export async function deleteProduto(db: pg.Pool, id: number): Promise<boolean> {
+export async function deleteProduto(
+  db: pg.Pool,
+  storage: ImageStorage,
+  id: number,
+): Promise<boolean> {
   const imagens = await db.query('SELECT url FROM produtos_imagens WHERE produto_id = $1', [id]);
   for (const img of imagens.rows as { url: string }[]) {
-    await deleteImageFile(img.url);
+    await storage.delete(img.url);
   }
   const del = await db.query('DELETE FROM produtos WHERE id = $1', [id]);
   return (del.rowCount ?? 0) > 0;
 }
 
-export async function deleteProdutoImagem(db: pg.Pool, imagemId: number): Promise<boolean> {
+export async function deleteProdutoImagem(
+  db: pg.Pool,
+  storage: ImageStorage,
+  imagemId: number,
+): Promise<boolean> {
   const img = await db.query('SELECT url FROM produtos_imagens WHERE id = $1', [imagemId]);
   if (!img.rows[0]) return false;
-  await deleteImageFile(img.rows[0].url as string);
+  await storage.delete(img.rows[0].url as string);
   await db.query('DELETE FROM produtos_imagens WHERE id = $1', [imagemId]);
   return true;
 }

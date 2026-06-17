@@ -57,8 +57,9 @@ alwaysApply: true
 
 ## Deploy
 
-- Alterações em `docker-compose.yml`, `Makefile`, `LEIA-ME.md` são **parte da entrega** quando a fase exigir
-- Ver `docs/migration/DEPLOY.md` para portas: legacy 3000, api 3001, admin 5173, storefront 3002
+- Alterações em `docker-compose.yml`, `docker-compose.db.yml`, `Makefile`, `LEIA-ME.md` são **parte da entrega** quando a fase exigir
+- **Dois modos de dev:** Docker completo (`make up-d`) ou híbrido (`make db-up-d` + `pnpm dev`) — ambos suportados
+- Ver `docs/migration/DEPLOY.md` para portas: api 3001, admin 5173, storefront 3000
 - `VITE_*` / `NEXT_PUBLIC_*` usam `localhost` no browser, não hostname Docker interno
 
 ## Proibido sem nova spec
