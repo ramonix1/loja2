@@ -201,7 +201,9 @@ Copie `.env.example` → `.env` e ajuste conforme necessário.
 
 ## Deploy Render (Blueprint)
 
-Monorepo pronto para **Render Blueprint** (`render.yaml` na raiz):
+Monorepo pronto para **Render Blueprint** (`render.yaml` na raiz).
+
+**Antes de push/deploy:** `make ci-install && make deploy-check` — o Render usa `pnpm install --frozen-lockfile` (dev local não). Produção usa `STORAGE_PROVIDER=r2`; dev híbrido usa `local`.
 
 1. Render → **New → Blueprint** → repo + branch `master`
 2. Suspenda/apague o serviço legado que usava `server.js`

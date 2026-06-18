@@ -19,6 +19,7 @@ Deploy do monorepo Lojão via **Render Blueprint** (`render.yaml` na raiz).
    - `lojao-storefront` (Web Service)
    - `lojao-admin` (Static Site — sem `plan`; static sites não usam tier no blueprint)
 5. Preencha variáveis marcadas **sync: false** no dashboard:
+   - **`R2_ACCESS_KEY_ID`**, **`R2_SECRET_ACCESS_KEY`** (obrigatório — blueprint usa `STORAGE_PROVIDER=r2`)
    - `ADMIN_EMAIL`, `ADMIN_SENHA` (não use defaults em produção)
    - Stripe, SumUp, e-mail (se aplicável)
 6. Aguarde o deploy. Ordem típica: DB → API → storefront/admin.
@@ -73,7 +74,8 @@ Vincule domínios em cada serviço no dashboard. Atualize `APP_URL`, `ADMIN_URL`
 | Admin login falha (401 após login) | CORS/cookie: `COOKIE_SAME_SITE=none` na API; `ADMIN_URL` deve bater com URL do admin |
 | Imagens 404 após redeploy | Free tier: uploads efêmeros; upgrade ou storage externo |
 | Imagens 404 (geral) | `UPLOAD_DIR` incorreto ou arquivo nunca persistido |
-| `ERR_PNPM_OUTDATED_LOCKFILE` | `package.json` alterado sem regenerar lockfile — rode `pnpm install` e commite `pnpm-lock.yaml` |
+| API cai no boot: `R2_ACCESS_KEY_ID` ausente | Blueprint define `STORAGE_PROVIDER=r2`; preencha `R2_ACCESS_KEY_ID` e `R2_SECRET_ACCESS_KEY` no Environment de `lojao-api` |
+| `ERR_PNPM_OUTDATED_LOCKFILE` | `package.json` alterado sem regenerar lockfile — rode `pnpm install` e commite `pnpm-lock.yaml`; valide com `make ci-install` |
 | Build falha com `frozen-lockfile` | Build usa `NODE_ENV=development` no install (devDeps como `tsx`/`typescript`); runtime continua `production` |
 | Build falha Node 20 | Defina `NODE_VERSION=24` (já no blueprint) |
 
@@ -92,5 +94,6 @@ Proxy `/api/v1` no storefront serve só fallback; imagens usam `/images/*` (same
 
 ```bash
 pnpm install
+make ci-install      # igual Render — falha se lockfile desatualizado
 make deploy-check
 ```

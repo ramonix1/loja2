@@ -22,7 +22,7 @@ services:
     plan: free
     region: oregon
     buildCommand: corepack enable && NODE_ENV=development CI=true pnpm install --frozen-lockfile && pnpm --filter api... build
-    startCommand: pnpm --filter api exec tsx src/index.ts
+    startCommand: pnpm --filter api start:dist
     healthCheckPath: /health
     # Produção: use STORAGE_PROVIDER=r2 (uploads no Cloudflare R2). Disco local no free tier é efêmero.
     envVars:

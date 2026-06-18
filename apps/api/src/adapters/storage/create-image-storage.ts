@@ -2,6 +2,10 @@ import type { ImageStorage } from '../../ports/image-storage.js';
 import { LocalImageStorage } from './local-image-storage.js';
 import { R2ImageStorage, type R2DeliveryMode } from './r2-image-storage.js';
 
+function missingEnv(names: string[]): string[] {
+  return names.filter((name) => !process.env[name]?.trim());
+}
+
 function requireEnv(name: string): string {
   const value = process.env[name]?.trim();
   if (!value) {
@@ -21,6 +25,14 @@ export function createImageStorage(): ImageStorage {
   const provider = (process.env.STORAGE_PROVIDER ?? 'local').trim().toLowerCase();
 
   if (provider === 'r2') {
+    const missing = missingEnv(['R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY']);
+    if (missing.length > 0) {
+      throw new Error(
+        `STORAGE_PROVIDER=r2, mas variáveis ausentes: ${missing.join(', ')}. ` +
+          'Preencha no dashboard Render (Environment) ou use STORAGE_PROVIDER=local em dev.',
+      );
+    }
+
     const delivery = resolveR2Delivery();
     const publicBaseUrl = process.env.R2_PUBLIC_URL?.trim();
 
