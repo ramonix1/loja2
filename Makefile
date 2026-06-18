@@ -170,8 +170,8 @@ build: ## turbo build (api + admin + storefront + packages)
 ci-install: ## Valida pnpm-lock.yaml (igual Render e GitHub Actions)
 	pnpm ci:install
 
-deploy-check: ## Gate release: lockfile + typecheck + test + build
-	pnpm ci:install && pnpm turbo typecheck && pnpm --filter api test && pnpm turbo build
+deploy-check: ## Gate release: lockfile + build deps + typecheck + test + build
+	pnpm ci:install && pnpm --filter api... build && pnpm turbo typecheck && pnpm --filter api test
 
 ci-check: ## Mesmo gate do job CI "test" (typecheck + api + db) — requer Node 24 + deps no host
 	pnpm turbo typecheck && pnpm --filter api test && pnpm --filter @lojao/db test

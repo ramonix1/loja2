@@ -4,23 +4,24 @@
   "private": true,
   "description": "Drizzle ORM — schema PostgreSQL Lojão (master + tenant)",
   "type": "module",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
-      "default": "./src/index.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./schema/tenant": {
-      "types": "./src/schema/tenant/index.ts",
-      "default": "./src/schema/tenant/index.ts"
+      "types": "./dist/schema/tenant/index.d.ts",
+      "default": "./dist/schema/tenant/index.js"
     },
     "./schema/master": {
-      "types": "./src/schema/master/index.ts",
-      "default": "./src/schema/master/index.ts"
+      "types": "./dist/schema/master/index.d.ts",
+      "default": "./dist/schema/master/index.js"
     }
   },
   "scripts": {
+    "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",

@@ -1,8 +1,9 @@
 {
-  "extends": "@lojao/eslint-config/base.json",
+  "extends": "../../packages/eslint-config/base.json",
   "compilerOptions": {
-    "noEmit": true,
+    "outDir": "./dist",
     "rootDir": "./src"
   },
-  "include": ["src"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["dist", "node_modules"]
 }
