@@ -1,6 +1,7 @@
 import { store as testIds } from '@lojao/test-utils/test-ids/store';
 import type { Metadata } from 'next';
 import { ProductPurchaseActions } from '@/components/product-purchase-actions';
+import { ProductGallery } from '@/components/product-gallery';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -8,10 +9,9 @@ import {
   BRL,
   fetchPublicProductDetail,
   fetchPublicStore,
-  legacyAssetUrl,
 } from '@/lib/api';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -61,11 +61,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
         ? [{ id: 0, url: product.primeira_imagem }]
         : [];
 
-  const mainImage =
-    imagens[0]?.url != null
-      ? legacyAssetUrl(imagens[0].url)
-      : 'https://placehold.co/600x450/f3f4f6/9ca3af?text=Sem+Imagem';
-
   const esgotado =
     store.controla_estoque &&
     product.estoque !== null &&
@@ -79,28 +74,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
       </Link>
 
       <div className="grid gap-10 lg:grid-cols-2">
-        <div>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={mainImage}
-            alt={product.nome}
-            className="w-full rounded-xl object-cover shadow-sm"
-            style={{ maxHeight: 460 }}
-          />
-          {imagens.length > 1 ? (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {imagens.map((img) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  key={img.id}
-                  src={legacyAssetUrl(img.url)}
-                  alt=""
-                  className="h-16 w-16 rounded-lg border border-gray-200 object-cover"
-                />
-              ))}
-            </div>
-          ) : null}
-        </div>
+        <ProductGallery images={imagens} productName={product.nome} />
 
         <div className="flex flex-col gap-5">
           <div>

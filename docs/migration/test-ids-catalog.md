@@ -116,6 +116,8 @@ Constantes: `testIds.adminAparencia.*`.
 | `admin-produtos-nome-input` | produtos | Input nome | 3 | admin/produtos.spec.ts |
 | `admin-produtos-valor-input` | produtos | Input valor | 3 | admin/produtos.spec.ts |
 | `admin-produtos-imagens-input` | produtos | Input imagens | 3 | admin/produtos.spec.ts |
+| `admin-produtos-imagens-preview` | produtos | Grid preview antes de salvar | 3 | — |
+| `admin-produtos-imagens-preview-{index}` | produtos | Item do preview (dinâmico) | 3 | — |
 | `admin-produtos-form-submit-btn` | produtos | Salvar novo | 3 | — |
 | `admin-produtos-delete-btn` | produtos | Excluir | 3 | — |
 | `admin-produtos-empty-state` | produtos | Estado vazio | 3 | — |
@@ -273,6 +275,8 @@ Constantes: `testIds.adminDiagnostico.*` (`item(nome)` é função).
 | `store-home-product-card-{id}` | home | Card produto (dinâmico) | 5 | store/vitrine.spec.ts, store/cart.spec.ts |
 | `store-home-banner-carousel` | home | Carrossel banners | 6 | — |
 | `store-product-detail` | produto | Container detalhe | 5 | store/vitrine.spec.ts |
+| `store-product-gallery` | produto | Galeria principal | 5 | store/vitrine.spec.ts |
+| `store-product-gallery-thumb-{id}` | produto | Miniatura (dinâmico) | 5 | — |
 | `store-product-title` | produto | Nome | 5 | store/vitrine.spec.ts |
 | `store-product-price` | produto | Preço | 5 | store/vitrine.spec.ts |
 | `store-product-add-cart-btn` | produto / card | Adicionar ao carrinho | 6 | store/vitrine.spec.ts, store/checkout.spec.ts |

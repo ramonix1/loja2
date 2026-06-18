@@ -7,6 +7,8 @@ export const store = {
   homeProductCard: (id: number | string): string => `store-home-product-card-${id}`,
   homeBannerCarousel: 'store-home-banner-carousel',
   productDetail: 'store-product-detail',
+  productGallery: 'store-product-gallery',
+  productGalleryThumb: (id: number | string): string => `store-product-gallery-thumb-${id}`,
   productTitle: 'store-product-title',
   productPrice: 'store-product-price',
   productAddCartBtn: 'store-product-add-cart-btn',

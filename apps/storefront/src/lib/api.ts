@@ -6,11 +6,22 @@ import { getSsrApiBase } from '@/lib/ssr-fetch';
 
 const TENANT_SLUG = process.env.TENANT_SLUG ?? process.env.NEXT_PUBLIC_TENANT_SLUG ?? 'loja';
 
+/** Segundos de cache ISR para dados públicos (home, produto). */
+const PUBLIC_REVALIDATE_SEC = Number(process.env.STOREFRONT_PUBLIC_REVALIDATE ?? 60);
+
 export function assetUrl(path: string): string {
   if (!path) return '';
   if (path.startsWith('http')) return path;
-  // Same-origin: proxy `/images/*` → API (dev e produção)
-  return path.startsWith('/') ? path : `/${path}`;
+
+  const normalized = path.startsWith('/') ? path : `/${path}`;
+
+  // Imagens: URL direta da API — evita hop storefront→API e permite cache no browser/CDN.
+  if (normalized.startsWith('/images/')) {
+    const apiPublic = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
+    if (apiPublic) return `${apiPublic}${normalized}`;
+  }
+
+  return normalized;
 }
 
 /** @deprecated use assetUrl */
@@ -27,10 +38,13 @@ export class ApiError extends Error {
   }
 }
 
-async function fetchApi<T>(path: string): Promise<T> {
+async function fetchApi<T>(path: string, options?: { revalidate?: number | false }): Promise<T> {
+  const revalidate = options?.revalidate ?? PUBLIC_REVALIDATE_SEC;
   const res = await fetch(`${getSsrApiBase()}${path}`, {
     headers: { 'X-Tenant-Slug': TENANT_SLUG },
-    cache: 'no-store',
+    ...(revalidate === false
+      ? { cache: 'no-store' as const }
+      : { next: { revalidate } }),
   });
 
   const body = (await res.json().catch(() => ({}))) as {
@@ -72,6 +86,10 @@ export async function fetchPublicProduct(id: number): Promise<PublicProduct | nu
 }
 
 export async function fetchPublicProductDetail(id: number) {
+  return fetchPublicProductDetailCached(id);
+}
+
+const fetchPublicProductDetailCached = cache(async (id: number) => {
   try {
     const { data } = await fetchApi<{
       data: PublicProduct & {
@@ -84,7 +102,7 @@ export async function fetchPublicProductDetail(id: number) {
     if (e instanceof ApiError && e.status === 404) return null;
     throw e;
   }
-}
+});
 
 export function buildStoreMetadata(store: PublicStoreData): Metadata {
   const title = store.loja.nome;

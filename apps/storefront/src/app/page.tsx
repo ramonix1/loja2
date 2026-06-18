@@ -5,7 +5,7 @@ import { BannerCarousel } from '@/components/banner-carousel';
 import { ProductGrid } from '@/components/product-grid';
 import { buildStoreMetadata, fetchPublicBanners, fetchPublicStore, flattenStoreProducts } from '@/lib/api';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   const store = await fetchPublicStore();

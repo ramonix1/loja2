@@ -5,6 +5,8 @@ export const adminProdutos = {
   nomeInput: 'admin-produtos-nome-input',
   valorInput: 'admin-produtos-valor-input',
   imagensInput: 'admin-produtos-imagens-input',
+  imagensPreview: 'admin-produtos-imagens-preview',
+  imagensPreviewItem: (index: number | string): string => `admin-produtos-imagens-preview-${index}`,
   formSubmit: 'admin-produtos-form-submit-btn',
   deleteBtn: 'admin-produtos-delete-btn',
   emptyState: 'admin-produtos-empty-state',

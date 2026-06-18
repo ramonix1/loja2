@@ -26,14 +26,22 @@ export async function registerStaticAssets(
 
     const url = `/images/${filename}`;
 
+    const cacheHeader = { 'Cache-Control': 'public, max-age=86400, immutable' };
+
     try {
       const body = await fs.readFile(path.join(root, filename));
-      return reply.type(mimeFromFilename(filename)).send(body);
+      return reply
+        .headers(cacheHeader)
+        .type(mimeFromFilename(filename))
+        .send(body);
     } catch {}
 
     const fromStorage = await app.imageStorage.read(url);
     if (fromStorage) {
-      return reply.type(fromStorage.contentType).send(fromStorage.body);
+      return reply
+        .headers(cacheHeader)
+        .type(fromStorage.contentType)
+        .send(fromStorage.body);
     }
 
     return reply

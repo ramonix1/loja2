@@ -6,7 +6,7 @@ import { buildStoreMetadata, assetUrl, fetchPublicStore } from '@/lib/api';
 
 import './globals.css';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
   const store = await fetchPublicStore();

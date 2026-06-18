@@ -33,6 +33,8 @@ export function ProductCard({ product, controlaEstoque }: ProductCardProps) {
           src={imgSrc}
           alt={product.nome}
           className="aspect-[4/3] w-full object-cover"
+          loading="lazy"
+          decoding="async"
         />
         <div className="p-4">
           <h2 className="text-lg font-bold text-gray-900">{product.nome}</h2>

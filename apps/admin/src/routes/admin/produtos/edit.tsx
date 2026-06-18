@@ -6,6 +6,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { ApiError, apiFetch, apiUpload, legacyImageUrl } from '../../../lib/api-client';
 import { formatBRL, maskBRLInput, parseBRLInput } from '../../../lib/currency';
+import { useImageFilePreviews } from '../../../lib/use-image-file-previews';
 
 interface ProdutoImagem {
   id: number;
@@ -39,6 +40,7 @@ export function ProdutoEditPage() {
   const [estoque, setEstoque] = useState('');
   const [novasImagens, setNovasImagens] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const novasImagemPreviews = useImageFilePreviews(novasImagens);
 
   const { data: produto, isLoading } = useQuery({
     queryKey: ['admin', 'produtos', produtoId],
@@ -88,6 +90,10 @@ export function ProdutoEditPage() {
     e.preventDefault();
     if (!nome.trim()) return;
     saveMutation.mutate();
+  }
+
+  function removeNovaImagem(index: number) {
+    setNovasImagens((prev) => prev.filter((_, i) => i !== index));
   }
 
   function handleDeleteImagem(imagemId: number) {
@@ -201,9 +207,39 @@ export function ProdutoEditPage() {
               type="file"
               accept="image/*"
               multiple
-              onChange={(e) => setNovasImagens(Array.from(e.target.files ?? []))}
+              onChange={(e) =>
+                setNovasImagens((prev) => [...prev, ...Array.from(e.target.files ?? [])])
+              }
               className="block w-full text-sm text-gray-400 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-blue-700"
             />
+            {novasImagemPreviews.length > 0 ? (
+              <div
+                data-testid={testIds.adminProdutos.imagensPreview}
+                className="mt-3 flex flex-wrap gap-2"
+              >
+                {novasImagemPreviews.map((item, index) => (
+                  <div
+                    key={`${item.file.name}-${index}`}
+                    className="group relative"
+                    data-testid={testIds.adminProdutos.imagensPreviewItem(index)}
+                  >
+                    <img
+                      src={item.url}
+                      alt=""
+                      className="h-20 w-20 rounded-lg border border-gray-700 object-cover"
+                    />
+                    <button
+                      type="button"
+                      aria-label="Remover imagem"
+                      onClick={() => removeNovaImagem(index)}
+                      className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-xs text-white opacity-0 transition group-hover:opacity-100"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </div>
 
           <div className="flex gap-3 border-t border-gray-800 pt-6">
