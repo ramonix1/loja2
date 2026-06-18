@@ -1,8 +1,12 @@
-import { loadEnvConfig } from '@next/env';
-import type { NextConfig } from 'next';
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-loadEnvConfig(join(process.cwd(), '../..'));
+import type { NextConfig } from 'next';
+
+const monorepoEnv = join(process.cwd(), '../..', '.env');
+if (existsSync(monorepoEnv)) {
+  process.loadEnvFile(monorepoEnv);
+}
 
 function r2RemotePattern(): { protocol: 'http' | 'https'; hostname: string; pathname: string } | null {
   const publicUrl = process.env.R2_PUBLIC_URL?.trim();
