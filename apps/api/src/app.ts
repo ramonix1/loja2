@@ -44,7 +44,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(imageStoragePlugin);
 
   await app.register(healthRoutes);
-  // Imagens legadas em disco (`/images/*`) — novos uploads no R2 usam URL pública direta.
+  // Imagens legadas em disco (`/images/*`) — produção CDN redireciona; dev/proxy serve local ou R2.
   await registerStaticAssets(app);
   await app.register(webhookRoutes);
   await app.register(v1Routes, { prefix: '/api/v1' });

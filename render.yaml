@@ -1,4 +1,7 @@
-# Render Blueprint — Lojão (monorepo pnpm)
+# Render Blueprint — Lojão / Ata Labs (monorepo pnpm)
+#
+# Produção Ata Labs: atalabs.com.br (storefront), app.atalabs.com.br (admin),
+# cdn.atalabs.com.br (R2 CDN — fora do Render). API: lojao-api.onrender.com.
 #
 # Cenário A: New → Blueprint no dashboard Render, repo ramonixl/loja2, branch master.
 # Depois de aplicar: preencher secrets (Stripe, e-mail, etc.) e apagar o serviço legado
@@ -41,7 +44,9 @@ services:
       - key: STORAGE_PROVIDER
         value: r2
       - key: R2_DELIVERY
-        value: proxy
+        value: cdn
+      - key: R2_PUBLIC_URL
+        value: https://cdn.atalabs.com.br
       - key: UPLOAD_DIR
         value: data/uploads/images
       - key: R2_ACCOUNT_ID
@@ -61,15 +66,9 @@ services:
       - key: ADMIN_NOME
         value: Administrador
       - key: APP_URL
-        fromService:
-          type: web
-          name: lojao-storefront
-          envVarKey: RENDER_EXTERNAL_URL
+        value: https://atalabs.com.br
       - key: ADMIN_URL
-        fromService:
-          type: web
-          name: lojao-admin
-          envVarKey: RENDER_EXTERNAL_URL
+        value: https://app.atalabs.com.br
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_PUBLIC_KEY
@@ -120,10 +119,9 @@ services:
           name: lojao-api
           envVarKey: RENDER_EXTERNAL_URL
       - key: NEXT_PUBLIC_ADMIN_URL
-        fromService:
-          type: web
-          name: lojao-admin
-          envVarKey: RENDER_EXTERNAL_URL
+        value: https://app.atalabs.com.br
+      - key: NEXT_PUBLIC_CDN_URL
+        value: https://cdn.atalabs.com.br
 
   # --- Admin (Vite → static site) ---
   - type: web
@@ -146,7 +144,6 @@ services:
           name: lojao-api
           envVarKey: RENDER_EXTERNAL_URL
       - key: VITE_STOREFRONT_URL
-        fromService:
-          type: web
-          name: lojao-storefront
-          envVarKey: RENDER_EXTERNAL_URL
+        value: https://atalabs.com.br
+      - key: VITE_CDN_URL
+        value: https://cdn.atalabs.com.br

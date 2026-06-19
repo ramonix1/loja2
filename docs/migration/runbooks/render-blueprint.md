@@ -55,9 +55,49 @@ Após deploy, configure URLs apontando para a API pública:
 - `https://<lojao-api>/webhook/stripe`
 - `https://<lojao-api>/webhook/sumup`
 
-## Domínio customizado (opcional)
+## Domínio customizado — Ata Labs (produção)
 
-Vincule domínios em cada serviço no dashboard. Atualize `APP_URL`, `ADMIN_URL` e rebuild se usar URLs fixas — o blueprint usa `RENDER_EXTERNAL_URL` entre serviços.
+Domínio registrado: **atalabs.com.br** (DNS na Cloudflare). Spec: `docs/specs/ata-labs-platform-spec.md` (Fase A).
+
+### Mapa de hosts
+
+| Host | Destino | Render custom domain |
+|------|---------|----------------------|
+| `atalabs.com.br`, `www` | `lojao-storefront` | Sim |
+| `app.atalabs.com.br` | `lojao-admin` | Sim |
+| `lojao-api.onrender.com` | `lojao-api` | Não (cookie sessão; limite 2 domains no free) |
+| `cdn.atalabs.com.br` | Cloudflare R2 (`ata-commerce`) | Não (fora do Render) |
+
+### DNS Cloudflare
+
+- `@` e `www` → CNAME `lojao-storefront.onrender.com` (proxy conforme cert Render)
+- `app` → CNAME `lojao-admin.onrender.com`
+- `cdn` → custom domain do bucket R2 (dashboard R2 → Settings → Custom Domains)
+
+### Variáveis críticas (já no `render.yaml`)
+
+| Serviço | Variáveis |
+|---------|-----------|
+| `lojao-api` | `APP_URL=https://atalabs.com.br`, `ADMIN_URL=https://app.atalabs.com.br`, `R2_DELIVERY=cdn`, `R2_PUBLIC_URL=https://cdn.atalabs.com.br` |
+| `lojao-storefront` | `NEXT_PUBLIC_CDN_URL=https://cdn.atalabs.com.br`, `NEXT_PUBLIC_ADMIN_URL=https://app.atalabs.com.br` |
+| `lojao-admin` | `VITE_STOREFRONT_URL=https://atalabs.com.br`, `VITE_CDN_URL=https://cdn.atalabs.com.br` |
+| `lojao-admin` | `VITE_STOREFRONT_URL=https://atalabs.com.br` |
+
+Após alterar env ou DNS: **Manual Deploy** em API → storefront → admin (CORS depende de `APP_URL`/`ADMIN_URL`).
+
+### Imagens e bandwidth
+
+- **`R2_DELIVERY=cdn`:** uploads novos retornam `https://cdn.atalabs.com.br/images/...`; GET `/images/*` na API **redireciona 301** para CDN (sem proxy de bytes).
+- Storefront `/images/*` também redireciona para CDN quando `NEXT_PUBLIC_CDN_URL` está definido.
+- Admin usa `VITE_CDN_URL` para previews — não passa imagens pela API Render.
+- Fase B (migração URLs no Postgres) é consistência de dados, não requisito para parar bandwidth de imagem.
+- Validar CDN: `curl -sI "https://cdn.atalabs.com.br/images/{arquivo}"`
+
+> `TENANT_SLUG=loja` permanece no blueprint até Fase D (multi-tenant path).
+
+## Domínio customizado (legado / genérico)
+
+Para deploy sem domínio Ata Labs, use `RENDER_EXTERNAL_URL` entre serviços ou URLs `*.onrender.com` no dashboard.
 
 ## Troubleshooting
 
@@ -68,7 +108,8 @@ Vincule domínios em cada serviço no dashboard. Atualize `APP_URL`, `ADMIN_URL`
 | API não conecta ao Postgres | SSL: não defina `PGSSL=disable` em produção Render |
 | Redirect admin vai para `localhost:5173` | Falta `NEXT_PUBLIC_ADMIN_URL` no build do storefront — rebuild após push |
 | Página 500 (carrinho, checkout, home) | Proxy runtime `/api/v1` — confirme `API_URL` no storefront apontando para `lojao-api` |
-| Imagens quebradas | Use paths `/images/...`; storefront faz proxy para a API |
+| Imagens quebradas | Confirme `cdn.atalabs.com.br` no R2; env CDN nos três serviços; arquivo existe no bucket |
+| Bandwidth Render estourado | `R2_DELIVERY` deve ser `cdn`; nunca `proxy` em produção; imagens só via `cdn.atalabs.com.br` |
 | Admin pede login após entrar pelo storefront | Cookie estava no domínio do storefront — rebuild com `NEXT_PUBLIC_API_URL` apontando para API |
 | Logout no admin não desloga storefront | Mesma causa — sessão deve ser só no domínio da API |
 | Admin login falha (401 após login) | CORS/cookie: `COOKIE_SAME_SITE=none` na API; `ADMIN_URL` deve bater com URL do admin |
@@ -88,7 +129,7 @@ O cookie `lojao.sid` fica no **domínio da API** (`lojao-api.onrender.com`), nã
 - Logout no admin → storefront também desloga na próxima request
 - Requisito: `COOKIE_SAME_SITE=none` na API + CORS com `APP_URL` e `ADMIN_URL`
 
-Proxy `/api/v1` no storefront serve só fallback; imagens usam `/images/*` (same-origin).
+Proxy `/api/v1` no storefront serve só fallback; imagens públicas usam `NEXT_PUBLIC_CDN_URL` (CDN R2) ou fallback API em dev.
 
 ---
 

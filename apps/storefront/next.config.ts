@@ -9,7 +9,7 @@ if (existsSync(monorepoEnv)) {
 }
 
 function r2RemotePattern(): { protocol: 'http' | 'https'; hostname: string; pathname: string } | null {
-  const publicUrl = process.env.R2_PUBLIC_URL?.trim();
+  const publicUrl = (process.env.NEXT_PUBLIC_CDN_URL ?? process.env.R2_PUBLIC_URL)?.trim();
   if (!publicUrl) return null;
   try {
     const parsed = new URL(publicUrl);

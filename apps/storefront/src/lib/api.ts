@@ -15,8 +15,11 @@ export function assetUrl(path: string): string {
 
   const normalized = path.startsWith('/') ? path : `/${path}`;
 
-  // Imagens: URL direta da API — evita hop storefront→API e permite cache no browser/CDN.
+  // Imagens: CDN R2 (produção) → fallback API (dev/proxy legado).
   if (normalized.startsWith('/images/')) {
+    const cdnBase = process.env.NEXT_PUBLIC_CDN_URL?.replace(/\/$/, '');
+    if (cdnBase) return `${cdnBase}${normalized}`;
+
     const apiPublic = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
     if (apiPublic) return `${apiPublic}${normalized}`;
   }

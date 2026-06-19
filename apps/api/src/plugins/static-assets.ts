@@ -5,13 +5,24 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { getLocalUploadDir } from "../adapters/storage/local-image-storage.js";
 import { mimeFromFilename } from "../lib/image-mime.js";
 
+/** Base pública CDN quando `R2_DELIVERY=cdn` — produção não faz proxy de bytes. */
+export function resolveCdnPublicBase(): string | null {
+  const delivery = (process.env.R2_DELIVERY ?? "proxy").trim().toLowerCase();
+  const publicUrl = process.env.R2_PUBLIC_URL?.trim();
+  if (delivery === "cdn" && publicUrl) {
+    return publicUrl.replace(/\/$/, "");
+  }
+  return null;
+}
+
 /**
- * Serve uploads em `/images/*`.
- * Ordem: disco local (legado/dev) → R2 via `app.imageStorage.read()` (modo proxy).
+ * `/images/*` — dev/local: serve disco ou proxy R2.
+ * Produção (`R2_DELIVERY=cdn`): redirect 301 para CDN (sem ler R2/disco na memória).
  */
 export async function registerStaticAssets(
   app: FastifyInstance,
 ): Promise<void> {
+  const cdnBase = resolveCdnPublicBase();
   const root = getLocalUploadDir();
   await fs.mkdir(root, { recursive: true });
 
@@ -24,9 +35,12 @@ export async function registerStaticAssets(
         .send({ error: "Caminho inválido.", code: "VALIDATION_ERROR" });
     }
 
-    const url = `/images/${filename}`;
+    if (cdnBase) {
+      return reply.redirect(`${cdnBase}/images/${filename}`, 301);
+    }
 
-    const cacheHeader = { 'Cache-Control': 'public, max-age=86400, immutable' };
+    const url = `/images/${filename}`;
+    const cacheHeader = { "Cache-Control": "public, max-age=86400, immutable" };
 
     try {
       const body = await fs.readFile(path.join(root, filename));

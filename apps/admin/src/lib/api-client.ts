@@ -5,10 +5,18 @@ export const STOREFRONT_URL = (import.meta.env.VITE_STOREFRONT_URL ?? 'http://lo
   '',
 );
 
-/** URL absoluta para imagens uploadadas (`/images/...` servidas pela API). */
+/** URL absoluta para imagens — CDN em produção; API só em dev/proxy legado. */
 export function assetImageUrl(path: string): string {
   if (path.startsWith('http')) return path;
-  return `${API_URL}${path.startsWith('/') ? path : `/${path}`}`;
+
+  const normalized = path.startsWith('/') ? path : `/${path}`;
+
+  if (normalized.startsWith('/images/')) {
+    const cdn = import.meta.env.VITE_CDN_URL?.replace(/\/$/, '');
+    if (cdn) return `${cdn}${normalized}`;
+  }
+
+  return `${API_URL}${normalized}`;
 }
 
 /** @deprecated use assetImageUrl */
