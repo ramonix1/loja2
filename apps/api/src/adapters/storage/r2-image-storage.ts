@@ -2,10 +2,8 @@ import path from "node:path";
 
 import { AwsClient } from "aws4fetch";
 
-import {
-  assertValidImage,
-  buildImageFilename,
-} from "../../lib/image-validation.js";
+import { buildImageFilename } from "../../lib/image-validation.js";
+import { prepareImageForSave } from "../../lib/image-optimize.js";
 import { mimeFromFilename } from "../../lib/image-mime.js";
 import type {
   ImageReadResult,
@@ -79,14 +77,14 @@ export class R2ImageStorage implements ImageStorage {
   }
 
   async save(input: ImageUploadInput): Promise<string> {
-    assertValidImage(input.buffer, input.mimetype);
-    const filename = buildImageFilename(input.originalFilename);
+    const prepared = await prepareImageForSave(input);
+    const filename = buildImageFilename(prepared.originalFilename);
     const key = `${OBJECT_PREFIX}${filename}`;
 
     const res = await this.client.fetch(this.objectUrl(key), {
       method: "PUT",
-      body: input.buffer,
-      headers: { "Content-Type": input.mimetype },
+      body: prepared.buffer,
+      headers: { "Content-Type": prepared.mimetype },
     });
 
     if (!res.ok) {

@@ -68,7 +68,7 @@ R2_SECRET_ACCESS_KEY=...
 - Novos uploads retornam URL direta do CDN; imagens antigas em `/images/...` continuam via proxy.
 
 - **Endpoint S3** (upload/delete/leitura): `https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com`
-- Objetos gravados em `images/{timestamp}.{ext}`.
+- Objetos gravados em `images/{timestamp}.webp` (upload otimizado: resize max 1920px + WebP).
 - Imagens legadas em disco local continuam servidas antes de consultar o R2.
 
 ## Adicionar novo provider de storage

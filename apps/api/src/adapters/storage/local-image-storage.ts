@@ -2,10 +2,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { getMonorepoRoot } from '../../lib/monorepo-root.js';
-import {
-  assertValidImage,
-  buildImageFilename,
-} from '../../lib/image-validation.js';
+import { buildImageFilename } from '../../lib/image-validation.js';
+import { prepareImageForSave } from '../../lib/image-optimize.js';
 import { mimeFromFilename } from '../../lib/image-mime.js';
 import type { ImageReadResult, ImageStorage, ImageUploadInput } from '../../ports/image-storage.js';
 
@@ -30,11 +28,11 @@ export class LocalImageStorage implements ImageStorage {
   readonly provider = 'local' as const;
 
   async save(input: ImageUploadInput): Promise<string> {
-    assertValidImage(input.buffer, input.mimetype);
-    const filename = buildImageFilename(input.originalFilename);
+    const prepared = await prepareImageForSave(input);
+    const filename = buildImageFilename(prepared.originalFilename);
     const dir = getLocalUploadDir();
     await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(path.join(dir, filename), input.buffer);
+    await fs.writeFile(path.join(dir, filename), prepared.buffer);
     return `/images/${filename}`;
   }
 
