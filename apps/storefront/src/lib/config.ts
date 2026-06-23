@@ -6,10 +6,19 @@ export const API_URL = (
   process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001'
 ).replace(/\/$/, '');
 
-export const TENANT_SLUG =
-  process.env.TENANT_SLUG ?? process.env.NEXT_PUBLIC_TENANT_SLUG ?? 'loja';
-
 export const IS_DEV = process.env.NODE_ENV !== 'production';
+
+/**
+ * Base URL para fetch no browser (client components).
+ * Dev: '' → proxy same-origin do Next (`/api/v1/*`), sem CORS.
+ * Prod: NEXT_PUBLIC_API_URL (cross-origin + CORS na API).
+ */
+export function browserApiBase(): string {
+  if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+    return '';
+  }
+  return API_URL;
+}
 
 /** URL do painel admin React (static site separado em produção). */
 export function adminDashboardUrl(): string {

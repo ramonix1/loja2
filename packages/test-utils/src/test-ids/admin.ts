@@ -6,6 +6,8 @@
  */
 export const admin = {
   sidebarNav: 'admin-sidebar-nav',
+  mobileMenuBtn: 'admin-mobile-menu-btn',
+  viewStorefront: 'admin-view-storefront-link',
   dashboardStats: 'admin-dashboard-stats',
   pedidosTable: 'admin-pedidos-table',
   pedidosEmpty: 'admin-pedidos-empty-state',
@@ -24,4 +26,5 @@ export const admin = {
   dashboardChartEmpty: 'admin-dashboard-chart-empty',
   dashboardChartPeriod: (period: '7d' | '30d' | '90d'): string =>
     `admin-dashboard-chart-period-${period}`,
+  uiThemeSwitch: 'admin-ui-theme-switch',
 } as const;

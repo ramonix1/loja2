@@ -1,4 +1,15 @@
-import { Button, Card, cn } from '@lojao/ui';
+import {
+  Button,
+  Card,
+  adminInputClass,
+  adminMutedClass,
+  adminPageSubtitleClass,
+  adminPageTitleClass,
+  adminPeriodPillClass,
+  adminSectionTitleClass,
+  adminSubtleClass,
+  cn,
+} from '@lojao/ui';
 import { testIds } from '@lojao/test-utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
@@ -234,7 +245,7 @@ export function ChatPage() {
   const inputDisabled = !conversaAtiva || conversaAtiva.status === 'encerrada';
 
   if (isLoading) {
-    return <p className="text-gray-400">Carregando chat…</p>;
+    return <p className={adminMutedClass()}>Carregando chat…</p>;
   }
 
   return (
@@ -243,10 +254,10 @@ export function ChatPage() {
       style={{ height: 'calc(100vh - 0px)' }}
       data-testid={testIds.adminChat.panel}
     >
-      <div className="flex shrink-0 items-center justify-between border-b border-gray-800 px-8 py-5">
+      <div className="flex shrink-0 items-center justify-between border-b border-[var(--admin-border)] px-8 py-5">
         <div>
-          <h1 className="text-2xl font-bold text-white">Chat ao Vivo</h1>
-          <p className="mt-0.5 text-sm text-gray-400">Atenda seus clientes em tempo real</p>
+          <h1 className={adminPageTitleClass()}>Chat ao Vivo</h1>
+          <p className={adminPageSubtitleClass('mt-0.5')}>Atenda seus clientes em tempo real</p>
         </div>
         <Button
           type="button"
@@ -259,8 +270,8 @@ export function ChatPage() {
       </div>
 
       <div className="flex min-h-0 flex-1 overflow-hidden">
-        <div className="flex w-72 shrink-0 flex-col border-r border-gray-800">
-          <div className="border-b border-gray-800 p-3">
+        <div className="flex w-72 shrink-0 flex-col border-r border-[var(--admin-border)]">
+          <div className="border-b border-[var(--admin-border)] p-3">
             <div className="flex gap-2 text-xs">
               {(['abertas', 'todas', 'encerradas'] as Filtro[]).map((f) => (
                 <button
@@ -268,12 +279,7 @@ export function ChatPage() {
                   type="button"
                   data-testid={testIds.adminChat.filter(f)}
                   onClick={() => setFiltro(f)}
-                  className={cn(
-                    'rounded-lg px-3 py-1.5 font-medium transition',
-                    filtro === f
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-800 text-gray-400 hover:text-white',
-                  )}
+                  className={adminPeriodPillClass(filtro === f, 'rounded-lg px-3 py-1.5 font-medium')}
                 >
                   {f === 'abertas' ? 'Abertas' : f === 'todas' ? 'Todas' : 'Encerradas'}
                 </button>
@@ -285,7 +291,7 @@ export function ChatPage() {
             data-testid={testIds.adminChat.conversasList}
           >
             {conversasFiltradas.length === 0 ? (
-              <div className="p-4 text-center text-sm text-gray-600">Nenhuma conversa</div>
+              <div className={cn('p-4 text-center text-sm', adminSubtleClass())}>Nenhuma conversa</div>
             ) : (
               conversasFiltradas.map((c) => (
                 <button
@@ -294,29 +300,35 @@ export function ChatPage() {
                   data-testid={testIds.adminChat.conversaItem(c.id)}
                   onClick={() => abrirConversa(c)}
                   className={cn(
-                    'w-full border-b border-gray-800 p-4 text-left transition',
-                    conversaAtiva?.id === c.id ? 'bg-gray-800' : 'hover:bg-gray-900',
+                    'w-full border-b border-[var(--admin-border)] p-4 text-left transition',
+                    conversaAtiva?.id === c.id
+                      ? 'bg-[var(--admin-surface-elevated)]'
+                      : 'hover:bg-[var(--admin-table-row-hover)]',
                   )}
                 >
                   <div className="flex items-start justify-between">
-                    <div className="truncate text-sm font-medium text-white">{c.nome_visitante}</div>
+                    <div className="truncate text-sm font-medium text-[var(--admin-text)]">
+                      {c.nome_visitante}
+                    </div>
                     <div className="ml-2 flex shrink-0 items-center gap-1.5">
                       {c.nao_lidas > 0 && (
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--admin-accent)] text-xs font-bold text-[var(--admin-text)]">
                           {c.nao_lidas}
                         </span>
                       )}
-                      <span className="text-xs text-gray-500">{tempoRelativo(c.updated_at)}</span>
+                      <span className={cn('text-xs', adminSubtleClass())}>
+                        {tempoRelativo(c.updated_at)}
+                      </span>
                     </div>
                   </div>
                   <span
                     className={cn(
                       'mt-1 inline-block rounded px-1.5 py-0.5 text-xs',
                       c.status === 'encerrada'
-                        ? 'bg-gray-700 text-gray-400'
+                        ? 'bg-[var(--admin-badge-neutral-bg)] text-[var(--admin-badge-neutral-text)]'
                         : c.bot_ativo
-                          ? 'bg-green-900 text-green-400'
-                          : 'bg-yellow-900 text-yellow-400',
+                          ? 'bg-[var(--admin-success-bg)] text-[var(--admin-success-text)]'
+                          : 'bg-[var(--admin-warning-bg)] text-[var(--admin-warning-text)]',
                     )}
                   >
                     {c.status === 'encerrada' ? 'Encerrada' : c.bot_ativo ? 'Bot' : 'Humano'}
@@ -334,24 +346,24 @@ export function ChatPage() {
               data-testid={testIds.adminChat.emptyState}
             >
               <div>
-                <p className="font-medium text-gray-400">Selecione uma conversa</p>
-                <p className="mt-1 text-sm text-gray-600">
+                <p className={cn('font-medium', adminMutedClass())}>Selecione uma conversa</p>
+                <p className={cn('mt-1 text-sm', adminSubtleClass())}>
                   Clique em uma conversa à esquerda para visualizar
                 </p>
               </div>
             </div>
           ) : (
             <>
-              <div className="flex shrink-0 items-center justify-between border-b border-gray-800 px-5 py-3">
+              <div className="flex shrink-0 items-center justify-between border-b border-[var(--admin-border)] px-5 py-3">
                 <div>
-                  <div className="font-semibold text-white">{conversaAtiva.nome_visitante}</div>
+                  <div className="font-semibold text-[var(--admin-text)]">{conversaAtiva.nome_visitante}</div>
                   <div className="mt-0.5 text-xs">
                     {conversaAtiva.status === 'encerrada' ? (
-                      <span className="text-gray-500">Conversa encerrada</span>
+                      <span className={adminSubtleClass()}>Conversa encerrada</span>
                     ) : conversaAtiva.bot_ativo ? (
-                      <span className="text-green-400">Bot respondendo</span>
+                      <span className="text-[var(--admin-success-text)]">Bot respondendo</span>
                     ) : (
-                      <span className="text-yellow-400">Você está respondendo</span>
+                      <span className="text-[var(--admin-warning-text)]">Você está respondendo</span>
                     )}
                   </div>
                 </div>
@@ -361,7 +373,7 @@ export function ChatPage() {
                       <Button
                         type="button"
                         variant="secondary"
-                        className="bg-yellow-600 text-xs hover:bg-yellow-500"
+                        className="text-xs"
                         data-testid={testIds.adminChat.assumirBtn}
                         onClick={assumirConversa}
                       >
@@ -381,8 +393,8 @@ export function ChatPage() {
                     )}
                     <Button
                       type="button"
-                      variant="secondary"
-                      className="bg-red-700 text-xs text-white hover:bg-red-600"
+                      variant="ghost"
+                      className="text-xs text-[var(--admin-error-text)] hover:bg-[var(--admin-error-bg)]"
                       data-testid={testIds.adminChat.encerrarBtn}
                       onClick={encerrarConversa}
                     >
@@ -404,7 +416,8 @@ export function ChatPage() {
                       <div className="max-w-xs lg:max-w-md">
                         <div
                           className={cn(
-                            'mb-1 text-xs text-gray-500',
+                            'mb-1 text-xs',
+                            adminSubtleClass(),
                             isAdmin && 'text-right',
                           )}
                         >
@@ -413,10 +426,10 @@ export function ChatPage() {
                         </div>
                         <div
                           className={cn(
-                            'rounded-2xl px-4 py-2.5 text-sm text-white',
-                            isAdmin && 'rounded-tr-sm bg-purple-900/80',
-                            isBot && 'rounded-tl-sm bg-green-950/80',
-                            !isAdmin && !isBot && 'rounded-tl-sm bg-blue-950/80',
+                            'rounded-2xl px-4 py-2.5 text-sm text-[var(--admin-text)]',
+                            isAdmin && 'rounded-tr-sm bg-[var(--admin-accent)]/80',
+                            isBot && 'rounded-tl-sm bg-[var(--admin-success-bg)]',
+                            !isAdmin && !isBot && 'rounded-tl-sm bg-[var(--admin-surface-elevated)]',
                           )}
                           dangerouslySetInnerHTML={{ __html: escHtml(msg.conteudo) }}
                         />
@@ -428,7 +441,7 @@ export function ChatPage() {
               </div>
 
               <form
-                className="shrink-0 border-t border-gray-800 p-4"
+                className="shrink-0 border-t border-[var(--admin-border)] p-4"
                 onSubmit={enviarMensagem}
               >
                 <div className="flex gap-3">
@@ -441,7 +454,7 @@ export function ChatPage() {
                     }
                     data-testid={testIds.adminChat.input}
                     onChange={(e) => setMensagemInput(e.target.value)}
-                    className="flex-1 rounded-xl border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none disabled:opacity-50"
+                    className={adminInputClass('flex-1 rounded-xl disabled:opacity-50')}
                   />
                   <Button
                     type="submit"
@@ -463,20 +476,21 @@ export function ChatPage() {
           onClick={(e) => e.target === e.currentTarget && setBotModalOpen(false)}
         >
           <Card
+            surface="admin"
             className="flex max-h-[85vh] w-full max-w-2xl flex-col p-0"
             data-testid={testIds.adminChat.botModal}
           >
-            <div className="flex items-center justify-between border-b border-gray-800 p-6">
+            <div className="flex items-center justify-between border-b border-[var(--admin-border)] p-6">
               <div>
-                <h2 className="text-lg font-bold text-white">Configuração do Bot</h2>
-                <p className="mt-0.5 text-xs text-gray-400">
+                <h2 className={adminSectionTitleClass('text-lg')}>Configuração do Bot</h2>
+                <p className={cn('mt-0.5 text-xs', adminMutedClass())}>
                   Separe múltiplas palavras-chave por vírgula
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setBotModalOpen(false)}
-                className="text-xl text-gray-500 hover:text-white"
+                className={cn('text-xl hover:text-[var(--admin-text)]', adminSubtleClass())}
               >
                 ×
               </button>
@@ -484,20 +498,22 @@ export function ChatPage() {
             <div className="flex-1 overflow-y-auto p-6">
               <div className="mb-6 space-y-3">
                 {botRespostas.length === 0 ? (
-                  <p className="py-4 text-center text-sm text-gray-500">
+                  <p className={cn('py-4 text-center text-sm', adminSubtleClass())}>
                     Nenhuma resposta configurada ainda.
                   </p>
                 ) : (
                   botRespostas.map((r) => (
-                    <div key={r.id} className="rounded-xl bg-gray-800 p-4">
+                    <div key={r.id} className="rounded-xl bg-[var(--admin-surface-elevated)] p-4">
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1">
-                          <div className="mb-1 text-xs font-medium text-blue-400">
+                          <div className="mb-1 text-xs font-medium text-[var(--admin-accent)]">
                             Palavras-chave:
                           </div>
-                          <div className="mb-2 text-sm text-gray-200">{r.palavra_chave}</div>
-                          <div className="mb-1 text-xs font-medium text-green-400">Resposta:</div>
-                          <div className="text-sm text-gray-300">{r.resposta}</div>
+                          <div className="mb-2 text-sm text-[var(--admin-text-muted)]">{r.palavra_chave}</div>
+                          <div className="mb-1 text-xs font-medium text-[var(--admin-success-text)]">
+                            Resposta:
+                          </div>
+                          <div className={cn('text-sm', adminMutedClass())}>{r.resposta}</div>
                         </div>
                         <div className="flex shrink-0 gap-2">
                           <Button
@@ -514,8 +530,8 @@ export function ChatPage() {
                           </Button>
                           <Button
                             type="button"
-                            variant="secondary"
-                            className="bg-red-900 px-2 py-1 text-xs text-red-200"
+                            variant="ghost"
+                            className="px-2 py-1 text-xs text-[var(--admin-error-text)] hover:bg-[var(--admin-error-bg)]"
                             onClick={() => {
                               if (window.confirm('Excluir esta resposta automática?')) {
                                 deleteBotMutation.mutate(r.id);
@@ -530,8 +546,8 @@ export function ChatPage() {
                   ))
                 )}
               </div>
-              <div className="rounded-xl bg-gray-800 p-4">
-                <h3 className="mb-3 text-sm font-semibold text-white">
+              <div className="rounded-xl bg-[var(--admin-surface-elevated)] p-4">
+                <h3 className={adminSectionTitleClass('mb-3 text-sm')}>
                   {botEditId ? 'Editando resposta' : '+ Nova resposta automática'}
                 </h3>
                 <div className="space-y-3">
@@ -540,14 +556,14 @@ export function ChatPage() {
                     value={botKw}
                     placeholder="ex: preço, valor, quanto custa"
                     onChange={(e) => setBotKw(e.target.value)}
-                    className="w-full rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+                    className={adminInputClass()}
                   />
                   <textarea
                     rows={3}
                     value={botResp}
                     placeholder="Digite a resposta automática..."
                     onChange={(e) => setBotResp(e.target.value)}
-                    className="w-full resize-none rounded-lg border border-gray-600 bg-gray-700 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+                    className={adminInputClass('resize-none')}
                   />
                   <div className="flex gap-2">
                     <Button

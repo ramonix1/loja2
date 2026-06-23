@@ -1,6 +1,6 @@
 import type { ReceitaPorMetodo } from '@lojao/types/dashboard';
 import { testIds } from '@lojao/test-utils';
-import { ChartCard } from '@lojao/ui';
+import { ChartCard, useChartTheme } from '@lojao/ui';
 import {
   Bar,
   BarChart,
@@ -15,11 +15,8 @@ import {
 import {
   BRL,
   BRL_COMPACT,
-  CHART_AXIS,
-  CHART_GRID,
   PAYMENT_COLORS,
   metodoLabel,
-  tooltipStyle,
   usePrefersReducedMotion,
 } from './chart-utils';
 
@@ -29,6 +26,7 @@ interface PaymentMethodsChartProps {
 
 export function PaymentMethodsChart({ data }: PaymentMethodsChartProps) {
   const animate = !usePrefersReducedMotion();
+  const { axis, grid, tooltip } = useChartTheme('admin');
   const chartData = data.map((d) => ({ ...d, label: metodoLabel(d.metodo) }));
 
   return (
@@ -39,17 +37,17 @@ export function PaymentMethodsChart({ data }: PaymentMethodsChartProps) {
     >
       <ResponsiveContainer width="100%" height={280}>
         <BarChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-          <CartesianGrid {...CHART_GRID} vertical={false} />
-          <XAxis dataKey="label" tick={CHART_AXIS} axisLine={false} tickLine={false} />
+          <CartesianGrid {...grid} vertical={false} />
+          <XAxis dataKey="label" tick={axis} axisLine={false} tickLine={false} />
           <YAxis
             tickFormatter={(v: number) => BRL_COMPACT.format(v)}
-            tick={CHART_AXIS}
+            tick={axis}
             axisLine={false}
             tickLine={false}
             width={72}
           />
           <Tooltip
-            {...tooltipStyle}
+            {...tooltip}
             formatter={(value, _name, item) => [
               BRL.format(Number(value ?? 0)),
               `${item.payload?.label ?? ''} (${item.payload?.pedidos ?? 0} pedidos)`,

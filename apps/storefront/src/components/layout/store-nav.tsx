@@ -1,14 +1,27 @@
 'use client';
 
+import type { StoreTheme } from '@lojao/types/store-theme';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import { fetchMe, logout, type AuthUser } from '@/lib/client-api';
 import { adminDashboardUrl } from '@/lib/config';
+import { storeShellClasses } from '@/lib/store-styles';
+import { useStoreHref } from '@/lib/use-store-href';
 
-export function StoreNav() {
+interface StoreNavProps {
+  tema?: StoreTheme;
+}
+
+export function StoreNav({ tema = 'escuro' }: StoreNavProps) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const homeHref = useStoreHref('/');
+  const loginHref = useStoreHref('/login');
+  const cadastroHref = useStoreHref('/cadastro');
+  const carrinhoHref = useStoreHref('/carrinho');
+  const pedidosHref = useStoreHref('/meus-pedidos');
+  const linkClass = storeShellClasses(tema).navLink;
 
   useEffect(() => {
     fetchMe()
@@ -18,20 +31,20 @@ export function StoreNav() {
 
   async function handleLogout() {
     await logout();
-    window.location.href = '/';
+    window.location.href = homeHref;
   }
 
   if (loading) {
-    return <span className="text-gray-400">…</span>;
+    return <span className="opacity-50">…</span>;
   }
 
   if (!user) {
     return (
       <>
-        <Link href="/login" className="text-gray-300 hover:text-white">
+        <Link href={loginHref} className={linkClass}>
           Entrar
         </Link>
-        <Link href="/cadastro" className="btn-primary text-sm">
+        <Link href={cadastroHref} className="btn-primary text-sm">
           Cadastrar
         </Link>
       </>
@@ -40,10 +53,7 @@ export function StoreNav() {
 
   if (user.role === 'admin') {
     return (
-      <a
-        href={adminDashboardUrl()}
-        className="btn-primary text-sm"
-      >
+      <a href={adminDashboardUrl()} className="btn-primary text-sm">
         Painel admin
       </a>
     );
@@ -51,13 +61,13 @@ export function StoreNav() {
 
   return (
     <>
-      <Link href="/carrinho" className="text-gray-300 hover:text-white">
+      <Link href={carrinhoHref} className={linkClass}>
         Carrinho
       </Link>
-      <Link href="/meus-pedidos" className="text-gray-300 hover:text-white">
+      <Link href={pedidosHref} className={linkClass}>
         Meus pedidos
       </Link>
-      <button type="button" onClick={handleLogout} className="text-gray-300 hover:text-white">
+      <button type="button" onClick={handleLogout} className={linkClass}>
         Sair
       </button>
     </>

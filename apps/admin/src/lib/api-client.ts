@@ -1,9 +1,49 @@
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
-const TENANT_SLUG = import.meta.env.VITE_TENANT_SLUG ?? 'loja';
+import { buildStorePath } from '@lojao/tenant-host';
+
+import { browserApiBase } from './browser-api.js';
 export const STOREFRONT_URL = (import.meta.env.VITE_STOREFRONT_URL ?? 'http://localhost:3000').replace(
   /\/$/,
   '',
 );
+
+/** Slug do tenant autenticado (sessão). Dev: fallback opcional via VITE_TENANT_SLUG. */
+let sessionTenantSlug: string | null = null;
+
+export function setSessionTenantSlug(slug: string | null): void {
+  sessionTenantSlug = slug;
+}
+
+function resolveTenantSlug(explicit?: string): string {
+  if (explicit) return explicit;
+  if (sessionTenantSlug) return sessionTenantSlug;
+  if (import.meta.env.DEV && import.meta.env.VITE_TENANT_SLUG) {
+    return import.meta.env.VITE_TENANT_SLUG;
+  }
+  throw new Error('Tenant não identificado — faça login novamente.');
+}
+
+/** URL absoluta da vitrine para um subpath da loja atual. */
+export function storefrontProductUrl(produtoId: number, tenantSlug?: string): string {
+  const slug = tenantSlug ?? resolveTenantSlug();
+  return `${STOREFRONT_URL}${buildStorePath(slug, `/produto/${produtoId}`)}`;
+}
+
+/** Subpath da vitrine (para CTA de banner). */
+export function storefrontStorePath(subpath: string, tenantSlug?: string): string {
+  const slug = tenantSlug ?? resolveTenantSlug();
+  return buildStorePath(slug, subpath);
+}
+
+/** URL absoluta da home da vitrine do tenant autenticado. */
+export function storefrontHomeUrl(tenantSlug?: string): string {
+  const slug = tenantSlug ?? resolveTenantSlug();
+  return `${STOREFRONT_URL}${buildStorePath(slug, '/')}`;
+}
+
+/** URL absoluta da vitrine para um slug arbitrário (Platform Hub). */
+export function storefrontUrlForSlug(slug: string): string {
+  return `${STOREFRONT_URL}${buildStorePath(slug, '/')}`;
+}
 
 /** URL absoluta para imagens — CDN em produção; API só em dev/proxy legado. */
 export function assetImageUrl(path: string): string {
@@ -16,7 +56,7 @@ export function assetImageUrl(path: string): string {
     if (cdn) return `${cdn}${normalized}`;
   }
 
-  return `${API_URL}${normalized}`;
+  return `${browserApiBase()}${normalized}`;
 }
 
 /** @deprecated use assetImageUrl */
@@ -34,21 +74,19 @@ export class ApiError extends Error {
 }
 
 /**
- * fetch com `credentials: 'include'` (cookie de sessão `lojao.sid`) e header
- * `X-Tenant-Slug`. Lança `ApiError` em respostas não-2xx, preservando o `code`
- * do contrato da API (`{ error, code }`).
+ * fetch com `credentials: 'include'` (cookie de sessão `lojao.sid`).
+ * Tenant autenticado vem da sessão; no login envie `tenantSlug` no body.
  */
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const hasBody = options.body != null && options.body !== '';
   const headers: Record<string, string> = {
-    'X-Tenant-Slug': TENANT_SLUG,
     ...((options.headers as Record<string, string> | undefined) ?? {}),
   };
   if (hasBody) {
     headers['Content-Type'] = 'application/json';
   }
 
-  const res = await fetch(`${API_URL}${path}`, {
+  const res = await fetch(`${browserApiBase()}${path}`, {
     ...options,
     credentials: 'include',
     headers,
@@ -68,10 +106,9 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
 
 /** POST/PUT multipart (upload de imagem) — não define Content-Type (boundary automático). */
 export async function apiUpload<T>(path: string, formData: FormData, method = 'POST'): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, {
+  const res = await fetch(`${browserApiBase()}${path}`, {
     method,
     credentials: 'include',
-    headers: { 'X-Tenant-Slug': TENANT_SLUG },
     body: formData,
   });
 

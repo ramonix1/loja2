@@ -148,7 +148,7 @@ Requer tenant resolvido. Response:
 {
   "data": {
     "nome": "Lojão",
-    "cor_primaria": "#2563eb",
+    "cor_primaria": "#0D5FE0",
     "logo": "",
     "slogan": ""
   }

@@ -25,3 +25,11 @@ playwright-report/
 
 # Logs
 *.log
+
+# Specs longas — fonte de verdade no Obsidian vault (symlinks locais; ver scripts/setup-obsidian-vault.sh)
+docs/specs/admin-merchant-hub-spec.md
+docs/specs/ata-labs-platform-spec.md
+docs/specs/design-system.md
+docs/specs/storefront-marketing-STATUS.md
+docs/specs/storefront-marketing-spec.md
+docs/specs/storefront-onboarding-spec.md

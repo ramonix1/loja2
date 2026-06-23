@@ -1,0 +1,53 @@
+/* Tokens carregados em globals.css — utilitários marketing Ata Commerce */
+
+.browser-frame-blue {
+  background: #010f2e;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.browser-frame-blue .browser-bar-blue {
+  background: #000a1e;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.faq-answer {
+  overflow: hidden;
+  transition:
+    max-height 0.3s ease,
+    opacity 0.3s ease;
+}
+
+.plan-card {
+  transition: all 0.25s ease;
+  border: 2px solid var(--ata-azul-gelo);
+}
+
+.plan-card.featured {
+  border-color: var(--ata-azul-comercio);
+  background: linear-gradient(145deg, rgba(13, 95, 224, 0.08), rgba(13, 95, 224, 0.04));
+}
+
+@media (min-width: 768px) {
+  .plan-card.featured {
+    transform: scale(1.05);
+  }
+}
+
+.plan-card:hover {
+  border-color: var(--ata-azul-comercio);
+  box-shadow: 0 20px 40px rgba(13, 95, 224, 0.15);
+}
+
+.feature-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--ata-azul-nevoa);
+}

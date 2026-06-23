@@ -1,20 +1,80 @@
 @import 'tailwindcss';
 
+/* Tokens oficiais — packages/design-tokens (manual PDF → design-system.md) */
+@import '../../../../packages/design-tokens/src/primitives.css';
+@import '../../../../packages/design-tokens/src/semantic-store.css';
+@import '@lojao/design-tokens/shadcn-bridge.css';
+@import '@lojao/ui/styles/shadcn.css';
+@import '../../../../packages/design-tokens/src/components.css';
+
+@import '../styles/ata-labs-theme.css';
+@import '../styles/ata-commerce-theme.css';
+
 @source "../**/*.{ts,tsx}";
+@source "../../../packages/ui/src/**/*.{ts,tsx}";
 
 :root {
-  --cor-primaria: #2563eb;
+  --cor-primaria: var(--ata-azul-comercio);
 }
 
 body {
-  @apply min-h-screen bg-gray-50 text-gray-900 antialiased;
+  @apply min-h-screen antialiased;
 }
 
+html:has([data-store-theme]) {
+  scrollbar-width: thin;
+  scrollbar-color: var(--store-scrollbar-thumb) var(--store-scrollbar-track);
+}
+
+html:has([data-store-theme])::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html:has([data-store-theme])::-webkit-scrollbar-track {
+  background: var(--store-scrollbar-track);
+}
+
+html:has([data-store-theme])::-webkit-scrollbar-thumb {
+  background-color: var(--store-scrollbar-thumb);
+  border-radius: 9999px;
+}
+
+html:has([data-store-theme])::-webkit-scrollbar-thumb:hover {
+  background-color: var(--store-scrollbar-thumb-hover);
+}
+
+html:has([data-store-theme])::-webkit-scrollbar-button {
+  display: none;
+  height: 0;
+  width: 0;
+}
+
+/* CTA tenant — só botões de ação da marca */
 .btn-primary {
   background-color: var(--cor-primaria);
-  @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50;
+  @apply inline-flex min-h-11 touch-manipulation items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50;
 }
 
+[data-store-theme] .btn-outline {
+  @apply inline-flex min-h-11 touch-manipulation items-center justify-center rounded-lg border px-4 py-2 text-sm font-medium transition hover:brightness-95;
+  border-color: var(--store-border);
+  background-color: var(--store-surface);
+  color: var(--store-text);
+}
+
+/* Fallback marketing/signup fora da vitrine tenant */
 .btn-outline {
-  @apply inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50;
+  @apply inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm font-medium transition hover:brightness-95;
+  border-color: var(--ata-azul-gelo);
+  background-color: #ffffff;
+  color: var(--ata-azul-noite);
+}
+
+[data-store-theme] .ds-link {
+  color: var(--store-link);
+}
+
+[data-store-theme] .ds-link:hover {
+  color: var(--store-link);
 }

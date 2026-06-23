@@ -1,0 +1,5 @@
+/**
+ * Vitrine tenant — compat legado (remover na Fase 7 quando vitrine 100% tokens).
+ * Tokens semânticos: semantic-store.css (sem !important).
+ */
+@import './semantic-store.css';

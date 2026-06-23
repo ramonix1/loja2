@@ -1,0 +1,111 @@
+/**
+ * Bridge — tokens semânticos Ata → variáveis shadcn/ui.
+ * Carregar após admin-ui-theme / platform-ui-theme e antes de components.css.
+ *
+ * Admin (padrão): :root + data-admin-ui-theme
+ * Platform: sobrescreve dentro de [data-ui-surface='platform']
+ */
+
+:root,
+[data-admin-ui-theme='escuro'],
+[data-admin-ui-theme='claro'] {
+  --background: var(--admin-bg);
+  --foreground: var(--admin-text);
+  --card: var(--admin-surface);
+  --card-foreground: var(--admin-text);
+  --popover: var(--admin-surface-elevated);
+  --popover-foreground: var(--admin-text);
+  --primary: var(--admin-accent);
+  --primary-foreground: #ffffff;
+  --secondary: var(--admin-surface-elevated);
+  --secondary-foreground: var(--admin-text);
+  --muted: var(--admin-surface-elevated);
+  --muted-foreground: var(--admin-text-muted);
+  --accent: var(--admin-accent);
+  --accent-foreground: #ffffff;
+  --destructive: var(--admin-error);
+  --destructive-foreground: var(--admin-error-text);
+  --border: var(--admin-border);
+  --input: var(--admin-input-border);
+  --ring: var(--admin-focus-ring);
+  --sidebar: var(--admin-sidebar-bg);
+  --sidebar-foreground: var(--admin-sidebar-text);
+  --sidebar-primary: var(--admin-accent);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--admin-sidebar-active-bg);
+  --sidebar-accent-foreground: var(--admin-sidebar-text);
+  --sidebar-border: var(--admin-sidebar-border);
+  --sidebar-ring: var(--admin-focus-ring);
+  --chart-1: var(--admin-accent);
+  --chart-2: var(--admin-success);
+  --chart-3: var(--admin-warning);
+  --chart-4: var(--admin-link);
+  --chart-5: var(--admin-text-muted);
+}
+
+[data-ui-surface='platform'] {
+  --background: var(--platform-bg);
+  --foreground: var(--platform-text);
+  --card: var(--platform-surface);
+  --card-foreground: var(--platform-text);
+  --popover: var(--platform-surface-elevated);
+  --popover-foreground: var(--platform-text);
+  --primary: var(--platform-accent);
+  --primary-foreground: var(--ata-verde-conde);
+  --secondary: var(--platform-surface-elevated);
+  --secondary-foreground: var(--platform-text);
+  --muted: var(--platform-surface-elevated);
+  --muted-foreground: var(--platform-text-muted);
+  --accent: var(--platform-accent);
+  --accent-foreground: var(--ata-verde-conde);
+  --destructive: var(--platform-error);
+  --destructive-foreground: #ffffff;
+  --border: var(--platform-border);
+  --input: var(--platform-input-border);
+  --ring: var(--platform-focus-ring);
+  --sidebar: var(--platform-sidebar-bg);
+  --sidebar-foreground: var(--platform-sidebar-text);
+  --sidebar-primary: var(--platform-accent);
+  --sidebar-primary-foreground: var(--ata-verde-conde);
+  --sidebar-accent: var(--platform-sidebar-active-bg);
+  --sidebar-accent-foreground: var(--platform-sidebar-text);
+  --sidebar-border: var(--platform-sidebar-border);
+  --sidebar-ring: var(--platform-focus-ring);
+  --chart-1: var(--platform-accent);
+  --chart-2: var(--platform-success);
+  --chart-3: var(--platform-warning);
+  --chart-4: var(--platform-link);
+  --chart-5: var(--platform-text-muted);
+}
+
+:root {
+  --radius: 0.625rem;
+}
+
+[data-store-theme='escuro'],
+[data-store-theme='claro'] {
+  --background: var(--store-bg);
+  --foreground: var(--store-text);
+  --card: var(--store-surface);
+  --card-foreground: var(--store-text);
+  --popover: var(--store-surface-elevated);
+  --popover-foreground: var(--store-text);
+  --primary: var(--cor-primaria);
+  --primary-foreground: #ffffff;
+  --secondary: var(--store-surface-elevated);
+  --secondary-foreground: var(--store-text);
+  --muted: var(--store-surface-elevated);
+  --muted-foreground: var(--store-text-muted);
+  --accent: var(--store-link);
+  --accent-foreground: var(--store-text);
+  --destructive: var(--store-error);
+  --destructive-foreground: #ffffff;
+  --border: var(--store-border);
+  --input: var(--store-input-border);
+  --ring: var(--store-focus-ring);
+  --chart-1: var(--cor-primaria);
+  --chart-2: var(--store-success);
+  --chart-3: var(--store-link);
+  --chart-4: var(--store-text-muted);
+  --chart-5: var(--store-text-subtle);
+}

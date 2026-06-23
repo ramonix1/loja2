@@ -1,6 +1,17 @@
 'use client';
 
-import { API_URL, TENANT_SLUG } from '@/lib/config';
+import { browserApiBase } from '@/lib/config';
+
+let clientTenantSlug = 'loja';
+
+/** Sincronizado pelo `StoreSlugProvider` em rotas `/store/[slug]`. */
+export function setClientTenantSlug(slug: string): void {
+  clientTenantSlug = slug;
+}
+
+export function getClientTenantSlug(): string {
+  return clientTenantSlug;
+}
 
 export class ApiError extends Error {
   constructor(
@@ -19,14 +30,14 @@ async function apiFetch<T>(
 ): Promise<T> {
   const hasBody = init.body != null && init.body !== '';
   const headers: Record<string, string> = {
-    'X-Tenant-Slug': TENANT_SLUG,
+    'X-Tenant-Slug': clientTenantSlug,
     ...((init.headers as Record<string, string> | undefined) ?? {}),
   };
   if (hasBody) {
     headers['Content-Type'] = 'application/json';
   }
 
-  const res = await fetch(`${API_URL}${path}`, {
+  const res = await fetch(`${browserApiBase()}${path}`, {
     ...init,
     credentials: 'include',
     headers,

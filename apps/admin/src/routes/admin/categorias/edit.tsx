@@ -1,4 +1,14 @@
-import { Button, Card } from '@lojao/ui';
+import {
+  Button,
+  Card,
+  FieldInput,
+  adminFieldLabelClass,
+  adminMutedClass,
+  adminPageTitleClass,
+  adminSectionTitleClass,
+  adminSubtleClass,
+  cn,
+} from '@lojao/ui';
 import { testIds } from '@lojao/test-utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
@@ -79,14 +89,14 @@ export function CategoriaEditPage() {
   }
 
   if (isLoading) {
-    return <p className="text-gray-400">Carregando…</p>;
+    return <p className={adminMutedClass()}>Carregando…</p>;
   }
 
   if (isError || !data) {
     return (
       <div>
-        <p className="text-red-400">Categoria não encontrada.</p>
-        <Link to="/admin/categorias" className="mt-4 inline-block text-sm text-blue-400">
+        <p className="ds-alert-error">Categoria não encontrada.</p>
+        <Link to="/admin/categorias" className="ds-link mt-4 inline-block text-sm">
           Voltar
         </Link>
       </div>
@@ -95,14 +105,14 @@ export function CategoriaEditPage() {
 
   return (
     <div>
-      <div className="mb-6 text-xs text-gray-500">
-        <Link to="/admin/categorias" className="hover:text-gray-300">
+      <div className={cn('mb-6 text-xs', adminSubtleClass())}>
+        <Link to="/admin/categorias" className="ds-link hover:opacity-80">
           Categorias
         </Link>
         <span className="mx-2">/</span>
-        <span className="text-gray-300">Editar</span>
+        <span className={adminMutedClass()}>Editar</span>
       </div>
-      <h1 className="mb-6 text-2xl font-bold text-white">Editar categoria</h1>
+      <h1 className={adminPageTitleClass('mb-6')}>Editar categoria</h1>
 
       <form
         onSubmit={(e) => {
@@ -111,37 +121,45 @@ export function CategoriaEditPage() {
         }}
         className="grid grid-cols-1 gap-8 lg:grid-cols-3"
       >
-        <Card className="lg:col-span-2">
+        <Card surface="admin" className="lg:col-span-2">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-base font-bold text-white">Produtos nesta categoria</h2>
+            <h2 className={adminSectionTitleClass()}>Produtos nesta categoria</h2>
             <div className="flex gap-2 text-xs">
-              <button type="button" className="text-blue-400 hover:text-blue-300" onClick={() => toggleTodos(true)}>
+              <button type="button" className="ds-link" onClick={() => toggleTodos(true)}>
                 Marcar todos
               </button>
-              <span className="text-gray-600">·</span>
-              <button type="button" className="text-gray-400 hover:text-gray-300" onClick={() => toggleTodos(false)}>
+              <span className={adminSubtleClass()}>·</span>
+              <button
+                type="button"
+                className={cn('ds-link', adminMutedClass())}
+                onClick={() => toggleTodos(false)}
+              >
                 Desmarcar todos
               </button>
             </div>
           </div>
           {data.produtos.length === 0 ? (
-            <p className="py-8 text-center text-sm text-gray-400">Nenhum produto cadastrado ainda.</p>
+            <p className={cn('py-8 text-center text-sm', adminMutedClass())}>
+              Nenhum produto cadastrado ainda.
+            </p>
           ) : (
             <div className="space-y-2">
               {data.produtos.map((p) => (
                 <label
                   key={p.id}
-                  className="flex cursor-pointer items-center gap-3 rounded-lg p-3 transition hover:bg-gray-800"
+                  className="flex cursor-pointer items-center gap-3 rounded-lg p-3 transition hover:bg-[var(--admin-table-row-hover)]"
                 >
                   <input
                     type="checkbox"
                     checked={selectedIds.has(p.id)}
                     onChange={() => toggleProduto(p.id)}
-                    className="h-4 w-4 shrink-0 rounded accent-blue-500"
+                    className="h-4 w-4 shrink-0 rounded accent-[var(--admin-accent)]"
                   />
-                  <span className="flex-1 text-sm text-gray-300">{p.nome}</span>
+                  <span className="flex-1 text-sm text-[var(--admin-text)]">{p.nome}</span>
                   {p.categoria_id != null && p.categoria_id !== data.id && (
-                    <span className="shrink-0 text-xs text-amber-500">(outra categoria)</span>
+                    <span className="shrink-0 text-xs text-[var(--admin-warning-text)]">
+                      (outra categoria)
+                    </span>
                   )}
                 </label>
               ))}
@@ -149,38 +167,38 @@ export function CategoriaEditPage() {
           )}
         </Card>
 
-        <Card className="space-y-4">
-          <h2 className="text-base font-bold text-white">Configurações</h2>
+        <Card surface="admin" className="space-y-4">
+          <h2 className={adminSectionTitleClass()}>Configurações</h2>
           <div>
-            <label htmlFor="edit-nome" className="mb-1.5 block text-sm font-medium text-gray-300">
+            <label htmlFor="edit-nome" className={adminFieldLabelClass()}>
               Nome da categoria *
             </label>
-            <input
+            <FieldInput
               id="edit-nome"
               type="text"
               required
               value={nome}
               onChange={(e) => setNome(e.target.value)}
               data-testid={testIds.adminCategorias.nomeInput}
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white outline-none focus:border-blue-500"
             />
           </div>
           <div>
-            <label htmlFor="edit-ordem" className="mb-1.5 block text-sm font-medium text-gray-300">
+            <label htmlFor="edit-ordem" className={adminFieldLabelClass()}>
               Ordem de exibição
             </label>
-            <input
+            <FieldInput
               id="edit-ordem"
               type="number"
               min={0}
               value={ordem}
               onChange={(e) => setOrdem(Number(e.target.value))}
               data-testid={testIds.adminCategorias.ordemInput}
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white outline-none focus:border-blue-500"
             />
-            <p className="mt-1 text-xs text-gray-500">Menor número aparece primeiro na vitrine.</p>
+            <p className={cn('mt-1 text-xs', adminSubtleClass())}>
+              Menor número aparece primeiro na vitrine.
+            </p>
           </div>
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {error && <p className="ds-alert-error text-sm">{error}</p>}
           <Button
             type="submit"
             data-testid={testIds.adminCategorias.formSubmit}
@@ -191,7 +209,7 @@ export function CategoriaEditPage() {
           </Button>
           <Link
             to="/admin/categorias"
-            className="block py-2 text-center text-sm text-gray-400 transition hover:text-white"
+            className={cn('block py-2 text-center text-sm transition', adminMutedClass(), 'hover:text-[var(--admin-text)]')}
           >
             Cancelar
           </Link>

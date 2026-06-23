@@ -102,7 +102,7 @@ async function registerTenant(pool: pg.Pool, connectionString: string): Promise<
     `INSERT INTO tenants (slug, nome, db_host, db_port, db_name, db_user, db_password, ativo)
      VALUES ($1, $2, $3, $4, $5, $6, $7, true)
      ON CONFLICT (slug) DO NOTHING`,
-    [TEST_TENANT_SLUG, 'Lojão', host, port, dbName, user, password],
+    [TEST_TENANT_SLUG, 'Ata Commerce Demo', host, port, dbName, user, password],
   );
   await pool.query('UPDATE tenants SET ativo = true WHERE slug = $1', [TEST_TENANT_SLUG]);
 }
@@ -145,10 +145,10 @@ async function createTenantTables(pool: pg.Pool): Promise<void> {
       updated_at TIMESTAMP DEFAULT NOW()
     );
     INSERT INTO configuracoes (chave, valor) VALUES
-      ('loja_nome', 'Lojão'),
+      ('loja_nome', 'Ata Commerce Demo'),
       ('loja_slogan', ''),
       ('loja_logo', ''),
-      ('loja_cor_primaria', '#2563eb'),
+      ('loja_cor_primaria', '#0D5FE0'),
       ('controla_estoque', 'false'),
       ('reservar_estoque_carrinho', 'false'),
       ('modulo_agenda', 'false'),
@@ -523,6 +523,8 @@ async function ensureBillingFixtures(pool: pg.Pool): Promise<void> {
       status VARCHAR(50) DEFAULT 'pending',
       created_at TIMESTAMP DEFAULT NOW()
     );
+    -- Fase G: trial self-service grava trial_ends_at (schema real já tem a coluna).
+    ALTER TABLE tenant_billing ADD COLUMN IF NOT EXISTS trial_ends_at TIMESTAMP;
   `);
 
   const tenantRes = await pool.query<{ id: number }>('SELECT id FROM tenants WHERE slug = $1', [

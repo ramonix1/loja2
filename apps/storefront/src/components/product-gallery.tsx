@@ -51,7 +51,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                 className={`overflow-hidden rounded-lg border-2 transition ${
                   selected
                     ? 'border-[var(--cor-primaria)] ring-2 ring-[var(--cor-primaria)]/30'
-                    : 'border-gray-200 hover:border-gray-400'
+                    : 'border-[var(--store-border)] hover:border-[var(--store-text-subtle)]'
                 }`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}

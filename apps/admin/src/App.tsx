@@ -21,12 +21,39 @@ import { PermissoesPage } from './routes/admin/permissoes/index';
 import { ChatPage } from './routes/admin/chat/index';
 import { DiagnosticoPage } from './routes/admin/diagnostico/index';
 import { LoginPage } from './routes/login';
+import { MyStoresPage } from './routes/my-stores';
+import { PlatformLoginPage } from './routes/platform-login';
+import { PlatformLayout } from './routes/platform/layout';
+import { PlatformTenantsPage } from './routes/platform/tenants/index';
+import { PlatformTenantNovoPage } from './routes/platform/tenants/novo';
+import { PlatformTenantDetailPage } from './routes/platform/tenants/detail';
+import { RootRedirect } from './components/root-redirect';
 
 const router = createBrowserRouter([
-  { path: '/', element: <Navigate to="/admin/dashboard" replace /> },
+  { path: '/', element: <RootRedirect /> },
   { path: '/login', element: <LoginPage /> },
   {
-    element: <ProtectedRoute />,
+    element: <ProtectedRoute role="admin" allowMissingTenant />,
+    children: [{ path: '/admin/my-stores', element: <MyStoresPage /> }],
+  },
+  { path: '/platform/login', element: <PlatformLoginPage /> },
+  {
+    element: <ProtectedRoute role="platform_admin" />,
+    children: [
+      {
+        path: '/platform',
+        element: <PlatformLayout />,
+        children: [
+          { index: true, element: <Navigate to="/platform/tenants" replace /> },
+          { path: 'tenants', element: <PlatformTenantsPage /> },
+          { path: 'tenants/novo', element: <PlatformTenantNovoPage /> },
+          { path: 'tenants/:slug', element: <PlatformTenantDetailPage /> },
+        ],
+      },
+    ],
+  },
+  {
+    element: <ProtectedRoute role="admin" />,
     children: [
       {
         path: '/admin',
@@ -56,7 +83,7 @@ const router = createBrowserRouter([
       },
     ],
   },
-  { path: '*', element: <Navigate to="/admin/dashboard" replace /> },
+  { path: '*', element: <RootRedirect /> },
 ]);
 
 export function App() {

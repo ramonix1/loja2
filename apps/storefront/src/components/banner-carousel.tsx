@@ -1,5 +1,6 @@
 'use client';
 
+import { buildStorePath } from '@lojao/tenant-host';
 import { store as testIds } from '@lojao/test-utils/test-ids/store';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -9,9 +10,10 @@ import type { PublicBanner } from '@lojao/types/public-store';
 
 interface BannerCarouselProps {
   banners: PublicBanner[];
+  storeSlug: string;
 }
 
-export function BannerCarousel({ banners }: BannerCarouselProps) {
+export function BannerCarousel({ banners, storeSlug }: BannerCarouselProps) {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -27,15 +29,15 @@ export function BannerCarousel({ banners }: BannerCarouselProps) {
   const banner = banners[index]!;
 
   const ctaHref = banner.produto_id
-    ? `/produto/${banner.produto_id}`
+    ? buildStorePath(storeSlug, `/produto/${banner.produto_id}`)
     : banner.cta_url && banner.cta_url !== '#'
       ? banner.cta_url
-      : '/#produtos';
+      : `${buildStorePath(storeSlug)}#produtos`;
 
   return (
     <section
       data-testid={testIds.homeBannerCarousel}
-      className="relative mb-10 overflow-hidden rounded-2xl bg-gray-900"
+      className="relative mb-10 overflow-hidden rounded-2xl bg-[var(--store-surface-elevated)]"
     >
       <div
         className="relative flex min-h-[280px] items-center bg-cover bg-center sm:min-h-[360px] lg:min-h-[420px]"

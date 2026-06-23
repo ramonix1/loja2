@@ -11,5 +11,5 @@ test('admin relatorios listagem @smoke', async ({ page }) => {
 test('admin relatorios troca aba estoque', async ({ page }) => {
   await page.goto('/admin/relatorios');
   await page.getByTestId(testIds.adminRelatorios.tab('estoque')).click();
-  await expect(page.getByTestId(testIds.adminRelatorios.tab('estoque'))).toHaveClass(/bg-blue-600/);
+  await expect(page.getByTestId(testIds.adminRelatorios.tab('estoque'))).toHaveClass(/bg-\[var\(--admin-accent\)\]/);
 });

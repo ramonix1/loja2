@@ -1,6 +1,6 @@
 import type { ReceitaPorDia } from '@lojao/types/dashboard';
 import { testIds } from '@lojao/test-utils';
-import { ChartCard } from '@lojao/ui';
+import { ChartCard, useChartTheme } from '@lojao/ui';
 import {
   Area,
   AreaChart,
@@ -14,10 +14,7 @@ import {
 import {
   BRL,
   BRL_COMPACT,
-  CHART_AXIS,
-  CHART_GRID,
   formatChartDate,
-  tooltipStyle,
   usePrefersReducedMotion,
 } from './chart-utils';
 
@@ -27,6 +24,7 @@ interface RevenueChartProps {
 
 export function RevenueChart({ data }: RevenueChartProps) {
   const animate = !usePrefersReducedMotion();
+  const { axis, grid, tooltip } = useChartTheme('admin');
 
   return (
     <ChartCard
@@ -38,34 +36,34 @@ export function RevenueChart({ data }: RevenueChartProps) {
         <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#22c55e" stopOpacity={0.35} />
-              <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+              <stop offset="5%" stopColor="var(--admin-success)" stopOpacity={0.35} />
+              <stop offset="95%" stopColor="var(--admin-success)" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid {...CHART_GRID} vertical={false} />
+          <CartesianGrid {...grid} vertical={false} />
           <XAxis
             dataKey="dia"
             tickFormatter={formatChartDate}
-            tick={CHART_AXIS}
+            tick={axis}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
             tickFormatter={(v: number) => BRL_COMPACT.format(v)}
-            tick={CHART_AXIS}
+            tick={axis}
             axisLine={false}
             tickLine={false}
             width={72}
           />
           <Tooltip
-            {...tooltipStyle}
+            {...tooltip}
             formatter={(value) => [BRL.format(Number(value ?? 0)), 'Receita']}
             labelFormatter={(label) => formatChartDate(String(label))}
           />
           <Area
             type="monotone"
             dataKey="receita"
-            stroke="#22c55e"
+            stroke="var(--admin-success)"
             fill="url(#revenueGradient)"
             strokeWidth={2}
             isAnimationActive={animate}

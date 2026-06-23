@@ -1,24 +1,38 @@
 import type { HTMLAttributes, ReactNode } from 'react';
 
-import { cn } from './cn';
+import {
+  Card as ShadcnCard,
+  CardDescription,
+  CardHeader,
+} from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+import { resolveSurface, type SidebarTheme, type UiSurface } from './surface';
 
 export interface CardProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
   title?: ReactNode;
+  surface?: UiSurface;
+  /** @deprecated Use `surface`. */
+  theme?: SidebarTheme;
 }
 
-export function Card({ title, className, children, ...props }: CardProps) {
+export function Card({
+  title,
+  surface: _surface,
+  theme,
+  className,
+  children,
+  ...props
+}: CardProps) {
+  resolveSurface(_surface, theme);
+
   return (
-    <div
-      className={cn(
-        'rounded-xl border border-gray-800 bg-gray-900 p-5 shadow-sm',
-        className,
-      )}
-      {...props}
-    >
+    <ShadcnCard className={cn('gap-1 p-5 shadow-sm', className)} {...props}>
       {title != null && (
-        <div className="mb-1 text-sm font-medium text-gray-400">{title}</div>
+        <CardHeader className="gap-0 p-0">
+          <CardDescription className="mb-1 text-sm font-medium">{title}</CardDescription>
+        </CardHeader>
       )}
       {children}
-    </div>
+    </ShadcnCard>
   );
 }

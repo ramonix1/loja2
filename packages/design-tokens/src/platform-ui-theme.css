@@ -1,0 +1,5 @@
+/**
+ * Platform Hub — bundle de tema (sem overrides legados por enquanto).
+ * Toggle: data-platform-ui-theme no <html> (Fase 2b).
+ */
+@import './semantic-platform.css';

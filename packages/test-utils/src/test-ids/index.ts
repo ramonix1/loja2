@@ -1,3 +1,6 @@
+import { marketing } from './marketing.js';
+import { merchantHub } from './merchant-hub.js';
+import { signup } from './signup.js';
 import { admin } from './admin.js';
 import { adminAparencia } from './admin-aparencia.js';
 import { adminBanners } from './admin-banners.js';
@@ -12,6 +15,7 @@ import { adminDiagnostico } from './admin-diagnostico.js';
 import { adminPedidoDetail } from './admin-pedido-detail.js';
 import { adminProdutos } from './admin-produtos.js';
 import { auth } from './auth.js';
+import { platform } from './platform.js';
 import { store } from './store.js';
 
 /**
@@ -35,7 +39,11 @@ export const testIds = {
   adminChat,
   adminDiagnostico,
   adminPedidoDetail,
+  platform,
   store,
+  marketing,
+  merchantHub,
+  signup,
 } as const;
 
 export {
@@ -53,5 +61,9 @@ export {
   adminChat,
   adminDiagnostico,
   adminPedidoDetail,
+  platform,
   store,
+  marketing,
+  merchantHub,
+  signup,
 };

@@ -1,10 +1,20 @@
-import { Button, cn } from '@lojao/ui';
+import {
+  Button,
+  adminFieldLabelClass,
+  adminInputClass,
+  adminMutedClass,
+  adminPageSubtitleClass,
+  adminPageTitleClass,
+  adminPeriodPillClass,
+  adminSegmentedControlClass,
+} from '@lojao/ui';
 import { testIds } from '@lojao/test-utils';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState, type FormEvent } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import { apiFetch } from '../../../lib/api-client';
+import { browserApiBase } from '../../../lib/browser-api';
 import { RelatorioTabContent } from './tab-panels';
 
 const RELATORIO_ABAS = [
@@ -19,7 +29,6 @@ const RELATORIO_ABAS = [
 
 type RelatorioAba = (typeof RELATORIO_ABAS)[number];
 
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3001';
 const TENANT_SLUG = import.meta.env.VITE_TENANT_SLUG ?? 'loja';
 
 const TAB_LABELS: Record<RelatorioAba, string> = {
@@ -121,7 +130,7 @@ export function RelatoriosPage() {
       qs.set('fim', dataFim);
     }
     const res = await fetch(
-      `${API_URL}/api/v1/admin/relatorios/csv/${aba}?${qs.toString()}`,
+      `${browserApiBase()}/api/v1/admin/relatorios/csv/${aba}?${qs.toString()}`,
       {
         credentials: 'include',
         headers: { 'X-Tenant-Slug': TENANT_SLUG },
@@ -143,8 +152,8 @@ export function RelatoriosPage() {
     <div data-testid={testIds.adminRelatorios.panel}>
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Relatórios</h1>
-          <p className="mt-1 text-sm text-gray-400">Visão analítica do negócio</p>
+          <h1 className={adminPageTitleClass()}>Relatórios</h1>
+          <p className={adminPageSubtitleClass('mt-1')}>Visão analítica do negócio</p>
         </div>
         <div className="flex gap-2">
           <Button variant="secondary" type="button" onClick={() => window.print()}>
@@ -164,26 +173,26 @@ export function RelatoriosPage() {
         <form
           data-testid={testIds.adminRelatorios.dateFilter}
           onSubmit={handleDateFilter}
-          className="mb-6 flex flex-wrap items-end gap-3 rounded-xl border border-gray-800 bg-gray-900 px-5 py-4"
+          className="mb-6 flex flex-wrap items-end gap-3 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] px-5 py-4"
         >
           <div>
-            <label className="mb-1 block text-xs text-gray-400">Início</label>
+            <label className={adminFieldLabelClass('text-xs')}>Início</label>
             <input
               type="date"
               value={inicioInput}
               onChange={(e) => setInicioInput(e.target.value)}
               data-testid={testIds.adminRelatorios.dateInicioInput}
-              className="rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white outline-none focus:border-blue-500"
+              className={adminInputClass('w-auto')}
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-gray-400">Fim</label>
+            <label className={adminFieldLabelClass('text-xs')}>Fim</label>
             <input
               type="date"
               value={fimInput}
               onChange={(e) => setFimInput(e.target.value)}
               data-testid={testIds.adminRelatorios.dateFimInput}
-              className="rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white outline-none focus:border-blue-500"
+              className={adminInputClass('w-auto')}
             />
           </div>
           <Button type="submit" data-testid={testIds.adminRelatorios.dateFilterBtn}>
@@ -194,7 +203,7 @@ export function RelatoriosPage() {
 
       <div
         data-testid={testIds.adminRelatorios.tabs}
-        className="mb-6 flex w-fit flex-wrap gap-1 rounded-xl border border-gray-800 bg-gray-900 p-1"
+        className={adminSegmentedControlClass('mb-6 w-fit flex-wrap rounded-xl p-1')}
       >
         {RELATORIO_ABAS.map((id) => (
           <button
@@ -202,12 +211,7 @@ export function RelatoriosPage() {
             type="button"
             data-testid={testIds.adminRelatorios.tab(id)}
             onClick={() => setAba(id)}
-            className={cn(
-              'rounded-lg px-4 py-2 text-sm font-medium transition',
-              aba === id
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-400 hover:bg-gray-800 hover:text-white',
-            )}
+            className={adminPeriodPillClass(aba === id, 'rounded-lg px-4 py-2 text-sm')}
           >
             {TAB_LABELS[id]}
           </button>
@@ -222,12 +226,7 @@ export function RelatoriosPage() {
               type="button"
               data-testid={testIds.adminRelatorios.estoqueFilter(f)}
               onClick={() => setFiltroEstoque(f)}
-              className={cn(
-                'rounded-lg px-3 py-1.5 text-xs font-medium transition',
-                filtroEstoque === f
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-800 text-gray-400 hover:bg-gray-700',
-              )}
+              className={adminPeriodPillClass(filtroEstoque === f, 'rounded-lg px-3 py-1.5 text-xs')}
             >
               {f === 'todos' ? 'Todos' : f.charAt(0).toUpperCase() + f.slice(1)}
             </button>
@@ -236,7 +235,7 @@ export function RelatoriosPage() {
       )}
 
       {isLoading ? (
-        <p className="text-gray-400">Carregando relatório…</p>
+        <p className={adminMutedClass()}>Carregando relatório…</p>
       ) : (
         <RelatorioTabContent aba={aba} dados={dados} />
       )}

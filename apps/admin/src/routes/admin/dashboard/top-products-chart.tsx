@@ -1,6 +1,6 @@
 import type { TopProdutoChart } from '@lojao/types/dashboard';
 import { testIds } from '@lojao/test-utils';
-import { ChartCard } from '@lojao/ui';
+import { ChartCard, useChartTheme } from '@lojao/ui';
 import {
   Bar,
   BarChart,
@@ -12,14 +12,7 @@ import {
   YAxis,
 } from 'recharts';
 
-import {
-  BRL,
-  CHART_AXIS,
-  CHART_GRID,
-  PAYMENT_COLORS,
-  tooltipStyle,
-  usePrefersReducedMotion,
-} from './chart-utils';
+import { BRL, PAYMENT_COLORS, usePrefersReducedMotion } from './chart-utils';
 
 interface TopProductsChartProps {
   data: TopProdutoChart[];
@@ -27,6 +20,7 @@ interface TopProductsChartProps {
 
 export function TopProductsChart({ data }: TopProductsChartProps) {
   const animate = !usePrefersReducedMotion();
+  const { axis, grid, tooltip } = useChartTheme('admin');
   const chartData = data.map((d) => ({
     ...d,
     label: d.nome.length > 22 ? `${d.nome.slice(0, 20)}…` : d.nome,
@@ -44,18 +38,18 @@ export function TopProductsChart({ data }: TopProductsChartProps) {
           layout="vertical"
           margin={{ top: 8, right: 16, left: 8, bottom: 0 }}
         >
-          <CartesianGrid {...CHART_GRID} horizontal={false} />
-          <XAxis type="number" tick={CHART_AXIS} axisLine={false} tickLine={false} />
+          <CartesianGrid {...grid} horizontal={false} />
+          <XAxis type="number" tick={axis} axisLine={false} tickLine={false} />
           <YAxis
             type="category"
             dataKey="label"
-            tick={CHART_AXIS}
+            tick={axis}
             axisLine={false}
             tickLine={false}
             width={100}
           />
           <Tooltip
-            {...tooltipStyle}
+            {...tooltip}
             formatter={(value, _name, item) => [
               `${Number(value ?? 0)} un. · ${BRL.format(Number(item.payload?.receita ?? 0))}`,
               String(item.payload?.nome ?? ''),

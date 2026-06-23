@@ -49,6 +49,9 @@ jobs:
       - name: Typecheck
         run: pnpm turbo typecheck
 
+      - name: Design tokens (STRICT)
+        run: STRICT=1 make check-design
+
       - name: API tests
         run: pnpm --filter api test
 

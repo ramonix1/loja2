@@ -1,0 +1,31 @@
+/**
+ * Ata Labs — marca-mãe (verde)
+ * Fonte: atalabs-landing/AtaLabs - Identidade Visual new.pdf
+ */
+:root {
+  --ata-verde-hero-inicio: #0d2002;
+  --ata-verde-conde: #173404;
+  --ata-verde-folha: #27500a;
+  --ata-verde-mata: #3b6d11;
+  --ata-verde-broto: #639922;
+  --ata-cinza-pedra: #888780;
+  --ata-cinza-areia: #d3d1c7;
+  --ata-creme: #f2f0ea;
+  --ata-hero-gradient: linear-gradient(
+    140deg,
+    var(--ata-verde-hero-inicio) 0%,
+    #173404 40%,
+    #27500a 75%,
+    #3b6d11 100%
+  );
+}
+
+@theme inline {
+  --color-verde-conde: #173404;
+  --color-verde-folha: #27500a;
+  --color-verde-mata: #3b6d11;
+  --color-verde-broto: #639922;
+  --color-cinza-pedra: #888780;
+  --color-cinza-areia: #d3d1c7;
+  --color-creme: #f2f0ea;
+}

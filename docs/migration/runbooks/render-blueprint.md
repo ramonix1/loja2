@@ -90,10 +90,10 @@ Após alterar env ou DNS: **Manual Deploy** em API → storefront → admin (COR
 - **`R2_DELIVERY=cdn`:** uploads novos retornam `https://cdn.atalabs.com.br/images/...`; GET `/images/*` na API **redireciona 301** para CDN (sem proxy de bytes).
 - Storefront `/images/*` também redireciona para CDN quando `NEXT_PUBLIC_CDN_URL` está definido.
 - Admin usa `VITE_CDN_URL` para previews — não passa imagens pela API Render.
-- Fase B (migração URLs no Postgres) é consistência de dados, não requisito para parar bandwidth de imagem.
+- **Fase B:** dispensada — base sem registros legados `/images/...`; uploads novos já gravam URL CDN (Fase A).
 - Validar CDN: `curl -sI "https://cdn.atalabs.com.br/images/{arquivo}"`
 
-> `TENANT_SLUG=loja` permanece no blueprint até Fase D (multi-tenant path).
+> API bootstrap usa `TENANT_SLUG=demo` (provisionamento). Admin **não** usa `VITE_TENANT_SLUG` em produção — tenant vem da sessão após login. Storefront usa `NEXT_PUBLIC_DEFAULT_STORE_SLUG`.
 
 ## Domínio customizado (legado / genérico)
 

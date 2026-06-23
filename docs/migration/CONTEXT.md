@@ -23,7 +23,21 @@ Cada **tenant** = uma loja virtual independente com:
 | **Admin da loja** | Lojista; gerencia produtos, pedidos, configurações |
 | **Super admin** | Operador da plataforma; billing, tenants (dev: `/_tenants`) |
 
----
+### Público-alvo e UX (mobile-first)
+
+O **público principal** são **pequenos negócios e vendedores autônomos** no Brasil — pessoas que vendem pelo WhatsApp, Instagram ou balcão e não são “power users” de software.
+
+**Implicações para produto e UI:**
+
+| Princípio | Decisão |
+|-----------|---------|
+| **Mobile-first** | Projetar telas primeiro para celular (touch, legibilidade, uma mão); desktop é expansão, não o default |
+| **Simplicidade** | Poucos passos, linguagem do dia a dia, evitar jargão técnico (ex.: slug só como URL da vitrine, não no login) |
+| **Alvos de toque** | Botões e cards com altura mínima ~48px; áreas clicáveis generosas |
+| **Layout** | Preferir **blocos/cards em grid** a listas densas; telas auth/hub **full-screen**, não cards centralizados estreitos |
+| **Contexto de uso** | Uso intermitente no celular (entre atendimentos); carregamento e feedback claros |
+
+Referência de implementação: Merchant Hub (`/admin/my-stores`), login admin, painel lojista. Detalhes: [`docs/design/UX-PRINCIPLES.md`](../design/UX-PRINCIPLES.md).
 
 ## Stack atual (legacy)
 

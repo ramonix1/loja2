@@ -64,6 +64,12 @@ pnpm install
 
 > **`.env` na raiz:** `DATABASE_URL=postgresql://postgres:postgres@localhost:5432/lojao`, `PGSSL=disable`, `API_URL=http://localhost:3001`.
 
+### API no browser (dev vs prod)
+
+Em **dev**, admin (`:5173`) e storefront (`:3000`) chamam a API por **proxy same-origin** (`/api/...`) — sem CORS no browser. Reinicie o Vite/Next após mudar `vite.config.ts` ou rotas de proxy.
+
+Em **prod**, o browser chama a API direto (`VITE_API_URL` / `NEXT_PUBLIC_API_URL`); a API libera origens via `APP_URL`, `ADMIN_URL`, `STOREFRONT_URL` e opcional `CORS_ORIGINS` (`apps/api/src/lib/cors-config.ts`). Cross-origin exige `COOKIE_SAME_SITE=none` na API.
+
 ### ⚠️ Não misture modos
 
 | Faça | Não faça no híbrido |

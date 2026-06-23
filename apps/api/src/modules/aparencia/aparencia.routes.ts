@@ -21,6 +21,7 @@ export async function aparenciaRoutes(app: FastifyInstance): Promise<void> {
         loja_nome: fields.loja_nome,
         loja_slogan: fields.loja_slogan,
         loja_cor_primaria: fields.loja_cor_primaria,
+        loja_tema: fields.loja_tema,
         loja_rodape: fields.loja_rodape,
         loja_email: fields.loja_email,
         loja_whatsapp: fields.loja_whatsapp,

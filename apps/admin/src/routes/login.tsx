@@ -4,24 +4,46 @@ import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { AdminUiThemeSwitch } from '../components/admin-ui-theme-switch';
+import {
+  AtaCommerceBrand,
+  authCardClass,
+  authInputClass,
+  authLabelClass,
+  authShellClass,
+} from '../components/ata-brand';
 import { ApiError } from '../lib/api-client';
 import { useAuth } from '../lib/auth-context';
 
 export function LoginPage() {
-  const { login, isAuthenticated, isLoading } = useAuth();
+  const { login, isAuthenticated, isLoading, needsTenantSelection, isPlatformAdmin } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
+      if (isPlatformAdmin) {
+        navigate('/platform/tenants', { replace: true });
+        return;
+      }
+      if (needsTenantSelection) {
+        navigate('/admin/my-stores', { replace: true });
+        return;
+      }
       navigate('/admin/dashboard', { replace: true });
     }
-  }, [isLoading, isAuthenticated, navigate]);
+  }, [isLoading, isAuthenticated, needsTenantSelection, isPlatformAdmin, navigate]);
 
   const mutation = useMutation({
     mutationFn: () => login(email, senha),
-    onSuccess: () => navigate('/admin/dashboard', { replace: true }),
+    onSuccess: (step) => {
+      if (step === 'select_tenant') {
+        navigate('/admin/my-stores', { replace: true });
+        return;
+      }
+      navigate('/admin/dashboard', { replace: true });
+    },
   });
 
   const errorMessage =
@@ -37,14 +59,20 @@ export function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-950 px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-gray-800 bg-gray-900 p-8 shadow-xl">
-        <h1 className="mb-1 text-xl font-bold text-white">Lojão — Painel Admin</h1>
-        <p className="mb-6 text-sm text-gray-400">Entre com sua conta de administrador.</p>
+    <div className={authShellClass()}>
+      <div className="absolute right-4 top-4 z-10 pt-[env(safe-area-inset-top)]">
+        <AdminUiThemeSwitch inset={false} />
+      </div>
+
+      <div className={authCardClass()}>
+        <AtaCommerceBrand
+          testId={testIds.auth.loginBrand}
+          subtitle="Entre com sua conta de administrador."
+        />
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="email" className="mb-1 block text-sm font-medium text-gray-300">
+            <label htmlFor="email" className={authLabelClass()}>
               E-mail
             </label>
             <input
@@ -55,12 +83,12 @@ export function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               data-testid={testIds.auth.loginEmail}
-              className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500"
+              className={authInputClass()}
             />
           </div>
 
           <div>
-            <label htmlFor="senha" className="mb-1 block text-sm font-medium text-gray-300">
+            <label htmlFor="senha" className={authLabelClass()}>
               Senha
             </label>
             <input
@@ -71,21 +99,19 @@ export function LoginPage() {
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               data-testid={testIds.auth.loginPassword}
-              className="w-full rounded-lg border border-gray-700 bg-gray-950 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-500"
+              className={authInputClass()}
             />
           </div>
 
           {errorMessage && (
-            <p
-              data-testid={testIds.auth.loginError}
-              className="rounded-lg border border-red-900 bg-red-950 px-3 py-2 text-sm text-red-300"
-            >
+            <p data-testid={testIds.auth.loginError} className="ds-alert-error">
               {errorMessage}
             </p>
           )}
 
           <Button
             type="submit"
+            surface="admin"
             disabled={mutation.isPending}
             data-testid={testIds.auth.loginSubmit}
             className="w-full"
@@ -93,6 +119,13 @@ export function LoginPage() {
             {mutation.isPending ? 'Entrando…' : 'Entrar'}
           </Button>
         </form>
+
+        <a
+          href="/platform/login"
+          className="ds-link mt-6 block text-center text-sm"
+        >
+          Acesso plataforma (Ata Labs)
+        </a>
       </div>
     </div>
   );

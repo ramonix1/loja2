@@ -2,9 +2,9 @@ import type { PublicBanner, PublicProduct, PublicStoreData } from '@lojao/types/
 import type { Metadata } from 'next';
 import { cache } from 'react';
 
-import { getSsrApiBase } from '@/lib/ssr-fetch';
+import { getDefaultStoreSlug } from '@lojao/tenant-host';
 
-const TENANT_SLUG = process.env.TENANT_SLUG ?? process.env.NEXT_PUBLIC_TENANT_SLUG ?? 'loja';
+import { getSsrApiBase } from '@/lib/ssr-fetch';
 
 /** Segundos de cache ISR para dados públicos (home, produto). */
 const PUBLIC_REVALIDATE_SEC = Number(process.env.STOREFRONT_PUBLIC_REVALIDATE ?? 60);
@@ -15,7 +15,6 @@ export function assetUrl(path: string): string {
 
   const normalized = path.startsWith('/') ? path : `/${path}`;
 
-  // Imagens: CDN R2 (produção) → fallback API (dev/proxy legado).
   if (normalized.startsWith('/images/')) {
     const cdnBase = process.env.NEXT_PUBLIC_CDN_URL?.replace(/\/$/, '');
     if (cdnBase) return `${cdnBase}${normalized}`;
@@ -41,10 +40,14 @@ export class ApiError extends Error {
   }
 }
 
-async function fetchApi<T>(path: string, options?: { revalidate?: number | false }): Promise<T> {
+async function fetchApi<T>(
+  path: string,
+  slug: string,
+  options?: { revalidate?: number | false },
+): Promise<T> {
   const revalidate = options?.revalidate ?? PUBLIC_REVALIDATE_SEC;
   const res = await fetch(`${getSsrApiBase()}${path}`, {
-    headers: { 'X-Tenant-Slug': TENANT_SLUG },
+    headers: { 'X-Tenant-Slug': slug },
     ...(revalidate === false
       ? { cache: 'no-store' as const }
       : { next: { revalidate } }),
@@ -62,24 +65,35 @@ async function fetchApi<T>(path: string, options?: { revalidate?: number | false
   return body as T;
 }
 
-export function getTenantSlug(): string {
-  return TENANT_SLUG;
+/** Slug dev/test — não usar em produção (tenant vem do path). */
+export function getDevFallbackSlug(): string {
+  return (
+    process.env.TENANT_SLUG ??
+    getDefaultStoreSlug({
+      NEXT_PUBLIC_DEFAULT_STORE_SLUG: process.env.NEXT_PUBLIC_DEFAULT_STORE_SLUG,
+      NODE_ENV: process.env.NODE_ENV,
+    })
+  );
 }
 
-export const fetchPublicStore = cache(async (): Promise<PublicStoreData> => {
-  const { data } = await fetchApi<{ data: PublicStoreData }>('/api/v1/public/store');
+export const fetchPublicStore = cache(async (slug: string): Promise<PublicStoreData> => {
+  const { data } = await fetchApi<{ data: PublicStoreData }>('/api/v1/public/store', slug);
   return data;
 });
 
-export const fetchPublicBanners = cache(async (): Promise<PublicBanner[]> => {
-  const { data } = await fetchApi<{ data: PublicBanner[] }>('/api/v1/public/banners');
+export const fetchPublicBanners = cache(async (slug: string): Promise<PublicBanner[]> => {
+  const { data } = await fetchApi<{ data: PublicBanner[] }>('/api/v1/public/banners', slug);
   return data;
 });
 
-export async function fetchPublicProduct(id: number): Promise<PublicProduct | null> {
+export async function fetchPublicProduct(
+  slug: string,
+  id: number,
+): Promise<PublicProduct | null> {
   try {
     const { data } = await fetchApi<{ data: PublicProduct & { descricao?: string; imagens?: unknown[] } }>(
       `/api/v1/public/products/${id}`,
+      slug,
     );
     return data;
   } catch (e) {
@@ -88,18 +102,18 @@ export async function fetchPublicProduct(id: number): Promise<PublicProduct | nu
   }
 }
 
-export async function fetchPublicProductDetail(id: number) {
-  return fetchPublicProductDetailCached(id);
+export async function fetchPublicProductDetail(slug: string, id: number) {
+  return fetchPublicProductDetailCached(slug, id);
 }
 
-const fetchPublicProductDetailCached = cache(async (id: number) => {
+const fetchPublicProductDetailCached = cache(async (slug: string, id: number) => {
   try {
     const { data } = await fetchApi<{
       data: PublicProduct & {
         descricao: string | null;
         imagens: Array<{ id: number; url: string }>;
       };
-    }>(`/api/v1/public/products/${id}`);
+    }>(`/api/v1/public/products/${id}`, slug);
     return data;
   } catch (e) {
     if (e instanceof ApiError && e.status === 404) return null;
@@ -107,14 +121,22 @@ const fetchPublicProductDetailCached = cache(async (id: number) => {
   }
 });
 
-export function buildStoreMetadata(store: PublicStoreData): Metadata {
+export function buildStoreMetadata(store: PublicStoreData, slug?: string): Metadata {
   const title = store.loja.nome;
   const description =
     store.loja.slogan || `${store.loja.nome} — produtos de qualidade com entrega para todo o Brasil.`;
 
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? '').replace(/\/$/, '');
+  const canonical =
+    siteUrl && slug ? `${siteUrl}/store/${slug}` : undefined;
+
   return {
     title: { default: title, template: `%s | ${title}` },
     description,
+    ...(store.loja.favicon
+      ? { icons: { icon: assetUrl(store.loja.favicon) } }
+      : {}),
+    ...(canonical ? { alternates: { canonical } } : {}),
     openGraph: {
       title,
       description,
@@ -125,7 +147,6 @@ export function buildStoreMetadata(store: PublicStoreData): Metadata {
 
 export const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
-/** Todos os produtos da home (categorias + sem categoria), deduplicados. */
 export function flattenStoreProducts(store: PublicStoreData): PublicProduct[] {
   const map = new Map<number, PublicProduct>();
   for (const cat of store.categorias) {

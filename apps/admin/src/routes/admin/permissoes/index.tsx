@@ -1,4 +1,22 @@
-import { Button, Card, Table, cn } from '@lojao/ui';
+import {
+  Button,
+  Card,
+  Table,
+  TableCell,
+  TableHead,
+  TableHeaderCell,
+  TableRow,
+  adminEmptyStateClass,
+  adminFieldLabelClass,
+  adminInputClass,
+  adminMutedClass,
+  adminPageSubtitleClass,
+  adminPageTitleClass,
+  adminSectionTitleClass,
+  StatusBadge,
+  adminSubtleClass,
+  cn,
+} from '@lojao/ui';
 import { testIds } from '@lojao/test-utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
@@ -122,12 +140,12 @@ export function PermissoesPage() {
   }
 
   if (isLoading) {
-    return <p className="text-gray-400">Carregando permissões…</p>;
+    return <p className={adminMutedClass()}>Carregando permissões…</p>;
   }
 
   if (isError) {
     return (
-      <p className="text-red-400" data-testid={testIds.adminPermissoes.errorMsg}>
+      <p className="ds-alert-error" data-testid={testIds.adminPermissoes.errorMsg}>
         Erro ao carregar administradores.
       </p>
     );
@@ -136,31 +154,25 @@ export function PermissoesPage() {
   return (
     <div data-testid={testIds.adminPermissoes.panel}>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Permissões do Sistema</h1>
-        <p className="mt-1 text-sm text-gray-400">
+        <h1 className={adminPageTitleClass()}>Permissões do Sistema</h1>
+        <p className={adminPageSubtitleClass('mt-1')}>
           Gerencie os administradores com acesso ao painel
         </p>
       </div>
 
       {feedback?.type === 'success' && (
-        <div
-          className="mb-6 rounded-xl border border-green-700 bg-green-900 px-5 py-3 text-sm text-green-300"
-          data-testid={testIds.adminPermissoes.successMsg}
-        >
+        <div className="ds-alert-success mb-6" data-testid={testIds.adminPermissoes.successMsg}>
           {feedback.msg}
         </div>
       )}
       {feedback?.type === 'error' && (
-        <div
-          className="mb-6 rounded-xl border border-red-700 bg-red-900 px-5 py-3 text-sm text-red-300"
-          data-testid={testIds.adminPermissoes.errorMsg}
-        >
+        <div className="ds-alert-error mb-6" data-testid={testIds.adminPermissoes.errorMsg}>
           {feedback.msg}
         </div>
       )}
 
-      <Card className="mb-8 max-w-2xl p-6">
-        <h2 className="mb-5 text-lg font-bold text-white">Adicionar Administrador</h2>
+      <Card surface="admin" className="mb-8 max-w-2xl p-6">
+        <h2 className={adminSectionTitleClass('mb-5 text-lg')}>Adicionar Administrador</h2>
         <form
           className="space-y-4"
           data-testid={testIds.adminPermissoes.createForm}
@@ -168,7 +180,7 @@ export function PermissoesPage() {
         >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-300">Nome *</label>
+              <label className={adminFieldLabelClass()}>Nome *</label>
               <input
                 type="text"
                 required
@@ -176,11 +188,11 @@ export function PermissoesPage() {
                 placeholder="Nome completo"
                 data-testid={testIds.adminPermissoes.nomeInput}
                 onChange={(e) => setNome(e.target.value)}
-                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white focus:border-blue-500 focus:outline-none"
+                className={adminInputClass()}
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-300">Email *</label>
+              <label className={adminFieldLabelClass()}>Email *</label>
               <input
                 type="email"
                 required
@@ -188,13 +200,13 @@ export function PermissoesPage() {
                 placeholder="admin@email.com"
                 data-testid={testIds.adminPermissoes.emailInput}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white focus:border-blue-500 focus:outline-none"
+                className={adminInputClass()}
               />
             </div>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-300">Senha *</label>
+              <label className={adminFieldLabelClass()}>Senha *</label>
               <div className="relative">
                 <input
                   type={showSenha ? 'text' : 'password'}
@@ -204,19 +216,19 @@ export function PermissoesPage() {
                   placeholder="Mínimo 8 caracteres"
                   data-testid={testIds.adminPermissoes.senhaInput}
                   onChange={(e) => setSenha(e.target.value)}
-                  className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 pr-10 text-sm text-white focus:border-blue-500 focus:outline-none"
+                  className={adminInputClass('pr-10')}
                 />
                 <button
                   type="button"
                   onClick={() => setShowSenha((v) => !v)}
-                  className="absolute top-1/2 right-3 -translate-y-1/2 text-xs text-gray-400"
+                  className={cn('absolute top-1/2 right-3 -translate-y-1/2 text-xs', adminMutedClass())}
                 >
                   {showSenha ? 'Ocultar' : 'Ver'}
                 </button>
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-gray-300">CPF</label>
+              <label className={adminFieldLabelClass()}>CPF</label>
               <input
                 type="text"
                 value={cpf}
@@ -224,7 +236,7 @@ export function PermissoesPage() {
                 placeholder="000.000.000-00"
                 data-testid={testIds.adminPermissoes.cpfInput}
                 onChange={(e) => setCpf(mascaraCpf(e.target.value))}
-                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white focus:border-blue-500 focus:outline-none"
+                className={adminInputClass()}
               />
             </div>
           </div>
@@ -238,75 +250,58 @@ export function PermissoesPage() {
         </form>
       </Card>
 
-      <Card className="p-6">
+      <Card surface="admin" className="p-6">
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-white">Administradores Cadastrados</h2>
-          <span className="text-sm text-gray-400">
+          <h2 className={adminSectionTitleClass('text-lg')}>Administradores Cadastrados</h2>
+          <span className={adminPageSubtitleClass()}>
             {admins.length} admin{admins.length !== 1 ? 's' : ''}
           </span>
         </div>
 
         {admins.length === 0 ? (
           <div
-            className="rounded-xl bg-gray-800 py-12 text-center"
+            className={adminEmptyStateClass('py-12')}
             data-testid={testIds.adminPermissoes.emptyState}
           >
-            <p className="text-gray-400">Nenhum administrador cadastrado</p>
+            <p className={adminMutedClass()}>Nenhum administrador cadastrado</p>
           </div>
         ) : (
-          <Table data-testid={testIds.adminPermissoes.table}>
-            <thead>
-              <tr className="border-b border-gray-800">
-                <th className="pb-3 text-left text-xs font-semibold uppercase text-gray-500">
-                  Nome
-                </th>
-                <th className="pb-3 text-left text-xs font-semibold uppercase text-gray-500">
-                  Email
-                </th>
-                <th className="pb-3 text-left text-xs font-semibold uppercase text-gray-500">
-                  CPF
-                </th>
-                <th className="pb-3 text-left text-xs font-semibold uppercase text-gray-500">
-                  Status
-                </th>
-                <th className="pb-3 text-left text-xs font-semibold uppercase text-gray-500">
-                  Último acesso
-                </th>
-                <th className="pb-3 text-left text-xs font-semibold uppercase text-gray-500">
-                  Ações
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-800">
+          <Table surface="admin" data-testid={testIds.adminPermissoes.table}>
+            <TableHead surface="admin">
+              <TableRow surface="admin">
+                <TableHeaderCell>Nome</TableHeaderCell>
+                <TableHeaderCell>Email</TableHeaderCell>
+                <TableHeaderCell>CPF</TableHeaderCell>
+                <TableHeaderCell>Status</TableHeaderCell>
+                <TableHeaderCell>Último acesso</TableHeaderCell>
+                <TableHeaderCell>Ações</TableHeaderCell>
+              </TableRow>
+            </TableHead>
+            <tbody>
               {admins.map((admin) => {
                 const isSelf = admin.id === user?.id;
                 return (
-                  <tr
+                  <TableRow
                     key={admin.id}
+                    surface="admin"
                     data-testid={testIds.adminPermissoes.row(admin.id)}
-                    className="hover:bg-gray-800/40"
                   >
-                    <td className="py-3 pr-4 text-sm font-medium text-white">{admin.nome}</td>
-                    <td className="py-3 pr-4 text-sm text-gray-300">{admin.email}</td>
-                    <td className="py-3 pr-4 text-sm text-gray-400">{admin.cpf ?? '—'}</td>
-                    <td className="py-3 pr-4">
-                      <span
-                        className={cn(
-                          'rounded-full px-2 py-1 text-xs font-semibold',
-                          admin.ativo
-                            ? 'bg-green-900 text-green-300'
-                            : 'bg-red-900 text-red-300',
-                        )}
-                      >
+                    <TableCell className="text-sm font-medium">{admin.nome}</TableCell>
+                    <TableCell className="text-sm">{admin.email}</TableCell>
+                    <TableCell className={cn('text-sm', adminMutedClass())}>{admin.cpf ?? '—'}</TableCell>
+                    <TableCell>
+                      <StatusBadge status={admin.ativo ? 'pago' : 'cancelado'}>
                         {admin.ativo ? 'Ativo' : 'Inativo'}
-                      </span>
-                    </td>
-                    <td className="py-3 pr-4 text-xs text-gray-400">
+                      </StatusBadge>
+                    </TableCell>
+                    <TableCell className={cn('text-xs', adminMutedClass())}>
                       {formatUltimoAcesso(admin.ultimo_acesso)}
-                    </td>
-                    <td className="py-3">
+                    </TableCell>
+                    <TableCell>
                       {isSelf ? (
-                        <span className="px-2 py-1 text-xs italic text-gray-600">Você mesmo</span>
+                        <span className={cn('px-2 py-1 text-xs italic', adminSubtleClass())}>
+                          Você mesmo
+                        </span>
                       ) : (
                         <div className="flex gap-2">
                           <Button
@@ -314,30 +309,25 @@ export function PermissoesPage() {
                             variant="secondary"
                             disabled={toggleMutation.isPending}
                             data-testid={testIds.adminPermissoes.toggleBtn(admin.id)}
-                            className={cn(
-                              'px-3 py-1.5 text-xs',
-                              admin.ativo
-                                ? 'bg-yellow-700 text-yellow-200 hover:bg-yellow-600'
-                                : 'bg-green-700 text-green-200 hover:bg-green-600',
-                            )}
+                            className="px-3 py-1.5 text-xs"
                             onClick={() => toggleMutation.mutate(admin.id)}
                           >
                             {admin.ativo ? 'Suspender' : 'Ativar'}
                           </Button>
                           <Button
                             type="button"
-                            variant="secondary"
+                            variant="ghost"
                             disabled={deleteMutation.isPending}
                             data-testid={testIds.adminPermissoes.deleteBtn(admin.id)}
-                            className="bg-red-700 px-3 py-1.5 text-xs text-white hover:bg-red-600"
+                            className="px-3 py-1.5 text-xs text-[var(--admin-error-text)] hover:bg-[var(--admin-error-bg)]"
                             onClick={() => handleDelete(admin)}
                           >
                             Remover
                           </Button>
                         </div>
                       )}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
             </tbody>

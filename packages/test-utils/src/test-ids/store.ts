@@ -2,6 +2,7 @@
  * data-testid da vitrine Next (Fase 5+) e fluxo comprador (Fase 6).
  */
 export const store = {
+  slugLayout: 'store-slug-layout',
   header: 'store-header',
   homeProductGrid: 'store-home-product-grid',
   homeProductCard: (id: number | string): string => `store-home-product-card-${id}`,

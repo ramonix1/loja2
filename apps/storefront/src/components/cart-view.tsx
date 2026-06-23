@@ -7,9 +7,25 @@ import { useEffect, useState } from 'react';
 
 import { BRL, legacyAssetUrl } from '@/lib/api';
 import { fetchCart, removeCartItem, updateCartItem, type CartItem } from '@/lib/client-api';
+import {
+  storeBodyClass,
+  storeEmptyStateClass,
+  storeErrorTextClass,
+  storeHeadingClass,
+  storeMutedClass,
+  storePanelClass,
+  storeSubtleClass,
+  storeTableHeadClass,
+  storeTableRowClass,
+  storeTableWrapClass,
+} from '@/lib/store-styles';
+import { useStoreHref, useStoreLoginHref } from '@/lib/use-store-href';
 
 export function CartView() {
   const router = useRouter();
+  const homeHref = useStoreHref('/');
+  const checkoutHref = useStoreHref('/checkout');
+  const loginHref = useStoreLoginHref('/carrinho');
   const [itens, setItens] = useState<CartItem[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -22,9 +38,9 @@ export function CartView() {
 
   useEffect(() => {
     reload()
-      .catch(() => router.push('/login?redirect=/carrinho'))
+      .catch(() => router.push(loginHref))
       .finally(() => setLoading(false));
-  }, [router]);
+  }, [router, loginHref]);
 
   async function changeQty(item: CartItem, qty: number) {
     if (qty < 1) return;
@@ -38,14 +54,14 @@ export function CartView() {
   }
 
   if (loading) {
-    return <p className="text-center text-gray-500">Carregando carrinho…</p>;
+    return <p className={storeMutedClass('text-center')}>Carregando carrinho…</p>;
   }
 
   if (itens.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-gray-300 bg-white p-12 text-center">
-        <p className="text-gray-600">Seu carrinho está vazio.</p>
-        <Link href="/" className="btn-primary mt-4 inline-block">
+      <div className={storeEmptyStateClass()}>
+        <p className={storeMutedClass()}>Seu carrinho está vazio.</p>
+        <Link href={homeHref} className="btn-primary mt-4 inline-block">
           Continuar comprando
         </Link>
       </div>
@@ -55,9 +71,9 @@ export function CartView() {
   return (
     <div className="grid gap-8 lg:grid-cols-3">
       <div className="lg:col-span-2">
-        <div data-testid={testIds.cartTable} className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <div data-testid={testIds.cartTable} className={storeTableWrapClass()}>
           <table className="w-full text-left text-sm">
-            <thead className="border-b bg-gray-50 text-gray-600">
+            <thead className={storeTableHeadClass('border-b')}>
               <tr>
                 <th className="px-4 py-3">Produto</th>
                 <th className="px-4 py-3">Qtd</th>
@@ -70,7 +86,7 @@ export function CartView() {
                 <tr
                   key={item.id}
                   data-testid={testIds.cartItemRow(item.id)}
-                  className="border-b last:border-0"
+                  className={storeTableRowClass()}
                 >
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-3">
@@ -83,9 +99,9 @@ export function CartView() {
                         />
                       ) : null}
                       <div>
-                        <p className="font-semibold text-gray-900">{item.nome}</p>
+                        <p className={storeBodyClass('font-semibold')}>{item.nome}</p>
                         {item.subtitulo ? (
-                          <p className="text-xs text-gray-500">{item.subtitulo}</p>
+                          <p className={storeSubtleClass('text-xs')}>{item.subtitulo}</p>
                         ) : null}
                       </div>
                     </div>
@@ -103,7 +119,7 @@ export function CartView() {
                   </td>
                   <td className="px-4 py-4 font-semibold">{BRL.format(item.subtotal)}</td>
                   <td className="px-4 py-4">
-                    <button type="button" className="text-sm text-red-600 hover:underline" onClick={() => remove(item)}>
+                    <button type="button" className={storeErrorTextClass('text-sm hover:underline')} onClick={() => remove(item)}>
                       Remover
                     </button>
                   </td>
@@ -114,15 +130,15 @@ export function CartView() {
         </div>
       </div>
 
-      <aside className="h-fit rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-lg font-bold">Resumo</h2>
-        <p className="flex justify-between text-sm text-gray-600">
+      <aside className={storePanelClass('h-fit')}>
+        <h2 className={storeHeadingClass('mb-4')}>Resumo</h2>
+        <p className={storeMutedClass('flex justify-between text-sm')}>
           <span>Subtotal</span>
-          <span className="font-semibold text-gray-900">{BRL.format(total)}</span>
+          <span className={storeBodyClass('font-semibold')}>{BRL.format(total)}</span>
         </p>
-        <p className="mt-2 text-xs text-gray-500">Frete calculado no checkout.</p>
+        <p className={storeSubtleClass('mt-2 text-xs')}>Frete calculado no checkout.</p>
         <Link
-          href="/checkout"
+          href={checkoutHref}
           data-testid={testIds.cartCheckoutBtn}
           className="btn-primary mt-6 block w-full py-3 text-center"
         >

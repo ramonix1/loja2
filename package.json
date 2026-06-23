@@ -19,6 +19,7 @@
     "typecheck": "turbo typecheck",
     "lint": "turbo lint",
     "test:api": "pnpm --filter api test",
+    "test:tenant-host": "pnpm --filter @lojao/tenant-host test",
     "test:e2e": "pnpm --filter e2e test",
     "test:e2e:smoke": "pnpm --filter e2e test:smoke",
     "test:all": "pnpm --filter api test && pnpm test:e2e:smoke",

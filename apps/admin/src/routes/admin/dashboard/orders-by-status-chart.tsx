@@ -1,14 +1,9 @@
 import type { PedidosPorStatus } from '@lojao/types/dashboard';
 import { testIds } from '@lojao/test-utils';
-import { ChartCard } from '@lojao/ui';
+import { ChartCard, useChartTheme } from '@lojao/ui';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 
-import {
-  STATUS_CHART_COLORS,
-  statusLabel,
-  tooltipStyle,
-  usePrefersReducedMotion,
-} from './chart-utils';
+import { STATUS_CHART_COLORS, statusLabel, usePrefersReducedMotion } from './chart-utils';
 
 interface OrdersByStatusChartProps {
   data: PedidosPorStatus[];
@@ -16,6 +11,7 @@ interface OrdersByStatusChartProps {
 
 export function OrdersByStatusChart({ data }: OrdersByStatusChartProps) {
   const animate = !usePrefersReducedMotion();
+  const { tooltip } = useChartTheme('admin');
 
   return (
     <ChartCard
@@ -39,12 +35,12 @@ export function OrdersByStatusChart({ data }: OrdersByStatusChartProps) {
             {data.map((entry) => (
               <Cell
                 key={entry.status}
-                fill={STATUS_CHART_COLORS[entry.status] ?? '#9ca3af'}
+                fill={STATUS_CHART_COLORS[entry.status] ?? 'var(--ata-cinza-pedra)'}
               />
             ))}
           </Pie>
           <Tooltip
-            {...tooltipStyle}
+            {...tooltip}
             formatter={(value, _name, item) => [
               Number(value ?? 0),
               statusLabel(String(item.payload?.status ?? '')),

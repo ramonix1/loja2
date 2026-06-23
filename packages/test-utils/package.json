@@ -23,6 +23,14 @@
       "types": "./src/test-ids/auth.ts",
       "default": "./src/test-ids/auth.ts"
     },
+    "./test-ids/marketing": {
+      "types": "./src/test-ids/marketing.ts",
+      "default": "./src/test-ids/marketing.ts"
+    },
+    "./test-ids/signup": {
+      "types": "./src/test-ids/signup.ts",
+      "default": "./src/test-ids/signup.ts"
+    },
     "./fixtures/auth": {
       "types": "./src/fixtures/auth.ts",
       "default": "./src/fixtures/auth.ts"

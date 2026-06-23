@@ -1,0 +1,94 @@
+/* Tokens carregados em globals.css — utilitários marketing Ata Labs */
+
+html {
+  scroll-behavior: smooth;
+}
+
+.nav-link {
+  position: relative;
+  padding-bottom: 2px;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 2px;
+  background: var(--ata-verde-broto);
+  transition: width 0.2s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+.card-hover {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(23, 52, 4, 0.1);
+}
+
+.browser-frame {
+  background: #0f1a06;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.browser-bar {
+  background: #080f04;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.browser-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+
+.float-anim {
+  animation: float 6s ease-in-out infinite;
+}
+
+.fade-up {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.fade-up.will-animate {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.55s ease,
+    transform 0.55s ease;
+}
+
+.fade-up.will-animate.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.marketing-input:focus,
+.marketing-textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ata-verde-broto);
+}

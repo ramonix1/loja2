@@ -1,9 +1,12 @@
 'use client';
 
+import { buildStorePath } from '@lojao/tenant-host';
 import { store as testIds } from '@lojao/test-utils/test-ids/store';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useEffect, useState, type FormEvent } from 'react';
 
+import { Button, FieldInput } from '@lojao/ui';
 import { BRL } from '@/lib/api';
 import { IS_DEV } from '@/lib/config';
 import {
@@ -16,9 +19,23 @@ import {
   type CheckoutPreview,
   type FreteOpcao,
 } from '@/lib/client-api';
+import {
+  storeErrorTextClass,
+  storeHeadingClass,
+  storeLabelClass,
+  storeLinkClass,
+  storeMutedClass,
+  storeOptionRowClass,
+  storePanelClass,
+} from '@/lib/store-styles';
+import { useStoreSlug } from '@/lib/store-slug-context';
+import { useStoreHref, useStoreLoginHref } from '@/lib/use-store-href';
 
 export function CheckoutForm() {
   const router = useRouter();
+  const slug = useStoreSlug();
+  const loginHref = useStoreLoginHref('/checkout');
+  const carrinhoHref = useStoreHref('/carrinho');
   const [preview, setPreview] = useState<CheckoutPreview | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -57,13 +74,13 @@ export function CheckoutForm() {
         }));
         if (IS_DEV) setMetodo('teste');
       } catch {
-        router.push('/login?redirect=/checkout');
+        router.push(loginHref);
       } finally {
         setLoading(false);
       }
     }
     load();
-  }, [router]);
+  }, [router, loginHref]);
 
   async function buscarCep() {
     const data = await lookupCep(form.cep);
@@ -104,7 +121,7 @@ export function CheckoutForm() {
         return;
       }
 
-      router.push(`/checkout/resultado/${result.pedido_id}`);
+      router.push(buildStorePath(slug, `/checkout/resultado/${result.pedido_id}`));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Erro ao finalizar pedido.');
     } finally {
@@ -112,12 +129,16 @@ export function CheckoutForm() {
     }
   }
 
-  const inputClass =
-    'w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-500';
-
-  if (loading) return <p className="text-center text-gray-500">Carregando checkout…</p>;
+  if (loading) return <p className={storeMutedClass('text-center')}>Carregando checkout…</p>;
   if (!preview || preview.itens.length === 0) {
-    return <p className="text-center text-gray-500">Carrinho vazio. <a href="/carrinho" className="text-blue-600">Voltar</a></p>;
+    return (
+      <p className={storeMutedClass('text-center')}>
+        Carrinho vazio.{' '}
+        <Link href={carrinhoHref} className={storeLinkClass()}>
+          Voltar
+        </Link>
+      </p>
+    );
   }
 
   const totalComFrete = preview.subtotal + (freteSelecionado?.valor ?? 0);
@@ -125,59 +146,106 @@ export function CheckoutForm() {
   return (
     <form data-testid={testIds.checkoutForm} onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-3">
       <div className="space-y-6 lg:col-span-2">
-        <section className="rounded-xl border border-gray-200 bg-white p-6">
-          <h2 className="mb-4 text-lg font-bold">Dados de entrega</h2>
+        <section className={storePanelClass()}>
+          <h2 className={storeHeadingClass('mb-4')}>Dados de entrega</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium">Nome</label>
-              <input required className={inputClass} value={form.nome_entrega} onChange={(e) => update('nome_entrega', e.target.value)} />
+              <label className={storeLabelClass()}>Nome</label>
+              <FieldInput
+                surface="store"
+                required
+                value={form.nome_entrega}
+                onChange={(e) => update('nome_entrega', e.target.value)}
+              />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">E-mail</label>
-              <input required type="email" className={inputClass} value={form.email_entrega} onChange={(e) => update('email_entrega', e.target.value)} />
+              <label className={storeLabelClass()}>E-mail</label>
+              <FieldInput
+                surface="store"
+                required
+                type="email"
+                value={form.email_entrega}
+                onChange={(e) => update('email_entrega', e.target.value)}
+              />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">Telefone</label>
-              <input className={inputClass} value={form.telefone_entrega} onChange={(e) => update('telefone_entrega', e.target.value)} />
+              <label className={storeLabelClass()}>Telefone</label>
+              <FieldInput
+                surface="store"
+                value={form.telefone_entrega}
+                onChange={(e) => update('telefone_entrega', e.target.value)}
+              />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">CEP</label>
+              <label className={storeLabelClass()}>CEP</label>
               <div className="flex gap-2">
-                <input required className={inputClass} value={form.cep} onChange={(e) => update('cep', e.target.value)} onBlur={() => form.cep && buscarCep()} />
-                <button type="button" onClick={buscarCep} className="btn-outline whitespace-nowrap px-3">
+                <FieldInput
+                  surface="store"
+                  required
+                  className="flex-1"
+                  value={form.cep}
+                  onChange={(e) => update('cep', e.target.value)}
+                  onBlur={() => form.cep && buscarCep()}
+                />
+                <Button type="button" variant="secondary" surface="store" onClick={buscarCep} className="shrink-0 whitespace-nowrap px-3">
                   Buscar
-                </button>
+                </Button>
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">Número</label>
-              <input required className={inputClass} value={form.numero} onChange={(e) => update('numero', e.target.value)} />
+              <label className={storeLabelClass()}>Número</label>
+              <FieldInput
+                surface="store"
+                required
+                value={form.numero}
+                onChange={(e) => update('numero', e.target.value)}
+              />
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium">Logradouro</label>
-              <input required className={inputClass} value={form.logradouro} onChange={(e) => update('logradouro', e.target.value)} />
+              <label className={storeLabelClass()}>Logradouro</label>
+              <FieldInput
+                surface="store"
+                required
+                value={form.logradouro}
+                onChange={(e) => update('logradouro', e.target.value)}
+              />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">Bairro</label>
-              <input className={inputClass} value={form.bairro} onChange={(e) => update('bairro', e.target.value)} />
+              <label className={storeLabelClass()}>Bairro</label>
+              <FieldInput
+                surface="store"
+                value={form.bairro}
+                onChange={(e) => update('bairro', e.target.value)}
+              />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">Cidade</label>
-              <input required className={inputClass} value={form.cidade} onChange={(e) => update('cidade', e.target.value)} />
+              <label className={storeLabelClass()}>Cidade</label>
+              <FieldInput
+                surface="store"
+                required
+                value={form.cidade}
+                onChange={(e) => update('cidade', e.target.value)}
+              />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">Estado</label>
-              <input required maxLength={2} className={inputClass} value={form.estado} onChange={(e) => update('estado', e.target.value.toUpperCase())} />
+              <label className={storeLabelClass()}>Estado</label>
+              <FieldInput
+                surface="store"
+                required
+                maxLength={2}
+                value={form.estado}
+                onChange={(e) => update('estado', e.target.value.toUpperCase())}
+              />
             </div>
           </div>
         </section>
 
         {freteOpcoes.length > 0 ? (
-          <section className="rounded-xl border border-gray-200 bg-white p-6">
-            <h2 className="mb-4 text-lg font-bold">Frete</h2>
+          <section className={storePanelClass()}>
+            <h2 className={storeHeadingClass('mb-4')}>Frete</h2>
             <div className="space-y-2">
               {freteOpcoes.map((op) => (
-                <label key={op.id} className="flex cursor-pointer items-center justify-between rounded-lg border border-gray-200 p-3 hover:bg-gray-50">
+                <label key={op.id} className={storeOptionRowClass()}>
                   <span>
                     <input
                       type="radio"
@@ -195,8 +263,8 @@ export function CheckoutForm() {
           </section>
         ) : null}
 
-        <section className="rounded-xl border border-gray-200 bg-white p-6">
-          <h2 className="mb-4 text-lg font-bold">Pagamento</h2>
+        <section className={storePanelClass()}>
+          <h2 className={storeHeadingClass('mb-4')}>Pagamento</h2>
           <div className="space-y-3">
             <label className="flex items-center gap-2">
               <input
@@ -250,9 +318,9 @@ export function CheckoutForm() {
         </section>
       </div>
 
-      <aside className="h-fit rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 className="mb-4 text-lg font-bold">Resumo</h2>
-        <ul className="mb-4 space-y-2 text-sm text-gray-600">
+      <aside className={storePanelClass('h-fit')}>
+        <h2 className={storeHeadingClass('mb-4')}>Resumo</h2>
+        <ul className={storeMutedClass('mb-4 space-y-2 text-sm')}>
           {preview.itens.map((item) => (
             <li key={item.id} className="flex justify-between gap-2">
               <span>
@@ -262,12 +330,12 @@ export function CheckoutForm() {
             </li>
           ))}
         </ul>
-        <p className="flex justify-between border-t pt-3 text-base font-bold">
+        <p className="flex justify-between border-t border-[var(--store-border)] pt-3 text-base font-bold">
           <span>Total</span>
           <span>{BRL.format(totalComFrete)}</span>
         </p>
 
-        {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
+        {error ? <p className={storeErrorTextClass('mt-4 text-sm')}>{error}</p> : null}
 
         <button
           type="submit"

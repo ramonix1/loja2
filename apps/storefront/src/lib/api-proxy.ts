@@ -9,6 +9,11 @@ export async function proxyToApi(
   request: NextRequest,
   upstreamPath: string,
 ): Promise<NextResponse> {
+  // Preflight same-origin (dev): não repassa — browser não precisa de headers CORS.
+  if (request.method === 'OPTIONS') {
+    return new NextResponse(null, { status: 204 });
+  }
+
   const apiBase = getSsrApiBase();
   const url = `${apiBase}${upstreamPath}${request.nextUrl.search}`;
 

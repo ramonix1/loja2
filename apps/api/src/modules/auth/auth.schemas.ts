@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const loginSchema = z.object({
   email: z.string().min(1, 'Email é obrigatório.'),
   senha: z.string().min(1, 'Senha é obrigatória.'),
+  tenantSlug: z.string().trim().min(1, 'Slug da loja inválido.').optional(),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;
@@ -42,3 +43,9 @@ export const resetPasswordSchema = z.object({
 });
 
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+export const selectTenantSchema = z.object({
+  tenantSlug: z.string().trim().min(1, 'Slug da loja inválido.'),
+});
+
+export type SelectTenantInput = z.infer<typeof selectTenantSchema>;

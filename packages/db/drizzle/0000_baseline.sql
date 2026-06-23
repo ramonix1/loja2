@@ -399,7 +399,7 @@ INSERT INTO configuracoes (chave, valor) VALUES
   ('loja_slogan', ''),
   ('loja_logo', ''),
   ('loja_favicon', ''),
-  ('loja_cor_primaria', '#2563eb'),
+  ('loja_cor_primaria', '#0D5FE0'),
   ('loja_rodape', ''),
   ('loja_email', ''),
   ('loja_whatsapp', '')

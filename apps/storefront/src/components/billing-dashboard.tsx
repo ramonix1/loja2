@@ -2,7 +2,16 @@
 
 import { useEffect, useState } from 'react';
 
-import { API_URL, TENANT_SLUG } from '@/lib/config';
+import { browserApiBase } from '@/lib/config';
+import { getClientTenantSlug } from '@/lib/client-api';
+import {
+  storeBodyClass,
+  storeErrorTextClass,
+  storeHeadingClass,
+  storeMutedClass,
+  storePanelClass,
+  storeSubtleClass,
+} from '@/lib/store-styles';
 
 interface BillingConfig {
   billing_type?: string;
@@ -15,9 +24,9 @@ export function BillingDashboard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`${API_URL}/api/v1/billing/config`, {
+    fetch(`${browserApiBase()}/api/v1/billing/config`, {
       credentials: 'include',
-      headers: { 'X-Tenant-Slug': TENANT_SLUG },
+      headers: { 'X-Tenant-Slug': getClientTenantSlug() },
     })
       .then(async (res) => {
         if (!res.ok) throw new Error('Não foi possível carregar billing.');
@@ -27,25 +36,25 @@ export function BillingDashboard() {
       .catch((e: Error) => setError(e.message));
   }, []);
 
-  if (error) return <p className="text-red-600">{error}</p>;
-  if (!config) return <p className="text-gray-500">Carregando…</p>;
+  if (error) return <p className={storeErrorTextClass()}>{error}</p>;
+  if (!config) return <p className={storeMutedClass()}>Carregando…</p>;
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-6">
-      <h2 className="text-lg font-bold">Plano da loja</h2>
+    <div className={storePanelClass()}>
+      <h2 className={storeHeadingClass()}>Plano da loja</h2>
       <dl className="mt-4 space-y-2 text-sm">
         <div className="flex justify-between">
-          <dt className="text-gray-500">Tipo</dt>
-          <dd className="font-medium">{config.billing_type ?? '—'}</dd>
+          <dt className={storeSubtleClass()}>Tipo</dt>
+          <dd className={storeBodyClass('font-medium')}>{config.billing_type ?? '—'}</dd>
         </div>
         <div className="flex justify-between">
-          <dt className="text-gray-500">Plano</dt>
-          <dd className="font-medium">{config.plan_name ?? '—'}</dd>
+          <dt className={storeSubtleClass()}>Plano</dt>
+          <dd className={storeBodyClass('font-medium')}>{config.plan_name ?? '—'}</dd>
         </div>
         {config.monthly_fee != null ? (
           <div className="flex justify-between">
-            <dt className="text-gray-500">Mensalidade</dt>
-            <dd className="font-medium">R$ {Number(config.monthly_fee).toFixed(2)}</dd>
+            <dt className={storeSubtleClass()}>Mensalidade</dt>
+            <dd className={storeBodyClass('font-medium')}>R$ {Number(config.monthly_fee).toFixed(2)}</dd>
           </div>
         ) : null}
       </dl>
