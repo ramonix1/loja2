@@ -77,6 +77,7 @@ services:
       - .:/app
       - admin_root_node_modules:/app/node_modules
       - admin_app_node_modules:/app/apps/admin/node_modules
+      - admin_ui_node_modules:/app/packages/ui/node_modules
     healthcheck:
       test:
         [
@@ -108,6 +109,7 @@ services:
       - .:/app
       - storefront_root_node_modules:/app/node_modules
       - storefront_app_node_modules:/app/apps/storefront/node_modules
+      - storefront_ui_node_modules:/app/packages/ui/node_modules
     healthcheck:
       test:
         [
@@ -156,5 +158,7 @@ volumes:
   api_types_node_modules:
   admin_root_node_modules:
   admin_app_node_modules:
+  admin_ui_node_modules:
   storefront_root_node_modules:
   storefront_app_node_modules:
+  storefront_ui_node_modules:
