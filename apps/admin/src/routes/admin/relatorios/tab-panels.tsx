@@ -1,4 +1,19 @@
-import { Card, Table, cn } from '@lojao/ui';
+import {
+  Card,
+  Table,
+  TableCell,
+  TableHead,
+  TableHeaderCell,
+  TableRow,
+  adminEmptyStateClass,
+  adminMutedClass,
+  adminSectionTitleClass,
+  adminStatValueClass,
+  adminStatValueSuccessClass,
+  StatusBadge,
+  adminSubtleClass,
+  cn,
+} from '@lojao/ui';
 import { testIds } from '@lojao/test-utils';
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
@@ -14,25 +29,11 @@ const STATUS_LABEL: Record<string, string> = {
   cancelado: 'Cancelado',
 };
 
-const STATUS_STYLES: Record<string, string> = {
-  pago: 'bg-green-900/40 text-green-400',
-  enviado: 'bg-blue-900/40 text-blue-400',
-  entregue: 'bg-teal-900/40 text-teal-400',
-  cancelado: 'bg-red-900/40 text-red-400',
-  aguardando_pagamento: 'bg-yellow-900/40 text-yellow-400',
-  em_separacao: 'bg-purple-900/40 text-purple-400',
-};
-
-function StatusBadge({ status }: { status: string }) {
+function RelatorioStatusBadge({ status }: { status: string }) {
   return (
-    <span
-      className={cn(
-        'rounded-full px-2 py-0.5 text-xs font-medium',
-        STATUS_STYLES[status] ?? 'bg-gray-800 text-gray-400',
-      )}
-    >
+    <StatusBadge status={status}>
       {STATUS_LABEL[status] ?? status}
-    </span>
+    </StatusBadge>
   );
 }
 
@@ -42,9 +43,9 @@ function KpiGrid({ children }: { children: ReactNode }) {
 
 function Kpi({ label, value, className }: { label: string; value: ReactNode; className?: string }) {
   return (
-    <Card>
-      <div className="text-xs text-gray-500">{label}</div>
-      <div className={cn('mt-1 text-2xl font-bold text-white', className)}>{value}</div>
+    <Card surface="admin">
+      <div className={cn('text-xs', adminSubtleClass())}>{label}</div>
+      <div className={cn(adminStatValueClass('mt-1 text-2xl'), className)}>{value}</div>
     </Card>
   );
 }
@@ -52,10 +53,7 @@ function Kpi({ label, value, className }: { label: string; value: ReactNode; cla
 export function RelatorioTabContent({ aba, dados }: { aba: string; dados: Record<string, unknown> }) {
   if (dados.erro) {
     return (
-      <p
-        data-testid={testIds.adminRelatorios.errorMsg}
-        className="rounded-xl border border-red-700 bg-red-900/30 px-4 py-3 text-sm text-red-300"
-      >
+      <p data-testid={testIds.adminRelatorios.errorMsg} className="ds-alert-error text-sm">
         Erro ao carregar relatório: {String(dados.erro)}
       </p>
     );
@@ -73,45 +71,45 @@ export function RelatorioTabContent({ aba, dados }: { aba: string; dados: Record
       <>
         <KpiGrid>
           <Kpi label="Total de pedidos" value={resumo.total_pedidos} />
-          <Kpi label="Receita confirmada" value={formatBRL(resumo.receita_confirmada)} className="text-green-400" />
-          <Kpi label="Ticket médio" value={formatBRL(resumo.ticket_medio)} className="text-blue-400" />
-          <Kpi label="Pendente de pagamento" value={formatBRL(resumo.receita_pendente)} className="text-yellow-400" />
+          <Kpi label="Receita confirmada" value={formatBRL(resumo.receita_confirmada)} className={adminStatValueSuccessClass('text-2xl')} />
+          <Kpi label="Ticket médio" value={formatBRL(resumo.ticket_medio)} className="text-[var(--admin-accent)]" />
+          <Kpi label="Pendente de pagamento" value={formatBRL(resumo.receita_pendente)} className="text-[var(--admin-warning-text)]" />
         </KpiGrid>
-        <Card>
-          <h3 className="mb-4 text-sm font-semibold text-white">Pedidos no período</h3>
+        <Card surface="admin">
+          <h3 className={adminSectionTitleClass('mb-4 text-sm')}>Pedidos no período</h3>
           {pedidos.length === 0 ? (
-            <p data-testid={testIds.adminRelatorios.emptyState} className="py-8 text-center text-sm text-gray-500">
+            <p data-testid={testIds.adminRelatorios.emptyState} className={adminEmptyStateClass('py-8 text-sm')}>
               Nenhum pedido no período selecionado.
             </p>
           ) : (
-            <Table data-testid={testIds.adminRelatorios.table}>
-              <thead>
-                <tr className="border-b border-gray-800 text-xs uppercase text-gray-500">
-                  <th className="px-4 py-2 text-left">#</th>
-                  <th className="px-4 py-2 text-left">Data</th>
-                  <th className="px-4 py-2 text-left">Cliente</th>
-                  <th className="px-4 py-2 text-right">Total</th>
-                  <th className="px-4 py-2 text-left">Status</th>
-                </tr>
-              </thead>
+            <Table surface="admin" data-testid={testIds.adminRelatorios.table}>
+              <TableHead surface="admin">
+                <TableRow surface="admin">
+                  <TableHeaderCell>#</TableHeaderCell>
+                  <TableHeaderCell>Data</TableHeaderCell>
+                  <TableHeaderCell>Cliente</TableHeaderCell>
+                  <TableHeaderCell className="text-right">Total</TableHeaderCell>
+                  <TableHeaderCell>Status</TableHeaderCell>
+                </TableRow>
+              </TableHead>
               <tbody>
                 {pedidos.map((p) => (
-                  <tr key={String(p.id)} className="border-b border-gray-800 last:border-0">
-                    <td className="px-4 py-2 text-gray-500">#{String(p.id)}</td>
-                    <td className="px-4 py-2 text-gray-300">
+                  <TableRow key={String(p.id)} surface="admin">
+                    <TableCell className={adminSubtleClass()}>#{String(p.id)}</TableCell>
+                    <TableCell>
                       {new Date(String(p.created_at)).toLocaleDateString('pt-BR')}
-                    </td>
-                    <td className="px-4 py-2">
-                      <div className="text-white">{String(p.cliente_nome)}</div>
-                      <div className="text-xs text-gray-500">{String(p.email_entrega ?? '')}</div>
-                    </td>
-                    <td className="px-4 py-2 text-right font-semibold text-green-400">
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-[var(--admin-text)]">{String(p.cliente_nome)}</div>
+                      <div className={cn('text-xs', adminSubtleClass())}>{String(p.email_entrega ?? '')}</div>
+                    </TableCell>
+                    <TableCell className={cn('text-right font-semibold', adminStatValueSuccessClass('text-base'))}>
                       {formatBRL(Number(p.total))}
-                    </td>
-                    <td className="px-4 py-2">
-                      <StatusBadge status={String(p.status)} />
-                    </td>
-                  </tr>
+                    </TableCell>
+                    <TableCell>
+                      <RelatorioStatusBadge status={String(p.status)} />
+                    </TableCell>
+                  </TableRow>
                 ))}
               </tbody>
             </Table>
@@ -128,33 +126,33 @@ export function RelatorioTabContent({ aba, dados }: { aba: string; dados: Record
       <>
         <KpiGrid>
           <Kpi label="Total" value={resumo.total} />
-          <Kpi label="OK" value={resumo.ok} className="text-green-400" />
-          <Kpi label="Estoque baixo" value={resumo.baixo} className="text-yellow-400" />
-          <Kpi label="Esgotados" value={resumo.esgotados} className="text-red-400" />
+          <Kpi label="OK" value={resumo.ok} className={adminStatValueSuccessClass('text-2xl')} />
+          <Kpi label="Estoque baixo" value={resumo.baixo} className="text-[var(--admin-warning-text)]" />
+          <Kpi label="Esgotados" value={resumo.esgotados} className="text-[var(--admin-error-text)]" />
         </KpiGrid>
-        <Card>
+        <Card surface="admin">
           {produtos.length === 0 ? (
-            <p data-testid={testIds.adminRelatorios.emptyState} className="py-8 text-center text-sm text-gray-500">
+            <p data-testid={testIds.adminRelatorios.emptyState} className={adminEmptyStateClass('py-8 text-sm')}>
               Nenhum produto encontrado.
             </p>
           ) : (
-            <Table data-testid={testIds.adminRelatorios.table}>
-              <thead>
-                <tr className="border-b border-gray-800 text-xs uppercase text-gray-500">
-                  <th className="px-4 py-2 text-left">Produto</th>
-                  <th className="px-4 py-2 text-left">Categoria</th>
-                  <th className="px-4 py-2 text-right">Estoque</th>
-                </tr>
-              </thead>
+            <Table surface="admin" data-testid={testIds.adminRelatorios.table}>
+              <TableHead surface="admin">
+                <TableRow surface="admin">
+                  <TableHeaderCell>Produto</TableHeaderCell>
+                  <TableHeaderCell>Categoria</TableHeaderCell>
+                  <TableHeaderCell className="text-right">Estoque</TableHeaderCell>
+                </TableRow>
+              </TableHead>
               <tbody>
                 {produtos.map((p) => (
-                  <tr key={String(p.id)} className="border-b border-gray-800 last:border-0">
-                    <td className="px-4 py-2 text-white">{String(p.nome)}</td>
-                    <td className="px-4 py-2 text-gray-400">{String(p.categoria_nome ?? '—')}</td>
-                    <td className="px-4 py-2 text-right">
+                  <TableRow key={String(p.id)} surface="admin">
+                    <TableCell>{String(p.nome)}</TableCell>
+                    <TableCell className={adminMutedClass()}>{String(p.categoria_nome ?? '—')}</TableCell>
+                    <TableCell className="text-right">
                       {p.estoque === null ? '∞' : String(p.estoque)}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
               </tbody>
             </Table>
@@ -167,36 +165,38 @@ export function RelatorioTabContent({ aba, dados }: { aba: string; dados: Record
   if (aba === 'entregas') {
     const pedidos = (dados.pedidos as Array<Record<string, unknown>>) ?? [];
     return (
-      <Card>
-        <h3 className="mb-4 text-sm font-semibold text-white">Pedidos em andamento</h3>
+      <Card surface="admin">
+        <h3 className={adminSectionTitleClass('mb-4 text-sm')}>Pedidos em andamento</h3>
         {pedidos.length === 0 ? (
-          <p data-testid={testIds.adminRelatorios.emptyState} className="py-8 text-center text-sm text-gray-500">
+          <p data-testid={testIds.adminRelatorios.emptyState} className={adminEmptyStateClass('py-8 text-sm')}>
             Nenhum pedido em andamento.
           </p>
         ) : (
-          <Table data-testid={testIds.adminRelatorios.table}>
-            <thead>
-              <tr className="border-b border-gray-800 text-xs uppercase text-gray-500">
-                <th className="px-4 py-2 text-left">#</th>
-                <th className="px-4 py-2 text-left">Destinatário</th>
-                <th className="px-4 py-2 text-left">Status</th>
-                <th className="px-4 py-2 text-right">Total</th>
-              </tr>
-            </thead>
+          <Table surface="admin" data-testid={testIds.adminRelatorios.table}>
+            <TableHead surface="admin">
+              <TableRow surface="admin">
+                <TableHeaderCell>#</TableHeaderCell>
+                <TableHeaderCell>Destinatário</TableHeaderCell>
+                <TableHeaderCell>Status</TableHeaderCell>
+                <TableHeaderCell className="text-right">Total</TableHeaderCell>
+              </TableRow>
+            </TableHead>
             <tbody>
               {pedidos.map((p) => (
-                <tr key={String(p.id)} className="border-b border-gray-800 last:border-0">
-                  <td className="px-4 py-2">
-                    <Link to={`/admin/pedidos/${String(p.id)}`} className="text-blue-400 hover:underline">
+                <TableRow key={String(p.id)} surface="admin">
+                  <TableCell>
+                    <Link to={`/admin/pedidos/${String(p.id)}`} className="ds-link">
                       #{String(p.id)}
                     </Link>
-                  </td>
-                  <td className="px-4 py-2 text-white">{String(p.nome_entrega)}</td>
-                  <td className="px-4 py-2">
-                    <StatusBadge status={String(p.status)} />
-                  </td>
-                  <td className="px-4 py-2 text-right text-green-400">{formatBRL(Number(p.total))}</td>
-                </tr>
+                  </TableCell>
+                  <TableCell>{String(p.nome_entrega)}</TableCell>
+                  <TableCell>
+                    <RelatorioStatusBadge status={String(p.status)} />
+                  </TableCell>
+                  <TableCell className={cn('text-right', adminStatValueSuccessClass('text-base'))}>
+                    {formatBRL(Number(p.total))}
+                  </TableCell>
+                </TableRow>
               ))}
             </tbody>
           </Table>
@@ -208,20 +208,20 @@ export function RelatorioTabContent({ aba, dados }: { aba: string; dados: Record
   if (aba === 'produtos') {
     const top = (dados.topProdutos as Array<Record<string, unknown>>) ?? [];
     return (
-      <Card>
-        <h3 className="mb-4 text-sm font-semibold text-white">Top produtos vendidos</h3>
+      <Card surface="admin">
+        <h3 className={adminSectionTitleClass('mb-4 text-sm')}>Top produtos vendidos</h3>
         {top.length === 0 ? (
-          <p data-testid={testIds.adminRelatorios.emptyState} className="py-8 text-center text-sm text-gray-500">
+          <p data-testid={testIds.adminRelatorios.emptyState} className={adminEmptyStateClass('py-8 text-sm')}>
             Nenhum produto vendido no período.
           </p>
         ) : (
           <div data-testid={testIds.adminRelatorios.table} className="space-y-3">
             {top.map((p, i) => (
               <div key={String(p.nome_produto)} className="flex justify-between text-sm">
-                <span className="text-gray-300">
+                <span className={adminMutedClass()}>
                   {i + 1}. {String(p.nome_produto)}
                 </span>
-                <span className="text-green-400">{formatBRL(Number(p.receita_total))}</span>
+                <span className={adminStatValueSuccessClass('text-base')}>{formatBRL(Number(p.receita_total))}</span>
               </div>
             ))}
           </div>
@@ -241,23 +241,23 @@ export function RelatorioTabContent({ aba, dados }: { aba: string; dados: Record
     return (
       <>
         <KpiGrid>
-          <Kpi label="Receita total" value={formatBRL(resumo.receita_total)} className="text-green-400" />
+          <Kpi label="Receita total" value={formatBRL(resumo.receita_total)} className={adminStatValueSuccessClass('text-2xl')} />
           <Kpi label="Total pedidos" value={resumo.total_pedidos} />
-          <Kpi label="Ticket médio" value={formatBRL(resumo.ticket_medio)} className="text-blue-400" />
+          <Kpi label="Ticket médio" value={formatBRL(resumo.ticket_medio)} className="text-[var(--admin-accent)]" />
           <Kpi label="Total em frete" value={formatBRL(resumo.total_frete)} />
         </KpiGrid>
-        <Card>
-          <h3 className="mb-4 text-sm font-semibold text-white">Métodos de pagamento</h3>
+        <Card surface="admin">
+          <h3 className={adminSectionTitleClass('mb-4 text-sm')}>Métodos de pagamento</h3>
           {porMetodo.length === 0 ? (
-            <p data-testid={testIds.adminRelatorios.emptyState} className="text-sm text-gray-500">
+            <p data-testid={testIds.adminRelatorios.emptyState} className={cn('text-sm', adminSubtleClass())}>
               Nenhum dado.
             </p>
           ) : (
             <div data-testid={testIds.adminRelatorios.table} className="space-y-2">
               {porMetodo.map((m) => (
                 <div key={String(m.metodo_pagamento)} className="flex justify-between text-sm">
-                  <span className="capitalize text-gray-300">{String(m.metodo_pagamento)}</span>
-                  <span className="text-green-400">{formatBRL(Number(m.receita))}</span>
+                  <span className={cn('capitalize', adminMutedClass())}>{String(m.metodo_pagamento)}</span>
+                  <span className={adminStatValueSuccessClass('text-base')}>{formatBRL(Number(m.receita))}</span>
                 </div>
               ))}
             </div>
@@ -274,34 +274,34 @@ export function RelatorioTabContent({ aba, dados }: { aba: string; dados: Record
       <>
         <KpiGrid>
           <Kpi label="Total de clientes" value={totalClientes} />
-          <Kpi label="Ativos no período" value={top.length} className="text-blue-400" />
+          <Kpi label="Ativos no período" value={top.length} className="text-[var(--admin-accent)]" />
         </KpiGrid>
-        <Card>
+        <Card surface="admin">
           {top.length === 0 ? (
-            <p data-testid={testIds.adminRelatorios.emptyState} className="py-8 text-center text-sm text-gray-500">
+            <p data-testid={testIds.adminRelatorios.emptyState} className={adminEmptyStateClass('py-8 text-sm')}>
               Nenhum cliente com pedidos no período.
             </p>
           ) : (
-            <Table data-testid={testIds.adminRelatorios.table}>
-              <thead>
-                <tr className="border-b border-gray-800 text-xs uppercase text-gray-500">
-                  <th className="px-4 py-2 text-left">Cliente</th>
-                  <th className="px-4 py-2 text-right">Pedidos</th>
-                  <th className="px-4 py-2 text-right">Total gasto</th>
-                </tr>
-              </thead>
+            <Table surface="admin" data-testid={testIds.adminRelatorios.table}>
+              <TableHead surface="admin">
+                <TableRow surface="admin">
+                  <TableHeaderCell>Cliente</TableHeaderCell>
+                  <TableHeaderCell className="text-right">Pedidos</TableHeaderCell>
+                  <TableHeaderCell className="text-right">Total gasto</TableHeaderCell>
+                </TableRow>
+              </TableHead>
               <tbody>
                 {top.map((c) => (
-                  <tr key={String(c.email)} className="border-b border-gray-800 last:border-0">
-                    <td className="px-4 py-2">
-                      <div className="text-white">{String(c.nome)}</div>
-                      <div className="text-xs text-gray-500">{String(c.email)}</div>
-                    </td>
-                    <td className="px-4 py-2 text-right">{String(c.total_pedidos)}</td>
-                    <td className="px-4 py-2 text-right text-green-400">
+                  <TableRow key={String(c.email)} surface="admin">
+                    <TableCell>
+                      <div className="text-[var(--admin-text)]">{String(c.nome)}</div>
+                      <div className={cn('text-xs', adminSubtleClass())}>{String(c.email)}</div>
+                    </TableCell>
+                    <TableCell className="text-right">{String(c.total_pedidos)}</TableCell>
+                    <TableCell className={cn('text-right', adminStatValueSuccessClass('text-base'))}>
                       {formatBRL(Number(c.total_gasto))}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
               </tbody>
             </Table>
@@ -323,37 +323,37 @@ export function RelatorioTabContent({ aba, dados }: { aba: string; dados: Record
       <>
         <KpiGrid>
           <Kpi label="Total no período" value={resumo.total} />
-          <Kpi label="Confirmados" value={resumo.confirmados} className="text-green-400" />
-          <Kpi label="Cancelados" value={resumo.cancelados} className="text-red-400" />
-          <Kpi label="Receita confirmada" value={formatBRL(resumo.receita_confirmada)} className="text-blue-400" />
+          <Kpi label="Confirmados" value={resumo.confirmados} className={adminStatValueSuccessClass('text-2xl')} />
+          <Kpi label="Cancelados" value={resumo.cancelados} className="text-[var(--admin-error-text)]" />
+          <Kpi label="Receita confirmada" value={formatBRL(resumo.receita_confirmada)} className="text-[var(--admin-accent)]" />
         </KpiGrid>
-        <Card>
+        <Card surface="admin">
           {agendamentos.length === 0 ? (
-            <p data-testid={testIds.adminRelatorios.emptyState} className="py-8 text-center text-sm text-gray-500">
+            <p data-testid={testIds.adminRelatorios.emptyState} className={adminEmptyStateClass('py-8 text-sm')}>
               Nenhum agendamento no período.
             </p>
           ) : (
-            <Table data-testid={testIds.adminRelatorios.table}>
-              <thead>
-                <tr className="border-b border-gray-800 text-xs uppercase text-gray-500">
-                  <th className="px-4 py-2 text-left">Pedido</th>
-                  <th className="px-4 py-2 text-left">Cliente</th>
-                  <th className="px-4 py-2 text-left">Data evento</th>
-                  <th className="px-4 py-2 text-right">Total</th>
-                </tr>
-              </thead>
+            <Table surface="admin" data-testid={testIds.adminRelatorios.table}>
+              <TableHead surface="admin">
+                <TableRow surface="admin">
+                  <TableHeaderCell>Pedido</TableHeaderCell>
+                  <TableHeaderCell>Cliente</TableHeaderCell>
+                  <TableHeaderCell>Data evento</TableHeaderCell>
+                  <TableHeaderCell className="text-right">Total</TableHeaderCell>
+                </TableRow>
+              </TableHead>
               <tbody>
                 {agendamentos.map((a) => (
-                  <tr key={String(a.id)} className="border-b border-gray-800 last:border-0">
-                    <td className="px-4 py-2 text-blue-400">#{String(a.pedido_id)}</td>
-                    <td className="px-4 py-2 text-white">{String(a.cliente_nome)}</td>
-                    <td className="px-4 py-2 text-gray-300">
+                  <TableRow key={String(a.id)} surface="admin">
+                    <TableCell className="ds-link">#{String(a.pedido_id)}</TableCell>
+                    <TableCell>{String(a.cliente_nome)}</TableCell>
+                    <TableCell className={adminMutedClass()}>
                       {new Date(`${String(a.data_evento)}T12:00:00`).toLocaleDateString('pt-BR')}
-                    </td>
-                    <td className="px-4 py-2 text-right text-green-400">
+                    </TableCell>
+                    <TableCell className={cn('text-right', adminStatValueSuccessClass('text-base'))}>
                       {formatBRL(Number(a.total))}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
               </tbody>
             </Table>

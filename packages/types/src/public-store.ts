@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { storeThemeSchema } from './store-theme.js';
+
 export const publicProductSchema = z.object({
   id: z.number().int().positive(),
   nome: z.string(),
@@ -37,6 +39,7 @@ export const publicStoreSchema = z.object({
   loja: z.object({
     nome: z.string(),
     cor_primaria: z.string(),
+    tema: storeThemeSchema.default('escuro'),
     logo: z.string(),
     slogan: z.string(),
     favicon: z.string().optional(),

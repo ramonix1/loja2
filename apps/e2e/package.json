@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "@lojao/eslint-config": "workspace:*",
+    "@lojao/tenant-host": "workspace:*",
     "@lojao/test-utils": "workspace:*",
     "@playwright/test": "^1.49.0",
     "playwright": "^1.49.0",

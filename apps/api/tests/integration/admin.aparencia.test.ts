@@ -43,6 +43,7 @@ describe('GET/PUT /api/v1/admin/aparencia', () => {
         `------ap\r\nContent-Disposition: form-data; name="loja_nome"\r\n\r\nLoja Vitest\r\n` +
         `------ap\r\nContent-Disposition: form-data; name="loja_slogan"\r\n\r\nSlogan teste\r\n` +
         `------ap\r\nContent-Disposition: form-data; name="loja_cor_primaria"\r\n\r\n#ff5500\r\n` +
+        `------ap\r\nContent-Disposition: form-data; name="loja_tema"\r\n\r\nclaro\r\n` +
         `------ap\r\nContent-Disposition: form-data; name="loja_rodape"\r\n\r\nRodapé teste\r\n` +
         `------ap\r\nContent-Disposition: form-data; name="loja_email"\r\n\r\ncontato@teste.com\r\n` +
         `------ap\r\nContent-Disposition: form-data; name="loja_whatsapp"\r\n\r\n(11) 99999-0000\r\n` +
@@ -52,6 +53,7 @@ describe('GET/PUT /api/v1/admin/aparencia', () => {
     const data = res.json().data;
     expect(data.loja_nome).toBe('Loja Vitest');
     expect(data.loja_cor_primaria).toBe('#ff5500');
+    expect(data.loja_tema).toBe('claro');
     expect(data.loja_email).toBe('contato@teste.com');
   });
 

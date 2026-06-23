@@ -12,4 +12,5 @@ export const adminAparencia = {
   faviconInput: 'admin-aparencia-favicon-input',
   formSubmit: 'admin-aparencia-form-submit-btn',
   successMsg: 'admin-aparencia-success-msg',
+  temaSwitch: 'admin-aparencia-tema-switch',
 } as const;

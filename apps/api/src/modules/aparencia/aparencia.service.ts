@@ -1,12 +1,17 @@
 import type { AparenciaConfig, AparenciaFields } from '@lojao/types/aparencia';
+import { DEFAULT_LOJA_COR_PRIMARIA } from '@lojao/types/aparencia';
+import { DEFAULT_STORE_THEME, parseStoreTheme } from '@lojao/types/store-theme';
 import type { Pool } from 'pg';
 
 import type { ImageStorage } from '../../ports/image-storage.js';
 
+const DEFAULT_STORE_NAME = 'Ata Commerce Demo';
+
 const DEFAULTS: AparenciaConfig = {
-  loja_nome: 'Lojão',
+  loja_nome: DEFAULT_STORE_NAME,
   loja_slogan: '',
-  loja_cor_primaria: '#2563eb',
+  loja_cor_primaria: DEFAULT_LOJA_COR_PRIMARIA,
+  loja_tema: DEFAULT_STORE_THEME,
   loja_rodape: '',
   loja_email: '',
   loja_whatsapp: '',
@@ -21,10 +26,15 @@ export async function getAparencia(db: Pool): Promise<AparenciaConfig> {
   const cfg = { ...DEFAULTS };
   for (const row of r.rows as { chave: string; valor: string | null }[]) {
     const key = row.chave as keyof AparenciaConfig;
+    if (key === 'loja_tema') continue;
     if (key in cfg) {
       cfg[key] = row.valor ?? '';
     }
   }
+  const temaRow = (r.rows as { chave: string; valor: string | null }[]).find(
+    (row) => row.chave === 'loja_tema',
+  );
+  cfg.loja_tema = parseStoreTheme(temaRow?.valor);
   return cfg;
 }
 
@@ -40,7 +50,8 @@ export async function updateAparencia(
   const pares: [string, string][] = [
     ['loja_nome', (fields.loja_nome ?? '').trim()],
     ['loja_slogan', (fields.loja_slogan ?? '').trim()],
-    ['loja_cor_primaria', fields.loja_cor_primaria ?? '#2563eb'],
+    ['loja_cor_primaria', fields.loja_cor_primaria ?? DEFAULT_LOJA_COR_PRIMARIA],
+    ['loja_tema', fields.loja_tema ?? DEFAULT_STORE_THEME],
     ['loja_rodape', (fields.loja_rodape ?? '').trim()],
     ['loja_email', (fields.loja_email ?? '').trim()],
     ['loja_whatsapp', (fields.loja_whatsapp ?? '').trim()],

@@ -6,6 +6,7 @@ COMPOSE_DB := docker compose -f docker-compose.db.yml
         shell shell-api db api-install admin-install storefront-install deps-sync docker-rebuild \
         seed seed-fresh db-migrate db-generate db-studio \
         test test-api test-all test-e2e test-e2e-smoke typecheck build deploy-check \
+        check-design \
         ci-check ci-check-docker ci-e2e-smoke-docker ci-gate
 
 help: ## Lista os comandos disponíveis
@@ -163,6 +164,10 @@ test-e2e-smoke: ## Playwright smoke (@smoke)
 
 typecheck: ## turbo typecheck
 	pnpm turbo typecheck
+
+check-design: ## Grep cores legadas (gray/blue/#2563eb) — baseline Fase 0; STRICT=1 no gate final
+	@chmod +x scripts/check-design-tokens.sh
+	@./scripts/check-design-tokens.sh
 
 build: ## turbo build (api + admin + storefront + packages)
 	pnpm turbo build

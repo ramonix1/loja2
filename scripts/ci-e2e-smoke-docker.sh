@@ -22,6 +22,12 @@ docker run --rm --network host -v "$ROOT:/app" -w /app "$NODE_IMAGE" sh -ec '
   pnpm install --filter api... --filter e2e... --frozen-lockfile
 '
 
+echo "[ci-e2e] Build workspace packages (dist/ não vai pro git; bind mount no CI)..."
+docker run --rm --network host -v "$ROOT:/app" -w /app "$NODE_IMAGE" sh -ec '
+  corepack enable
+  pnpm turbo build --filter=@lojao/types --filter=@lojao/db
+'
+
 echo "[ci-e2e] Playwright CLI (antes do Docker)..."
 docker run --rm --network host -v "$ROOT:/app" -w /app "$NODE_IMAGE" sh -ec '
   corepack enable

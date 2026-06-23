@@ -6,6 +6,7 @@ import Fastify, { type FastifyInstance } from 'fastify';
 import { healthRoutes } from './routes/health.js';
 import { v1Routes } from './routes/v1.js';
 import { webhookRoutes } from './modules/webhooks/webhook.routes.js';
+import { corsPluginOptions } from './lib/cors-config.js';
 import { sessionPlugin } from './plugins/session.js';
 import { registerSocketIO } from './plugins/socketio.js';
 import { imageStoragePlugin } from './plugins/image-storage.js';
@@ -22,19 +23,7 @@ export async function buildApp(): Promise<FastifyInstance> {
     trustProxy: true,
   });
 
-  const corsOrigins = [
-    process.env.APP_URL,
-    process.env.ADMIN_URL,
-    'http://localhost:3000',
-    'http://localhost:5173',
-  ]
-    .filter((url): url is string => Boolean(url))
-    .map((url) => url.replace(/\/$/, ''));
-
-  await app.register(cors, {
-    origin: [...new Set(corsOrigins)],
-    credentials: true,
-  });
+  await app.register(cors, corsPluginOptions());
 
   await app.register(cookie);
   await app.register(multipart, {

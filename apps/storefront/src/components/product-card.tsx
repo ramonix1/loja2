@@ -1,16 +1,24 @@
+import { buildStorePath } from '@lojao/tenant-host';
 import { store as testIds } from '@lojao/test-utils/test-ids/store';
 import { AddToCartButton } from '@/components/add-to-cart-button';
 import Link from 'next/link';
 
 import { BRL, legacyAssetUrl } from '@/lib/api';
+import {
+  storeCardClass,
+  storeErrorTextClass,
+  storeHeadingClass,
+  storeSubtleClass,
+} from '@/lib/store-styles';
 import type { PublicProduct } from '@lojao/types/public-store';
 
 interface ProductCardProps {
   product: PublicProduct;
   controlaEstoque: boolean;
+  storeSlug: string;
 }
 
-export function ProductCard({ product, controlaEstoque }: ProductCardProps) {
+export function ProductCard({ product, controlaEstoque, storeSlug }: ProductCardProps) {
   const esgotado =
     controlaEstoque &&
     product.estoque !== null &&
@@ -22,12 +30,14 @@ export function ProductCard({ product, controlaEstoque }: ProductCardProps) {
       ? legacyAssetUrl(product.primeira_imagem)
       : 'https://placehold.co/400x220/eee/aaa?text=Sem+Imagem';
 
+  const productHref = buildStorePath(storeSlug, `/produto/${product.id}`);
+
   return (
     <article
       data-testid={testIds.homeProductCard(product.id)}
-      className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md"
+      className={storeCardClass('flex flex-col overflow-hidden shadow-sm transition hover:shadow-md')}
     >
-      <Link href={`/produto/${product.id}`} className="block">
+      <Link href={productHref} className="block">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={imgSrc}
@@ -37,20 +47,20 @@ export function ProductCard({ product, controlaEstoque }: ProductCardProps) {
           decoding="async"
         />
         <div className="p-4">
-          <h2 className="text-lg font-bold text-gray-900">{product.nome}</h2>
+          <h2 className={storeHeadingClass()}>{product.nome}</h2>
           {product.subtitulo ? (
-            <p className="mt-1 line-clamp-2 text-sm text-gray-500">{product.subtitulo}</p>
+            <p className={storeSubtleClass('mt-1 line-clamp-2 text-sm')}>{product.subtitulo}</p>
           ) : null}
           <p className="mt-3 text-xl font-black" style={{ color: 'var(--cor-primaria)' }}>
             {BRL.format(product.valor)}
           </p>
           {esgotado ? (
-            <p className="mt-2 text-xs font-semibold text-red-500">Esgotado</p>
+            <p className={storeErrorTextClass('mt-2 text-xs font-semibold')}>Esgotado</p>
           ) : null}
         </div>
       </Link>
-      <div className="mt-auto flex gap-2 border-t border-gray-100 p-4 pt-0">
-        <Link href={`/produto/${product.id}`} className="btn-outline flex-1 text-center text-xs">
+      <div className="mt-auto flex gap-2 border-t border-[var(--store-border)] p-4 pt-0">
+        <Link href={productHref} className="btn-outline flex-1 text-center text-xs">
           Ver detalhes
         </Link>
         <AddToCartButton

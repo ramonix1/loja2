@@ -39,5 +39,7 @@ describe('GET /api/v1/auth/me', () => {
     const body = res.json();
     expect(body.data.usuario.role).toBe('admin');
     expect(body.data.tenant.slug).toBe('loja');
+    expect(body.data.tenant.lojaNome).toEqual(expect.any(String));
+    expect(body.data.tenant.lojaNome.length).toBeGreaterThan(0);
   });
 });

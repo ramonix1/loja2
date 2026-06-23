@@ -1,0 +1,4 @@
+/**
+ * Admin UI — re-export semântico (Fase 7: overrides !important removidos).
+ */
+@import './semantic-admin.css';

@@ -37,6 +37,8 @@ services:
       EMAIL_USER: ${EMAIL_USER:-}
       EMAIL_PASS: ${EMAIL_PASS:-}
       EMAIL_FROM: ${EMAIL_FROM:-}
+      MASTER_EMAIL: ${MASTER_EMAIL:-master@suaplataforma.com}
+      MASTER_PASSWORD: ${MASTER_PASSWORD:-troque-por-senha-forte-aqui}
     depends_on:
       db:
         condition: service_healthy
@@ -67,6 +69,7 @@ services:
     ports:
       - "5173:5173"
     environment:
+      API_URL: http://api:3001
       VITE_API_URL: http://localhost:3001
       VITE_TENANT_SLUG: loja
       VITE_STOREFRONT_URL: http://localhost:3000
@@ -77,6 +80,7 @@ services:
       - .:/app
       - admin_root_node_modules:/app/node_modules
       - admin_app_node_modules:/app/apps/admin/node_modules
+      - admin_ui_node_modules:/app/packages/ui/node_modules
     healthcheck:
       test:
         [
@@ -100,7 +104,7 @@ services:
       API_URL: http://api:3001
       NEXT_PUBLIC_API_URL: http://localhost:3001
       TENANT_SLUG: loja
-      NEXT_PUBLIC_TENANT_SLUG: loja
+      NEXT_PUBLIC_DEFAULT_STORE_SLUG: loja
     depends_on:
       api:
         condition: service_healthy
@@ -108,6 +112,7 @@ services:
       - .:/app
       - storefront_root_node_modules:/app/node_modules
       - storefront_app_node_modules:/app/apps/storefront/node_modules
+      - storefront_ui_node_modules:/app/packages/ui/node_modules
     healthcheck:
       test:
         [
@@ -156,5 +161,7 @@ volumes:
   api_types_node_modules:
   admin_root_node_modules:
   admin_app_node_modules:
+  admin_ui_node_modules:
   storefront_root_node_modules:
   storefront_app_node_modules:
+  storefront_ui_node_modules:

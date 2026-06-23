@@ -1,4 +1,23 @@
-import { Button, Card, Table, cn } from '@lojao/ui';
+import {
+  Button,
+  Card,
+  Table,
+  TableCell,
+  TableHead,
+  TableHeaderCell,
+  TableRow,
+  adminEmptyStateClass,
+  adminInputClass,
+  adminMutedClass,
+  adminPageSubtitleClass,
+  adminPageTitleClass,
+  adminSectionTitleClass,
+  adminStatValueClass,
+  adminStatValueSuccessClass,
+  StatusBadge,
+  adminSubtleClass,
+  cn,
+} from '@lojao/ui';
 import { testIds } from '@lojao/test-utils';
 import { useQuery } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
@@ -68,8 +87,8 @@ export function CompradoresPage() {
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-bold text-white">Compradores</h1>
-      <p className="mb-6 text-sm text-gray-400">
+      <h1 className={adminPageTitleClass('mb-1')}>Compradores</h1>
+      <p className={adminPageSubtitleClass('mb-6')}>
         Fichas de todos os clientes que realizaram cadastro na loja.
       </p>
 
@@ -78,17 +97,17 @@ export function CompradoresPage() {
           data-testid={testIds.adminCompradores.stats}
           className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3"
         >
-          <Card>
-            <div className="text-xs text-gray-500">Total de compradores</div>
-            <div className="mt-1 text-3xl font-bold text-white">{totais.total_compradores}</div>
+          <Card surface="admin">
+            <div className={cn('text-xs', adminSubtleClass())}>Total de compradores</div>
+            <div className={adminStatValueClass()}>{totais.total_compradores}</div>
           </Card>
-          <Card>
-            <div className="text-xs text-gray-500">Contas ativas</div>
-            <div className="mt-1 text-3xl font-bold text-green-400">{totais.ativos}</div>
+          <Card surface="admin">
+            <div className={cn('text-xs', adminSubtleClass())}>Contas ativas</div>
+            <div className={adminStatValueSuccessClass()}>{totais.ativos}</div>
           </Card>
-          <Card>
-            <div className="text-xs text-gray-500">Novos este mês</div>
-            <div className="mt-1 text-3xl font-bold text-blue-400">{totais.novos_mes}</div>
+          <Card surface="admin">
+            <div className={cn('text-xs', adminSubtleClass())}>Novos este mês</div>
+            <div className={cn(adminStatValueClass(), 'text-[var(--admin-accent)]')}>{totais.novos_mes}</div>
           </Card>
         </div>
       )}
@@ -100,7 +119,7 @@ export function CompradoresPage() {
           onChange={(e) => setBuscaInput(e.target.value)}
           placeholder="Buscar por nome, e-mail, CPF ou telefone..."
           data-testid={testIds.adminCompradores.searchInput}
-          className="min-w-0 flex-1 rounded-xl border border-gray-800 bg-gray-900 px-4 py-2.5 text-sm text-white outline-none placeholder:text-gray-500 focus:border-blue-500"
+          className={adminInputClass('min-w-0 flex-1 rounded-xl')}
         />
         <Button type="submit" data-testid={testIds.adminCompradores.searchBtn}>
           Buscar
@@ -118,20 +137,22 @@ export function CompradoresPage() {
       </form>
 
       {isError && (
-        <p className="mb-4 rounded-lg border border-red-900 bg-red-950 px-4 py-3 text-sm text-red-300">
+        <p className="ds-alert-error mb-4 text-sm">
           Não foi possível carregar os compradores.
         </p>
       )}
 
       {isLoading ? (
-        <Card className="text-center text-gray-400">Carregando compradores…</Card>
+        <Card surface="admin" className={cn('text-center', adminMutedClass())}>
+          Carregando compradores…
+        </Card>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-gray-800 bg-gray-900">
-          <div className="border-b border-gray-800 px-6 py-4">
-            <h2 className="font-semibold text-white">
+        <Card surface="admin" className="overflow-hidden p-0">
+          <div className="border-b border-[var(--admin-border)] px-6 py-4">
+            <h2 className={adminSectionTitleClass()}>
               {compradores.length} comprador{compradores.length !== 1 ? 'es' : ''}
               {buscaAtiva && (
-                <span className="font-normal text-gray-500"> para &quot;{buscaAtiva}&quot;</span>
+                <span className={cn('font-normal', adminSubtleClass())}> para &quot;{buscaAtiva}&quot;</span>
               )}
             </h2>
           </div>
@@ -139,81 +160,77 @@ export function CompradoresPage() {
           {compradores.length === 0 ? (
             <div
               data-testid={testIds.adminCompradores.emptyState}
-              className="py-16 text-center text-gray-400"
+              className={adminEmptyStateClass('py-16')}
             >
               <p className="font-medium">Nenhum comprador encontrado</p>
-              <p className="mt-1 text-sm text-gray-600">
+              <p className={cn('mt-1 text-sm', adminSubtleClass())}>
                 {buscaAtiva
                   ? 'Tente uma busca diferente'
                   : 'Os compradores aparecem aqui quando fazem cadastro na loja'}
               </p>
             </div>
           ) : (
-            <Table data-testid={testIds.adminCompradores.table}>
-              <thead>
-                <tr className="border-b border-gray-800 text-xs uppercase tracking-wide text-gray-500">
-                  <th className="px-6 py-3 text-left">Comprador</th>
-                  <th className="px-4 py-3 text-left">Telefone</th>
-                  <th className="px-4 py-3 text-left">Cidade/UF</th>
-                  <th className="px-4 py-3 text-center">Pedidos</th>
-                  <th className="px-4 py-3 text-right">Total gasto</th>
-                  <th className="px-4 py-3 text-center">Status</th>
-                  <th className="px-4 py-3 text-center">Cadastro</th>
-                  <th className="px-4 py-3" />
-                </tr>
-              </thead>
+            <Table surface="admin" data-testid={testIds.adminCompradores.table}>
+              <TableHead surface="admin">
+                <TableRow surface="admin">
+                  <TableHeaderCell>Comprador</TableHeaderCell>
+                  <TableHeaderCell>Telefone</TableHeaderCell>
+                  <TableHeaderCell>Cidade/UF</TableHeaderCell>
+                  <TableHeaderCell className="text-center">Pedidos</TableHeaderCell>
+                  <TableHeaderCell className="text-right">Total gasto</TableHeaderCell>
+                  <TableHeaderCell className="text-center">Status</TableHeaderCell>
+                  <TableHeaderCell className="text-center">Cadastro</TableHeaderCell>
+                  <TableHeaderCell />
+                </TableRow>
+              </TableHead>
               <tbody>
                 {compradores.map((c) => (
-                  <tr
+                  <TableRow
                     key={c.id}
+                    surface="admin"
                     data-testid={testIds.adminCompradores.row(c.id)}
-                    className="border-b border-gray-800 last:border-0 hover:bg-gray-800/50"
                   >
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-white">{c.nome}</div>
-                      <div className="mt-0.5 text-xs text-gray-500">{c.email}</div>
-                      {c.cpf && <div className="mt-0.5 text-xs text-gray-600">CPF: {c.cpf}</div>}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-300">{c.telefone ?? '—'}</td>
-                    <td className="px-4 py-4 text-sm text-gray-300">
+                    <TableCell>
+                      <div className="text-sm font-medium text-[var(--admin-text)]">{c.nome}</div>
+                      <div className={cn('mt-0.5 text-xs', adminSubtleClass())}>{c.email}</div>
+                      {c.cpf && (
+                        <div className={cn('mt-0.5 text-xs', adminSubtleClass())}>CPF: {c.cpf}</div>
+                      )}
+                    </TableCell>
+                    <TableCell>{c.telefone ?? '—'}</TableCell>
+                    <TableCell>
                       {c.cidade ? `${c.cidade}/${c.estado}` : '—'}
-                    </td>
-                    <td className="px-4 py-4 text-center text-sm font-semibold text-white">
+                    </TableCell>
+                    <TableCell className="text-center font-semibold">
                       {c.total_pedidos}
-                    </td>
-                    <td className="px-4 py-4 text-right text-sm font-semibold text-green-400">
+                    </TableCell>
+                    <TableCell className={cn('text-right font-semibold', adminStatValueSuccessClass('text-base'))}>
                       {formatBRL(c.total_gasto)}
-                    </td>
-                    <td className="px-4 py-4 text-center">
-                      <span
-                        className={cn(
-                          'rounded-full px-2 py-1 text-xs font-medium',
-                          c.ativo
-                            ? 'bg-green-900/50 text-green-400'
-                            : 'bg-red-900/50 text-red-400',
-                        )}
-                      >
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <StatusBadge status={c.ativo ? 'pago' : 'cancelado'}>
                         {c.ativo ? 'Ativo' : 'Inativo'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-4 text-center text-xs text-gray-500">
+                      </StatusBadge>
+                    </TableCell>
+                    <TableCell className={cn('text-center text-xs', adminSubtleClass())}>
                       {new Date(c.created_at).toLocaleDateString('pt-BR')}
-                    </td>
-                    <td className="px-4 py-4 text-right">
+                    </TableCell>
+                    <TableCell className="text-right">
                       <Link
                         to={`/admin/compradores/${c.id}`}
                         data-testid={testIds.adminCompradores.detailBtn(c.id)}
-                        className="rounded-lg bg-gray-800 px-3 py-1.5 text-xs transition hover:bg-gray-700"
                       >
-                        Ver ficha
+                        <Button variant="secondary" className="text-xs">
+                          Ver ficha
+                        </Button>
                       </Link>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
               </tbody>
             </Table>
           )}
-        </div>
+        </Card>
       )}
     </div>
   );

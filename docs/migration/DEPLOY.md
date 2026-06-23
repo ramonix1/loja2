@@ -203,10 +203,26 @@ test-all:         ## legacy + api tests
 	pnpm turbo test
 ```
 
-#### CORS (api)
+#### CORS e proxy (padrão atual)
 
-- `credentials: true`
-- `origin`: `http://localhost:3000`, `http://localhost:5173`, `http://localhost:3002`
+**Dev — evitar CORS no browser (preferido):**
+
+| App | Proxy | Browser chama |
+|-----|-------|---------------|
+| Admin (Vite) | `vite.config.ts` → `/api`, `/images`, `/socket.io` | same-origin `:5173` |
+| Storefront (Next) | Route handlers `/api/v1/*`, `/images/*` | same-origin `:3000` |
+
+Helpers: `browserApiBase()` retorna `''` em dev (admin + storefront client).
+
+**Prod — CORS centralizado na API** (`apps/api/src/lib/cors-config.ts`):
+
+- `@fastify/cors` + Socket.io usam `isOriginAllowed()`
+- Allowlist: `APP_URL`, `ADMIN_URL`, `STOREFRONT_URL`, `CORS_ORIGINS` (extras)
+- `credentials: true`; headers: `Content-Type`, `Authorization`, `X-Tenant-Slug`, `Idempotency-Key`
+- Dev fallback: qualquer `localhost` / `127.0.0.1` / `[::1]` (qualquer porta)
+- Prod cross-origin: `COOKIE_SAME_SITE=none` na API + `Secure` cookie
+
+Frontends em prod usam `VITE_API_URL` / `NEXT_PUBLIC_API_URL` (cross-origin explícito).
 
 ---
 

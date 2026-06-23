@@ -13,7 +13,7 @@ export interface SessionFields {
   usuarioId?: number | null;
   nome?: string | null;
   email?: string | null;
-  role?: 'admin' | 'usuario' | null;
+  role?: 'admin' | 'usuario' | 'platform_admin' | null;
   tenantSlug?: string;
   tenant_id?: number;
   redirecionarPara?: string | null;

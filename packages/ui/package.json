@@ -10,7 +10,26 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
-    }
+    },
+    "./styles/shadcn.css": "./src/styles/shadcn.css",
+    "./button": "./src/components/ui/button.tsx",
+    "./card": "./src/components/ui/card.tsx",
+    "./switch": "./src/components/ui/switch.tsx",
+    "./badge": "./src/components/ui/badge.tsx",
+    "./label": "./src/components/ui/label.tsx",
+    "./input": "./src/components/ui/input.tsx",
+    "./table": "./src/components/ui/table.tsx",
+    "./skeleton": "./src/components/ui/skeleton.tsx",
+    "./tabs": "./src/components/ui/tabs.tsx",
+    "./alert": "./src/components/ui/alert.tsx",
+    "./separator": "./src/components/ui/separator.tsx",
+    "./dialog": "./src/components/ui/dialog.tsx",
+    "./select": "./src/components/ui/select.tsx",
+    "./dropdown-menu": "./src/components/ui/dropdown-menu.tsx",
+    "./textarea": "./src/components/ui/textarea.tsx",
+    "./checkbox": "./src/components/ui/checkbox.tsx",
+    "./scroll-area": "./src/components/ui/scroll-area.tsx",
+    "./sheet": "./src/components/ui/sheet.tsx"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
@@ -18,6 +37,16 @@
   "peerDependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
+  },
+  "dependencies": {
+    "@lojao/types": "workspace:*",
+    "@radix-ui/react-slot": "^1.2.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.511.0",
+    "radix-ui": "^1.6.0",
+    "tailwind-merge": "^2.6.0",
+    "tw-animate-css": "^1.2.5"
   },
   "devDependencies": {
     "@lojao/eslint-config": "workspace:*",

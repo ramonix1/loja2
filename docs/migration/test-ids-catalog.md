@@ -10,12 +10,57 @@ Convenção: `{app}-{pagina}-{elemento}[-{id}]` — ver [TESTING-STRATEGY.md](./
 
 | data-testid | App | Elemento | Fase | Spec |
 |-------------|-----|----------|------|------|
+| `admin-login-brand` | admin | Marca Ata Commerce no login | C | admin/login.spec.ts |
+| `admin-login-slug-input` | admin | ~~Input slug da loja~~ **deprecado (Fase H)** | E | — |
 | `auth-login-email-input` | admin | Input e-mail | 2 | admin/login.spec.ts |
 | `auth-login-password-input` | admin | Input senha | 2 | admin/login.spec.ts |
 | `auth-login-submit-btn` | admin | Botão entrar | 2 | admin/login.spec.ts |
 | `auth-login-error-msg` | admin | Erro de credencial | 2 | admin/login.spec.ts |
+| `admin-ui-theme-switch` | admin | Toggle tema claro painel | theme | admin/theme.spec.ts |
 
-Constantes: `@lojao/test-utils/test-ids` → `testIds.auth.*`.
+Constantes: `@lojao/test-utils/test-ids` → `testIds.auth.*`, `testIds.admin.uiThemeSwitch`.
+
+---
+
+## merchant-hub (Minhas lojas — Fase H)
+
+| data-testid | Página | Elemento | Fase | Spec |
+|-------------|--------|----------|------|------|
+| `merchant-hub-page` | /admin/my-stores | Container | H | admin/merchant-hub.spec.ts |
+| `merchant-hub-store-list` | Grid de blocos (lojas) | H | admin/merchant-hub.spec.ts |
+| `merchant-hub-switch-link` | admin layout | Link Trocar loja | H | admin/merchant-hub.spec.ts |
+| `merchant-hub-store-card-{slug}` | /admin/my-stores | Card da loja | H | admin/merchant-hub.spec.ts |
+| `merchant-hub-select-{slug}` | /admin/my-stores | Botão Entrar | H | admin/merchant-hub.spec.ts |
+
+Constantes: `testIds.merchantHub.*`.
+
+---
+
+## platform (Platform Hub — Ata Labs)
+
+| data-testid | Página | Elemento | Fase | Spec |
+|-------------|--------|----------|------|------|
+| `platform-login-email-input` | /platform/login | Input e-mail | F | admin/platform.spec.ts |
+| `platform-login-password-input` | /platform/login | Input senha | F | admin/platform.spec.ts |
+| `platform-login-submit-btn` | /platform/login | Botão entrar | F | admin/platform.spec.ts |
+| `platform-login-error-msg` | /platform/login | Erro de credencial | F | — |
+| `platform-sidebar-nav` | layout | Nav lateral | F | — |
+| `platform-mobile-menu-btn` | layout | Hamburger menu (&lt; lg) | S4 | — |
+| `platform-ui-theme-switch` | layout / login | Toggle tema claro | theme | admin/theme.spec.ts |
+| `platform-tenants-list` | /platform/tenants | Lista de lojas | F | admin/platform.spec.ts |
+| `platform-tenants-empty-state` | /platform/tenants | Lista vazia | F | — |
+| `platform-tenants-row-{slug}` | /platform/tenants | Linha de loja | F | admin/platform.spec.ts |
+| `platform-tenant-create-link` | /platform/tenants | Link nova loja | F | admin/platform.spec.ts |
+| `platform-tenant-create-form` | /platform/tenants/novo | Form criar | F | admin/platform.spec.ts |
+| `platform-tenant-create-slug` | /platform/tenants/novo | Input slug | F | admin/platform.spec.ts |
+| `platform-tenant-create-nome` | /platform/tenants/novo | Input nome | F | admin/platform.spec.ts |
+| `platform-tenant-create-submit` | /platform/tenants/novo | Botão criar | F | admin/platform.spec.ts |
+| `platform-tenant-create-error` | /platform/tenants/novo | Erro criar | F | — |
+| `platform-tenant-detail` | /platform/tenants/:slug | Container detalhe | F | admin/platform.spec.ts |
+| `platform-tenant-toggle-ativo` | /platform/tenants/:slug | Suspender/reativar | F | — |
+| `platform-tenant-save-nome` | /platform/tenants/:slug | Salvar nome | F | — |
+
+Constantes: `@lojao/test-utils/test-ids` → `testIds.platform.*`.
 
 ---
 
@@ -24,6 +69,8 @@ Constantes: `@lojao/test-utils/test-ids` → `testIds.auth.*`.
 | data-testid | Página | Elemento | Fase | Spec |
 |-------------|--------|----------|------|------|
 | `admin-sidebar-nav` | layout | Nav lateral | 2 | admin/pedidos.spec.ts |
+| `admin-mobile-menu-btn` | layout | Hamburger menu (&lt; lg) | S4 | — |
+| `admin-view-storefront-link` | layout | Link ver vitrine | E | — |
 | `admin-dashboard-stats` | dashboard | Container de cards | 2 | admin/login.spec.ts |
 | `admin-pedidos-table` | pedidos | Tabela | 2 | admin/pedidos.spec.ts |
 | `admin-pedidos-row-{id}` | pedidos | Linha (id dinâmico) | 2 | admin/pedidos.spec.ts |
@@ -261,6 +308,16 @@ Constantes: `testIds.adminChat.*` (`filter`, `conversaItem` são funções).
 | `admin-diagnostico-refresh-btn` | diagnostico | Atualizar | 3 | — |
 | `admin-diagnostico-help-section` | diagnostico | Ajuda credenciais | 3 | — |
 | `admin-diagnostico-config-link` | diagnostico | Link configurações | 3 | — |
+| `admin-diagnostico-token-swatch` | diagnostico | Swatch tokens Fase 1 | theme | — |
+| `admin-diagnostico-token-swatch-switch` | diagnostico | Switch demo swatch | theme | — |
+
+### store vitrine (tema API)
+
+| data-testid | Página | Elemento | Fase | Spec |
+|-------------|--------|----------|------|------|
+| `store-slug-layout` | /store/{slug} | Container + `data-store-theme` | theme | store/vitrine.spec.ts |
+
+Vitrine: **sem** toggle visitante — `data-store-theme` vem da API (`loja_tema`), não de `localStorage`.
 
 Constantes: `testIds.adminDiagnostico.*` (`item(nome)` é função).
 
@@ -270,6 +327,7 @@ Constantes: `testIds.adminDiagnostico.*` (`item(nome)` é função).
 
 | data-testid | Página | Elemento | Fase | Spec |
 |-------------|--------|----------|------|------|
+| `store-slug-layout` | `/store/[slug]` layout | Container vitrine tenant | D | store/vitrine.spec.ts |
 | `store-header` | layout | Header | 5 | store/vitrine.spec.ts |
 | `store-home-product-grid` | home | Grade de produtos | 5 | store/vitrine.spec.ts |
 | `store-home-product-card-{id}` | home | Card produto (dinâmico) | 5 | store/vitrine.spec.ts, store/cart.spec.ts |
@@ -296,6 +354,50 @@ Constantes: `testIds.adminDiagnostico.*` (`item(nome)` é função).
 | `store-order-row-{id}` | /meus-pedidos | Linha pedido (dinâmico) | 6 | store/orders.spec.ts |
 
 Constantes: `@lojao/test-utils/test-ids/store` → `testIds.store.*`; auth em `@lojao/test-utils/test-ids/auth`. **No storefront Next**, importar subpaths (não o barrel `test-ids/index` — quebra Webpack).
+
+---
+
+## marketing (storefront — zona Ata Labs)
+
+| data-testid | Página | Elemento | Fase | Spec |
+|-------------|--------|----------|------|------|
+| `marketing-header` | layout marketing | Header fixo | M1 | marketing/site.spec.ts |
+| `marketing-header-nav` | layout marketing | Nav desktop | M1 | marketing/site.spec.ts |
+| `marketing-footer` | layout marketing | Footer | M1 | marketing/site.spec.ts |
+| `landing-hero` | `/` | Seção hero | M2 | marketing/site.spec.ts |
+| `landing-hero-cta-pricing` | `/` | CTA "Conheça os planos" → `/pricing` | M2 | marketing/site.spec.ts |
+| `landing-stats` | `/` | Faixa de stats | M2 | marketing/site.spec.ts |
+| `landing-contact-form` | `/` | Formulário contato | M2 | marketing/site.spec.ts |
+| `ata-commerce-hero` | `/ata-commerce` | Hero produto | M3 | — |
+| `ata-commerce-features` | `/ata-commerce` | Grid features | M3 | — |
+| `ata-commerce-faq` | `/ata-commerce` | FAQ accordion | M3 | — |
+| `pricing-page` | `/pricing` | Container | M4 | — |
+| `pricing-grid` | `/pricing` | Grid de planos | M4 | — |
+| `pricing-card-{slug}` | `/pricing` | Card plano (`starter`, `professional`, `enterprise`) | M4 | marketing/site.spec.ts |
+| `pricing-comparison-table` | `/pricing` | Tabela comparativa | M4 | — |
+| `demo-page` | `/demo` | Container | M5 | — |
+| `demo-open-store-link` | `/demo` | Link `/store/demo` | M5 | — |
+
+Constantes: `@lojao/test-utils/test-ids/marketing` → `testIds.marketing.*`.
+
+---
+
+## signup (storefront — self-service M7)
+
+| data-testid | Página | Elemento | Fase | Spec |
+|-------------|--------|----------|------|------|
+| `signup-page` | `/signup` | Container resumo do plano | M7 | marketing/signup.spec.ts |
+| `signup-continue` | `/signup` | CTA continuar → checkout | M7 | marketing/signup.spec.ts |
+| `signup-checkout-page` | `/signup/checkout` | Container | M7 | marketing/signup.spec.ts |
+| `signup-checkout-slug-input` | `/signup/checkout` | Input do slug (step 1) | M7 | marketing/signup.spec.ts |
+| `signup-checkout-next` | `/signup/checkout` | Botão avançar step | M7 | marketing/signup.spec.ts |
+| `signup-checkout-submit` | `/signup/checkout` | Submit final | M7 | marketing/signup.spec.ts |
+| `signup-checkout-error` | `/signup/checkout` | Mensagem de erro | M7 | — |
+| `signup-success-page` | `/signup/success` | Container | M7 | marketing/signup.spec.ts |
+| `signup-success-admin-link` | `/signup/success` | CTA painel (login sem slug) | M7 | marketing/signup.spec.ts |
+| `signup-success-store-link` | `/signup/success` | CTA `/store/{slug}` | M7 | marketing/signup.spec.ts |
+
+Constantes: `@lojao/test-utils/test-ids/signup` → `testIds.signup.*`.
 
 ---
 

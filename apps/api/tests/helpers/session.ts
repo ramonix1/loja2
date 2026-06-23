@@ -23,8 +23,11 @@ export async function loginAdminCookie(app: FastifyInstance): Promise<string> {
   const res = await app.inject({
     method: 'POST',
     url: '/api/v1/auth/login',
-    headers: { ...TENANT_HEADER },
-    payload: { email: TEST_ADMIN_EMAIL, senha: TEST_ADMIN_SENHA },
+    payload: {
+      email: TEST_ADMIN_EMAIL,
+      senha: TEST_ADMIN_SENHA,
+      tenantSlug: TEST_TENANT_SLUG,
+    },
   });
   if (res.statusCode !== 200) {
     throw new Error(`Login de teste falhou (${res.statusCode}): ${res.body}`);
@@ -37,8 +40,11 @@ export async function loginUserCookie(app: FastifyInstance): Promise<string> {
   const res = await app.inject({
     method: 'POST',
     url: '/api/v1/auth/login',
-    headers: { ...TENANT_HEADER },
-    payload: { email: TEST_USER_EMAIL, senha: TEST_USER_SENHA },
+    payload: {
+      email: TEST_USER_EMAIL,
+      senha: TEST_USER_SENHA,
+      tenantSlug: TEST_TENANT_SLUG,
+    },
   });
   if (res.statusCode !== 200) {
     throw new Error(`Login de usuário comum falhou (${res.statusCode}): ${res.body}`);

@@ -5,6 +5,8 @@ import type {
   PublicProductDetail,
   PublicStoreData,
 } from '@lojao/types/public-store';
+import { DEFAULT_LOJA_COR_PRIMARIA } from '@lojao/types/aparencia';
+import { parseStoreTheme } from '@lojao/types/store-theme';
 import type { TenantDatabase } from '@lojao/db';
 import { asc, desc, eq, produtos, produtosImagens, sql } from '@lojao/db';
 import type pg from 'pg';
@@ -41,8 +43,9 @@ async function getStoreConfigs(db: pg.Pool): Promise<{
 
   return {
     loja: {
-      nome: cfg.loja_nome || 'Lojão',
-      cor_primaria: cfg.loja_cor_primaria || '#2563eb',
+      nome: cfg.loja_nome || 'Ata Commerce Demo',
+      cor_primaria: cfg.loja_cor_primaria || DEFAULT_LOJA_COR_PRIMARIA,
+      tema: parseStoreTheme(cfg.loja_tema),
       logo: cfg.loja_logo ?? '',
       slogan: cfg.loja_slogan ?? '',
       favicon: cfg.loja_favicon || undefined,

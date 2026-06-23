@@ -1,10 +1,22 @@
-import { Button, Card } from '@lojao/ui';
+import {
+  Button,
+  Card,
+  FieldInput,
+  FieldNativeSelect,
+  Checkbox,
+  adminFieldLabelClass,
+  adminMutedClass,
+  adminPageTitleClass,
+  adminSectionTitleClass,
+  adminSubtleClass,
+  cn,
+} from '@lojao/ui';
 import { testIds } from '@lojao/test-utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
-import { ApiError, apiFetch, apiUpload, legacyImageUrl } from '../../../lib/api-client';
+import { ApiError, apiFetch, apiUpload, legacyImageUrl, storefrontStorePath } from '../../../lib/api-client';
 
 interface ProdutoOption {
   id: number;
@@ -114,19 +126,19 @@ export function BannerFormPage() {
     setProdutoId(value);
     if (value) {
       const p = produtos.find((x) => x.id === Number(value));
-      if (p) setCtaUrl(`/produto/${p.id}`);
+      if (p) setCtaUrl(storefrontStorePath(`/produto/${p.id}`));
     }
   }
 
   if (isEdit && isLoading) {
-    return <p className="text-gray-400">Carregando…</p>;
+    return <p className={adminMutedClass()}>Carregando…</p>;
   }
 
   if (isEdit && !isLoading && !banner) {
     return (
       <div>
-        <p className="text-red-400">Banner não encontrado.</p>
-        <Link to="/admin/banners" className="mt-4 inline-block text-sm text-blue-400">
+        <p className="ds-alert-error">Banner não encontrado.</p>
+        <Link to="/admin/banners" className="ds-link mt-4 inline-block text-sm">
           Voltar
         </Link>
       </div>
@@ -136,10 +148,10 @@ export function BannerFormPage() {
   return (
     <div>
       <div className="mb-6 flex items-center gap-4">
-        <Link to="/admin/banners" className="text-sm text-gray-400 transition hover:text-white">
+        <Link to="/admin/banners" className={cn('ds-link text-sm', adminMutedClass())}>
           Banners
         </Link>
-        <h1 className="text-2xl font-bold text-white">
+        <h1 className={adminPageTitleClass()}>
           {isEdit ? 'Editar Banner' : 'Novo Banner'}
         </h1>
       </div>
@@ -151,12 +163,12 @@ export function BannerFormPage() {
         }}
         className="max-w-2xl space-y-6"
       >
-        <Card>
-          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-300">
+        <Card surface="admin">
+          <h2 className={cn(adminSectionTitleClass('mb-4 text-sm uppercase tracking-wider'), adminMutedClass())}>
             Imagem do Banner
           </h2>
           {previewUrl && (
-            <div className="mb-4 max-h-[200px] overflow-hidden rounded-lg bg-gray-800">
+            <div className="mb-4 max-h-[200px] overflow-hidden rounded-lg bg-[var(--admin-surface-elevated)]">
               <img
                 src={previewUrl}
                 alt="Preview"
@@ -164,9 +176,9 @@ export function BannerFormPage() {
               />
             </div>
           )}
-          <label className="block cursor-pointer rounded-lg border-2 border-dashed border-gray-700 p-6 text-center transition hover:border-blue-500">
-            <p className="text-sm text-gray-400">Clique para selecionar uma imagem</p>
-            <p className="mt-1 text-xs text-gray-600">JPG, PNG, WEBP ou GIF — até 5MB</p>
+          <label className="block cursor-pointer rounded-lg border-2 border-dashed border-[var(--admin-border)] p-6 text-center transition hover:border-[var(--admin-accent)]">
+            <p className={cn('text-sm', adminMutedClass())}>Clique para selecionar uma imagem</p>
+            <p className={cn('mt-1 text-xs', adminSubtleClass())}>JPG, PNG, WEBP ou GIF — até 5MB</p>
             <input
               type="file"
               accept="image/*"
@@ -178,59 +190,59 @@ export function BannerFormPage() {
           </label>
         </Card>
 
-        <Card className="space-y-4">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-300">Conteúdo</h2>
+        <Card surface="admin" className="space-y-4">
+          <h2 className={cn(adminSectionTitleClass('text-sm uppercase tracking-wider'), adminMutedClass())}>
+            Conteúdo
+          </h2>
           <div>
-            <label htmlFor="titulo" className="mb-1 block text-sm font-medium text-gray-300">
+            <label htmlFor="titulo" className={adminFieldLabelClass()}>
               Título *
             </label>
-            <input
+            <FieldInput
               id="titulo"
               type="text"
               required
               value={titulo}
               onChange={(e) => setTitulo(e.target.value)}
               data-testid={testIds.adminBanners.tituloInput}
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white outline-none focus:border-blue-500"
             />
           </div>
           <div>
-            <label htmlFor="subtitulo" className="mb-1 block text-sm font-medium text-gray-300">
+            <label htmlFor="subtitulo" className={adminFieldLabelClass()}>
               Subtítulo
             </label>
-            <input
+            <FieldInput
               id="subtitulo"
               type="text"
               value={subtitulo}
               onChange={(e) => setSubtitulo(e.target.value)}
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white outline-none focus:border-blue-500"
             />
           </div>
         </Card>
 
-        <Card className="space-y-4">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-300">Botão CTA</h2>
+        <Card surface="admin" className="space-y-4">
+          <h2 className={cn(adminSectionTitleClass('text-sm uppercase tracking-wider'), adminMutedClass())}>
+            Botão CTA
+          </h2>
           <div>
-            <label htmlFor="cta_texto" className="mb-1 block text-sm font-medium text-gray-300">
+            <label htmlFor="cta_texto" className={adminFieldLabelClass()}>
               Texto do botão
             </label>
-            <input
+            <FieldInput
               id="cta_texto"
               type="text"
               value={ctaTexto}
               onChange={(e) => setCtaTexto(e.target.value)}
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white outline-none focus:border-blue-500"
             />
           </div>
           <div>
-            <label htmlFor="produto_id" className="mb-1 block text-sm font-medium text-gray-300">
+            <label htmlFor="produto_id" className={adminFieldLabelClass()}>
               Vincular a um produto
             </label>
-            <select
+            <FieldNativeSelect
               id="produto_id"
               value={produtoId}
               onChange={(e) => handleProdutoChange(e.target.value)}
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white outline-none focus:border-blue-500"
             >
               <option value="">Nenhum (usar URL manual)</option>
               {produtos.map((p) => (
@@ -238,41 +250,37 @@ export function BannerFormPage() {
                   {p.nome}
                 </option>
               ))}
-            </select>
+            </FieldNativeSelect>
           </div>
           <div>
-            <label htmlFor="cta_url" className="mb-1 block text-sm font-medium text-gray-300">
+            <label htmlFor="cta_url" className={adminFieldLabelClass()}>
               URL do CTA
             </label>
-            <input
+            <FieldInput
               id="cta_url"
               type="text"
               value={ctaUrl}
               onChange={(e) => setCtaUrl(e.target.value)}
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white outline-none focus:border-blue-500"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="ordem" className="mb-1 block text-sm font-medium text-gray-300">
+              <label htmlFor="ordem" className={adminFieldLabelClass()}>
                 Ordem
               </label>
-              <input
+              <FieldInput
                 id="ordem"
                 type="number"
                 min={0}
                 value={ordem}
                 onChange={(e) => setOrdem(Number(e.target.value))}
-                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-2.5 text-sm text-white outline-none focus:border-blue-500"
               />
             </div>
             <div className="flex items-end pb-1">
-              <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-300">
-                <input
-                  type="checkbox"
+              <label className={cn('flex cursor-pointer items-center gap-2 text-sm', adminMutedClass())}>
+                <Checkbox
                   checked={ativo}
-                  onChange={(e) => setAtivo(e.target.checked)}
-                  className="h-4 w-4 rounded accent-blue-500"
+                  onCheckedChange={(checked) => setAtivo(checked === true)}
                 />
                 Banner ativo
               </label>
@@ -280,7 +288,7 @@ export function BannerFormPage() {
           </div>
         </Card>
 
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="ds-alert-error text-sm">{error}</p>}
 
         <Button
           type="submit"

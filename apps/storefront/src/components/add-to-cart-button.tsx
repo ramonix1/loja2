@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import { addToCart, ApiError } from '@/lib/client-api';
+import { useStoreHref, useStoreLoginHref } from '@/lib/use-store-href';
 
 interface AddToCartButtonProps {
   produtoId: number;
@@ -20,6 +21,8 @@ export function AddToCartButton({
   label = 'Adicionar ao carrinho',
 }: AddToCartButtonProps) {
   const router = useRouter();
+  const cartHref = useStoreHref('/carrinho');
+  const loginRedirectHref = useStoreLoginHref(`/produto/${produtoId}`);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,10 +31,10 @@ export function AddToCartButton({
     setError(null);
     try {
       await addToCart(produtoId, 1);
-      router.push('/carrinho');
+      router.push(cartHref);
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {
-        router.push(`/login?redirect=/produto/${produtoId}`);
+        router.push(loginRedirectHref);
         return;
       }
       setError(e instanceof ApiError ? e.message : 'Não foi possível adicionar ao carrinho.');

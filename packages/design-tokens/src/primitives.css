@@ -1,0 +1,6 @@
+/**
+ * Nível 1 — Primitivos (manual PDF, imutáveis).
+ * Reexporta paletas Ata Labs + Ata Commerce.
+ */
+@import './ata-labs.css';
+@import './ata-commerce.css';

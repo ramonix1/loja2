@@ -66,6 +66,18 @@
     "./public-store": {
       "types": "./dist/public-store.d.ts",
       "default": "./dist/public-store.js"
+    },
+    "./platform": {
+      "types": "./dist/platform.d.ts",
+      "default": "./dist/platform.js"
+    },
+    "./signup": {
+      "types": "./dist/signup.d.ts",
+      "default": "./dist/signup.js"
+    },
+    "./store-theme": {
+      "types": "./dist/store-theme.d.ts",
+      "default": "./dist/store-theme.js"
     }
   },
   "scripts": {

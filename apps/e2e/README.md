@@ -28,7 +28,7 @@ Projetos:
 E2E_BASE_URL=http://localhost:5173
 E2E_STORE_URL=http://localhost:3000
 E2E_API_URL=http://localhost:3001
-E2E_TENANT_SLUG=loja
+E2E_STORE_SLUG=loja
 E2E_ADMIN_EMAIL=admin@loja.com
 E2E_ADMIN_PASSWORD=admin123
 ```

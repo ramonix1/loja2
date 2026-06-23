@@ -1,9 +1,9 @@
 openapi: 3.1.0
 info:
-  title: Lojão API
+  title: Ata Commerce API
   version: 0.2.0
   description: >
-    API Fastify do Lojão (migração Strangler Fig). Fase 1: autenticação e tenant.
+    API Fastify do Ata Commerce (migração Strangler Fig). Fase 1: autenticação e tenant.
     Fase 2: rotas admin read-only (dashboard + pedidos), guard `role=admin`.
     Sessão compartilhada com o legacy via cookie `lojao.sid` (PostgreSQL, tabela
     `sessao`). Clientes devem enviar credenciais (`credentials: 'include'`).
@@ -157,7 +157,10 @@ paths:
                     type: object
                     properties:
                       nome: { type: string }
-                      cor_primaria: { type: string }
+                      cor_primaria:
+                        type: string
+                        example: '#0D5FE0'
+                        description: Cor da marca (CTAs). Default Ata Commerce.
                       logo: { type: string }
                       slogan: { type: string }
         '404':

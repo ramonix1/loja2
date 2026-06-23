@@ -1,7 +1,15 @@
 import type { DashboardChartsData, DashboardPeriodo } from '@lojao/types/dashboard';
 import { DASHBOARD_PERIODOS } from '@lojao/types/dashboard';
 import { testIds } from '@lojao/test-utils';
-import { cn } from '@lojao/ui';
+import {
+  adminEmptyStateClass,
+  adminMutedClass,
+  adminPeriodPillClass,
+  adminSectionTitleClass,
+  adminSegmentedControlClass,
+  cn,
+  Skeleton,
+} from '@lojao/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 
@@ -20,11 +28,11 @@ function fetchCharts(periodo: DashboardPeriodo) {
 
 function ChartsSkeleton() {
   return (
-    <div className="grid animate-pulse grid-cols-1 gap-4 lg:grid-cols-3">
-      <div className="h-[360px] rounded-xl bg-gray-800 lg:col-span-2" />
-      <div className="h-[360px] rounded-xl bg-gray-800" />
-      <div className="h-[360px] rounded-xl bg-gray-800" />
-      <div className="h-[360px] rounded-xl bg-gray-800" />
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <Skeleton className="h-[360px] rounded-xl bg-[var(--admin-surface-elevated)] lg:col-span-2" />
+      <Skeleton className="h-[360px] rounded-xl bg-[var(--admin-surface-elevated)]" />
+      <Skeleton className="h-[360px] rounded-xl bg-[var(--admin-surface-elevated)]" />
+      <Skeleton className="h-[360px] rounded-xl bg-[var(--admin-surface-elevated)]" />
     </div>
   );
 }
@@ -49,20 +57,15 @@ export function DashboardCharts() {
   return (
     <section className="mb-8" data-testid={testIds.admin.dashboardCharts}>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-base font-semibold text-white">Análise do período</h2>
-        <div className="flex gap-1 rounded-lg border border-gray-800 bg-gray-900 p-1">
+        <h2 className={adminSectionTitleClass()}>Análise do período</h2>
+        <div className={adminSegmentedControlClass()}>
           {DASHBOARD_PERIODOS.map((p) => (
             <button
               key={p}
               type="button"
               data-testid={testIds.admin.dashboardChartPeriod(p)}
               onClick={() => setPeriodo(p)}
-              className={cn(
-                'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
-                periodo === p
-                  ? 'bg-blue-600 text-white'
-                  : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200',
-              )}
+              className={adminPeriodPillClass(periodo === p)}
             >
               {PERIOD_LABELS[p]}
             </button>
@@ -71,21 +74,14 @@ export function DashboardCharts() {
       </div>
 
       {isError && (
-        <p className="mb-4 rounded-lg border border-red-900 bg-red-950 px-4 py-3 text-sm text-red-300">
-          Não foi possível carregar os gráficos.
-        </p>
+        <p className="ds-alert-error mb-4">Não foi possível carregar os gráficos.</p>
       )}
 
       {isLoading && <ChartsSkeleton />}
 
       {!isLoading && data && isChartsEmpty(data) && (
-        <div
-          data-testid={testIds.admin.dashboardChartEmpty}
-          className="rounded-xl border border-dashed border-gray-700 bg-gray-900/50 px-6 py-16 text-center"
-        >
-          <p className="text-sm text-gray-400">
-            Nenhum pedido no período selecionado.
-          </p>
+        <div data-testid={testIds.admin.dashboardChartEmpty} className={adminEmptyStateClass()}>
+          <p className={cn('text-sm', adminMutedClass())}>Nenhum pedido no período selecionado.</p>
         </div>
       )}
 

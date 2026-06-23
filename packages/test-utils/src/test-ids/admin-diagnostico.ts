@@ -7,4 +7,6 @@ export const adminDiagnostico = {
   refreshBtn: 'admin-diagnostico-refresh-btn',
   helpSection: 'admin-diagnostico-help-section',
   configLink: 'admin-diagnostico-config-link',
+  tokenSwatch: 'admin-diagnostico-token-swatch',
+  tokenSwatchSwitch: 'admin-diagnostico-token-swatch-switch',
 } as const;

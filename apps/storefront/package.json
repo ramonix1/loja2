@@ -11,8 +11,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@lojao/design-tokens": "workspace:*",
+    "@lojao/tenant-host": "workspace:*",
     "@lojao/test-utils": "workspace:*",
     "@lojao/types": "workspace:*",
+    "@lojao/ui": "workspace:*",
     "next": "^15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

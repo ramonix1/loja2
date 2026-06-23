@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+import { storeThemeSchema } from './store-theme.js';
+
+/** Cor primária padrão Ata Commerce — manual PDF (`--ata-azul-comercio`). */
+export const DEFAULT_LOJA_COR_PRIMARIA = '#0D5FE0';
+
 export const aparenciaFieldsSchema = z.object({
   loja_nome: z.string().max(255).optional().default(''),
   loja_slogan: z.string().max(500).optional().default(''),
@@ -7,7 +12,8 @@ export const aparenciaFieldsSchema = z.object({
     .string()
     .regex(/^#[0-9A-Fa-f]{6}$/, 'Cor inválida. Use formato #RRGGBB.')
     .optional()
-    .default('#2563eb'),
+    .default(DEFAULT_LOJA_COR_PRIMARIA),
+  loja_tema: storeThemeSchema.optional().default('escuro'),
   loja_rodape: z.string().max(500).optional().default(''),
   loja_email: z
     .union([z.string().email('E-mail inválido.'), z.literal('')])
@@ -18,10 +24,13 @@ export const aparenciaFieldsSchema = z.object({
 
 export type AparenciaFields = z.infer<typeof aparenciaFieldsSchema>;
 
+import type { StoreTheme } from './store-theme.js';
+
 export interface AparenciaConfig {
   loja_nome: string;
   loja_slogan: string;
   loja_cor_primaria: string;
+  loja_tema: StoreTheme;
   loja_rodape: string;
   loja_email: string;
   loja_whatsapp: string;

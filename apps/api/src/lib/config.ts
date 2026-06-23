@@ -18,5 +18,5 @@ export async function getLojaInfo(db: pg.Pool): Promise<{ nome: string; email: s
   for (const row of r.rows as Array<{ chave: string; valor: string | null }>) {
     cfg[row.chave] = row.valor ?? '';
   }
-  return { nome: cfg.loja_nome || 'Lojão', email: cfg.loja_email || '' };
+  return { nome: cfg.loja_nome || 'Ata Commerce Demo', email: cfg.loja_email || '' };
 }

@@ -38,6 +38,8 @@ Você está migrando o **Lojão** para monorepo TypeScript. Leia isto antes de q
 
 SaaS e-commerce multi-tenant BR. PostgreSQL. Cookie sessão `lojao.sid`. Não quebrar pagamentos.
 
+**UX:** público principal = pequenos negócios no **celular** — decisões **mobile-first**; ver `docs/design/UX-PRINCIPLES.md`.
+
 ## Deploy
 
 Toda fase que altera infra deve atualizar:

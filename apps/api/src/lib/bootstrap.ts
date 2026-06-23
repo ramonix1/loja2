@@ -10,6 +10,21 @@ function pgSsl(): boolean | { rejectUnauthorized: false } {
   return sslEnabled ? { rejectUnauthorized: false } : false;
 }
 
+/** Slugs provisionados no master. CI usa só `loja` (mono-loja); dev local mantém `demo` + TENANT_SLUG. */
+function resolveBootstrapSlugs(): Set<string> {
+  const fromEnv = process.env.BOOTSTRAP_TENANT_SLUGS?.split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (fromEnv?.length) {
+    return new Set(fromEnv);
+  }
+
+  const slugs = new Set<string>(['demo']);
+  const envSlug = process.env.TENANT_SLUG?.trim();
+  if (envSlug) slugs.add(envSlug);
+  return slugs;
+}
+
 /**
  * Bootstrap dev/prod: migrations Drizzle + auto-provision do tenant padrão.
  * Substitui `apps/legacy/config/init-db.js` (removido na Fase 8).
@@ -27,11 +42,7 @@ export async function bootstrapDatabase(): Promise<void> {
 }
 
 async function autoProvisionTenant(dbUrl: string): Promise<void> {
-  const slug = process.env.TENANT_SLUG;
-  if (!slug) {
-    console.log('[bootstrap] TENANT_SLUG ausente — pulando auto-provision.');
-    return;
-  }
+  const slugs = resolveBootstrapSlugs();
 
   const adminEmail = process.env.ADMIN_EMAIL ?? 'admin@loja.com';
   const adminSenha = process.env.ADMIN_SENHA ?? 'admin123';
@@ -47,17 +58,20 @@ async function autoProvisionTenant(dbUrl: string): Promise<void> {
   const pool = new pg.Pool({ connectionString: dbUrl, ssl: pgSsl() });
 
   try {
-    const existe = await pool.query('SELECT id FROM tenants WHERE slug = $1', [slug]);
+    for (const slug of slugs) {
+      const nome = slug === 'demo' ? 'Ata Commerce Demo' : slug;
+      const existe = await pool.query('SELECT id FROM tenants WHERE slug = $1', [slug]);
 
-    if (existe.rows.length === 0) {
-      await pool.query(
-        `INSERT INTO tenants (slug, nome, db_host, db_port, db_name, db_user, db_password, ativo)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, true)`,
-        [slug, slug, host, port, dbName, user, password],
-      );
-      console.log(`[bootstrap] Tenant "${slug}" registrado.`);
-    } else {
-      console.log(`[bootstrap] Tenant "${slug}" já existe (id=${existe.rows[0].id}).`);
+      if (existe.rows.length === 0) {
+        await pool.query(
+          `INSERT INTO tenants (slug, nome, db_host, db_port, db_name, db_user, db_password, ativo)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, true)`,
+          [slug, nome, host, port, dbName, user, password],
+        );
+        console.log(`[bootstrap] Tenant "${slug}" registrado.`);
+      } else {
+        console.log(`[bootstrap] Tenant "${slug}" já existe (id=${existe.rows[0].id}).`);
+      }
     }
 
     await ensureAdminUser(pool, adminEmail, adminSenha, adminNome);

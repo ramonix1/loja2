@@ -1,14 +1,15 @@
 import { test, expect } from '@playwright/test';
 import { testIds } from '@lojao/test-utils/test-ids';
 
+import { storePath } from '../../lib/store-path';
+
 test('checkout metodo teste @smoke', async ({ page }) => {
-  // Produto 1 tem estoque alto; produto 2 é usado em cart.spec e tem estoque 1.
-  await page.goto('/produto/1');
+  await page.goto(storePath('/produto/1'));
   await page.getByTestId(testIds.store.productAddCartBtn).click();
-  await expect(page).toHaveURL(/\/carrinho/);
+  await expect(page).toHaveURL(/\/store\/[^/]+\/carrinho/);
 
   await page.getByTestId(testIds.store.cartCheckoutBtn).click();
-  await expect(page).toHaveURL(/\/checkout/);
+  await expect(page).toHaveURL(/\/store\/[^/]+\/checkout/);
 
   const cepInput = page.getByText('CEP', { exact: true }).locator('..').locator('input');
   await cepInput.fill('01310100');
@@ -24,7 +25,7 @@ test('checkout metodo teste @smoke', async ({ page }) => {
   await page.getByTestId(testIds.store.checkoutPaymentTeste).check();
   await page.getByTestId(testIds.store.checkoutSubmitBtn).click();
 
-  await expect(page).toHaveURL(/\/checkout\/resultado\/\d+/, { timeout: 20000 });
+  await expect(page).toHaveURL(/\/store\/[^/]+\/checkout\/resultado\/\d+/, { timeout: 20000 });
 
   await expect(page.getByTestId(testIds.store.checkoutSuccessMsg)).toBeVisible({ timeout: 20000 });
 });

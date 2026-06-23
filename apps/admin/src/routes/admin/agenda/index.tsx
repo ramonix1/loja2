@@ -1,4 +1,15 @@
-import { Button, Card, cn } from '@lojao/ui';
+import {
+  Button,
+  Card,
+  adminFieldLabelClass,
+  adminInputClass,
+  adminMutedClass,
+  adminPageSubtitleClass,
+  adminPageTitleClass,
+  adminSectionTitleClass,
+  adminSubtleClass,
+  cn,
+} from '@lojao/ui';
 import { testIds } from '@lojao/test-utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState, type FormEvent } from 'react';
@@ -120,23 +131,23 @@ function buildCalendar(data: AgendaData): CalendarDay[] {
     let label: string;
 
     if (passado) {
-      cellCls = 'bg-gray-800 text-gray-500';
+      cellCls = 'bg-[var(--admin-surface-elevated)] text-[var(--admin-text-subtle)]';
       label = '';
     } else if (bloqueado) {
-      cellCls = 'bg-gray-950 border border-gray-700 text-gray-600';
+      cellCls = 'border border-[var(--admin-border)] bg-[var(--admin-surface)] text-[var(--admin-text-subtle)]';
       label = 'Fechado';
     } else if (livres === 0) {
-      cellCls = 'bg-red-900/70 text-red-200';
+      cellCls = 'bg-[var(--admin-error-bg)] text-[var(--admin-error-text)]';
       label = `${usados}/${capDia}`;
     } else if (usados > 0) {
-      cellCls = 'bg-yellow-900/60 text-yellow-100';
+      cellCls = 'bg-[var(--admin-warning-bg)] text-[var(--admin-warning-text)]';
       label = `${usados}/${capDia}`;
     } else {
-      cellCls = 'bg-green-900/60 text-green-100';
+      cellCls = 'bg-[var(--admin-success-bg)] text-[var(--admin-success-text)]';
       label = `${capDia} vaga${capDia > 1 ? 's' : ''}`;
     }
 
-    if (ehHoje) cellCls += ' ring-2 ring-blue-400';
+    if (ehHoje) cellCls += ' ring-2 ring-[var(--admin-accent)]';
 
     days.push({
       data: dataStr,
@@ -272,12 +283,12 @@ export function AgendaPage() {
   }
 
   if (isLoading) {
-    return <p className="text-gray-400">Carregando agenda…</p>;
+    return <p className={adminMutedClass()}>Carregando agenda…</p>;
   }
 
   if (error || !data || !config) {
     return (
-      <p className="text-red-400" data-testid={testIds.adminAgenda.errorMsg}>
+      <p className="ds-alert-error" data-testid={testIds.adminAgenda.errorMsg}>
         {error instanceof ApiError ? error.message : 'Erro ao carregar agenda.'}
       </p>
     );
@@ -286,46 +297,42 @@ export function AgendaPage() {
   return (
     <div data-testid={testIds.adminAgenda.panel}>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Agenda</h1>
-        <p className="mt-1 text-sm text-gray-400">Gerencie disponibilidade de datas para eventos</p>
+        <h1 className={adminPageTitleClass()}>Agenda</h1>
+        <p className={adminPageSubtitleClass('mt-1')}>
+          Gerencie disponibilidade de datas para eventos
+        </p>
       </div>
 
       {feedback?.type === 'success' && (
-        <div
-          className="mb-4 rounded-xl border border-green-700 bg-green-900/50 px-4 py-3 text-sm text-green-300"
-          data-testid={testIds.adminAgenda.successMsg}
-        >
+        <div className="ds-alert-success mb-4" data-testid={testIds.adminAgenda.successMsg}>
           {feedback.msg}
         </div>
       )}
       {feedback?.type === 'error' && (
-        <div
-          className="mb-4 rounded-xl border border-red-700 bg-red-900/50 px-4 py-3 text-sm text-red-300"
-          data-testid={testIds.adminAgenda.errorMsg}
-        >
+        <div className="ds-alert-error mb-4" data-testid={testIds.adminAgenda.errorMsg}>
           {feedback.msg}
         </div>
       )}
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <Card className="space-y-4 p-6 xl:col-span-2" data-testid={testIds.adminAgenda.calendar}>
+        <Card surface="admin" className="space-y-4 p-6 xl:col-span-2" data-testid={testIds.adminAgenda.calendar}>
           <div className="mb-5 flex items-center justify-between">
             <Link
               to={`/admin/agenda?mes=${prevMes(mes)}`}
-              className="rounded-lg bg-gray-800 px-3 py-1.5 text-sm text-white transition hover:bg-gray-700"
+              className="rounded-lg bg-[var(--admin-surface-elevated)] px-3 py-1.5 text-sm text-[var(--admin-text)] transition hover:bg-[var(--admin-table-row-hover)]"
               data-testid={testIds.adminAgenda.calendarPrevBtn}
             >
               ← Anterior
             </Link>
             <h2
-              className="text-lg font-bold text-white"
+              className={adminSectionTitleClass('text-lg')}
               data-testid={testIds.adminAgenda.calendarMonthLabel}
             >
               {NOMES_MES[data.mesNum - 1]} {data.ano}
             </h2>
             <Link
               to={`/admin/agenda?mes=${nextMes(mes)}`}
-              className="rounded-lg bg-gray-800 px-3 py-1.5 text-sm text-white transition hover:bg-gray-700"
+              className="rounded-lg bg-[var(--admin-surface-elevated)] px-3 py-1.5 text-sm text-[var(--admin-text)] transition hover:bg-[var(--admin-table-row-hover)]"
               data-testid={testIds.adminAgenda.calendarNextBtn}
             >
               Próximo →
@@ -334,7 +341,7 @@ export function AgendaPage() {
 
           <div className="mb-1 grid grid-cols-7 gap-1">
             {DIAS_SEMANA.map((d) => (
-              <div key={d} className="py-2 text-center text-xs font-semibold text-gray-500">
+              <div key={d} className={cn('py-2 text-center text-xs font-semibold', adminSubtleClass())}>
                 {d}
               </div>
             ))}
@@ -354,8 +361,8 @@ export function AgendaPage() {
                 className={cn(
                   'flex min-h-[60px] flex-col items-center justify-center gap-0.5 rounded-lg transition',
                   day.cellCls,
-                  !day.passado && 'cursor-pointer hover:ring-2 hover:ring-white/30',
-                  selectedDay?.data === day.data && 'ring-2 ring-white',
+                  !day.passado && 'cursor-pointer hover:ring-2 hover:ring-[var(--admin-accent)]/30',
+                  selectedDay?.data === day.data && 'ring-2 ring-[var(--admin-text)]',
                 )}
               >
                 <span className="text-sm font-semibold">{day.dia}</span>
@@ -366,25 +373,25 @@ export function AgendaPage() {
             ))}
           </div>
 
-          <div className="mt-5 flex flex-wrap gap-4 text-xs text-gray-400">
+          <div className={cn('mt-5 flex flex-wrap gap-4 text-xs', adminMutedClass())}>
             <div className="flex items-center gap-1.5">
-              <div className="h-3 w-3 rounded bg-green-900/60" /> Disponível
+              <div className="h-3 w-3 rounded bg-[var(--admin-success-bg)]" /> Disponível
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="h-3 w-3 rounded bg-yellow-900/60" /> Parcialmente ocupado
+              <div className="h-3 w-3 rounded bg-[var(--admin-warning-bg)]" /> Parcialmente ocupado
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="h-3 w-3 rounded bg-red-900/70" /> Lotado
+              <div className="h-3 w-3 rounded bg-[var(--admin-error-bg)]" /> Lotado
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="h-3 w-3 rounded border border-gray-700 bg-gray-950" /> Fechado
+              <div className="h-3 w-3 rounded border border-[var(--admin-border)] bg-[var(--admin-surface)]" /> Fechado
             </div>
           </div>
         </Card>
 
         <div className="space-y-4">
-          <Card className="p-5">
-            <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-white">
+          <Card surface="admin" className="p-5">
+            <h2 className={cn(adminSectionTitleClass('mb-4 text-sm uppercase tracking-wider'))}>
               Configurações
             </h2>
             <form
@@ -393,7 +400,7 @@ export function AgendaPage() {
               onSubmit={handleConfigSubmit}
             >
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-400">
+                <label className={adminFieldLabelClass('text-xs')}>
                   Vagas por dia (padrão)
                 </label>
                 <input
@@ -407,11 +414,11 @@ export function AgendaPage() {
                       capacidade_diaria: parseInt(e.target.value, 10) || 1,
                     })
                   }
-                  className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+                  className={adminInputClass()}
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-400">
+                <label className={adminFieldLabelClass('text-xs')}>
                   Antecedência mínima (dias)
                 </label>
                 <input
@@ -425,11 +432,11 @@ export function AgendaPage() {
                       antecedencia_minima_dias: parseInt(e.target.value, 10) || 0,
                     })
                   }
-                  className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+                  className={adminInputClass()}
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-400">
+                <label className={adminFieldLabelClass('text-xs')}>
                   Antecedência máxima (dias)
                 </label>
                 <input
@@ -443,7 +450,7 @@ export function AgendaPage() {
                       antecedencia_maxima_dias: parseInt(e.target.value, 10) || 1,
                     })
                   }
-                  className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+                  className={adminInputClass()}
                 />
               </div>
               <Button
@@ -459,30 +466,31 @@ export function AgendaPage() {
 
           {selectedDay && (
             <Card
-              className="border-blue-700 p-5"
+              surface="admin"
+              className="border-[var(--admin-accent)] p-5"
               data-testid={testIds.adminAgenda.dayPanel}
             >
               <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-sm font-bold text-white">Configurar dia</h3>
+                <h3 className={adminSectionTitleClass('text-sm')}>Configurar dia</h3>
                 <button
                   type="button"
                   onClick={() => setSelectedDay(null)}
-                  className="text-xl leading-none text-gray-500 hover:text-white"
+                  className={cn('text-xl leading-none hover:text-[var(--admin-text)]', adminSubtleClass())}
                 >
                   ×
                 </button>
               </div>
-              <div className="mb-4 rounded-lg bg-gray-800 px-3 py-2">
-                <p className="text-xs text-gray-400">Data</p>
-                <p className="font-semibold text-white">{formatDataLabel(selectedDay.data)}</p>
-                <p className="mt-1 text-xs text-gray-400">
+              <div className="mb-4 rounded-lg bg-[var(--admin-surface-elevated)] px-3 py-2">
+                <p className={cn('text-xs', adminSubtleClass())}>Data</p>
+                <p className="font-semibold text-[var(--admin-text)]">{formatDataLabel(selectedDay.data)}</p>
+                <p className={cn('mt-1 text-xs', adminSubtleClass())}>
                   Agendamentos: {selectedDay.usados} /{' '}
                   {selectedDay.bloqueado ? '0 (fechado)' : selectedDay.capDia}
                 </p>
               </div>
               <form className="space-y-3" onSubmit={handleDaySubmit}>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-gray-400">
+                  <label className={adminFieldLabelClass('text-xs')}>
                     Capacidade especial
                   </label>
                   <input
@@ -492,11 +500,11 @@ export function AgendaPage() {
                     placeholder="Vazio = padrão | 0 = fechar"
                     data-testid={testIds.adminAgenda.dayCapacidadeInput}
                     onChange={(e) => setDayCapacidade(e.target.value)}
-                    className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+                    className={adminInputClass()}
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-gray-400">
+                  <label className={adminFieldLabelClass('text-xs')}>
                     Motivo (opcional)
                   </label>
                   <input
@@ -505,7 +513,7 @@ export function AgendaPage() {
                     placeholder="Ex: Feriado, Férias..."
                     data-testid={testIds.adminAgenda.dayMotivoInput}
                     onChange={(e) => setDayMotivo(e.target.value)}
-                    className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white focus:border-blue-500 focus:outline-none"
+                    className={adminInputClass()}
                   />
                 </div>
                 <div className="flex gap-2">
@@ -520,10 +528,10 @@ export function AgendaPage() {
                   {selectedDay.isEspecial && (
                     <Button
                       type="button"
-                      variant="secondary"
+                      variant="ghost"
                       disabled={removeMutation.isPending}
                       data-testid={testIds.adminAgenda.dayRemoveBtn}
-                      className="bg-red-900/70 text-red-200 hover:bg-red-800"
+                      className="text-[var(--admin-error-text)] hover:bg-[var(--admin-error-bg)]"
                       onClick={handleRemoveDay}
                     >
                       Remover
@@ -535,8 +543,8 @@ export function AgendaPage() {
           )}
 
           {data.especiais.length > 0 && (
-            <Card className="p-5">
-              <h3 className="mb-3 text-sm font-bold uppercase tracking-wider text-white">
+            <Card surface="admin" className="p-5">
+              <h3 className={cn(adminSectionTitleClass('mb-3 text-sm uppercase tracking-wider'))}>
                 Dias especiais do mês
               </h3>
               <div className="space-y-2">
@@ -547,14 +555,14 @@ export function AgendaPage() {
                       <span
                         className={cn(
                           'h-2 w-2 shrink-0 rounded-full',
-                          fechado ? 'bg-gray-600' : 'bg-yellow-500',
+                          fechado ? 'bg-[var(--admin-text-subtle)]' : 'bg-[var(--admin-warning)]',
                         )}
                       />
-                      <span className="flex-1 font-mono text-xs text-gray-300">{e.data}</span>
+                      <span className={cn('flex-1 font-mono text-xs', adminMutedClass())}>{e.data}</span>
                       <span
                         className={cn(
                           'text-xs',
-                          fechado ? 'text-gray-500' : 'text-yellow-300',
+                          fechado ? adminSubtleClass() : 'text-[var(--admin-warning-text)]',
                         )}
                       >
                         {fechado
@@ -562,7 +570,7 @@ export function AgendaPage() {
                           : `${e.capacidade} vaga${e.capacidade! > 1 ? 's' : ''}`}
                       </span>
                       {e.motivo && (
-                        <span className="max-w-[80px] truncate text-xs text-gray-500" title={e.motivo}>
+                        <span className={cn('max-w-[80px] truncate text-xs', adminSubtleClass())} title={e.motivo}>
                           {e.motivo}
                         </span>
                       )}

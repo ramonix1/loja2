@@ -40,5 +40,13 @@ export default defineConfig({
       dependencies: ['buyer-setup'],
       testMatch: /store\/.*\.spec\.ts/,
     },
+    {
+      name: 'marketing',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: process.env.E2E_STORE_URL ?? 'http://localhost:3000',
+      },
+      testMatch: /marketing\/.*\.spec\.ts/,
+    },
   ],
 });

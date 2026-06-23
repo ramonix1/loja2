@@ -1,6 +1,20 @@
 import type { PedidoStatus } from '@lojao/types/pedidos';
 import { PEDIDO_STATUS } from '@lojao/types/pedidos';
-import { Button, Table, cn } from '@lojao/ui';
+import {
+  Button,
+  Table,
+  TableCell,
+  TableHead,
+  TableHeaderCell,
+  TableRow,
+  adminEmptyStateClass,
+  adminInputClass,
+  adminMutedClass,
+  adminPageTitleClass,
+  adminSubtleClass,
+  cn,
+  StatusBadge,
+} from '@lojao/ui';
 import { testIds } from '@lojao/test-utils';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -27,15 +41,6 @@ interface PedidosResponse {
 const PER_PAGE = 20;
 const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
-const STATUS_STYLES: Record<string, string> = {
-  pago: 'bg-green-900 text-green-300',
-  aguardando_pagamento: 'bg-yellow-900 text-yellow-300',
-  em_separacao: 'bg-blue-900 text-blue-300',
-  enviado: 'bg-indigo-900 text-indigo-300',
-  entregue: 'bg-emerald-900 text-emerald-300',
-  cancelado: 'bg-red-900 text-red-300',
-};
-
 const STATUS_LABEL: Record<PedidoStatus, string> = {
   aguardando_pagamento: 'Aguardando pagamento',
   pago: 'Pago',
@@ -45,16 +50,11 @@ const STATUS_LABEL: Record<PedidoStatus, string> = {
   cancelado: 'Cancelado',
 };
 
-function StatusBadge({ status }: { status: string }) {
+function PedidoStatusBadge({ status }: { status: string }) {
   return (
-    <span
-      className={cn(
-        'inline-block rounded-full px-2.5 py-0.5 text-xs font-medium',
-        STATUS_STYLES[status] ?? 'bg-gray-800 text-gray-300',
-      )}
-    >
+    <StatusBadge status={status}>
       {STATUS_LABEL[status as PedidoStatus] ?? status.replace(/_/g, ' ')}
-    </span>
+    </StatusBadge>
   );
 }
 
@@ -91,12 +91,12 @@ export function PedidosPage() {
   return (
     <div>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold text-white">Pedidos</h1>
+        <h1 className={adminPageTitleClass()}>Pedidos</h1>
         <select
           data-testid={testIds.admin.pedidosFilterStatus}
           value={statusFilter}
           onChange={(e) => handleFilterChange(e.target.value)}
-          className="rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white"
+          className={adminInputClass('w-auto')}
         >
           <option value="">Todos os status</option>
           {PEDIDO_STATUS.map((s) => (
@@ -108,7 +108,7 @@ export function PedidosPage() {
       </div>
 
       {isError && (
-        <p className="mb-4 rounded-lg border border-red-900 bg-red-950 px-4 py-3 text-sm text-red-300">
+        <p className="ds-alert-error mb-4 text-sm">
           Não foi possível carregar os pedidos.
         </p>
       )}
@@ -116,75 +116,77 @@ export function PedidosPage() {
       {isLoading ? (
         <div
           data-testid={testIds.admin.pedidosLoading}
-          className="rounded-xl border border-gray-800 bg-gray-900 p-8 text-center text-gray-400"
+          className={adminEmptyStateClass('p-8')}
         >
           Carregando pedidos…
         </div>
       ) : (
-        <Table data-testid={testIds.admin.pedidosTable}>
-          <thead>
-            <tr className="border-b border-gray-800 text-xs uppercase tracking-wide text-gray-500">
-              <th className="px-4 py-3">#</th>
-              <th className="px-4 py-3">Data</th>
-              <th className="px-4 py-3">Cliente</th>
-              <th className="px-4 py-3">Itens</th>
-              <th className="px-4 py-3">Método</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3 text-right">Total</th>
-              <th className="px-4 py-3 text-right">Ações</th>
-            </tr>
-          </thead>
+        <Table surface="admin" data-testid={testIds.admin.pedidosTable}>
+          <TableHead surface="admin">
+            <TableRow surface="admin">
+              <TableHeaderCell>#</TableHeaderCell>
+              <TableHeaderCell>Data</TableHeaderCell>
+              <TableHeaderCell>Cliente</TableHeaderCell>
+              <TableHeaderCell>Itens</TableHeaderCell>
+              <TableHeaderCell>Método</TableHeaderCell>
+              <TableHeaderCell>Status</TableHeaderCell>
+              <TableHeaderCell className="text-right">Total</TableHeaderCell>
+              <TableHeaderCell className="text-right">Ações</TableHeaderCell>
+            </TableRow>
+          </TableHead>
           <tbody>
             {pedidos.length === 0 ? (
-              <tr>
-                <td colSpan={8} className="px-4 py-10 text-center text-gray-400">
-                  <span data-testid={testIds.admin.pedidosEmpty}>
+              <TableRow surface="admin">
+                <TableCell colSpan={8} className="py-10 text-center">
+                  <span data-testid={testIds.admin.pedidosEmpty} className={adminMutedClass()}>
                     Nenhum pedido encontrado.
                   </span>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ) : (
               pedidos.map((pedido) => (
-                <tr
+                <TableRow
                   key={pedido.id}
+                  surface="admin"
                   data-testid={testIds.admin.pedidosRow(pedido.id)}
-                  className="border-b border-gray-800 last:border-0 hover:bg-gray-900/60"
                 >
-                  <td className="px-4 py-3 font-mono text-gray-400">#{pedido.id}</td>
-                  <td className="px-4 py-3 text-gray-300">
+                  <TableCell className="font-mono">
+                    <span className={adminMutedClass()}>#{pedido.id}</span>
+                  </TableCell>
+                  <TableCell>
                     {new Date(pedido.created_at).toLocaleDateString('pt-BR')}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="text-gray-100">{pedido.cliente_nome ?? '—'}</div>
-                    <div className="text-xs text-gray-500">{pedido.cliente_email ?? ''}</div>
-                  </td>
-                  <td className="px-4 py-3 text-gray-300">{pedido.total_itens}</td>
-                  <td className="px-4 py-3 capitalize text-gray-300">
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-[var(--admin-text)]">{pedido.cliente_nome ?? '—'}</div>
+                    <div className={cn('text-xs', adminSubtleClass())}>{pedido.cliente_email ?? ''}</div>
+                  </TableCell>
+                  <TableCell>{pedido.total_itens}</TableCell>
+                  <TableCell className="capitalize">
                     {metodoLabel(pedido.metodo_pagamento)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <StatusBadge status={pedido.status} />
-                  </td>
-                  <td className="px-4 py-3 text-right font-medium text-gray-100">
+                  </TableCell>
+                  <TableCell>
+                    <PedidoStatusBadge status={pedido.status} />
+                  </TableCell>
+                  <TableCell className="text-right font-medium">
                     {BRL.format(pedido.total)}
-                  </td>
-                  <td className="px-4 py-3 text-right">
+                  </TableCell>
+                  <TableCell className="text-right">
                     <Link
                       to={`/admin/pedidos/${pedido.id}`}
                       data-testid={testIds.admin.pedidosViewBtn(pedido.id)}
-                      className="text-sm font-medium text-blue-400 hover:text-blue-300"
+                      className="ds-link text-sm font-medium"
                     >
                       Ver
                     </Link>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))
             )}
           </tbody>
         </Table>
       )}
 
-      <div className="mt-4 flex items-center justify-between text-sm text-gray-400">
+      <div className={cn('mt-4 flex items-center justify-between text-sm', adminMutedClass())}>
         <span>
           {total} pedido{total === 1 ? '' : 's'} · página {page} de {totalPages}
         </span>

@@ -1,9 +1,26 @@
 <!doctype html>
-<html lang="pt-BR" class="dark">
+<html lang="pt-BR" data-admin-ui-theme="escuro" data-platform-ui-theme="escuro">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lojão — Painel Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <title>Ata Commerce — Painel Admin</title>
+    <script>
+      (function () {
+        var adminStored = localStorage.getItem('ata-admin-ui-theme');
+        var platformStored = localStorage.getItem('ata-platform-ui-theme');
+        document.documentElement.dataset.adminUiTheme =
+          adminStored === 'claro' || adminStored === 'escuro' ? adminStored : 'escuro';
+        document.documentElement.dataset.platformUiTheme =
+          platformStored === 'claro' || platformStored === 'escuro' ? platformStored : 'escuro';
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

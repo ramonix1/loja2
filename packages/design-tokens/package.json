@@ -1,0 +1,20 @@
+{
+  "name": "@lojao/design-tokens",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tokens de identidade visual Ata Labs / Ata Commerce",
+  "exports": {
+    "./ata-labs.css": "./src/ata-labs.css",
+    "./ata-commerce.css": "./src/ata-commerce.css",
+    "./primitives.css": "./src/primitives.css",
+    "./semantic-admin.css": "./src/semantic-admin.css",
+    "./semantic-platform.css": "./src/semantic-platform.css",
+    "./semantic-store.css": "./src/semantic-store.css",
+    "./components.css": "./src/components.css",
+    "./admin-ui-theme.css": "./src/admin-ui-theme.css",
+    "./store-ui-theme.css": "./src/store-ui-theme.css",
+    "./platform-ui-theme.css": "./src/platform-ui-theme.css",
+    "./tokens.css": "./src/tokens.css",
+    "./shadcn-bridge.css": "./src/shadcn-bridge.css"
+  }
+}

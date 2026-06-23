@@ -1,0 +1,29 @@
+/**
+ * Ata Commerce — sub-marca (azul)
+ * Fonte: atalabs-landing/AtaLabs - Identidade Visual new.pdf
+ */
+:root {
+  --ata-azul-hero-inicio: #0a1f5c;
+  --ata-azul-noite: #012a7e;
+  --ata-azul-comercio: #0d5fe0;
+  --ata-azul-vivido: #2e8ffb;
+  --ata-azul-ceu: #5cb1fe;
+  --ata-azul-gelo: #a3d7fe;
+  --ata-azul-nevoa: #eef5ff;
+  --ata-commerce-hero-gradient: linear-gradient(
+    140deg,
+    var(--ata-azul-hero-inicio) 0%,
+    #012a7e 40%,
+    #0d5fe0 75%,
+    #2e8ffb 100%
+  );
+}
+
+@theme inline {
+  --color-azul-noite: #012a7e;
+  --color-azul-comercio: #0d5fe0;
+  --color-azul-vivido: #2e8ffb;
+  --color-azul-ceu: #5cb1fe;
+  --color-azul-gelo: #a3d7fe;
+  --color-azul-nevoa: #eef5ff;
+}

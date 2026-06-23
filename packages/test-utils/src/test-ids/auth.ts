@@ -6,6 +6,8 @@
  * importar destas constantes (`@lojao/test-utils/test-ids`).
  */
 export const auth = {
+  loginBrand: 'admin-login-brand',
+  loginSlug: 'admin-login-slug-input',
   loginEmail: 'auth-login-email-input',
   loginPassword: 'auth-login-password-input',
   loginSubmit: 'auth-login-submit-btn',

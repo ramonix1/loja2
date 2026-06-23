@@ -1,4 +1,16 @@
-import { Button, Card, cn } from '@lojao/ui';
+import {
+  Button,
+  Card,
+  FieldInput,
+  ConfirmDialog,
+  adminEmptyStateClass,
+  adminFieldLabelClass,
+  adminMutedClass,
+  adminPageSubtitleClass,
+  adminPageTitleClass,
+  adminSectionTitleClass,
+  cn,
+} from '@lojao/ui';
 import { testIds } from '@lojao/test-utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
@@ -21,6 +33,7 @@ export function CategoriasPage() {
   const queryClient = useQueryClient();
   const [nome, setNome] = useState('');
   const [createError, setCreateError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; nome: string } | null>(null);
 
   const { data: categorias = [], isLoading } = useQuery({
     queryKey: ['admin', 'categorias'],
@@ -56,27 +69,29 @@ export function CategoriasPage() {
   }
 
   function handleDelete(id: number, nomeCat: string) {
-    if (!window.confirm(`Remover categoria "${nomeCat}"? Os produtos não serão excluídos.`)) return;
-    deleteMutation.mutate(id);
+    setDeleteTarget({ id, nome: nomeCat });
   }
 
   return (
     <div>
-      <h1 className="mb-1 text-2xl font-bold text-white">Categorias</h1>
-      <p className="mb-6 text-sm text-gray-400">
+      <h1 className={adminPageTitleClass('mb-1')}>Categorias</h1>
+      <p className={adminPageSubtitleClass('mb-6')}>
         Agrupe produtos em seções exibidas na vitrine.
       </p>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
           {isLoading ? (
-            <Card className="text-center text-gray-400">Carregando…</Card>
+            <Card surface="admin" className={cn('text-center', adminMutedClass())}>
+              Carregando…
+            </Card>
           ) : (
             <div data-testid={testIds.adminCategorias.table} className="space-y-3">
               {categorias.length === 0 ? (
                 <Card
+                  surface="admin"
                   data-testid={testIds.adminCategorias.emptyState}
-                  className="py-12 text-center text-gray-400"
+                  className={adminEmptyStateClass('py-12')}
                 >
                   Nenhuma categoria criada ainda. Use o formulário ao lado para criar a primeira.
                 </Card>
@@ -85,26 +100,25 @@ export function CategoriasPage() {
                 <div
                   key={cat.id}
                   data-testid={testIds.adminCategorias.row(cat.id)}
-                  className="flex items-center justify-between gap-4 rounded-xl border border-gray-800 bg-gray-900 p-5"
+                  className="flex items-center justify-between gap-4 rounded-xl border border-[var(--admin-border)] bg-[var(--admin-surface)] p-5"
                 >
                   <div className="min-w-0">
-                    <div className="truncate font-semibold text-white">{cat.nome}</div>
-                    <div className="mt-0.5 text-xs text-gray-400">
+                    <div className="truncate font-semibold text-[var(--admin-text)]">{cat.nome}</div>
+                    <div className={cn('mt-0.5 text-xs', adminMutedClass())}>
                       {cat.total_produtos} produto{cat.total_produtos !== 1 ? 's' : ''}
                       {cat.ordem > 0 ? ` · ordem ${cat.ordem}` : ''}
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
-                    <Link
-                      to={`/admin/categorias/${cat.id}`}
-                      className="rounded-lg bg-gray-800 px-3 py-1.5 text-sm font-medium text-gray-300 transition hover:bg-gray-700 hover:text-white"
-                    >
-                      Editar
+                    <Link to={`/admin/categorias/${cat.id}`}>
+                      <Button variant="secondary" className="text-sm">
+                        Editar
+                      </Button>
                     </Link>
                     <Button
                       variant="ghost"
                       data-testid={testIds.adminCategorias.deleteBtn}
-                      className={cn('text-red-400 hover:bg-red-950 hover:text-red-300')}
+                      className={cn('text-[var(--admin-error-text)] hover:bg-[var(--admin-error-bg)]')}
                       onClick={() => handleDelete(cat.id, cat.nome)}
                       disabled={deleteMutation.isPending}
                     >
@@ -117,14 +131,14 @@ export function CategoriasPage() {
           )}
         </div>
 
-        <Card>
-          <h2 className="mb-4 text-base font-bold text-white">Nova categoria</h2>
+        <Card surface="admin">
+          <h2 className={adminSectionTitleClass('mb-4')}>Nova categoria</h2>
           <form onSubmit={handleCreate} className="space-y-4">
             <div>
-              <label htmlFor="cat-nome" className="mb-1.5 block text-sm font-medium text-gray-300">
+              <label htmlFor="cat-nome" className={adminFieldLabelClass()}>
                 Nome *
               </label>
-              <input
+              <FieldInput
                 id="cat-nome"
                 type="text"
                 required
@@ -132,11 +146,10 @@ export function CategoriasPage() {
                 onChange={(e) => setNome(e.target.value)}
                 data-testid={testIds.adminCategorias.nomeInput}
                 placeholder="Ex: Calçados, Roupas…"
-                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white outline-none focus:border-blue-500"
               />
             </div>
             {createError && (
-              <p className="text-sm text-red-400">{createError}</p>
+              <p className="ds-alert-error text-sm">{createError}</p>
             )}
             <Button
               type="submit"
@@ -149,6 +162,23 @@ export function CategoriasPage() {
           </form>
         </Card>
       </div>
+
+      <ConfirmDialog
+        open={deleteTarget != null}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Remover categoria"
+        description={
+          deleteTarget
+            ? `Remover "${deleteTarget.nome}"? Os produtos não serão excluídos.`
+            : ''
+        }
+        confirmLabel="Remover"
+        destructive
+        loading={deleteMutation.isPending}
+        onConfirm={() => {
+          if (deleteTarget) deleteMutation.mutate(deleteTarget.id);
+        }}
+      />
     </div>
   );
 }

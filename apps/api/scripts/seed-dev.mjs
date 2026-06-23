@@ -14,6 +14,10 @@ import { runMigrations } from '@lojao/db';
 import argon2 from 'argon2';
 import pg from 'pg';
 
+/** Cor primária padrão Ata Commerce — alinhada ao manual PDF. */
+const DEFAULT_LOJA_COR_PRIMARIA = '#0D5FE0';
+const DEFAULT_LOJA_COR_HEX = '0D5FE0';
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const envPath = join(__dirname, '../../../.env');
 if (existsSync(envPath)) {
@@ -149,7 +153,7 @@ async function ensureTenantRegistered() {
        db_password = EXCLUDED.db_password`,
     [
       SLUG,
-      'Lojão Dev',
+      'Ata Commerce Dev',
       url.hostname,
       parseInt(url.port, 10) || 5432,
       url.pathname.replace(/^\//, ''),
@@ -295,7 +299,7 @@ async function seedProdutos(pool, categoriaIds) {
     if (!imgExists.rows[0]) {
       await pool.query(
         'INSERT INTO produtos_imagens (produto_id, url) VALUES ($1, $2)',
-        [id, `https://placehold.co/600x600/2563eb/white?text=Produto+${id}`],
+        [id, `https://placehold.co/600x600/${DEFAULT_LOJA_COR_HEX}/white?text=Produto+${id}`],
       );
     }
   }
@@ -457,7 +461,7 @@ async function seedExtras(pool, userIds, produtoIds, produtos) {
       [
         bannerTitulo,
         'Até 30% off em eletrônicos',
-        'https://placehold.co/1200x400/2563eb/white?text=Banner+Promo',
+        `https://placehold.co/1200x400/${DEFAULT_LOJA_COR_HEX}/white?text=Banner+Promo`,
         produtoIds[0],
       ],
     );
@@ -475,7 +479,7 @@ async function seedExtras(pool, userIds, produtoIds, produtos) {
 
   await pool.query(`
     UPDATE configuracoes SET valor = 'true' WHERE chave = 'controla_estoque';
-    UPDATE configuracoes SET valor = 'Lojão Demo' WHERE chave = 'loja_nome';
+    UPDATE configuracoes SET valor = 'Ata Commerce Demo' WHERE chave = 'loja_nome';
     UPDATE configuracoes SET valor = 'Sua loja de demonstração' WHERE chave = 'loja_slogan';
     UPDATE configuracoes SET valor = 'dev_seed_applied' WHERE chave = 'dev_seed_version';
     INSERT INTO configuracoes (chave, valor) VALUES ('dev_seed_version', '1')

@@ -32,9 +32,8 @@ export async function loginAdmin(apiUrl: string, options: LoginAdminOptions = {}
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Tenant-Slug': tenantSlug,
     },
-    body: JSON.stringify({ email, senha }),
+    body: JSON.stringify({ email, senha, tenantSlug }),
   });
 
   if (!res.ok) {

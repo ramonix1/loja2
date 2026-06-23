@@ -1,0 +1,86 @@
+/**
+ * Nível 2 — Semânticos Platform Hub (Ata Labs verde).
+ * Toggle: data-platform-ui-theme="escuro" | "claro" no <html>.
+ * Sem !important — consumir var(--platform-*).
+ */
+
+:root,
+[data-platform-ui-theme='escuro'] {
+  --platform-bg: var(--ata-verde-hero-inicio);
+  --platform-surface: var(--ata-verde-conde);
+  --platform-surface-elevated: color-mix(in srgb, var(--ata-verde-conde) 88%, #000000);
+  --platform-border: color-mix(in srgb, var(--ata-verde-broto) 20%, transparent);
+  --platform-text: var(--ata-creme);
+  --platform-text-muted: color-mix(in srgb, var(--ata-creme) 72%, transparent);
+  --platform-text-subtle: color-mix(in srgb, var(--ata-creme) 52%, transparent);
+  --platform-accent: var(--ata-verde-broto);
+  --platform-accent-hover: var(--ata-verde-mata);
+  --platform-link: var(--ata-verde-broto);
+  --platform-link-hover: color-mix(in srgb, var(--ata-verde-broto) 80%, #ffffff);
+  --platform-focus-ring: color-mix(in srgb, var(--ata-verde-broto) 40%, transparent);
+  --platform-sidebar-bg: var(--ata-verde-conde);
+  --platform-sidebar-border: color-mix(in srgb, var(--ata-verde-broto) 18%, transparent);
+  --platform-sidebar-text: var(--ata-creme);
+  --platform-sidebar-muted: color-mix(in srgb, var(--ata-creme) 65%, transparent);
+  --platform-sidebar-active-bg: color-mix(in srgb, var(--ata-verde-broto) 16%, transparent);
+  --platform-sidebar-hover-bg: color-mix(in srgb, var(--ata-verde-broto) 10%, transparent);
+  --platform-input-bg: color-mix(in srgb, var(--ata-verde-conde) 92%, #000000);
+  --platform-input-border: color-mix(in srgb, var(--ata-verde-broto) 22%, var(--ata-verde-conde));
+  --platform-input-placeholder: var(--platform-text-subtle);
+  --platform-switch-track-on: var(--ata-verde-broto);
+  --platform-switch-track-off: color-mix(in srgb, var(--ata-verde-conde) 70%, var(--ata-cinza-areia));
+  --platform-table-header-bg: color-mix(in srgb, var(--ata-verde-folha) 35%, var(--ata-verde-conde));
+  --platform-table-row-hover: color-mix(in srgb, var(--ata-verde-broto) 8%, var(--ata-verde-conde));
+  --platform-table-border: var(--platform-border);
+  --platform-chart-grid: color-mix(in srgb, var(--ata-verde-broto) 14%, transparent);
+  --platform-chart-axis: color-mix(in srgb, var(--ata-creme) 75%, transparent);
+  --platform-success: var(--ata-verde-broto);
+  --platform-success-bg: color-mix(in srgb, var(--ata-verde-broto) 18%, var(--ata-verde-conde));
+  --platform-error: #e05252;
+  --platform-error-bg: color-mix(in srgb, #e05252 14%, var(--ata-verde-conde));
+  --platform-warning: #e6a817;
+  --platform-warning-bg: color-mix(in srgb, #e6a817 14%, var(--ata-verde-conde));
+  --platform-scrollbar-track: transparent;
+  --platform-scrollbar-thumb: color-mix(in srgb, var(--ata-creme) 28%, var(--ata-verde-conde));
+  --platform-scrollbar-thumb-hover: color-mix(in srgb, var(--ata-creme) 45%, var(--ata-verde-conde));
+}
+
+[data-platform-ui-theme='claro'] {
+  --platform-bg: var(--ata-creme);
+  --platform-surface: #ffffff;
+  --platform-surface-elevated: #ffffff;
+  --platform-border: var(--ata-cinza-areia);
+  --platform-text: var(--ata-verde-conde);
+  --platform-text-muted: color-mix(in srgb, var(--ata-verde-conde) 68%, transparent);
+  --platform-text-subtle: color-mix(in srgb, var(--ata-cinza-pedra) 85%, var(--ata-verde-conde));
+  --platform-accent: var(--ata-verde-broto);
+  --platform-accent-hover: var(--ata-verde-mata);
+  --platform-link: var(--ata-verde-folha);
+  --platform-link-hover: var(--ata-verde-broto);
+  --platform-focus-ring: color-mix(in srgb, var(--ata-verde-broto) 30%, transparent);
+  --platform-sidebar-bg: #ffffff;
+  --platform-sidebar-border: var(--ata-cinza-areia);
+  --platform-sidebar-text: var(--ata-verde-conde);
+  --platform-sidebar-muted: var(--ata-cinza-pedra);
+  --platform-sidebar-active-bg: color-mix(in srgb, var(--ata-verde-broto) 12%, transparent);
+  --platform-sidebar-hover-bg: color-mix(in srgb, var(--ata-verde-broto) 6%, transparent);
+  --platform-input-bg: #ffffff;
+  --platform-input-border: var(--ata-cinza-areia);
+  --platform-input-placeholder: var(--platform-text-subtle);
+  --platform-switch-track-on: var(--ata-verde-broto);
+  --platform-switch-track-off: var(--ata-cinza-areia);
+  --platform-table-header-bg: var(--ata-creme);
+  --platform-table-row-hover: color-mix(in srgb, var(--ata-verde-broto) 6%, #ffffff);
+  --platform-table-border: var(--ata-cinza-areia);
+  --platform-chart-grid: var(--ata-cinza-areia);
+  --platform-chart-axis: var(--ata-verde-conde);
+  --platform-success: var(--ata-verde-folha);
+  --platform-success-bg: color-mix(in srgb, var(--ata-verde-broto) 12%, #ffffff);
+  --platform-error: #c53030;
+  --platform-error-bg: color-mix(in srgb, #c53030 8%, #ffffff);
+  --platform-warning: #b7791f;
+  --platform-warning-bg: color-mix(in srgb, #e6a817 10%, #ffffff);
+  --platform-scrollbar-track: transparent;
+  --platform-scrollbar-thumb: var(--ata-cinza-areia);
+  --platform-scrollbar-thumb-hover: color-mix(in srgb, var(--ata-verde-broto) 25%, var(--ata-cinza-areia));
+}

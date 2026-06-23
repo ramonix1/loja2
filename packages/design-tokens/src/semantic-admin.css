@@ -1,0 +1,96 @@
+/**
+ * Nível 2 — Semânticos Admin (Ata Commerce azul).
+ * Toggle: data-admin-ui-theme="escuro" | "claro" no <html>.
+ * Sem !important — consumir var(--admin-*) ou classes .ds-*.
+ */
+
+:root,
+[data-admin-ui-theme='escuro'] {
+  --admin-bg: var(--ata-azul-hero-inicio);
+  --admin-surface: var(--ata-azul-noite);
+  --admin-surface-elevated: color-mix(in srgb, var(--ata-azul-noite) 85%, #000000);
+  --admin-border: color-mix(in srgb, var(--ata-azul-comercio) 22%, transparent);
+  --admin-text: #ffffff;
+  --admin-text-muted: var(--ata-azul-ceu);
+  --admin-text-subtle: color-mix(in srgb, var(--ata-azul-ceu) 55%, transparent);
+  --admin-accent: var(--ata-azul-comercio);
+  --admin-accent-hover: var(--ata-azul-vivido);
+  --admin-link: var(--ata-azul-vivido);
+  --admin-link-hover: var(--ata-azul-ceu);
+  --admin-focus-ring: color-mix(in srgb, var(--ata-azul-vivido) 45%, transparent);
+  --admin-sidebar-bg: var(--ata-azul-noite);
+  --admin-sidebar-border: color-mix(in srgb, var(--ata-azul-comercio) 22%, transparent);
+  --admin-sidebar-text: #ffffff;
+  --admin-sidebar-muted: color-mix(in srgb, var(--ata-azul-ceu) 80%, transparent);
+  --admin-sidebar-active-bg: color-mix(in srgb, var(--ata-azul-comercio) 18%, transparent);
+  --admin-sidebar-hover-bg: color-mix(in srgb, var(--ata-azul-comercio) 10%, transparent);
+  --admin-input-bg: color-mix(in srgb, var(--ata-azul-noite) 90%, #000000);
+  --admin-input-border: color-mix(in srgb, var(--ata-azul-comercio) 20%, transparent);
+  --admin-input-placeholder: var(--admin-text-subtle);
+  --admin-switch-track-on: var(--ata-azul-comercio);
+  --admin-switch-track-off: color-mix(in srgb, var(--ata-azul-noite) 70%, var(--ata-azul-gelo));
+  --admin-table-header-bg: color-mix(in srgb, var(--ata-azul-noite) 75%, var(--ata-azul-comercio));
+  --admin-table-row-hover: color-mix(in srgb, var(--ata-azul-comercio) 8%, var(--ata-azul-noite));
+  --admin-table-border: var(--admin-border);
+  --admin-chart-grid: color-mix(in srgb, var(--ata-azul-gelo) 22%, transparent);
+  --admin-chart-axis: var(--ata-azul-ceu);
+  --admin-badge-neutral-bg: color-mix(in srgb, var(--ata-azul-ceu) 18%, var(--ata-azul-noite));
+  --admin-badge-neutral-text: var(--ata-azul-ceu);
+  --admin-success: var(--ata-verde-broto);
+  --admin-success-bg: color-mix(in srgb, var(--ata-verde-broto) 18%, var(--ata-azul-noite));
+  --admin-success-text: color-mix(in srgb, var(--ata-verde-broto) 85%, #ffffff);
+  --admin-error: #e05252;
+  --admin-error-bg: color-mix(in srgb, #e05252 16%, var(--ata-azul-noite));
+  --admin-error-text: color-mix(in srgb, #ffb4b4 90%, #ffffff);
+  --admin-warning: #e6a817;
+  --admin-warning-bg: color-mix(in srgb, #e6a817 16%, var(--ata-azul-noite));
+  --admin-warning-text: color-mix(in srgb, #ffe08a 90%, #ffffff);
+  --admin-scrollbar-track: transparent;
+  --admin-scrollbar-thumb: color-mix(in srgb, var(--ata-azul-ceu) 32%, var(--ata-azul-noite));
+  --admin-scrollbar-thumb-hover: color-mix(in srgb, var(--ata-azul-ceu) 52%, var(--ata-azul-noite));
+}
+
+[data-admin-ui-theme='claro'] {
+  --admin-bg: var(--ata-azul-nevoa);
+  --admin-surface: #ffffff;
+  --admin-surface-elevated: #ffffff;
+  --admin-border: var(--ata-azul-gelo);
+  --admin-text: var(--ata-azul-noite);
+  --admin-text-muted: color-mix(in srgb, var(--ata-azul-noite) 70%, transparent);
+  --admin-text-subtle: color-mix(in srgb, var(--ata-azul-noite) 52%, transparent);
+  --admin-accent: var(--ata-azul-comercio);
+  --admin-accent-hover: var(--ata-azul-vivido);
+  --admin-link: var(--ata-azul-comercio);
+  --admin-link-hover: var(--ata-azul-vivido);
+  --admin-focus-ring: color-mix(in srgb, var(--ata-azul-comercio) 35%, transparent);
+  --admin-sidebar-bg: #ffffff;
+  --admin-sidebar-border: var(--ata-azul-gelo);
+  --admin-sidebar-text: var(--ata-azul-noite);
+  --admin-sidebar-muted: color-mix(in srgb, var(--ata-azul-noite) 62%, transparent);
+  --admin-sidebar-active-bg: color-mix(in srgb, var(--ata-azul-comercio) 12%, transparent);
+  --admin-sidebar-hover-bg: color-mix(in srgb, var(--ata-azul-comercio) 6%, transparent);
+  --admin-input-bg: #ffffff;
+  --admin-input-border: var(--ata-azul-gelo);
+  --admin-input-placeholder: var(--admin-text-subtle);
+  --admin-switch-track-on: var(--ata-azul-comercio);
+  --admin-switch-track-off: var(--ata-azul-gelo);
+  --admin-table-header-bg: var(--ata-azul-nevoa);
+  --admin-table-row-hover: color-mix(in srgb, var(--ata-azul-comercio) 6%, #ffffff);
+  --admin-table-border: var(--ata-azul-gelo);
+  --admin-chart-grid: var(--ata-azul-gelo);
+  --admin-chart-axis: var(--ata-azul-noite);
+  --admin-badge-neutral-bg: var(--ata-azul-nevoa);
+  --admin-badge-neutral-text: var(--ata-azul-noite);
+  --admin-success: var(--ata-verde-folha);
+  --admin-success-bg: color-mix(in srgb, var(--ata-verde-broto) 14%, #ffffff);
+  --admin-success-text: var(--ata-verde-conde);
+  --admin-error: #c53030;
+  --admin-error-bg: color-mix(in srgb, #c53030 10%, #ffffff);
+  --admin-error-text: #9b2c2c;
+  --admin-warning: #b7791f;
+  --admin-warning-bg: color-mix(in srgb, #e6a817 12%, #ffffff);
+  --admin-warning-text: #744210;
+  --admin-scrollbar-track: transparent;
+  --admin-scrollbar-thumb: var(--ata-azul-gelo);
+  --admin-scrollbar-thumb-hover: color-mix(in srgb, var(--ata-azul-comercio) 28%, var(--ata-azul-gelo));
+}

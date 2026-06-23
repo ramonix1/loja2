@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { Server as SocketIOServer, type ServerOptions } from 'socket.io';
 
 import { getTenant } from '../lib/tenant-db.js';
+import { isOriginAllowed } from '../lib/cors-config.js';
 import { findBotResponse } from '../modules/store-chat/store-chat.service.js';
 
 let io: SocketIOServer | null = null;
@@ -65,11 +66,9 @@ export async function registerSocketIO(app: FastifyInstance): Promise<void> {
   await app.ready();
 
   const corsOrigins: ServerOptions['cors'] = {
-    origin: [
-      (process.env.ADMIN_URL || 'http://localhost:5173').replace(/\/$/, ''),
-      (process.env.APP_URL || 'http://localhost:3000').replace(/\/$/, ''),
-      /^https?:\/\/localhost(:\d+)?$/,
-    ],
+    origin: (origin, callback) => {
+      callback(null, isOriginAllowed(origin));
+    },
     credentials: true,
   };
 
