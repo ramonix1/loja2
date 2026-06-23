@@ -78,6 +78,10 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm install --filter api... --filter e2e... --frozen-lockfile
 
+      # dist/ não vai pro git; containers CI montam o repo do runner (bind mount).
+      - name: Build workspace packages
+        run: pnpm turbo build --filter=@lojao/types --filter=@lojao/db
+
       - name: Verify Playwright CLI
         run: node apps/e2e/scripts/run-playwright.mjs --version
 
