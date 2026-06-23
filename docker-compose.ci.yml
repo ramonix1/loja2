@@ -8,6 +8,10 @@ services:
     environment:
       GITHUB_ACTIONS: "true"
       SKIP_DOCKER_DEPS_SYNC: "true"
+      # Mono-loja: evita login Merchant Hub ir para /admin/my-stores (demo+loja no mesmo DB).
+      BOOTSTRAP_TENANT_SLUGS: loja
+      MASTER_EMAIL: master@suaplataforma.com
+      MASTER_PASSWORD: troque-por-senha-forte-aqui
     volumes: !override
       - .:/app
       - upload_data:/app/data/uploads/images

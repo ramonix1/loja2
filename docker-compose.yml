@@ -37,6 +37,8 @@ services:
       EMAIL_USER: ${EMAIL_USER:-}
       EMAIL_PASS: ${EMAIL_PASS:-}
       EMAIL_FROM: ${EMAIL_FROM:-}
+      MASTER_EMAIL: ${MASTER_EMAIL:-master@suaplataforma.com}
+      MASTER_PASSWORD: ${MASTER_PASSWORD:-troque-por-senha-forte-aqui}
     depends_on:
       db:
         condition: service_healthy
