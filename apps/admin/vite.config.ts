@@ -12,10 +12,14 @@ const uiSrc = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../
  */
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '../..', '');
-  const apiTarget = (env.API_URL ?? env.VITE_API_PROXY_TARGET ?? 'http://localhost:3001').replace(
-    /\/$/,
-    '',
-  );
+  // Docker Compose injeta API_URL em process.env; loadEnv só lê arquivos .env.
+  const apiTarget = (
+    env.API_URL ??
+    process.env.API_URL ??
+    env.VITE_API_PROXY_TARGET ??
+    process.env.VITE_API_PROXY_TARGET ??
+    'http://localhost:3001'
+  ).replace(/\/$/, '');
 
   return {
     envDir: '../..',

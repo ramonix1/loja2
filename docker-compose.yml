@@ -67,6 +67,7 @@ services:
     ports:
       - "5173:5173"
     environment:
+      API_URL: http://api:3001
       VITE_API_URL: http://localhost:3001
       VITE_TENANT_SLUG: loja
       VITE_STOREFRONT_URL: http://localhost:3000

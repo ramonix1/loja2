@@ -74,11 +74,11 @@ export async function fetchMe(): Promise<AuthUser | null> {
 }
 
 export async function login(email: string, senha: string): Promise<AuthUser> {
-  const { data } = await apiFetch<{ data: AuthUser }>('/api/v1/auth/login', {
+  const { data } = await apiFetch<{ data: { user: AuthUser } }>('/api/v1/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ email, senha }),
+    body: JSON.stringify({ email, senha, tenantSlug: getClientTenantSlug() }),
   });
-  return data;
+  return data.user;
 }
 
 export async function logout(): Promise<void> {
