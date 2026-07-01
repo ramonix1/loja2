@@ -1,14 +1,21 @@
 import type pg from 'pg';
 
+import {
+  findActiveBotRespostas,
+  findConversaBotAtivo,
+  findOpenConversaBySession,
+  insertConversa,
+  insertMensagem,
+  touchConversaUpdatedAt,
+} from './store-chat.repository.js';
+
 const BOT_DELAY_MS =
   process.env.NODE_ENV === 'test' ? 0 : parseInt(process.env.BOT_RESPONSE_DELAY_MS ?? '900', 10);
 
 export async function findBotResponse(db: pg.Pool, mensagem: string): Promise<string | null> {
-  const r = await db.query(
-    `SELECT * FROM bot_respostas WHERE ativo = true ORDER BY ordem ASC, id ASC`,
-  );
+  const rows = await findActiveBotRespostas(db);
   const lower = mensagem.toLowerCase();
-  for (const row of r.rows as Array<{ palavra_chave: string; resposta: string }>) {
+  for (const row of rows) {
     const keywords = row.palavra_chave
       .toLowerCase()
       .split(',')
@@ -41,47 +48,37 @@ export async function sendStoreMessage(
   let conversaId = opts.conversaId;
 
   if (!conversaId) {
-    const existing = await db.query(
-      `SELECT id FROM conversas WHERE session_id = $1 AND status = 'aberta' ORDER BY created_at DESC LIMIT 1`,
-      [opts.sessionId],
-    );
-    if (existing.rows[0]) {
-      conversaId = Number(existing.rows[0].id);
+    const existingId = await findOpenConversaBySession(db, opts.sessionId);
+    if (existingId) {
+      conversaId = existingId;
     } else {
-      const nr = await db.query(
-        `INSERT INTO conversas (session_id, nome_visitante, usuario_id) VALUES ($1, $2, $3) RETURNING id`,
-        [opts.sessionId, (opts.nome || 'Visitante').slice(0, 100), opts.usuarioId ?? null],
+      conversaId = await insertConversa(
+        db,
+        opts.sessionId,
+        (opts.nome || 'Visitante').slice(0, 100),
+        opts.usuarioId ?? null,
       );
-      conversaId = Number(nr.rows[0]!.id);
     }
   }
 
-  const mr = await db.query(
-    `INSERT INTO mensagens (conversa_id, remetente, conteudo) VALUES ($1, 'cliente', $2) RETURNING *`,
-    [conversaId, conteudo],
-  );
-  await db.query(`UPDATE conversas SET updated_at = NOW() WHERE id = $1`, [conversaId]);
+  const mensagem = await insertMensagem(db, conversaId, 'cliente', conteudo);
+  await touchConversaUpdatedAt(db, conversaId);
 
-  const convR = await db.query(`SELECT bot_ativo FROM conversas WHERE id = $1`, [conversaId]);
   let botMensagem: Record<string, unknown> | undefined;
 
-  if (convR.rows[0]?.bot_ativo) {
+  if (await findConversaBotAtivo(db, conversaId)) {
     const resposta = await findBotResponse(db, conteudo);
     if (resposta) {
       if (BOT_DELAY_MS > 0) {
         await new Promise((resolve) => setTimeout(resolve, BOT_DELAY_MS));
       }
-      const br = await db.query(
-        `INSERT INTO mensagens (conversa_id, remetente, conteudo) VALUES ($1, 'bot', $2) RETURNING *`,
-        [conversaId, resposta],
-      );
-      botMensagem = br.rows[0] as Record<string, unknown>;
+      botMensagem = await insertMensagem(db, conversaId, 'bot', resposta);
     }
   }
 
   return {
     conversa_id: conversaId,
-    mensagem: mr.rows[0] as Record<string, unknown>,
+    mensagem,
     bot_mensagem: botMensagem,
   };
 }

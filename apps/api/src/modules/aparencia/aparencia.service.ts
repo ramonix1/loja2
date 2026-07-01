@@ -4,6 +4,7 @@ import { DEFAULT_STORE_THEME, parseStoreTheme } from '@lojao/types/store-theme';
 import type { Pool } from 'pg';
 
 import type { ImageStorage } from '../../ports/image-storage.js';
+import { fetchLojaConfigRows, upsertConfigRows } from './aparencia.repository.js';
 
 const DEFAULT_STORE_NAME = 'Ata Commerce Demo';
 
@@ -20,20 +21,16 @@ const DEFAULTS: AparenciaConfig = {
 };
 
 export async function getAparencia(db: Pool): Promise<AparenciaConfig> {
-  const r = await db.query(
-    "SELECT chave, valor FROM configuracoes WHERE chave LIKE 'loja_%'",
-  );
+  const rows = await fetchLojaConfigRows(db);
   const cfg = { ...DEFAULTS };
-  for (const row of r.rows as { chave: string; valor: string | null }[]) {
+  for (const row of rows) {
     const key = row.chave as keyof AparenciaConfig;
     if (key === 'loja_tema') continue;
     if (key in cfg) {
       cfg[key] = row.valor ?? '';
     }
   }
-  const temaRow = (r.rows as { chave: string; valor: string | null }[]).find(
-    (row) => row.chave === 'loja_tema',
-  );
+  const temaRow = rows.find((row) => row.chave === 'loja_tema');
   cfg.loja_tema = parseStoreTheme(temaRow?.valor);
   return cfg;
 }
@@ -74,11 +71,5 @@ export async function updateAparencia(
     pares.push(['loja_favicon', url]);
   }
 
-  for (const [chave, valor] of pares) {
-    await db.query(
-      `INSERT INTO configuracoes (chave, valor, updated_at) VALUES ($1, $2, NOW())
-       ON CONFLICT (chave) DO UPDATE SET valor = EXCLUDED.valor, updated_at = NOW()`,
-      [chave, valor],
-    );
-  }
+  await upsertConfigRows(db, pares);
 }

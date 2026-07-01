@@ -5,6 +5,10 @@ import type { TenantDatabase } from '@lojao/db';
 import type { Session } from '../plugins/session.js';
 
 declare module 'fastify' {
+  interface FastifyContextConfig {
+    rawBody?: boolean;
+  }
+
   interface FastifyRequest {
     /** Sessão compartilhada com o legacy (cookie `lojao.sid`). */
     session: Session;

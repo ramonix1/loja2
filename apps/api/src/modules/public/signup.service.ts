@@ -1,19 +1,21 @@
 import crypto from 'node:crypto';
 
 import {
-  SIGNUP_PLANS,
   isReservedSlug,
   signupAnnualPrice,
+  SIGNUP_PLANS,
   type SignupInput,
   type SignupPlanPublic,
   type SignupResult,
-} from '@lojao/types/signup';
-import { DEFAULT_LOJA_COR_PRIMARIA } from '@lojao/types/aparencia';
-import argon2 from 'argon2';
+} from './signup.schema.js';
 
-import { masterPool } from '../../lib/master-db.js';
-import { getTenant } from '../../lib/tenant-db.js';
 import { createTenant } from '../platform/platform.service.js';
+import {
+  insertTenantAdminBySlug,
+  insertTenantBillingTrial,
+  insertTenantConfigBySlug,
+  tenantSlugExists,
+} from './signup.repository.js';
 
 const TRIAL_DAYS = 14;
 
@@ -27,8 +29,7 @@ export async function checkSlugAvailability(slug: string): Promise<SlugAvailabil
   if (isReservedSlug(normalized)) {
     return { available: false, reason: 'RESERVED' };
   }
-  const existing = await masterPool.query('SELECT 1 FROM tenants WHERE slug = $1', [normalized]);
-  if (existing.rows.length > 0) {
+  if (await tenantSlugExists(normalized)) {
     return { available: false, reason: 'TAKEN' };
   }
   return { available: true };
@@ -79,74 +80,6 @@ function adminBaseUrl(): string {
   ).replace(/\/$/, '');
 }
 
-async function ensureBillingPlan(planSlug: 'starter' | 'professional'): Promise<string> {
-  const plan = SIGNUP_PLANS.find((p) => p.slug === planSlug)!;
-  await masterPool.query(
-    `INSERT INTO billing_plans (name, slug, billing_type, price)
-     VALUES ($1, $2, 'fixed', $3)
-     ON CONFLICT (slug) DO NOTHING`,
-    [plan.name, plan.slug, plan.priceMonthly],
-  );
-  const res = await masterPool.query<{ id: string }>(
-    'SELECT id FROM billing_plans WHERE slug = $1',
-    [plan.slug],
-  );
-  return res.rows[0]!.id;
-}
-
-async function registerTrialBilling(
-  tenantId: number,
-  planSlug: 'starter' | 'professional',
-): Promise<Date> {
-  const planId = await ensureBillingPlan(planSlug);
-  const plan = SIGNUP_PLANS.find((p) => p.slug === planSlug)!;
-  const trialEndsAt = new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
-
-  await masterPool.query(
-    `INSERT INTO tenant_billing
-       (tenant_id, plan_id, billing_type, monthly_fee, trial_ends_at, next_billing_date, status)
-     VALUES ($1, $2, 'fixed', $3, $4, $4, 'trialing')
-     ON CONFLICT (tenant_id) DO UPDATE SET
-       plan_id = $2, billing_type = 'fixed', monthly_fee = $3,
-       trial_ends_at = $4, next_billing_date = $4, status = 'trialing', updated_at = NOW()`,
-    [tenantId, planId, plan.priceMonthly, trialEndsAt],
-  );
-
-  return trialEndsAt;
-}
-
-async function createTenantAdmin(slug: string, admin: SignupInput['admin']): Promise<void> {
-  const { pool } = await getTenant(slug);
-  const senhaHash = await argon2.hash(admin.senha, {
-    type: argon2.argon2id,
-    memoryCost: 65536,
-    timeCost: 3,
-    parallelism: 4,
-  });
-  await pool.query(
-    `INSERT INTO usuarios (nome, email, senha_hash, role, ativo)
-     VALUES ($1, $2, $3, 'admin', true)
-     ON CONFLICT (email) DO NOTHING`,
-    [admin.nome, admin.email, senhaHash],
-  );
-}
-
-async function seedTenantConfig(slug: string, lojaNome: string): Promise<void> {
-  const { pool } = await getTenant(slug);
-  // Em dev/test os tenants compartilham o banco (configuracoes tem `chave` como
-  // PK única) — ON CONFLICT DO NOTHING evita sobrescrever a config existente.
-  // Em produção cada tenant tem banco próprio e a config é semeada do zero.
-  await pool.query(
-    `INSERT INTO configuracoes (chave, valor) VALUES
-       ('loja_nome', $1),
-       ('loja_cor_primaria', $2),
-       ('loja_tema', 'escuro'),
-       ('loja_slogan', '')
-     ON CONFLICT (chave) DO NOTHING`,
-    [lojaNome, DEFAULT_LOJA_COR_PRIMARIA],
-  );
-}
-
 /**
  * Provisiona uma loja self-service: tenant (master) + admin (tenant) + config
  * mínima + billing trial 14d. Reutiliza `createTenant` da Fase F.
@@ -184,8 +117,8 @@ export async function provisionSignup(
   }
 
   try {
-    await createTenantAdmin(slug, input.admin);
-    await seedTenantConfig(slug, input.loja.nome);
+    await insertTenantAdminBySlug(slug, input.admin);
+    await insertTenantConfigBySlug(slug, input.loja.nome);
   } catch (err) {
     log(`[signup] erro ao provisionar admin/config para ${slug}: ${String(err)}`);
     return {
@@ -198,7 +131,8 @@ export async function provisionSignup(
   let trialEndsAt: string | undefined;
   if (input.trial) {
     try {
-      const ends = await registerTrialBilling(created.tenant.id, input.planSlug);
+      const ends = new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
+      await insertTenantBillingTrial(created.tenant.id, input.planSlug, ends);
       trialEndsAt = ends.toISOString();
       // Stub de cobrança real (G.2 fará gateway + webhook).
       log(

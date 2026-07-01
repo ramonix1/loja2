@@ -2,6 +2,14 @@ import argon2 from 'argon2';
 import type { AdminPermissao, CreateAdminInput } from '@lojao/types/permissoes';
 import type pg from 'pg';
 
+import {
+  deleteAdminById,
+  findAllAdmins,
+  findUserByEmail,
+  insertAdmin,
+  toggleAdminAtivo,
+} from './permissoes.repository.js';
+
 const ARGON2_OPTIONS = {
   type: argon2.argon2id,
   memoryCost: 65536,
@@ -29,27 +37,9 @@ function formatCpf(cpf: string): string {
   return n.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
 }
 
-function mapAdmin(row: Record<string, unknown>): AdminPermissao {
-  return {
-    id: Number(row.id),
-    nome: String(row.nome),
-    email: String(row.email),
-    cpf: (row.cpf as string | null) ?? null,
-    ativo: Boolean(row.ativo),
-    ultimo_acesso: row.ultimo_acesso ? String(row.ultimo_acesso) : null,
-    created_at: String(row.created_at),
-  };
-}
-
 /** Porta `authController.exibirPermissoes`. */
 export async function listAdmins(db: pg.Pool): Promise<AdminPermissao[]> {
-  const r = await db.query(
-    `SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at
-     FROM usuarios
-     WHERE role = 'admin'
-     ORDER BY created_at DESC`,
-  );
-  return r.rows.map(mapAdmin);
+  return findAllAdmins(db);
 }
 
 export type CreateAdminResult =
@@ -66,24 +56,22 @@ export async function createAdmin(
     return { ok: false, code: 'VALIDATION_ERROR', message: 'CPF inválido.' };
   }
 
-  const existe = await db.query('SELECT id FROM usuarios WHERE email = $1', [
-    input.email.toLowerCase().trim(),
-  ]);
-  if (existe.rows[0]) {
+  const email = input.email.toLowerCase().trim();
+  if (await findUserByEmail(db, email)) {
     return { ok: false, code: 'EMAIL_EXISTS', message: 'Email já cadastrado.' };
   }
 
   const cpfLimpo = input.cpf?.trim() ? formatCpf(input.cpf) : null;
   const senhaHash = await argon2.hash(input.senha, ARGON2_OPTIONS);
 
-  const inserted = await db.query(
-    `INSERT INTO usuarios (nome, email, senha_hash, role, cpf)
-     VALUES ($1, $2, $3, 'admin', $4)
-     RETURNING id, nome, email, cpf, ativo, ultimo_acesso, created_at`,
-    [input.nome.trim(), input.email.toLowerCase().trim(), senhaHash, cpfLimpo],
-  );
+  const admin = await insertAdmin(db, {
+    nome: input.nome.trim(),
+    email,
+    senhaHash,
+    cpf: cpfLimpo,
+  });
 
-  return { ok: true, admin: mapAdmin(inserted.rows[0]!) };
+  return { ok: true, admin };
 }
 
 /** Porta `authController.toggleAdmin`. */
@@ -93,12 +81,7 @@ export async function toggleAdmin(
   currentUserId: number,
 ): Promise<'ok' | 'self' | 'not_found'> {
   if (id === currentUserId) return 'self';
-
-  const r = await db.query(
-    'UPDATE usuarios SET ativo = NOT ativo WHERE id = $1 AND role = $2 RETURNING id',
-    [id, 'admin'],
-  );
-  if ((r.rowCount ?? 0) === 0) return 'not_found';
+  if (!(await toggleAdminAtivo(db, id))) return 'not_found';
   return 'ok';
 }
 
@@ -109,10 +92,6 @@ export async function deleteAdmin(
   currentUserId: number,
 ): Promise<'ok' | 'self' | 'not_found'> {
   if (id === currentUserId) return 'self';
-
-  const r = await db.query("DELETE FROM usuarios WHERE id = $1 AND role = 'admin' RETURNING id", [
-    id,
-  ]);
-  if ((r.rowCount ?? 0) === 0) return 'not_found';
+  if (!(await deleteAdminById(db, id))) return 'not_found';
   return 'ok';
 }

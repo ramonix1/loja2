@@ -4,21 +4,7 @@ import type {
 } from '@lojao/types/configuracoes';
 import type pg from 'pg';
 
-const CONFIG_KEYS = [
-  'controla_estoque',
-  'reservar_estoque_carrinho',
-  'modulo_agenda',
-  'habilitar_sumup',
-  'frete_cep_origem',
-  'frete_fixo',
-  'frete_gratis_acima',
-  'melhor_envio_token',
-  'melhor_envio_sandbox',
-  'frete_peso_padrao',
-  'frete_altura',
-  'frete_largura',
-  'frete_comprimento',
-] as const;
+import { fetchConfigRows, upsertConfigRow } from './configuracoes.repository.js';
 
 const DEFAULTS: ConfiguracoesConfig = {
   controla_estoque: false,
@@ -79,11 +65,8 @@ function mapRowToConfig(rows: { chave: string; valor: string | null }[]): Config
 /** Porta `configController.getConfigs` — chaves operacionais da loja. */
 export async function getConfiguracoes(db: pg.Pool): Promise<ConfiguracoesConfig> {
   try {
-    const r = await db.query(
-      `SELECT chave, valor FROM configuracoes WHERE chave = ANY($1::text[])`,
-      [CONFIG_KEYS],
-    );
-    return mapRowToConfig(r.rows as { chave: string; valor: string | null }[]);
+    const rows = await fetchConfigRows(db);
+    return mapRowToConfig(rows);
   } catch {
     return { ...DEFAULTS };
   }
@@ -111,11 +94,7 @@ export async function updateConfiguracoes(
   ];
 
   for (const [chave, valor] of pares) {
-    await db.query(
-      `INSERT INTO configuracoes (chave, valor, updated_at) VALUES ($1, $2, NOW())
-       ON CONFLICT (chave) DO UPDATE SET valor = EXCLUDED.valor, updated_at = NOW()`,
-      [chave, valor],
-    );
+    await upsertConfigRow(db, chave, valor);
   }
 
   return getConfiguracoes(db);
