@@ -50,7 +50,7 @@ function pgSsl(): boolean | { rejectUnauthorized: false } {
   return sslEnabled ? { rejectUnauthorized: false } : false;
 }
 
-/** Aplica migrations Drizzle (baseline + futuras). Idempotente com IF NOT EXISTS no baseline. */
+/** Aplica migrations Drizzle (uma por tabela/grupo + futuras). Idempotente com IF NOT EXISTS. */
 export async function runMigrations(connectionString?: string): Promise<void> {
   const url = connectionString ?? process.env.DATABASE_URL;
   if (!url) {

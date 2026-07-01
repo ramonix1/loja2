@@ -6,14 +6,19 @@ import type {
 } from '@lojao/types/agenda';
 import type pg from 'pg';
 
+import {
+  countAgendamentosByDateInRange,
+  countAgendamentosConfirmados,
+  deleteAgendaDiaEspecial,
+  findAgendaConfig,
+  findAgendaDiaEspecial,
+  findAgendaDiasEspeciaisInRange,
+  upsertAgendaConfig,
+  upsertAgendaDiaEspecial,
+} from './agenda.repository.js';
+
 export async function getAgendaConfig(db: pg.Pool): Promise<AgendaConfig> {
-  const r = await db.query('SELECT * FROM agenda_config WHERE id = 1');
-  const row = r.rows[0];
-  return {
-    capacidade_diaria: Number(row?.capacidade_diaria ?? 1),
-    antecedencia_minima_dias: Number(row?.antecedencia_minima_dias ?? 1),
-    antecedencia_maxima_dias: Number(row?.antecedencia_maxima_dias ?? 180),
-  };
+  return findAgendaConfig(db);
 }
 
 function parseMes(mes?: string): { mes: string; ano: number; mesNum: number; lastDay: number } {
@@ -28,9 +33,7 @@ function parseMes(mes?: string): { mes: string; ano: number; mesNum: number; las
 /** Porta `agendaController.getDisponibilidade`. */
 export async function getDisponibilidade(db: pg.Pool, data: string) {
   const config = await getAgendaConfig(db);
-
-  const especial = await db.query('SELECT * FROM agenda_dias_especiais WHERE data = $1', [data]);
-  const e = especial.rows[0] as { capacidade: number | null; motivo: string | null } | undefined;
+  const e = await findAgendaDiaEspecial(db, data);
 
   let capacidade = config.capacidade_diaria;
   let bloqueado = false;
@@ -49,11 +52,7 @@ export async function getDisponibilidade(db: pg.Pool, data: string) {
     return { disponivel: false, vagas_total: 0, vagas_usadas: 0, vagas_livres: 0, bloqueado: true, motivo };
   }
 
-  const r = await db.query(
-    "SELECT COUNT(*) FROM agendamentos WHERE data_evento = $1 AND status = 'confirmado'",
-    [data],
-  );
-  const vagas_usadas = parseInt(String(r.rows[0]?.count ?? 0), 10);
+  const vagas_usadas = await countAgendamentosConfirmados(db, data);
   const vagas_livres = Math.max(0, capacidade - vagas_usadas);
 
   return {
@@ -74,27 +73,10 @@ export async function getAgendaAdmin(db: pg.Pool, mesParam?: string): Promise<Ag
   const inicio = `${mes}-01`;
   const fim = `${mes}-${pad(lastDay)}`;
 
-  const [especiaisRes, agendadosRes] = await Promise.all([
-    db.query(
-      `SELECT data::text AS data, capacidade, motivo
-       FROM agenda_dias_especiais
-       WHERE data BETWEEN $1 AND $2
-       ORDER BY data`,
-      [inicio, fim],
-    ),
-    db.query(
-      `SELECT data_evento::text AS data, COUNT(*)::int AS count
-       FROM agendamentos
-       WHERE data_evento BETWEEN $1 AND $2 AND status = 'confirmado'
-       GROUP BY data_evento`,
-      [inicio, fim],
-    ),
+  const [especiais, agendadosMap] = await Promise.all([
+    findAgendaDiasEspeciaisInRange(db, inicio, fim),
+    countAgendamentosByDateInRange(db, inicio, fim),
   ]);
-
-  const agendadosMap: Record<string, number> = {};
-  for (const row of agendadosRes.rows as { data: string; count: number }[]) {
-    agendadosMap[row.data] = Number(row.count);
-  }
 
   return {
     config,
@@ -102,11 +84,7 @@ export async function getAgendaAdmin(db: pg.Pool, mesParam?: string): Promise<Ag
     ano,
     mesNum,
     lastDay,
-    especiais: especiaisRes.rows.map((e) => ({
-      data: String(e.data).slice(0, 10),
-      capacidade: e.capacidade === null ? null : Number(e.capacidade),
-      motivo: (e.motivo as string | null) ?? null,
-    })),
+    especiais,
     agendadosMap,
   };
 }
@@ -116,33 +94,16 @@ export async function updateAgendaConfig(
   db: pg.Pool,
   input: UpdateAgendaConfigInput,
 ): Promise<AgendaConfig> {
-  await db.query(
-    `INSERT INTO agenda_config (id, capacidade_diaria, antecedencia_minima_dias, antecedencia_maxima_dias, updated_at)
-     VALUES (1, $1, $2, $3, NOW())
-     ON CONFLICT (id) DO UPDATE SET
-       capacidade_diaria = $1,
-       antecedencia_minima_dias = $2,
-       antecedencia_maxima_dias = $3,
-       updated_at = NOW()`,
-    [input.capacidade_diaria, input.antecedencia_minima_dias, input.antecedencia_maxima_dias],
-  );
+  await upsertAgendaConfig(db, input);
   return getAgendaConfig(db);
 }
 
 /** Porta `agendaController.salvarDia`. */
 export async function saveAgendaDia(db: pg.Pool, input: SaveAgendaDiaInput): Promise<void> {
-  const cap =
-    input.capacidade === undefined || input.capacidade === null ? null : Number(input.capacidade);
-  await db.query(
-    `INSERT INTO agenda_dias_especiais (data, capacidade, motivo)
-     VALUES ($1, $2, $3)
-     ON CONFLICT (data) DO UPDATE SET capacidade = $2, motivo = $3`,
-    [input.data, cap, input.motivo ?? null],
-  );
+  await upsertAgendaDiaEspecial(db, input);
 }
 
 /** Porta `agendaController.removerDia`. */
 export async function removeAgendaDia(db: pg.Pool, data: string): Promise<boolean> {
-  const r = await db.query('DELETE FROM agenda_dias_especiais WHERE data = $1', [data]);
-  return (r.rowCount ?? 0) > 0;
+  return deleteAgendaDiaEspecial(db, data);
 }

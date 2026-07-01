@@ -44,8 +44,10 @@ async function tableExists(pool: pg.Pool, name: string): Promise<boolean> {
   return res.rows[0]?.reg != null;
 }
 
-describe('db:migrate baseline', () => {
-  it('aplica baseline e garante tabelas master + tenant', async () => {
+const EXPECTED_MIGRATION_COUNT = 31;
+
+describe('db:migrate', () => {
+  it('aplica migrations granulares e garante tabelas master + tenant', async () => {
     const connectionString =
       process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5432/lojao';
 
@@ -60,7 +62,7 @@ describe('db:migrate baseline', () => {
       const journal = await pool.query(
         `SELECT COUNT(*)::int AS c FROM drizzle.__drizzle_migrations`,
       );
-      expect(journal.rows[0]?.c).toBeGreaterThanOrEqual(1);
+      expect(journal.rows[0]?.c).toBeGreaterThanOrEqual(EXPECTED_MIGRATION_COUNT);
     } finally {
       await pool.end();
     }

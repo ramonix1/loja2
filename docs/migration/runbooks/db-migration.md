@@ -3,9 +3,22 @@
 ## Visão geral
 
 - Pacote: `packages/db` (`@lojao/db`)
-- Baseline: `packages/db/drizzle/0000_baseline.sql` — espelha schema legacy **sem alterar dados**
+- Migrations: `packages/db/drizzle/` — **31 arquivos granulares** (extensões, master, billing, tenant, webhooks)
+- Ordem e journal: `packages/db/drizzle/meta/_journal.json`
 - Novas alterações de banco: **somente** via `drizzle-kit generate` + `db:migrate`
 - Multi-tenant: **opção A** — instância Drizzle por tenant (cache por slug), compatível com `tenants` + `getPool(slug)`
+
+### Estrutura das migrations iniciais
+
+| Prefixo | Conteúdo |
+|---------|----------|
+| `0000_extensions` | `pgcrypto` |
+| `0001`–`0004` | Master: `tenants`, `sessao`, `platform_config`, `leads` |
+| `0005`–`0008` | Billing: `billing_plans`, `tenant_billing`, `invoices`, `commission_transactions` |
+| `0009`–`0029` | Tenant: uma migration por tabela (usuários, produtos, pedidos, chat, etc.) |
+| `0030_webhook_events` | Idempotência de webhooks |
+
+Todas usam `IF NOT EXISTS` / `ON CONFLICT DO NOTHING` — seguras em banco já provisionado.
 
 ## Comandos
 
@@ -39,7 +52,14 @@ make db-migrate     # cria todas as tabelas
 make seed           # popula tenant loja (api seed:dev)
 ```
 
-O legacy `init-db.js` / `tenantSchema.js` continuam funcionando em paralelo até Fase 8; a baseline Drizzle é **idempotente** (`IF NOT EXISTS`).
+O bootstrap da API aplica migrations no boot; a baseline Drizzle é **idempotente** (`IF NOT EXISTS`).
+
+## Bancos que já rodaram `0000_baseline` (legado)
+
+Se `drizzle.__drizzle_migrations` contém apenas o registro antigo `0000_baseline`:
+
+- **Dev:** `make db-reset && make db-up-d` (recomendado)
+- **Produção / dados preservados:** rodar `make db-migrate` — as 31 migrations novas executam com `IF NOT EXISTS` e registram entradas adicionais no journal; o registro órfão de `0000_baseline` pode permanecer sem impacto funcional
 
 ## Módulos API migrados para Drizzle (Fase 7)
 
@@ -67,7 +87,7 @@ pnpm test:e2e:smoke              # regressão UI
 
 ## Rollback
 
-Baseline não altera dados existentes. Para reverter uma migration futura:
+Migrations iniciais não alteram dados existentes. Para reverter uma migration futura:
 
 1. Restaurar backup do Postgres
 2. Ou criar migration compensatória (preferível a editar migration já aplicada)

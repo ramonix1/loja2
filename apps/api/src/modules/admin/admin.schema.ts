@@ -8,3 +8,14 @@ export const pedidosQuerySchema = z.object({
 });
 
 export type PedidosQuery = z.infer<typeof pedidosQuerySchema>;
+
+export interface PedidoResumo {
+  id: number;
+  created_at: string;
+  status: string;
+  total: number;
+  metodo_pagamento: string | null;
+  total_itens: number;
+  cliente_nome: string | null;
+  cliente_email: string | null;
+}

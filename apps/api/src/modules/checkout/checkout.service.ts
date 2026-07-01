@@ -2,51 +2,40 @@ import type pg from 'pg';
 
 import { getConfigs, getLojaInfo } from '../../lib/config.js';
 import { validateCheckoutData } from '../../lib/validation.js';
-import { getAgendaConfig, getDisponibilidade } from '../agenda/agenda.service.js';
-import { getCartItems } from '../cart/cart.service.js';
-import { recordCommissionOnOrder } from '../../services/billing.service.js';
 import { enviarNotificacaoPedidoPago } from '../../services/email.service.js';
 import * as stripeService from '../../services/stripe.service.js';
 import * as sumupService from '../../services/sumup.service.js';
+import { getAgendaConfig, getDisponibilidade } from '../agenda/agenda.service.js';
+import { recordCommissionOnOrder } from '../billing/billing.service.js';
+import { getCartItems } from '../cart/cart.service.js';
+import type { CartItem } from '../cart/cart.service.js';
+import {
+  decrementProductStock,
+  deleteCartItemsByUser,
+  findLatestPagamento,
+  findPedidoById,
+  findPedidoByIdAndUser,
+  findPedidoItens,
+  findProductStock,
+  insertAgendamento,
+  insertMovimentacaoEstoque,
+  insertPagamento,
+  insertPedido,
+  insertPedidoItem,
+  updatePedidoStatusAndPayment,
+} from './checkout.repository.js';
+import type { CheckoutInput, CheckoutResult } from './checkout.schema.js';
 
-export interface CheckoutInput {
-  nome_entrega: string;
-  email_entrega: string;
-  telefone_entrega?: string;
-  cpf_entrega?: string;
-  cep: string;
-  logradouro: string;
-  numero: string;
-  complemento?: string;
-  bairro?: string;
-  cidade: string;
-  estado: string;
-  metodo_pagamento: string;
-  data_evento?: string;
-  stripe_payment_method_id?: string;
-  frete_valor?: number;
-  frete_servico?: string;
-}
-
-export type CheckoutResult =
-  | {
-      ok: true;
-      pedido_id: number;
-      status: string;
-      redirect_url?: string;
-    }
-  | { ok: false; error: string; code: string; status: number };
-
-async function notificarPedidoPago(db: pg.Pool, pedidoId: number, itens: Awaited<ReturnType<typeof getCartItems>>) {
+async function notificarPedidoPago(db: pg.Pool, pedidoId: number, itens: CartItem[]) {
   try {
     const loja = await getLojaInfo(db);
     if (!loja.email) return;
-    const pedidoRes = await db.query('SELECT * FROM pedidos WHERE id = $1', [pedidoId]);
-    if (!pedidoRes.rows[0]) return;
+    const pedido = await findPedidoById(db, pedidoId);
+    if (!pedido) return;
     await enviarNotificacaoPedidoPago({
       lojaNome: loja.nome,
       lojaEmail: loja.email,
-      pedido: pedidoRes.rows[0] as { id: number; total: number; metodo_pagamento?: string },
+      pedido: pedido as { id: number; total: number; metodo_pagamento?: string },
       itens: itens.map((i) => ({
         quantidade: i.quantidade,
         nome: i.nome,
@@ -132,12 +121,10 @@ export async function processCheckout(
       return { ok: false, error: 'Carrinho vazio.', code: 'EMPTY_CART', status: 400 };
     }
 
-    // Verificar estoque antes de criar pedido
     if (configs.controla_estoque === 'true') {
       for (const item of itens) {
-        const prod = await db.query('SELECT estoque FROM produtos WHERE id = $1', [item.produto_id]);
-        const estoque = prod.rows[0]?.estoque as number | null;
-        if (estoque !== null && item.quantidade > estoque) {
+        const estoque = await findProductStock(db, item.produto_id);
+        if (estoque !== null && estoque !== undefined && item.quantidade > estoque) {
           await db.query('ROLLBACK');
           return {
             ok: false,
@@ -154,65 +141,46 @@ export async function processCheckout(
     const freteServico = (input.frete_servico || '').slice(0, 100);
     const total = subtotal + frete;
 
-    const pedidoRes = await db.query<{ id: number }>(
-      `INSERT INTO pedidos
-         (usuario_id, nome_entrega, email_entrega, telefone_entrega, cpf_entrega,
-          cep, logradouro, numero, complemento, bairro, cidade, estado,
-          subtotal, frete, frete_servico, total, status, metodo_pagamento)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,'aguardando_pagamento',$17)
-       RETURNING id`,
-      [
-        usuarioId,
-        input.nome_entrega,
-        input.email_entrega,
-        input.telefone_entrega ?? null,
-        input.cpf_entrega ?? null,
-        input.cep,
-        input.logradouro,
-        input.numero,
-        input.complemento ?? null,
-        input.bairro ?? null,
-        input.cidade,
-        input.estado,
-        subtotal,
-        frete,
-        freteServico,
-        total,
-        input.metodo_pagamento,
-      ],
-    );
-
-    const pedidoId = pedidoRes.rows[0]!.id;
+    const pedidoId = await insertPedido(db, {
+      usuarioId,
+      nome_entrega: input.nome_entrega,
+      email_entrega: input.email_entrega,
+      telefone_entrega: input.telefone_entrega ?? null,
+      cpf_entrega: input.cpf_entrega ?? null,
+      cep: input.cep,
+      logradouro: input.logradouro,
+      numero: input.numero,
+      complemento: input.complemento ?? null,
+      bairro: input.bairro ?? null,
+      cidade: input.cidade,
+      estado: input.estado,
+      subtotal,
+      frete,
+      freteServico,
+      total,
+      metodo_pagamento: input.metodo_pagamento,
+    });
 
     for (const item of itens) {
-      await db.query(
-        `INSERT INTO pedido_itens (pedido_id, produto_id, nome_produto, quantidade, preco_unitario, subtotal)
-         VALUES ($1, $2, $3, $4, $5, $6)`,
-        [pedidoId, item.produto_id, item.nome, item.quantidade, item.preco_unitario, item.subtotal],
+      await insertPedidoItem(
+        db,
+        pedidoId,
+        item.produto_id,
+        item.nome,
+        item.quantidade,
+        item.preco_unitario,
+        item.subtotal,
       );
     }
 
     if (moduloAgenda && input.data_evento) {
-      await db.query('INSERT INTO agendamentos (pedido_id, data_evento) VALUES ($1, $2)', [
-        pedidoId,
-        input.data_evento,
-      ]);
-      await db.query('UPDATE pedidos SET data_evento = $1 WHERE id = $2', [
-        input.data_evento,
-        pedidoId,
-      ]);
+      await insertAgendamento(db, pedidoId, input.data_evento);
     }
 
     if (configs.controla_estoque === 'true') {
       for (const item of itens) {
-        await db.query(
-          'UPDATE produtos SET estoque = GREATEST(0, estoque - $1), updated_at = NOW() WHERE id = $2 AND estoque IS NOT NULL',
-          [item.quantidade, item.produto_id],
-        );
-        await db.query(
-          'INSERT INTO movimentacoes_estoque (produto_id, tipo, quantidade, origem, origem_id) VALUES ($1, $2, $3, $4, $5)',
-          [item.produto_id, 'saida', item.quantidade, 'pedido', pedidoId],
-        ).catch(() => {});
+        await decrementProductStock(db, item.produto_id, item.quantidade);
+        await insertMovimentacaoEstoque(db, item.produto_id, item.quantidade, pedidoId);
       }
     }
 
@@ -231,16 +199,17 @@ export async function processCheckout(
         return { ok: false, error: 'Método inválido.', code: 'INVALID_PAYMENT', status: 400 };
       }
 
-      await db.query(
-        `INSERT INTO pagamentos (pedido_id, mp_payment_id, status, status_mp, valor, metodo, resposta_json)
-         VALUES ($1, $2, 'pago', 'approved', $3, 'teste', $4)`,
-        [pedidoId, `TESTE-${pedidoId}`, total, JSON.stringify({ test: true })],
-      );
-      await db.query("UPDATE pedidos SET status = 'pago', mp_payment_id = $1 WHERE id = $2", [
-        `TESTE-${pedidoId}`,
+      await insertPagamento(db, {
         pedidoId,
-      ]);
-      await db.query('DELETE FROM carrinho_itens WHERE usuario_id = $1', [usuarioId]);
+        mpPaymentId: `TESTE-${pedidoId}`,
+        status: 'pago',
+        statusMp: 'approved',
+        valor: total,
+        metodo: 'teste',
+        respostaJson: JSON.stringify({ test: true }),
+      });
+      await updatePedidoStatusAndPayment(db, pedidoId, 'pago', `TESTE-${pedidoId}`);
+      await deleteCartItemsByUser(db, usuarioId);
       await db.query('COMMIT');
 
       void notificarPedidoPago(db, pedidoId, itens);
@@ -258,16 +227,17 @@ export async function processCheckout(
         redirectUrl: `${process.env.APP_URL ?? 'http://localhost:3000'}/checkout/resultado/${pedidoId}`,
       });
 
-      await db.query(
-        `INSERT INTO pagamentos (pedido_id, mp_payment_id, status, status_mp, valor, metodo, resposta_json)
-         VALUES ($1, $2, 'pendente', 'PENDING', $3, 'sumup_online', $4)`,
-        [pedidoId, checkoutSumup.id, total, JSON.stringify(checkoutSumup)],
-      );
-      await db.query(
-        "UPDATE pedidos SET status = 'aguardando_pagamento', mp_payment_id = $1 WHERE id = $2",
-        [checkoutSumup.id, pedidoId],
-      );
-      await db.query('DELETE FROM carrinho_itens WHERE usuario_id = $1', [usuarioId]);
+      await insertPagamento(db, {
+        pedidoId,
+        mpPaymentId: checkoutSumup.id,
+        status: 'pendente',
+        statusMp: 'PENDING',
+        valor: total,
+        metodo: 'sumup_online',
+        respostaJson: JSON.stringify(checkoutSumup),
+      });
+      await updatePedidoStatusAndPayment(db, pedidoId, 'aguardando_pagamento', checkoutSumup.id);
+      await deleteCartItemsByUser(db, usuarioId);
       await db.query('COMMIT');
 
       return {
@@ -311,25 +281,22 @@ export async function processCheckout(
 
     const statusInterno = stripeService.mapearStatus(stripeResult.status);
 
-    await db.query(
-      `INSERT INTO pagamentos (pedido_id, mp_payment_id, status, status_mp, valor, metodo, resposta_json)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [
-        pedidoId,
-        stripeResult.id,
-        statusInterno,
-        stripeResult.status,
-        total,
-        input.metodo_pagamento,
-        JSON.stringify(stripeResult),
-      ],
-    );
+    await insertPagamento(db, {
+      pedidoId,
+      mpPaymentId: stripeResult.id,
+      status: statusInterno,
+      statusMp: stripeResult.status,
+      valor: total,
+      metodo: input.metodo_pagamento,
+      respostaJson: JSON.stringify(stripeResult),
+    });
 
-    await db.query("UPDATE pedidos SET status = $1, mp_payment_id = $2 WHERE id = $3", [
+    await updatePedidoStatusAndPayment(
+      db,
+      pedidoId,
       statusInterno === 'pago' ? 'pago' : 'aguardando_pagamento',
       stripeResult.id,
-      pedidoId,
-    ]);
+    );
 
     let redirectUrl: string | undefined;
     if (
@@ -340,7 +307,7 @@ export async function processCheckout(
       redirectUrl = stripeResult.next_action.redirect_to_url?.url ?? undefined;
     }
 
-    await db.query('DELETE FROM carrinho_itens WHERE usuario_id = $1', [usuarioId]);
+    await deleteCartItemsByUser(db, usuarioId);
     await db.query('COMMIT');
 
     if (statusInterno === 'pago') {
@@ -367,20 +334,12 @@ export async function processCheckout(
 }
 
 export async function getCheckoutResult(db: pg.Pool, usuarioId: number, pedidoId: number) {
-  const pedidoRes = await db.query(
-    `SELECT p.* FROM pedidos p WHERE p.id = $1 AND p.usuario_id = $2`,
-    [pedidoId, usuarioId],
-  );
-  if (!pedidoRes.rows[0]) return null;
+  const pedido = await findPedidoByIdAndUser(db, pedidoId, usuarioId);
+  if (!pedido) return null;
 
-  const itensRes = await db.query('SELECT * FROM pedido_itens WHERE pedido_id = $1', [pedidoId]);
-  const pagamentoRes = await db.query(
-    'SELECT * FROM pagamentos WHERE pedido_id = $1 ORDER BY id DESC LIMIT 1',
-    [pedidoId],
-  );
+  const itens = await findPedidoItens(db, pedidoId);
+  const pagamento = await findLatestPagamento(db, pedidoId);
 
-  const pedido = pedidoRes.rows[0] as Record<string, unknown>;
-  const pagamento = pagamentoRes.rows[0] as Record<string, unknown> | undefined;
   let pixInfo: Record<string, unknown> | null = null;
   let boletoUrl: string | null = null;
 
@@ -404,5 +363,5 @@ export async function getCheckoutResult(db: pg.Pool, usuarioId: number, pedidoId
     }
   }
 
-  return { pedido, itens: itensRes.rows, pagamento: pagamento ?? null, pixInfo, boletoUrl };
+  return { pedido, itens, pagamento: pagamento ?? null, pixInfo, boletoUrl };
 }

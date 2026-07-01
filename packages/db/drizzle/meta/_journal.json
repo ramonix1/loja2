@@ -6,7 +6,217 @@
       "idx": 0,
       "version": "7",
       "when": 1718208000000,
-      "tag": "0000_baseline",
+      "tag": "0000_extensions",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1718208001000,
+      "tag": "0001_tenants",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1718208002000,
+      "tag": "0002_sessao",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1718208003000,
+      "tag": "0003_platform_config",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1718208004000,
+      "tag": "0004_leads",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1718208005000,
+      "tag": "0005_billing_plans",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1718208006000,
+      "tag": "0006_tenant_billing",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1718208007000,
+      "tag": "0007_invoices",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1718208008000,
+      "tag": "0008_commission_transactions",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1718208009000,
+      "tag": "0009_usuarios",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1718208010000,
+      "tag": "0010_tentativas_login",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1718208011000,
+      "tag": "0011_tokens_recuperacao",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1718208012000,
+      "tag": "0012_categorias",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1718208013000,
+      "tag": "0013_produtos",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1718208014000,
+      "tag": "0014_produtos_imagens",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1718208015000,
+      "tag": "0015_auditoria",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1718208016000,
+      "tag": "0016_clientes",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1718208017000,
+      "tag": "0017_banners",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1718208018000,
+      "tag": "0018_carrinho_itens",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1718208019000,
+      "tag": "0019_pedidos",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1718208020000,
+      "tag": "0020_pedido_itens",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1718208021000,
+      "tag": "0021_pagamentos",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1718208022000,
+      "tag": "0022_agenda_config",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1718208023000,
+      "tag": "0023_agenda_dias_especiais",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1718208024000,
+      "tag": "0024_agendamentos",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1718208025000,
+      "tag": "0025_movimentacoes_estoque",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1718208026000,
+      "tag": "0026_configuracoes",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1718208027000,
+      "tag": "0027_conversas",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1718208028000,
+      "tag": "0028_mensagens",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1718208029000,
+      "tag": "0029_bot_respostas",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1718208030000,
+      "tag": "0030_webhook_events",
       "breakpoints": true
     }
   ]
