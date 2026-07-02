@@ -15,6 +15,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 
 import { apiFetch } from '../../../lib/api-client';
+import { DeleteIconButton, EditIconButton } from '../../../components/crud-icon-buttons';
 import { createChatSocket } from '../../../lib/chat-socket';
 
 interface Conversa {
@@ -516,30 +517,22 @@ export function ChatPage() {
                           <div className={cn('text-sm', adminMutedClass())}>{r.resposta}</div>
                         </div>
                         <div className="flex shrink-0 gap-2">
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            className="px-2 py-1 text-xs"
+                          <EditIconButton
+                            label="Editar resposta automática"
                             onClick={() => {
                               setBotEditId(r.id);
                               setBotKw(r.palavra_chave);
                               setBotResp(r.resposta);
                             }}
-                          >
-                            Editar
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            className="px-2 py-1 text-xs text-[var(--admin-error-text)] hover:bg-[var(--admin-error-bg)]"
+                          />
+                          <DeleteIconButton
+                            label="Excluir resposta automática"
                             onClick={() => {
                               if (window.confirm('Excluir esta resposta automática?')) {
                                 deleteBotMutation.mutate(r.id);
                               }
                             }}
-                          >
-                            Excluir
-                          </Button>
+                          />
                         </div>
                       </div>
                     </div>

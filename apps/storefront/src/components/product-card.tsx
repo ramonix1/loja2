@@ -1,4 +1,4 @@
-import { buildStorePath } from '@lojao/tenant-host';
+import { buildStorePath } from '@lojao/store-host';
 import { store as testIds } from '@lojao/test-utils/test-ids/store';
 import { AddToCartButton } from '@/components/add-to-cart-button';
 import Link from 'next/link';
@@ -59,14 +59,14 @@ export function ProductCard({ product, controlaEstoque, storeSlug }: ProductCard
           ) : null}
         </div>
       </Link>
-      <div className="mt-auto flex gap-2 border-t border-[var(--store-border)] p-4 pt-0">
+      <div className="mt-auto flex gap-2 border-t border-[var(--store-border)] p-4 pt-5">
         <Link href={productHref} className="btn-outline flex-1 text-center text-xs">
           Ver detalhes
         </Link>
         <AddToCartButton
           produtoId={product.id}
           disabled={esgotado}
-          className="btn-primary flex-1 text-xs"
+          className="btn-primary flex flex-1 items-center justify-center gap-1.5 text-xs"
           label="Adicionar"
         />
       </div>

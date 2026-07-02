@@ -2,6 +2,7 @@ import { dashboardChartsQuerySchema } from '@lojao/types/dashboard';
 import { updatePedidoStatusSchema } from '@lojao/types/pedidos';
 import type { FastifyInstance } from 'fastify';
 
+import { requireStoreScope } from '../../lib/store-scope.js';
 import { requireAdmin } from '../../plugins/auth-guard.js';
 import { getDashboardCharts } from './dashboard-charts.service.js';
 import { pedidosQuerySchema } from './admin.schemas.js';
@@ -15,7 +16,7 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
   app.addHook('preHandler', requireAdmin);
 
   app.get('/admin/dashboard/stats', async (request, reply) => {
-    const data = await getDashboardStats(request.db);
+    const data = await getDashboardStats(requireStoreScope(request));
     return reply.send({ data });
   });
 
@@ -29,7 +30,7 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
       });
     }
 
-    const data = await getDashboardCharts(request.db, parsed.data.periodo);
+    const data = await getDashboardCharts(requireStoreScope(request), parsed.data.periodo);
     return reply.send({ data });
   });
 
@@ -44,7 +45,7 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
     }
 
     const { page, perPage, status } = parsed.data;
-    const { data, total } = await listPedidos(request.drizzle, parsed.data);
+    const { data, total } = await listPedidos(requireStoreScope(request), parsed.data);
 
     return reply.send({ data, meta: { page, perPage, total, ...(status ? { status } : {}) } });
   });
@@ -55,7 +56,7 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
       return reply.code(400).send({ error: 'ID inválido.', code: 'VALIDATION_ERROR' });
     }
 
-    const data = await getPedidoById(request.db, id);
+    const data = await getPedidoById(requireStoreScope(request), id);
     if (!data) {
       return reply.code(404).send({ error: 'Pedido não encontrado.', code: 'NOT_FOUND' });
     }
@@ -78,7 +79,7 @@ export async function adminRoutes(app: FastifyInstance): Promise<void> {
       });
     }
 
-    const data = await updatePedidoStatus(request.db, id, parsed.data);
+    const data = await updatePedidoStatus(requireStoreScope(request), id, parsed.data);
     if (!data) {
       return reply.code(404).send({ error: 'Pedido não encontrado.', code: 'NOT_FOUND' });
     }

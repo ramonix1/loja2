@@ -1,4 +1,4 @@
-import { MenuIcon } from 'lucide-react';
+import { HiOutlineBars3 } from './icons';
 import { useState, type ReactNode } from 'react';
 
 import {
@@ -83,7 +83,7 @@ export function LayoutAdmin({
           data-testid={mobileMenuTestId}
           onClick={() => setMobileOpen(true)}
         >
-          <MenuIcon className="size-5" aria-hidden />
+          <HiOutlineBars3 className="size-5" aria-hidden />
         </Button>
       </header>
 

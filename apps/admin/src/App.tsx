@@ -24,16 +24,16 @@ import { LoginPage } from './routes/login';
 import { MyStoresPage } from './routes/my-stores';
 import { PlatformLoginPage } from './routes/platform-login';
 import { PlatformLayout } from './routes/platform/layout';
-import { PlatformTenantsPage } from './routes/platform/tenants/index';
-import { PlatformTenantNovoPage } from './routes/platform/tenants/novo';
-import { PlatformTenantDetailPage } from './routes/platform/tenants/detail';
+import { PlatformStoresPage } from './routes/platform/stores/index';
+import { PlatformStoreNovoPage } from './routes/platform/stores/novo';
+import { PlatformStoreDetailPage } from './routes/platform/stores/detail';
 import { RootRedirect } from './components/root-redirect';
 
 const router = createBrowserRouter([
   { path: '/', element: <RootRedirect /> },
   { path: '/login', element: <LoginPage /> },
   {
-    element: <ProtectedRoute role="admin" allowMissingTenant />,
+    element: <ProtectedRoute role="admin" allowMissingStore />,
     children: [{ path: '/admin/my-stores', element: <MyStoresPage /> }],
   },
   { path: '/platform/login', element: <PlatformLoginPage /> },
@@ -44,10 +44,13 @@ const router = createBrowserRouter([
         path: '/platform',
         element: <PlatformLayout />,
         children: [
-          { index: true, element: <Navigate to="/platform/tenants" replace /> },
-          { path: 'tenants', element: <PlatformTenantsPage /> },
-          { path: 'tenants/novo', element: <PlatformTenantNovoPage /> },
-          { path: 'tenants/:slug', element: <PlatformTenantDetailPage /> },
+          { index: true, element: <Navigate to="/platform/stores" replace /> },
+          { path: 'stores', element: <PlatformStoresPage /> },
+          { path: 'stores/novo', element: <PlatformStoreNovoPage /> },
+          { path: 'stores/:slug', element: <PlatformStoreDetailPage /> },
+          { path: 'tenants', element: <Navigate to="/platform/stores" replace /> },
+          { path: 'tenants/novo', element: <Navigate to="/platform/stores/novo" replace /> },
+          { path: 'tenants/:slug', element: <Navigate to="/platform/stores" replace /> },
         ],
       },
     ],

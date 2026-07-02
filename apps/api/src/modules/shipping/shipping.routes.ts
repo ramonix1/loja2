@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 
 import { getConfigs } from '../../lib/config.js';
+import { requireStoreScope } from '../../lib/store-scope.js';
 import { requireAuth } from '../../plugins/auth-guard.js';
 import { calcularOpcoesFrete } from '../../services/frete.service.js';
 
@@ -24,7 +25,8 @@ export async function shippingRoutes(app: FastifyInstance): Promise<void> {
     }
 
     try {
-      const configs = await getConfigs(request.db);
+      const scope = requireStoreScope(request);
+      const configs = await getConfigs(scope);
       const opcoes = await calcularOpcoesFrete({
         cepDestino: parsed.data.cep_destino,
         subtotal: parsed.data.subtotal ?? 0,

@@ -36,7 +36,7 @@ Você está migrando o **Lojão** para monorepo TypeScript. Leia isto antes de q
 
 ## Produto
 
-SaaS e-commerce multi-tenant BR. PostgreSQL. Cookie sessão `lojao.sid`. Não quebrar pagamentos.
+SaaS e-commerce multi-tenant **Ata Commerce** (empresa **Ata Labs**). PostgreSQL. Cookie sessão `lojao.sid` (legado). Nomenclatura: `docs/specs/naming-policy.md`. Arquitetura contas: `docs/specs/merchant-account-architecture-spec.md`.
 
 **UX:** público principal = pequenos negócios no **celular** — decisões **mobile-first**; ver `docs/design/UX-PRINCIPLES.md`.
 

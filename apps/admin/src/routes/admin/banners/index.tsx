@@ -15,6 +15,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 
 import { apiFetch, legacyImageUrl } from '../../../lib/api-client';
+import {
+  DeleteIconButton,
+  EditIconButton,
+  ToggleActiveIconButton,
+} from '../../../components/crud-icon-buttons';
 
 interface Banner {
   id: number;
@@ -134,28 +139,19 @@ export function BannersPage() {
                   </div>
                 </div>
                 <div className="flex shrink-0 flex-col justify-center gap-2 p-4">
-                  <Link to={`/admin/banners/${banner.id}`}>
-                    <Button variant="secondary" className="w-full text-sm">
-                      Editar
-                    </Button>
-                  </Link>
-                  <Button
-                    variant="secondary"
-                    className="text-xs"
+                  <EditIconButton to={`/admin/banners/${banner.id}`} />
+                  <ToggleActiveIconButton
+                    active={banner.ativo}
+                    activeLabel="Desativar banner"
+                    inactiveLabel="Ativar banner"
                     onClick={() => toggleMutation.mutate(banner.id)}
                     disabled={toggleMutation.isPending}
-                  >
-                    {banner.ativo ? 'Desativar' : 'Ativar'}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    data-testid={testIds.adminBanners.deleteBtn}
-                    className="text-xs text-[var(--admin-error-text)] hover:bg-[var(--admin-error-bg)]"
+                  />
+                  <DeleteIconButton
+                    testId={testIds.adminBanners.deleteBtn}
                     onClick={() => handleDelete(banner.id, banner.titulo)}
                     disabled={deleteMutation.isPending}
-                  >
-                    Excluir
-                  </Button>
+                  />
                 </div>
               </div>
             ))

@@ -1,0 +1,1 @@
+ALTER TABLE "merchants" ADD COLUMN "max_stores" integer DEFAULT 1 NOT NULL;

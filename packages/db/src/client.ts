@@ -6,41 +6,41 @@ import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import pg from 'pg';
 
 import * as masterSchema from './schema/master/index.js';
-import * as tenantSchema from './schema/tenant/index.js';
+import * as merchantSchema from './schema/merchant/index.js';
 
 const { Pool } = pg;
 
 export type MasterDatabase = NodePgDatabase<typeof masterSchema>;
-export type TenantDatabase = NodePgDatabase<typeof tenantSchema>;
+/** MA2 — banco físico por merchant (`atacommerce_<merchant_slug>`). */
+export type MerchantDatabase = NodePgDatabase<typeof merchantSchema>;
 
-const drizzleTenantCache = new Map<string, TenantDatabase>();
-
-/** Instância Drizzle para o banco master (tenants, sessao, billing). */
+/** Instância Drizzle para o banco master (merchants, stores, sessao, billing). */
 export function createMasterDb(pool: pg.Pool): MasterDatabase {
   return drizzle(pool, { schema: masterSchema });
 }
 
-/**
- * Instância Drizzle para o banco de um tenant.
- * Opção A da spec: cache por slug, espelha `getPool(slug)` do legacy.
- */
-export function createTenantDb(pool: pg.Pool): TenantDatabase {
-  return drizzle(pool, { schema: tenantSchema });
+/** Instância Drizzle para o banco de um merchant (schema EN + `store_id`). */
+export function createMerchantDb(pool: pg.Pool): MerchantDatabase {
+  return drizzle(pool, { schema: merchantSchema });
 }
 
-export function getCachedTenantDb(slug: string, pool: pg.Pool): TenantDatabase {
-  const cached = drizzleTenantCache.get(slug);
+const drizzleMerchantCache = new Map<string, MerchantDatabase>();
+
+/** Instância Drizzle cacheada por slug de merchant. */
+export function getCachedMerchantDb(merchantSlug: string, pool: pg.Pool): MerchantDatabase {
+  const cached = drizzleMerchantCache.get(merchantSlug);
   if (cached) return cached;
-  const db = createTenantDb(pool);
-  drizzleTenantCache.set(slug, db);
+  const db = createMerchantDb(pool);
+  drizzleMerchantCache.set(merchantSlug, db);
   return db;
 }
 
-export function invalidateTenantDbCache(slug: string): void {
-  drizzleTenantCache.delete(slug);
+export function invalidateMerchantDbCache(merchantSlug: string): void {
+  drizzleMerchantCache.delete(merchantSlug);
 }
 
 const migrationsFolder = join(dirname(fileURLToPath(import.meta.url)), '../drizzle');
+const merchantMigrationsFolder = join(dirname(fileURLToPath(import.meta.url)), '../drizzle/merchant');
 
 const sslEnabled =
   (process.env.NODE_ENV === 'production' || !!process.env.DATABASE_URL) &&
@@ -67,5 +67,16 @@ export async function runMigrations(connectionString?: string): Promise<void> {
   }
 }
 
+/** Aplica migrations do schema merchant num banco alvo (`atacommerce_*`). */
+export async function runMerchantMigrations(connectionString: string): Promise<void> {
+  const pool = new Pool({ connectionString, ssl: pgSsl() });
+  const db = drizzle(pool);
+
+  try {
+    await migrate(db, { migrationsFolder: merchantMigrationsFolder });
+  } finally {
+    await pool.end();
+  }
+}
+
 export * from './schema/master/index.js';
-export * from './schema/tenant/index.js';

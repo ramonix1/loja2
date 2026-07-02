@@ -18,6 +18,7 @@ import {
 import { testIds } from '@lojao/test-utils';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { ActionIcons } from '@lojao/ui/icons';
 
 import { apiFetch } from '../../lib/api-client';
 import { DashboardCharts } from './dashboard/dashboard-charts';
@@ -118,8 +119,12 @@ export function DashboardPage() {
         <div data-testid={testIds.admin.dashboardRecentOrders}>
           <div className="mb-4 flex items-center justify-between">
             <h2 className={adminSectionTitleClass()}>Pedidos recentes</h2>
-            <Link to="/admin/pedidos" className="ds-link text-sm">
+            <Link
+              to="/admin/pedidos"
+              className="inline-flex items-center gap-1 text-sm text-[var(--admin-link)] hover:underline"
+            >
               Ver todos
+              <ActionIcons.next className="size-4" aria-hidden />
             </Link>
           </div>
           <Table surface="admin">

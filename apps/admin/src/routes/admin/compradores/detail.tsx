@@ -1,5 +1,4 @@
 import {
-  Button,
   Card,
   adminMutedClass,
   adminPageSubtitleClass,
@@ -13,9 +12,10 @@ import {
 } from '@lojao/ui';
 import { testIds } from '@lojao/test-utils';
 import { useQuery } from '@tanstack/react-query';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import { apiFetch } from '../../../lib/api-client';
+import { BackLink } from '../../../components/crud-icon-buttons';
 import { formatBRL } from '../../../lib/currency';
 
 interface CompradorDetailData {
@@ -96,11 +96,9 @@ export function CompradorDetailPage() {
     return (
       <div>
         <p className="ds-alert-error mb-4">Comprador não encontrado.</p>
-        <Link to="/admin/compradores">
-          <Button variant="secondary" data-testid={testIds.adminCompradores.detailBackBtn}>
-            Voltar
-          </Button>
-        </Link>
+        <BackLink to="/admin/compradores" testId={testIds.adminCompradores.detailBackBtn}>
+          Voltar
+        </BackLink>
       </div>
     );
   }
@@ -125,11 +123,9 @@ export function CompradorDetailPage() {
             </div>
           </div>
         </div>
-        <Link to="/admin/compradores">
-          <Button variant="secondary" data-testid={testIds.adminCompradores.detailBackBtn}>
-            Voltar
-          </Button>
-        </Link>
+        <BackLink to="/admin/compradores" testId={testIds.adminCompradores.detailBackBtn}>
+          Voltar
+        </BackLink>
       </div>
 
       <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">

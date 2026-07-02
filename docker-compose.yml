@@ -39,6 +39,9 @@ services:
       EMAIL_FROM: ${EMAIL_FROM:-}
       MASTER_EMAIL: ${MASTER_EMAIL:-master@suaplataforma.com}
       MASTER_PASSWORD: ${MASTER_PASSWORD:-troque-por-senha-forte-aqui}
+      STOREFRONT_URL: http://localhost:3000
+      STOREFRONT_INTERNAL_URL: http://storefront:3000
+      STOREFRONT_REVALIDATE_SECRET: ${STOREFRONT_REVALIDATE_SECRET:-dev-revalidate-secret-troque-em-producao}
     depends_on:
       db:
         condition: service_healthy
@@ -105,6 +108,7 @@ services:
       NEXT_PUBLIC_API_URL: http://localhost:3001
       TENANT_SLUG: loja
       NEXT_PUBLIC_DEFAULT_STORE_SLUG: loja
+      STOREFRONT_REVALIDATE_SECRET: ${STOREFRONT_REVALIDATE_SECRET:-dev-revalidate-secret-troque-em-producao}
     depends_on:
       api:
         condition: service_healthy

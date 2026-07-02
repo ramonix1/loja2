@@ -1,6 +1,6 @@
 import type { DashboardChartsData, DashboardPeriodo } from '@lojao/types/dashboard';
-import type pg from 'pg';
 
+import type { StoreScope } from '../../lib/store-scope.js';
 import {
   fetchPedidosPorStatus,
   fetchReceitaPorDia,
@@ -10,17 +10,17 @@ import {
 } from './order-analytics.js';
 
 export async function getDashboardCharts(
-  db: pg.Pool,
+  scope: StoreScope,
   periodo: DashboardPeriodo,
 ): Promise<DashboardChartsData> {
   const { dataInicio, dataFim } = parseDashboardPeriodo(periodo);
 
   const [receita_por_dia, pedidos_por_status, receita_por_metodo, top_produtos] =
     await Promise.all([
-      fetchReceitaPorDia(db, dataInicio, dataFim),
-      fetchPedidosPorStatus(db, dataInicio, dataFim),
-      fetchReceitaPorMetodo(db, dataInicio, dataFim),
-      fetchTopProdutos(db, dataInicio, dataFim, 5),
+      fetchReceitaPorDia(scope, dataInicio, dataFim),
+      fetchPedidosPorStatus(scope, dataInicio, dataFim),
+      fetchReceitaPorMetodo(scope, dataInicio, dataFim),
+      fetchTopProdutos(scope, dataInicio, dataFim, 5),
     ]);
 
   return {

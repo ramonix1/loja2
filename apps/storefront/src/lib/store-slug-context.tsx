@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect } from 'react';
 
-import { setClientTenantSlug } from '@/lib/client-api';
+import { setClientStoreSlug } from '@/lib/client-api';
 
 const StoreSlugContext = createContext<string>('loja');
 
@@ -14,7 +14,7 @@ export function StoreSlugProvider({
   children: React.ReactNode;
 }) {
   useEffect(() => {
-    setClientTenantSlug(slug);
+    setClientStoreSlug(slug);
   }, [slug]);
 
   return <StoreSlugContext.Provider value={slug}>{children}</StoreSlugContext.Provider>;

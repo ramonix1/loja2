@@ -18,6 +18,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { ApiError, apiFetch, apiUpload, legacyImageUrl } from '../../../lib/api-client';
+import { ImageRemoveIconButton } from '../../../components/crud-icon-buttons';
 import { formatBRL, maskBRLInput, parseBRLInput } from '../../../lib/currency';
 import { useImageFilePreviews } from '../../../lib/use-image-file-previews';
 
@@ -200,13 +201,7 @@ export function ProdutoEditPage() {
                       alt=""
                       className="h-20 w-20 rounded-lg border border-[var(--admin-border)] object-cover"
                     />
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteImagem(img.id)}
-                      className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--admin-error)] text-xs text-[var(--admin-text)] opacity-0 transition group-hover:opacity-100"
-                    >
-                      ×
-                    </button>
+                    <ImageRemoveIconButton onClick={() => handleDeleteImagem(img.id)} />
                   </div>
                 ))}
               </div>
@@ -237,14 +232,7 @@ export function ProdutoEditPage() {
                       alt=""
                       className="h-20 w-20 rounded-lg border border-[var(--admin-border)] object-cover"
                     />
-                    <button
-                      type="button"
-                      aria-label="Remover imagem"
-                      onClick={() => removeNovaImagem(index)}
-                      className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--admin-error)] text-xs text-[var(--admin-text)] opacity-0 transition group-hover:opacity-100"
-                    >
-                      ×
-                    </button>
+                    <ImageRemoveIconButton onClick={() => removeNovaImagem(index)} />
                   </div>
                 ))}
               </div>

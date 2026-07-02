@@ -16,6 +16,7 @@ import { useMemo, useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
 import { ApiError, apiFetch } from '../../../lib/api-client';
+import { DeleteIconButton } from '../../../components/crud-icon-buttons';
 
 interface AgendaConfig {
   capacidade_diaria: number;
@@ -526,16 +527,12 @@ export function AgendaPage() {
                     Salvar
                   </Button>
                   {selectedDay.isEspecial && (
-                    <Button
-                      type="button"
-                      variant="ghost"
+                    <DeleteIconButton
+                      label="Remover configuração especial do dia"
                       disabled={removeMutation.isPending}
-                      data-testid={testIds.adminAgenda.dayRemoveBtn}
-                      className="text-[var(--admin-error-text)] hover:bg-[var(--admin-error-bg)]"
+                      testId={testIds.adminAgenda.dayRemoveBtn}
                       onClick={handleRemoveDay}
-                    >
-                      Remover
-                    </Button>
+                    />
                   )}
                 </div>
               </form>

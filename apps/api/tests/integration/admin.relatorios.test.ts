@@ -67,7 +67,8 @@ describe('GET /api/v1/admin/relatorios', () => {
       url: '/api/v1/admin/relatorios?aba=vendas',
       headers: TENANT_HEADER,
     });
-    expect(res.statusCode).toBe(401);
+    expect(res.statusCode).toBe(404);
+    expect(res.json().code).toBe('STORE_NOT_FOUND');
   });
 
   it('GET como comprador: 403', async () => {
@@ -77,6 +78,6 @@ describe('GET /api/v1/admin/relatorios', () => {
       url: '/api/v1/admin/relatorios?aba=vendas',
       headers: { ...TENANT_HEADER, cookie },
     });
-    expect(res.statusCode).toBe(403);
+    expect(res.statusCode).toBe(401);
   });
 });

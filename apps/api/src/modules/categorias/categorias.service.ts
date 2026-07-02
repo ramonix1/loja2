@@ -1,5 +1,3 @@
-import type pg from 'pg';
-
 import type {
   CategoriaDetail,
   CategoriaListItem,
@@ -7,51 +5,64 @@ import type {
   UpdateCategoriaInput,
 } from '@lojao/types/categorias';
 
+import type { StoreScope } from '../../lib/store-scope.js';
+
 function mapListRow(row: {
   id: number;
-  nome: string;
-  ordem: number;
-  ativo: boolean;
+  name: string;
+  order: number;
+  active: boolean;
   total_produtos: string | number;
   created_at: Date | string;
   updated_at: Date | string;
 }): CategoriaListItem {
   return {
     id: row.id,
-    nome: row.nome,
-    ordem: row.ordem,
-    ativo: row.ativo,
+    nome: row.name,
+    ordem: row.order,
+    ativo: row.active,
     total_produtos: Number(row.total_produtos),
     created_at: row.created_at instanceof Date ? row.created_at.toISOString() : String(row.created_at),
     updated_at: row.updated_at instanceof Date ? row.updated_at.toISOString() : String(row.updated_at),
   };
 }
 
-export async function listCategorias(db: pg.Pool): Promise<CategoriaListItem[]> {
-  const r = await db.query(`
+export async function listCategorias({ pool, storeId }: StoreScope): Promise<CategoriaListItem[]> {
+  const r = await pool.query(
+    `
     SELECT c.*, COUNT(p.id)::int AS total_produtos
-    FROM categorias c
-    LEFT JOIN produtos p ON p.categoria_id = c.id
+    FROM categories c
+    LEFT JOIN products p ON p.category_id = c.id AND p.store_id = c.store_id
+    WHERE c.store_id = $1
     GROUP BY c.id
-    ORDER BY c.ordem ASC, c.nome ASC
-  `);
+    ORDER BY c."order" ASC, c.name ASC
+  `,
+    [storeId],
+  );
   return r.rows.map(mapListRow);
 }
 
-export async function getCategoria(db: pg.Pool, id: number): Promise<CategoriaDetail | null> {
-  const catRes = await db.query('SELECT * FROM categorias WHERE id = $1', [id]);
+export async function getCategoria(
+  { pool, storeId }: StoreScope,
+  id: number,
+): Promise<CategoriaDetail | null> {
+  const catRes = await pool.query('SELECT * FROM categories WHERE id = $1 AND store_id = $2', [
+    id,
+    storeId,
+  ]);
   if (!catRes.rows[0]) return null;
 
-  const produtosRes = await db.query(
-    'SELECT id, nome, categoria_id FROM produtos ORDER BY nome ASC',
+  const produtosRes = await pool.query(
+    'SELECT id, name AS nome, category_id AS categoria_id FROM products WHERE store_id = $1 ORDER BY name ASC',
+    [storeId],
   );
 
   const row = catRes.rows[0];
   return {
     id: row.id,
-    nome: row.nome,
-    ordem: row.ordem,
-    ativo: row.ativo,
+    nome: row.name,
+    ordem: row.order,
+    ativo: row.active,
     created_at: row.created_at instanceof Date ? row.created_at.toISOString() : String(row.created_at),
     updated_at: row.updated_at instanceof Date ? row.updated_at.toISOString() : String(row.updated_at),
     produtos: produtosRes.rows.map((p: { id: number; nome: string; categoria_id: number | null }) => ({
@@ -63,47 +74,57 @@ export async function getCategoria(db: pg.Pool, id: number): Promise<CategoriaDe
 }
 
 export async function createCategoria(
-  db: pg.Pool,
+  { pool, storeId }: StoreScope,
   input: CreateCategoriaInput,
 ): Promise<{ id: number }> {
-  const r = await db.query(
-    'INSERT INTO categorias (nome) VALUES ($1) RETURNING id',
-    [input.nome.trim()],
+  const r = await pool.query(
+    'INSERT INTO categories (store_id, name) VALUES ($1, $2) RETURNING id',
+    [storeId, input.nome.trim()],
   );
   return { id: r.rows[0].id as number };
 }
 
-/** Porta `categoriaController.atualizar` — atualiza nome/ordem e reassocia produtos. */
 export async function updateCategoria(
-  db: pg.Pool,
+  { pool, storeId }: StoreScope,
   id: number,
   input: UpdateCategoriaInput,
 ): Promise<boolean> {
-  const exists = await db.query('SELECT id FROM categorias WHERE id = $1', [id]);
+  const exists = await pool.query('SELECT id FROM categories WHERE id = $1 AND store_id = $2', [
+    id,
+    storeId,
+  ]);
   if (!exists.rows[0]) return false;
 
-  await db.query(
-    'UPDATE categorias SET nome = $1, ordem = $2, updated_at = NOW() WHERE id = $3',
-    [input.nome.trim(), input.ordem, id],
+  await pool.query(
+    'UPDATE categories SET name = $1, "order" = $2, updated_at = NOW() WHERE id = $3 AND store_id = $4',
+    [input.nome.trim(), input.ordem, id, storeId],
   );
-  await db.query('UPDATE produtos SET categoria_id = NULL WHERE categoria_id = $1', [id]);
+  await pool.query(
+    'UPDATE products SET category_id = NULL WHERE category_id = $1 AND store_id = $2',
+    [id, storeId],
+  );
 
   if (input.produtos_ids.length > 0) {
-    await db.query('UPDATE produtos SET categoria_id = $1 WHERE id = ANY($2::int[])', [
-      id,
-      input.produtos_ids,
-    ]);
+    await pool.query(
+      'UPDATE products SET category_id = $1 WHERE id = ANY($2::int[]) AND store_id = $3',
+      [id, input.produtos_ids, storeId],
+    );
   }
 
   return true;
 }
 
-/** Porta `categoriaController.remover` — desvincula produtos e exclui categoria. */
-export async function deleteCategoria(db: pg.Pool, id: number): Promise<boolean> {
-  const exists = await db.query('SELECT id FROM categorias WHERE id = $1', [id]);
+export async function deleteCategoria({ pool, storeId }: StoreScope, id: number): Promise<boolean> {
+  const exists = await pool.query('SELECT id FROM categories WHERE id = $1 AND store_id = $2', [
+    id,
+    storeId,
+  ]);
   if (!exists.rows[0]) return false;
 
-  await db.query('UPDATE produtos SET categoria_id = NULL WHERE categoria_id = $1', [id]);
-  await db.query('DELETE FROM categorias WHERE id = $1', [id]);
+  await pool.query(
+    'UPDATE products SET category_id = NULL WHERE category_id = $1 AND store_id = $2',
+    [id, storeId],
+  );
+  await pool.query('DELETE FROM categories WHERE id = $1 AND store_id = $2', [id, storeId]);
   return true;
 }

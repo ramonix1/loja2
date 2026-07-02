@@ -5,19 +5,21 @@ import {
   platformSidebarLinkClass,
   cn,
 } from '@lojao/ui';
+import { ActionIcons } from '@lojao/ui/icons';
 import { testIds } from '@lojao/test-utils';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 
 import { PlatformUiThemeSwitch } from '../../components/platform-ui-theme-switch';
+import { PLATFORM_NAV_ITEMS } from '../../lib/admin-nav-items';
 import { usePlatformUiTheme } from '../../lib/platform-ui-theme';
 import { useAuth } from '../../lib/auth-context';
-
-const NAV_ITEMS = [{ to: '/platform/tenants', label: 'Lojas' }];
 
 export function PlatformLayout() {
   const { user, logout } = useAuth();
   const { theme: uiTheme } = usePlatformUiTheme();
   const navigate = useNavigate();
+
+  const LogoutIcon = ActionIcons.logout;
 
   async function handleLogout() {
     await logout();
@@ -52,21 +54,26 @@ export function PlatformLayout() {
                 'text-[var(--platform-error)] hover:bg-[var(--platform-error-bg)] hover:text-[var(--platform-error)]',
               )}
             >
+              <LogoutIcon className="size-5 shrink-0" aria-hidden />
               Sair
             </button>
           </>
         }
       >
-        {NAV_ITEMS.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            onClick={closeMobileMenu}
-            className={({ isActive }) => platformNavLinkClass(isActive)}
-          >
-            {item.label}
-          </NavLink>
-        ))}
+        {PLATFORM_NAV_ITEMS.map((item) => {
+          const Icon = item.icon;
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              onClick={closeMobileMenu}
+              className={({ isActive }) => platformNavLinkClass(isActive)}
+            >
+              <Icon className="size-5 shrink-0" aria-hidden />
+              {item.label}
+            </NavLink>
+          );
+        })}
       </SidebarPanel>
     );
   }

@@ -3,6 +3,14 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type pg from 'pg';
 
 import { masterPool } from '../lib/master-db.js';
+import {
+  activatePersonaForRequest,
+  resolveAuthContext,
+  type ImpersonationMeta,
+  type StashedBuyerPersona,
+  type StashedMerchantPersona,
+  type StashedPlatformPersona,
+} from '../lib/session-persona.js';
 import { generateSid, signSid, unsignSid } from '../lib/session-signature.js';
 
 const COOKIE_NAME = 'lojao.sid';
@@ -13,11 +21,24 @@ export interface SessionFields {
   usuarioId?: number | null;
   nome?: string | null;
   email?: string | null;
-  role?: 'admin' | 'usuario' | 'platform_admin' | null;
-  tenantSlug?: string;
-  tenant_id?: number;
+  /** `owner`/`operator`/`admin` — roles de conta merchant; `usuario` = comprador; `platform_admin`. */
+  role?: 'admin' | 'usuario' | 'platform_admin' | 'owner' | 'operator' | null;
   redirecionarPara?: string | null;
   info?: string | null;
+  merchantId?: number;
+  merchantSlug?: string;
+  storeId?: number;
+  storeSlug?: string;
+  /** ID em `merchant_members`. */
+  memberId?: number;
+  /** Persona merchant em espera enquanto comprador está ativo na vitrine. */
+  stashedMerchant?: StashedMerchantPersona;
+  /** Persona comprador em espera enquanto lojista está ativo no admin. */
+  stashedBuyer?: StashedBuyerPersona;
+  /** Persona platform em espera durante impersonate. */
+  stashedPlatform?: StashedPlatformPersona;
+  /** Metadados quando operador Ata Labs entrou como lojista. */
+  impersonation?: ImpersonationMeta;
 }
 
 export interface Session extends SessionFields {
@@ -44,10 +65,13 @@ const DATA_KEYS: (keyof SessionFields)[] = [
   'nome',
   'email',
   'role',
-  'tenantSlug',
-  'tenant_id',
   'redirecionarPara',
   'info',
+  'merchantId',
+  'merchantSlug',
+  'storeId',
+  'storeSlug',
+  'memberId',
 ];
 
 function sessionSecret(): string {
@@ -84,14 +108,20 @@ function buildCookieMeta(): CookieMeta {
   };
 }
 
-/** Extrai apenas os campos de dados (sem métodos) para serialização/diff. */
-function extractData(session: Session): SessionFields {
+const STASH_KEYS = ['stashedMerchant', 'stashedBuyer', 'stashedPlatform', 'impersonation'] as const;
+
+/** Extrai campos persistidos (identidade ativa + stashes). */
+function extractPersistedData(session: Session): Record<string, unknown> {
   const data: Record<string, unknown> = {};
   for (const key of DATA_KEYS) {
     const value = session[key];
     if (value !== undefined && value !== null) data[key] = value;
   }
-  return data as SessionFields;
+  for (const key of STASH_KEYS) {
+    const value = session[key];
+    if (value !== undefined && value != null) data[key] = value;
+  }
+  return data;
 }
 
 class PgSessionStore {
@@ -131,6 +161,7 @@ interface SessionState {
 }
 
 const states = new WeakMap<FastifyRequest, SessionState>();
+const personaRestores = new WeakMap<FastifyRequest, () => void>();
 
 async function persist(
   store: PgSessionStore,
@@ -139,7 +170,7 @@ async function persist(
   state: SessionState,
 ): Promise<void> {
   const cookie = buildCookieMeta();
-  const data = extractData(session);
+  const data = extractPersistedData(session);
   const sess: Record<string, unknown> = { cookie, ...data };
 
   await store.set(state.sid, sess, new Date(cookie.expires));
@@ -176,6 +207,7 @@ function attachMethods(
       value: async (): Promise<void> => {
         if (!state.isNew) await store.destroy(state.sid);
         for (const key of DATA_KEYS) delete data[key];
+        for (const key of STASH_KEYS) delete data[key];
         state.destroyed = true;
         state.original = '{}';
         clearSessionCookie(reply);
@@ -229,7 +261,7 @@ export const sessionPlugin = fp(
       const session = {} as Session;
       if (loaded) {
         const target = session as unknown as Record<string, unknown>;
-        for (const key of DATA_KEYS) {
+        for (const key of [...DATA_KEYS, ...STASH_KEYS]) {
           if (loaded[key] !== undefined) {
             target[key] = loaded[key];
           }
@@ -240,20 +272,32 @@ export const sessionPlugin = fp(
         sid,
         isNew,
         destroyed: false,
-        original: JSON.stringify(extractData(session)),
+        original: JSON.stringify(extractPersistedData(session)),
       };
       states.set(request, state);
       attachMethods(store, reply, session, state);
       request.session = session;
+
+      const authContext = resolveAuthContext(request);
+      if (authContext) {
+        const restore = activatePersonaForRequest(session, authContext);
+        if (restore) personaRestores.set(request, restore);
+      }
     });
 
     // Auto-persiste sessões modificadas implicitamente (sem chamar save()).
     app.addHook('onSend', async (request: FastifyRequest, reply: FastifyReply, payload) => {
+      const restore = personaRestores.get(request);
+      if (restore) {
+        restore();
+        personaRestores.delete(request);
+      }
+
       const state = states.get(request);
       const session = request.session;
       if (!state || !session || state.destroyed) return payload;
 
-      const current = JSON.stringify(extractData(session));
+      const current = JSON.stringify(extractPersistedData(session));
       if (current !== state.original && current !== '{}') {
         await persist(store, reply, session, state);
       }

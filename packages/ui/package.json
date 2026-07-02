@@ -11,6 +11,10 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./icons": {
+      "types": "./src/icons/index.ts",
+      "default": "./src/icons/index.ts"
+    },
     "./styles/shadcn.css": "./src/styles/shadcn.css",
     "./button": "./src/components/ui/button.tsx",
     "./card": "./src/components/ui/card.tsx",
@@ -45,6 +49,7 @@
     "clsx": "^2.1.1",
     "lucide-react": "^0.511.0",
     "radix-ui": "^1.6.0",
+    "react-icons": "^5.4.0",
     "tailwind-merge": "^2.6.0",
     "tw-animate-css": "^1.2.5"
   },

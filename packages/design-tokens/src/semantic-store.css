@@ -1,48 +1,10 @@
 /**
  * Nível 2 — Semânticos vitrine (estrutura tenant).
- * Tokens fixos por loja; --cor-primaria tenant colore CTAs da marca.
- * Light/dark visitante: fora de escopo — ver THEME-MIGRATION-PLAN §2.3.
- *
- * Compat: data-store-theme ainda lido da API (loja_tema) até spec Aparência futura.
- * Sem !important — migrar componentes para var(--store-*).
+ * Vitrine fixa em claro — visitante não troca tema (spec futura).
+ * Bloco escuro reservado para eventual switch; --cor-primaria colore CTAs da marca.
  */
 
-:root {
-  --store-bg: var(--ata-azul-hero-inicio);
-  --store-surface: var(--ata-azul-noite);
-  --store-surface-elevated: color-mix(in srgb, var(--ata-azul-noite) 88%, #000000);
-  --store-border: color-mix(in srgb, var(--ata-azul-comercio) 22%, transparent);
-  --store-text: #ffffff;
-  --store-text-muted: var(--ata-azul-ceu);
-  --store-text-subtle: color-mix(in srgb, var(--ata-azul-ceu) 65%, transparent);
-  --store-header-bg: var(--ata-azul-noite);
-  --store-footer-bg: var(--ata-azul-noite);
-  --store-input-bg: color-mix(in srgb, var(--ata-azul-noite) 90%, #000000);
-  --store-input-border: color-mix(in srgb, var(--ata-azul-comercio) 20%, transparent);
-  --store-link: var(--ata-azul-vivido);
-  --store-focus-ring: color-mix(in srgb, var(--ata-azul-vivido) 40%, transparent);
-  --store-badge-neutral-bg: color-mix(in srgb, var(--ata-azul-ceu) 16%, var(--ata-azul-noite));
-  --store-success: var(--ata-verde-broto);
-  --store-error: #e05252;
-  --store-scrollbar-track: transparent;
-  --store-scrollbar-thumb: color-mix(in srgb, var(--ata-azul-ceu) 32%, var(--ata-azul-noite));
-  --store-scrollbar-thumb-hover: color-mix(in srgb, var(--ata-azul-ceu) 52%, var(--ata-azul-noite));
-}
-
-[data-store-theme='escuro'] {
-  --store-bg: var(--ata-azul-hero-inicio);
-  --store-surface: var(--ata-azul-noite);
-  --store-surface-elevated: color-mix(in srgb, var(--ata-azul-noite) 88%, #000000);
-  --store-border: color-mix(in srgb, var(--ata-azul-comercio) 22%, transparent);
-  --store-text: #ffffff;
-  --store-text-muted: var(--ata-azul-ceu);
-  --store-text-subtle: color-mix(in srgb, var(--ata-azul-ceu) 65%, transparent);
-  --store-header-bg: var(--ata-azul-noite);
-  --store-footer-bg: var(--ata-azul-noite);
-  --store-input-bg: color-mix(in srgb, var(--ata-azul-noite) 90%, #000000);
-  --store-input-border: color-mix(in srgb, var(--ata-azul-comercio) 20%, transparent);
-}
-
+:root,
 [data-store-theme='claro'] {
   --store-bg: var(--ata-azul-nevoa);
   --store-surface: #ffffff;
@@ -55,7 +17,44 @@
   --store-footer-bg: #ffffff;
   --store-input-bg: #ffffff;
   --store-input-border: var(--ata-azul-gelo);
+  --store-link: var(--cor-primaria);
+  --store-focus-ring: color-mix(in srgb, var(--cor-primaria) 40%, transparent);
+  --store-badge-neutral-bg: color-mix(in srgb, var(--ata-azul-ceu) 16%, #ffffff);
+  --store-success: var(--ata-verde-broto);
+  --store-error: #e05252;
   --store-scrollbar-track: transparent;
   --store-scrollbar-thumb: var(--ata-azul-gelo);
   --store-scrollbar-thumb-hover: color-mix(in srgb, var(--ata-azul-comercio) 28%, var(--ata-azul-gelo));
+}
+
+[data-store-theme='escuro'] {
+  --store-bg: var(--ata-dt-admin-bg-base);
+  --store-surface: var(--ata-dt-admin-bg-surface);
+  --store-surface-elevated: var(--ata-dt-admin-bg-elevated);
+  --store-border: var(--ata-dt-admin-border);
+  --store-text: var(--ata-dt-admin-text-primary);
+  --store-text-muted: var(--ata-dt-admin-text-secondary);
+  --store-text-subtle: color-mix(in srgb, var(--ata-dt-admin-text-secondary) 72%, transparent);
+  --store-header-bg: var(--ata-dt-admin-bg-surface);
+  --store-footer-bg: var(--ata-dt-admin-bg-surface);
+  --store-input-bg: var(--ata-dt-admin-bg-surface);
+  --store-input-border: var(--ata-dt-admin-border);
+  --store-link: var(--cor-primaria);
+  --store-focus-ring: color-mix(in srgb, var(--cor-primaria) 40%, transparent);
+  --store-badge-neutral-bg: color-mix(
+    in srgb,
+    var(--ata-dt-admin-text-secondary) 16%,
+    var(--ata-dt-admin-bg-surface)
+  );
+  --store-scrollbar-track: transparent;
+  --store-scrollbar-thumb: color-mix(
+    in srgb,
+    var(--ata-dt-admin-text-secondary) 32%,
+    var(--ata-dt-admin-bg-surface)
+  );
+  --store-scrollbar-thumb-hover: color-mix(
+    in srgb,
+    var(--ata-dt-admin-text-secondary) 52%,
+    var(--ata-dt-admin-bg-surface)
+  );
 }

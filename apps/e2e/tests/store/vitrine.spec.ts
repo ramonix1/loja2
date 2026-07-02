@@ -7,7 +7,8 @@ test('home exibe produtos @smoke', async ({ page }) => {
   await page.goto(storePath());
 
   await expect(page.getByTestId(testIds.store.slugLayout)).toBeVisible();
-  await expect(page.locator('[data-store-theme]')).toHaveAttribute('data-store-theme', /^(escuro|claro)$/);
+  // Vitrine fixa em tema claro (sem toggle do visitante).
+  await expect(page.locator('[data-store-theme]')).toHaveAttribute('data-store-theme', 'claro');
   await expect(page.getByTestId(testIds.store.homeProductGrid)).toBeVisible();
   await expect(page.locator('[data-testid^="store-home-product-card-"]').first()).toBeVisible();
 });

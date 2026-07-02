@@ -21,9 +21,10 @@ import {
 import { testIds } from '@lojao/test-utils';
 import { useQuery } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 import { apiFetch } from '../../../lib/api-client';
+import { ViewIconButton } from '../../../components/crud-icon-buttons';
 import { formatBRL } from '../../../lib/currency';
 
 interface Comprador {
@@ -216,14 +217,11 @@ export function CompradoresPage() {
                       {new Date(c.created_at).toLocaleDateString('pt-BR')}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Link
+                      <ViewIconButton
                         to={`/admin/compradores/${c.id}`}
-                        data-testid={testIds.adminCompradores.detailBtn(c.id)}
-                      >
-                        <Button variant="secondary" className="text-xs">
-                          Ver ficha
-                        </Button>
-                      </Link>
+                        testId={testIds.adminCompradores.detailBtn(c.id)}
+                        label="Ver ficha do comprador"
+                      />
                     </TableCell>
                   </TableRow>
                 ))}

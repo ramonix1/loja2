@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-/** Slug de tenant: minúsculas, números e hífen; 2–50 chars. */
-export const tenantSlugSchema = z
+/** Slug de loja (vitrine): minúsculas, números e hífen; 2–50 chars. */
+export const platformStoreSlugSchema = z
   .string()
   .trim()
   .toLowerCase()
@@ -16,15 +16,15 @@ export const platformLoginSchema = z.object({
 
 export type PlatformLoginInput = z.infer<typeof platformLoginSchema>;
 
-export const createTenantSchema = z.object({
-  slug: tenantSlugSchema,
+export const createPlatformStoreSchema = z.object({
+  slug: platformStoreSlugSchema,
   nome: z.string().trim().min(2, 'Nome obrigatório.').max(100, 'Nome muito longo.'),
   plano: z.string().trim().max(20).optional(),
 });
 
-export type CreateTenantInput = z.infer<typeof createTenantSchema>;
+export type CreatePlatformStoreInput = z.infer<typeof createPlatformStoreSchema>;
 
-export const updateTenantSchema = z
+export const updatePlatformStoreSchema = z
   .object({
     nome: z.string().trim().min(2, 'Nome obrigatório.').max(100).optional(),
     ativo: z.boolean().optional(),
@@ -34,10 +34,10 @@ export const updateTenantSchema = z
     message: 'Informe ao menos um campo para atualizar.',
   });
 
-export type UpdateTenantInput = z.infer<typeof updateTenantSchema>;
+export type UpdatePlatformStoreInput = z.infer<typeof updatePlatformStoreSchema>;
 
-/** Item de tenant exposto pelo Platform Hub (sem credenciais de banco). */
-export interface PlatformTenant {
+/** Loja exposta pelo Platform Hub (sem credenciais de banco). */
+export interface PlatformStore {
   id: number;
   slug: string;
   nome: string;

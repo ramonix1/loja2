@@ -7,9 +7,9 @@ import { StoreFooter } from '@/components/layout/store-footer';
 import { StoreHeader } from '@/components/layout/store-header';
 import { ApiError, buildStoreMetadata, fetchPublicStore } from '@/lib/api';
 import { StoreSlugProvider } from '@/lib/store-slug-context';
-import { parseStoreTheme } from '@lojao/types/store-theme';
+import { DEFAULT_STORE_THEME } from '@lojao/types/store-theme';
 
-export const revalidate = 60;
+export const revalidate = 30;
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -40,8 +40,9 @@ export default async function StoreLayout({ children, params }: LayoutProps) {
   }
 
   const cor = storeData.loja.cor_primaria || DEFAULT_LOJA_COR_PRIMARIA;
-  const tema = parseStoreTheme(storeData.loja.tema);
-  const shell = storeShellClasses(tema);
+  // Vitrine fixa em claro — visitante não troca tema (spec futura).
+  const tema = DEFAULT_STORE_THEME;
+  const shell = storeShellClasses();
 
   return (
     <StoreSlugProvider slug={slug}>

@@ -16,6 +16,10 @@ export const store = {
   cartTable: 'store-cart-table',
   cartItemRow: (id: number | string): string => `store-cart-item-row-${id}`,
   cartCheckoutBtn: 'store-cart-checkout-btn',
+  /** Link carrinho na nav da vitrine (I5). */
+  navCart: 'store-nav-cart',
+  /** Botão menu mobile no header da vitrine (I5). */
+  headerMenu: 'store-header-menu',
   checkoutForm: 'store-checkout-form',
   checkoutPayment: (metodo: string): string => `store-checkout-payment-${metodo}`,
   checkoutPaymentTeste: 'store-checkout-payment-teste',

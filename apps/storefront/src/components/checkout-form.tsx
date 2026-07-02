@@ -1,6 +1,6 @@
 'use client';
 
-import { buildStorePath } from '@lojao/tenant-host';
+import { buildStorePath } from '@lojao/store-host';
 import { store as testIds } from '@lojao/test-utils/test-ids/store';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';

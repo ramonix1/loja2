@@ -23,13 +23,13 @@ export function PlatformLoginPage() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated && isPlatformAdmin) {
-      navigate('/platform/tenants', { replace: true });
+      navigate('/platform/stores', { replace: true });
     }
   }, [isLoading, isAuthenticated, isPlatformAdmin, navigate]);
 
   const mutation = useMutation({
     mutationFn: () => platformLogin(email, senha),
-    onSuccess: () => navigate('/platform/tenants', { replace: true }),
+    onSuccess: () => navigate('/platform/stores', { replace: true }),
   });
 
   const errorMessage =

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 import { browserApiBase } from '@/lib/config';
-import { getClientTenantSlug } from '@/lib/client-api';
+import { getClientStoreSlug } from '@/lib/client-api';
 import {
   storeBodyClass,
   storeErrorTextClass,
@@ -26,7 +26,7 @@ export function BillingDashboard() {
   useEffect(() => {
     fetch(`${browserApiBase()}/api/v1/billing/config`, {
       credentials: 'include',
-      headers: { 'X-Tenant-Slug': getClientTenantSlug() },
+      headers: { 'X-Store-Slug': getClientStoreSlug() },
     })
       .then(async (res) => {
         if (!res.ok) throw new Error('Não foi possível carregar billing.');

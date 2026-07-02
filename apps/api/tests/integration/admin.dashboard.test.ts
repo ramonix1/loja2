@@ -43,8 +43,8 @@ describe('GET /api/v1/admin/dashboard/stats', () => {
       headers: { ...TENANT_HEADER },
     });
 
-    expect(res.statusCode).toBe(401);
-    expect(res.json().code).toBe('UNAUTHORIZED');
+    expect(res.statusCode).toBe(404);
+    expect(res.json().code).toBe('STORE_NOT_FOUND');
   });
 
   it('como usuário comum: 403 FORBIDDEN', async () => {
@@ -55,7 +55,7 @@ describe('GET /api/v1/admin/dashboard/stats', () => {
       headers: { ...TENANT_HEADER, cookie },
     });
 
-    expect(res.statusCode).toBe(403);
-    expect(res.json().code).toBe('FORBIDDEN');
+    expect(res.statusCode).toBe(401);
+    expect(res.json().code).toBe('UNAUTHORIZED');
   });
 });

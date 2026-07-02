@@ -2,7 +2,9 @@ import type {
   ConfiguracoesConfig,
   UpdateConfiguracoesInput,
 } from '@lojao/types/configuracoes';
-import type pg from 'pg';
+
+import { settingKeyFromEn, settingKeyToEn } from '../../lib/merchant-schema-map.js';
+import type { StoreScope } from '../../lib/store-scope.js';
 
 const CONFIG_KEYS = [
   'controla_estoque',
@@ -46,10 +48,10 @@ function formatCep(raw: string): string {
   return digits.replace(/^(\d{5})(\d{3})$/, '$1-$2');
 }
 
-function mapRowToConfig(rows: { chave: string; valor: string | null }[]): ConfiguracoesConfig {
+function mapRowToConfig(rows: { key: string; value: string | null }[]): ConfiguracoesConfig {
   const cfg: Record<string, string | null> = {};
   for (const row of rows) {
-    cfg[row.chave] = row.valor;
+    cfg[settingKeyFromEn(row.key)] = row.value;
   }
 
   return {
@@ -77,13 +79,14 @@ function mapRowToConfig(rows: { chave: string; valor: string | null }[]): Config
 }
 
 /** Porta `configController.getConfigs` — chaves operacionais da loja. */
-export async function getConfiguracoes(db: pg.Pool): Promise<ConfiguracoesConfig> {
+export async function getConfiguracoes({ pool, storeId }: StoreScope): Promise<ConfiguracoesConfig> {
   try {
-    const r = await db.query(
-      `SELECT chave, valor FROM configuracoes WHERE chave = ANY($1::text[])`,
-      [CONFIG_KEYS],
+    const enKeys = CONFIG_KEYS.map((k) => settingKeyToEn(k));
+    const r = await pool.query(
+      `SELECT key, value FROM store_settings WHERE store_id = $1 AND key = ANY($2::text[])`,
+      [storeId, enKeys],
     );
-    return mapRowToConfig(r.rows as { chave: string; valor: string | null }[]);
+    return mapRowToConfig(r.rows as { key: string; value: string | null }[]);
   } catch {
     return { ...DEFAULTS };
   }
@@ -91,9 +94,10 @@ export async function getConfiguracoes(db: pg.Pool): Promise<ConfiguracoesConfig
 
 /** Porta `configController.salvarConfiguracoes`. */
 export async function updateConfiguracoes(
-  db: pg.Pool,
+  scope: StoreScope,
   input: UpdateConfiguracoesInput,
 ): Promise<ConfiguracoesConfig> {
+  const { pool, storeId } = scope;
   const pares: [string, string][] = [
     ['controla_estoque', input.controla_estoque ? 'true' : 'false'],
     ['reservar_estoque_carrinho', input.reservar_estoque_carrinho ? 'true' : 'false'],
@@ -111,12 +115,13 @@ export async function updateConfiguracoes(
   ];
 
   for (const [chave, valor] of pares) {
-    await db.query(
-      `INSERT INTO configuracoes (chave, valor, updated_at) VALUES ($1, $2, NOW())
-       ON CONFLICT (chave) DO UPDATE SET valor = EXCLUDED.valor, updated_at = NOW()`,
-      [chave, valor],
+    const enKey = settingKeyToEn(chave);
+    await pool.query(
+      `INSERT INTO store_settings (store_id, key, value, updated_at) VALUES ($1, $2, $3, NOW())
+       ON CONFLICT (store_id, key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()`,
+      [storeId, enKey, valor],
     );
   }
 
-  return getConfiguracoes(db);
+  return getConfiguracoes(scope);
 }

@@ -18,6 +18,8 @@ import {
 } from '@/lib/store-styles';
 import { useStoreHref } from '@/lib/use-store-href';
 
+const MERCHANT_ROLES = new Set(['owner', 'admin', 'operator']);
+
 export function LoginForm() {
   const searchParams = useSearchParams();
   const homeHref = useStoreHref('/');
@@ -35,7 +37,7 @@ export function LoginForm() {
     setError(null);
     try {
       const user = await login(email, senha);
-      if (user.role === 'admin') {
+      if (user.redirectToAdmin || MERCHANT_ROLES.has(user.role)) {
         window.location.href = adminDashboardUrl();
         return;
       }

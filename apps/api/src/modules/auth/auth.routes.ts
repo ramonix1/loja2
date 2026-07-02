@@ -1,24 +1,33 @@
-import type { FastifyRequest } from 'fastify';
+import type { FastifyRequest, FastifyReply } from 'fastify';
 import type { FastifyInstance } from 'fastify';
 
-import { findAdminTenantsWithEmail } from '../../lib/resolve-login-tenant.js';
-import { getTenant } from '../../lib/tenant-db.js';
-import { requireMerchantAdmin } from '../../plugins/auth-guard.js';
+import { findActiveStoreInMerchant, listActiveStoresForMerchant } from '../../lib/resolve-member-login.js';
+import { getStoreBySlug, StoreNotFoundError, type StoreContext } from '../../lib/merchant-db.js';
+import { populateMerchantSession } from '../../lib/merchant-session.js';
+import {
+  applyBuyerPersona,
+  applyPreservedStashes,
+  logoutPersona,
+  preservedStashes,
+  resolveAuthContext,
+} from '../../lib/session-persona.js';
+import { requireStoreScope } from '../../lib/store-scope.js';
+import { requireAccountSession, requireMerchantMember } from '../../plugins/auth-guard.js';
+import { resolveStoreSlug } from '../../plugins/store.js';
 import {
   loginSchema,
   recoverPasswordSchema,
   registerSchema,
   resetPasswordSchema,
-  selectTenantSchema,
+  selectStoreSchema,
 } from './auth.schemas.js';
 import {
   isResetTokenValid,
-  login,
-  loginMerchantHub,
+  loginBuyer,
+  loginMerchantAccount,
   recoverPassword,
   register,
   resetPassword,
-  resolveAdminInTenant,
 } from './auth.service.js';
 
 function userPayload(usuario: {
@@ -35,34 +44,73 @@ function userPayload(usuario: {
   };
 }
 
-async function populateFullSession(
+/** MA8 — sessão de comprador (`buyers`) com loja resolvida; preserva lojista em stash. */
+async function populateBuyerSession(
   request: FastifyRequest,
-  usuario: { id: number; nome: string; email: string; role: string },
-  tenantSlug: string,
-  tenantId: number,
+  buyer: { id: number; nome: string; email: string },
+  ctx: StoreContext,
 ): Promise<void> {
+  const preserved = preservedStashes(request.session);
   await request.session.regenerate();
-  request.session.tenantSlug = tenantSlug;
-  request.session.tenant_id = tenantId;
-  request.session.usuarioId = usuario.id;
-  request.session.nome = usuario.nome;
-  request.session.email = usuario.email;
-  request.session.role = usuario.role as 'admin' | 'usuario' | 'platform_admin';
+  applyPreservedStashes(request.session, preserved);
+  applyBuyerPersona(request.session, buyer, {
+    merchantId: ctx.merchant.id,
+    merchantSlug: ctx.merchant.slug,
+    storeId: ctx.store.id,
+    storeSlug: ctx.store.slug,
+  });
   await request.session.save();
 }
 
-async function populatePartialSession(
+async function tryMerchantLoginForStore(
   request: FastifyRequest,
-  usuario: { nome: string; email: string; role: string },
-): Promise<void> {
-  await request.session.regenerate();
-  request.session.usuarioId = null;
-  request.session.tenantSlug = undefined;
-  request.session.tenant_id = undefined;
-  request.session.nome = usuario.nome;
-  request.session.email = usuario.email;
-  request.session.role = usuario.role as 'admin' | 'usuario' | 'platform_admin';
-  await request.session.save();
+  reply: FastifyReply,
+  ctx: StoreContext,
+  credentials: { email: string; senha: string },
+): Promise<boolean> {
+  const accountResult = await loginMerchantAccount(credentials, request.ip);
+  if (!accountResult.ok) {
+    if (accountResult.code === 'IP_BLOCKED' || accountResult.code === 'ACCOUNT_LOCKED') {
+      await reply.code(401).send({
+        error: 'Conta temporariamente bloqueada. Tente novamente mais tarde.',
+        code: accountResult.code,
+      });
+      return true;
+    }
+    return false;
+  }
+
+  const targetStore =
+    accountResult.step === 'ready'
+      ? accountResult.store
+      : accountResult.stores.find((s) => s.slug === ctx.store.slug);
+
+  if (!targetStore || targetStore.slug !== ctx.store.slug) {
+    return false;
+  }
+
+  await populateMerchantSession(request, accountResult.member, {
+    id: targetStore.id,
+    slug: targetStore.slug,
+  });
+
+  await reply.send({
+    data: {
+      step: 'ready',
+      redirectToAdmin: true,
+      merchant: {
+        slug: accountResult.member.merchantSlug,
+        nome: accountResult.member.merchantName,
+      },
+      store: { slug: targetStore.slug, nome: targetStore.nome },
+      user: userPayload({
+        nome: accountResult.member.name,
+        email: accountResult.member.email,
+        role: accountResult.member.role,
+      }),
+    },
+  });
+  return true;
 }
 
 /**
@@ -81,82 +129,110 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       });
     }
 
-    const hasExplicitSlug = Boolean(parsed.data.tenantSlug?.trim());
+    const storeSlug = parsed.data.storeSlug?.trim() || resolveStoreSlug(request);
 
-    if (!hasExplicitSlug) {
-      const hubResult = await loginMerchantHub(parsed.data, request.ip);
-      if (!hubResult.ok) {
-        if (hubResult.code === 'NO_TENANT_ACCESS') {
-          return reply.code(403).send({
-            error: 'Nenhuma loja encontrada para este e-mail.',
-            code: 'NO_TENANT_ACCESS',
-          });
-        }
-        return reply
-          .code(401)
-          .send({ error: 'Email ou senha incorretos.', code: 'UNAUTHORIZED' });
-      }
-
-      if (hubResult.step === 'ready') {
-        const { tenant } = await getTenant(hubResult.tenant.slug);
-        await populateFullSession(
-          request,
-          hubResult.usuario,
-          hubResult.tenant.slug,
-          tenant.id,
+    if (storeSlug) {
+      try {
+        const ctx = await getStoreBySlug(storeSlug);
+        const result = await loginBuyer(
+          { merchantDb: ctx.merchantDb, storeId: ctx.store.id },
+          parsed.data,
+          request.ip,
         );
+
+        if (!result.ok) {
+          if (result.code === 'IP_BLOCKED' || result.code === 'ACCOUNT_LOCKED') {
+            return reply.code(401).send({
+              error: 'Conta temporariamente bloqueada. Tente novamente mais tarde.',
+              code: result.code,
+            });
+          }
+
+          const merchantHandled = await tryMerchantLoginForStore(request, reply, ctx, parsed.data);
+          if (merchantHandled) return;
+          return reply
+            .code(401)
+            .send({ error: 'Email ou senha incorretos.', code: 'UNAUTHORIZED' });
+        }
+
+        await populateBuyerSession(request, result.usuario, ctx);
         return reply.send({
           data: {
             step: 'ready',
-            tenant: hubResult.tenant,
-            user: userPayload(hubResult.usuario),
+            store: { slug: ctx.store.slug, nome: ctx.store.name },
+            user: userPayload(result.usuario),
           },
         });
+      } catch (err) {
+        if (err instanceof StoreNotFoundError) {
+          return reply.code(404).send({ error: 'Loja não encontrada.', code: 'STORE_NOT_FOUND' });
+        }
+        throw err;
       }
-
-      await populatePartialSession(request, hubResult.usuario);
-      return reply.send({
-        data: {
-          step: 'select_tenant',
-          stores: hubResult.stores,
-          user: userPayload(hubResult.usuario),
-        },
-      });
     }
 
-    if (!request.drizzle) {
-      return reply.code(400).send({
-        error: 'Informe o slug da loja.',
-        code: 'TENANT_SLUG_REQUIRED',
-      });
-    }
-
-    const result = await login(request.drizzle, parsed.data, request.ip);
-    if (!result.ok) {
+    const accountResult = await loginMerchantAccount(parsed.data, request.ip);
+    if (!accountResult.ok) {
+      if (accountResult.code === 'IP_BLOCKED' || accountResult.code === 'ACCOUNT_LOCKED') {
+        return reply.code(401).send({
+          error: 'Conta temporariamente bloqueada. Tente novamente mais tarde.',
+          code: accountResult.code,
+        });
+      }
       return reply
         .code(401)
         .send({ error: 'Email ou senha incorretos.', code: 'UNAUTHORIZED' });
     }
 
-    await populateFullSession(
-      request,
-      result.usuario,
-      request.tenantSlug!,
-      request.tenantId!,
-    );
+    if (accountResult.step === 'ready') {
+      await populateMerchantSession(request, accountResult.member, {
+        id: accountResult.store.id,
+        slug: accountResult.store.slug,
+      });
+      return reply.send({
+        data: {
+          step: 'ready',
+          merchant: {
+            slug: accountResult.member.merchantSlug,
+            nome: accountResult.member.merchantName,
+          },
+          store: accountResult.store,
+          user: userPayload({
+            nome: accountResult.member.name,
+            email: accountResult.member.email,
+            role: accountResult.member.role,
+          }),
+        },
+      });
+    }
 
-    const { tenant } = await getTenant(request.tenantSlug!);
+    await populateMerchantSession(request, accountResult.member);
     return reply.send({
       data: {
-        step: 'ready',
-        tenant: { slug: tenant.slug, lojaNome: tenant.nome },
-        user: userPayload(result.usuario),
+        step: 'select_store',
+        merchant: {
+          slug: accountResult.member.merchantSlug,
+          nome: accountResult.member.merchantName,
+        },
+        stores: accountResult.stores,
+        user: userPayload({
+          nome: accountResult.member.name,
+          email: accountResult.member.email,
+          role: accountResult.member.role,
+        }),
       },
     });
   });
 
-  app.post('/auth/select-tenant', { preHandler: requireMerchantAdmin }, async (request, reply) => {
-    const parsed = selectTenantSchema.safeParse(request.body);
+  app.get('/auth/my-stores', { preHandler: requireAccountSession }, async (request, reply) => {
+    const stores = await listActiveStoresForMerchant(request.session.merchantId!);
+    return reply.send({
+      data: { stores: stores.map((s) => ({ slug: s.slug, nome: s.name })) },
+    });
+  });
+
+  app.post('/auth/select-store', { preHandler: requireMerchantMember }, async (request, reply) => {
+    const parsed = selectStoreSchema.safeParse(request.body);
     if (!parsed.success) {
       return reply.code(400).send({
         error: 'Dados inválidos.',
@@ -165,42 +241,38 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       });
     }
 
-    const email = request.session.email!;
-    const resolved = await resolveAdminInTenant(email, parsed.data.tenantSlug);
-    if (!resolved.ok) {
+    const store = await findActiveStoreInMerchant(
+      request.session.merchantId!,
+      parsed.data.storeSlug,
+    );
+    if (!store) {
       return reply.code(403).send({
         error: 'Você não tem acesso a esta loja.',
         code: 'FORBIDDEN',
       });
     }
 
-    await populateFullSession(
+    await populateMerchantSession(
       request,
-      resolved.usuario,
-      parsed.data.tenantSlug,
-      resolved.tenantId,
+      {
+        id: request.session.memberId!,
+        name: request.session.nome ?? '',
+        email: request.session.email ?? '',
+        role: request.session.role ?? 'owner',
+        merchantId: request.session.merchantId!,
+        merchantSlug: request.session.merchantSlug ?? '',
+      },
+      { id: store.id, slug: store.slug },
     );
 
     return reply.send({
-      data: {
-        tenant: { slug: parsed.data.tenantSlug, lojaNome: resolved.lojaNome },
-      },
+      data: { store: { slug: store.slug, nome: store.name } },
     });
   });
 
-  app.get('/auth/my-stores', { preHandler: requireMerchantAdmin }, async (request, reply) => {
-    const stores = await findAdminTenantsWithEmail(request.session.email!);
-    return reply.send({
-      data: {
-        stores: stores.map((s) => ({ slug: s.slug, lojaNome: s.nome })),
-      },
-    });
-  });
-
-  app.post('/auth/clear-tenant', { preHandler: requireMerchantAdmin }, async (request, reply) => {
-    request.session.tenantSlug = undefined;
-    request.session.tenant_id = undefined;
-    request.session.usuarioId = null;
+  app.post('/auth/clear-store', { preHandler: requireMerchantMember }, async (request, reply) => {
+    request.session.storeId = undefined;
+    request.session.storeSlug = undefined;
     await request.session.save();
     return reply.send({ data: { ok: true } });
   });
@@ -215,7 +287,8 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       });
     }
 
-    const result = await register(request.drizzle, parsed.data);
+    const scope = requireStoreScope(request);
+    const result = await register(scope, parsed.data);
     if (!result.ok) {
       const message =
         result.code === 'EMAIL_EXISTS' ? 'Este email já está cadastrado.' : 'Dados inválidos.';
@@ -235,7 +308,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       });
     }
 
-    await recoverPassword(request.drizzle, parsed.data);
+    await recoverPassword(requireStoreScope(request), parsed.data);
     return reply.send({
       data: {
         message:
@@ -246,7 +319,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
 
   app.get('/auth/reset-password/:token', async (request, reply) => {
     const token = (request.params as { token: string }).token;
-    const valid = await isResetTokenValid(request.drizzle, token);
+    const valid = await isResetTokenValid(requireStoreScope(request), token);
     if (!valid) {
       return reply.code(404).send({ error: 'Link inválido ou expirado.', code: 'INVALID_TOKEN' });
     }
@@ -264,7 +337,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
       });
     }
 
-    const result = await resetPassword(request.drizzle, token, parsed.data);
+    const result = await resetPassword(requireStoreScope(request), token, parsed.data);
     if (!result.ok) {
       return reply.code(404).send({ error: 'Link inválido ou expirado.', code: 'INVALID_TOKEN' });
     }
@@ -273,37 +346,84 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
   });
 
   app.post('/auth/logout', async (request, reply) => {
+    const context = resolveAuthContext(request);
+    if (context) {
+      logoutPersona(request.session, context);
+      const hasIdentity =
+        request.session.memberId != null ||
+        (request.session.usuarioId != null && request.session.role === 'usuario') ||
+        request.session.role === 'platform_admin';
+      if (hasIdentity) {
+        await request.session.save();
+        return reply.send({ data: { ok: true, partial: true } });
+      }
+    }
+
     await request.session.destroy();
     return reply.send({ data: { ok: true } });
   });
 
   app.get('/auth/me', async (request, reply) => {
-    const hasSession =
-      request.session.usuarioId || (request.session.email && request.session.role === 'admin');
-    if (!hasSession) {
+    const memberId = request.session.memberId;
+    const usuarioId = request.session.usuarioId;
+
+    if (!memberId && !usuarioId) {
       return reply.code(401).send({ error: 'Não autenticado.', code: 'UNAUTHORIZED' });
     }
 
-    const slug = request.session.tenantSlug ?? request.tenantSlug;
-    let lojaNome = '';
-    if (slug) {
-      try {
-        const { tenant } = await getTenant(slug);
-        lojaNome = tenant.nome;
-      } catch {
-        lojaNome = slug;
+    if (memberId) {
+      const storeSlug = request.session.storeSlug;
+      let storeName: string | null = null;
+      if (storeSlug) {
+        try {
+          storeName = (await getStoreBySlug(storeSlug)).store.name;
+        } catch {
+          storeName = storeSlug;
+        }
       }
+
+      return reply.send({
+        data: {
+          usuario: {
+            id: memberId,
+            nome: request.session.nome,
+            email: request.session.email,
+            role: request.session.role,
+          },
+          merchant: request.session.merchantSlug
+            ? { slug: request.session.merchantSlug, nome: request.session.merchantSlug }
+            : null,
+          store: storeSlug
+            ? {
+                slug: storeSlug,
+                nome: storeName ?? storeSlug,
+              }
+            : null,
+          tenant: null,
+          impersonation: request.session.impersonation
+            ? {
+                storeSlug: request.session.impersonation.storeSlug,
+                operatorEmail: request.session.impersonation.operatorEmail,
+              }
+            : null,
+        },
+      });
     }
 
     return reply.send({
       data: {
         usuario: {
-          id: request.session.usuarioId ?? undefined,
+          id: usuarioId,
           nome: request.session.nome,
           email: request.session.email,
           role: request.session.role,
         },
-        tenant: slug ? { slug, lojaNome } : null,
+        merchant: null,
+        store: request.session.storeSlug
+          ? { slug: request.session.storeSlug, nome: request.session.storeSlug }
+          : null,
+        tenant: null,
+        impersonation: null,
       },
     });
   });

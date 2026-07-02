@@ -2,15 +2,15 @@
 
 import { browserApiBase } from '@/lib/config';
 
-let clientTenantSlug = 'loja';
+let clientStoreSlug = 'loja';
 
 /** Sincronizado pelo `StoreSlugProvider` em rotas `/store/[slug]`. */
-export function setClientTenantSlug(slug: string): void {
-  clientTenantSlug = slug;
+export function setClientStoreSlug(slug: string): void {
+  clientStoreSlug = slug;
 }
 
-export function getClientTenantSlug(): string {
-  return clientTenantSlug;
+export function getClientStoreSlug(): string {
+  return clientStoreSlug;
 }
 
 export class ApiError extends Error {
@@ -30,7 +30,8 @@ async function apiFetch<T>(
 ): Promise<T> {
   const hasBody = init.body != null && init.body !== '';
   const headers: Record<string, string> = {
-    'X-Tenant-Slug': clientTenantSlug,
+    'X-Store-Slug': clientStoreSlug,
+    'X-Auth-Context': 'buyer',
     ...((init.headers as Record<string, string> | undefined) ?? {}),
   };
   if (hasBody) {
@@ -73,12 +74,14 @@ export async function fetchMe(): Promise<AuthUser | null> {
   }
 }
 
-export async function login(email: string, senha: string): Promise<AuthUser> {
-  const { data } = await apiFetch<{ data: { user: AuthUser } }>('/api/v1/auth/login', {
+export async function login(email: string, senha: string): Promise<AuthUser & { redirectToAdmin?: boolean }> {
+  const { data } = await apiFetch<{
+    data: { user: AuthUser; redirectToAdmin?: boolean };
+  }>('/api/v1/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ email, senha, tenantSlug: getClientTenantSlug() }),
+    body: JSON.stringify({ email, senha, storeSlug: getClientStoreSlug() }),
   });
-  return data.user;
+  return { ...data.user, redirectToAdmin: data.redirectToAdmin };
 }
 
 export async function logout(): Promise<void> {

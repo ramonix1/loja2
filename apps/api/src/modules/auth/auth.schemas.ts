@@ -3,7 +3,8 @@ import { z } from 'zod';
 export const loginSchema = z.object({
   email: z.string().min(1, 'Email é obrigatório.'),
   senha: z.string().min(1, 'Senha é obrigatória.'),
-  tenantSlug: z.string().trim().min(1, 'Slug da loja inválido.').optional(),
+  /** MA8 — vitrine: slug da loja no body (alternativa ao header `X-Store-Slug`). */
+  storeSlug: z.string().trim().min(1, 'Slug da loja inválido.').optional(),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;
@@ -44,8 +45,9 @@ export const resetPasswordSchema = z.object({
 
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 
-export const selectTenantSchema = z.object({
-  tenantSlug: z.string().trim().min(1, 'Slug da loja inválido.'),
+/** MA5 — seleção de loja dentro de uma conta merchant já autenticada (`session.memberId`). */
+export const selectStoreSchema = z.object({
+  storeSlug: z.string().trim().min(1, 'Slug da loja inválido.'),
 });
 
-export type SelectTenantInput = z.infer<typeof selectTenantSchema>;
+export type SelectStoreInput = z.infer<typeof selectStoreSchema>;

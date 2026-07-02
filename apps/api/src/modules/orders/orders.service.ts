@@ -1,4 +1,5 @@
-import type pg from 'pg';
+import { orderStatusToApi } from '../../lib/merchant-schema-map.js';
+import type { StoreScope } from '../../lib/store-scope.js';
 
 export interface BuyerOrderRow {
   id: number;
@@ -10,23 +11,23 @@ export interface BuyerOrderRow {
 }
 
 /** Lista pedidos do comprador autenticado — espelha `checkoutController.meusPedidos`. */
-export async function listBuyerOrders(db: pg.Pool, usuarioId: number): Promise<BuyerOrderRow[]> {
-  const res = await db.query(
+export async function listBuyerOrders(scope: StoreScope, buyerId: number): Promise<BuyerOrderRow[]> {
+  const res = await scope.pool.query(
     `
-    SELECT p.id, p.status, p.total, p.metodo_pagamento, p.created_at,
-           COUNT(pi.id)::int AS total_itens
-    FROM pedidos p
-    LEFT JOIN pedido_itens pi ON pi.pedido_id = p.id
-    WHERE p.usuario_id = $1
-    GROUP BY p.id
-    ORDER BY p.created_at DESC
+    SELECT o.id, o.status, o.total, o.payment_method AS metodo_pagamento, o.created_at,
+           COUNT(oi.id)::int AS total_itens
+    FROM orders o
+    LEFT JOIN order_items oi ON oi.order_id = o.id AND oi.store_id = o.store_id
+    WHERE o.buyer_id = $1 AND o.store_id = $2
+    GROUP BY o.id
+    ORDER BY o.created_at DESC
   `,
-    [usuarioId],
+    [buyerId, scope.storeId],
   );
 
   return res.rows.map((row) => ({
     id: Number(row.id),
-    status: String(row.status),
+    status: orderStatusToApi(String(row.status)),
     total: Number(row.total),
     metodo_pagamento: row.metodo_pagamento == null ? null : String(row.metodo_pagamento),
     created_at: String(row.created_at),

@@ -15,10 +15,17 @@ Especificações **spec-driven** pós-migração (Fase 8 concluída). Complement
 6. [storefront-onboarding-spec.md](./storefront-onboarding-spec.md) — self-service (Fase G + M7)
 7. [admin-merchant-hub-spec.md](./admin-merchant-hub-spec.md) — login sem slug (Fase H)
 8. [shadcn-ui-migration-spec.md](./shadcn-ui-migration-spec.md) — shadcn/ui em `@lojao/ui` · [STATUS](./shadcn-ui-migration-STATUS.md)
-9. [prompts/README.md](./prompts/README.md) — **prompts copy-paste por fase**
-10. [../migration/TESTING-STRATEGY.md](../migration/TESTING-STRATEGY.md) — testids e Playwright
-11. [../migration/TESTING-IMPLEMENTATION.md](../migration/TESTING-IMPLEMENTATION.md) — como implementar testes
-12. [../migration/runbooks/render-blueprint.md](../migration/runbooks/render-blueprint.md) — deploy Render
+9. [dark-theme-icons-spec.md](./dark-theme-icons-spec.md) — PDF Dark Theme + react-icons + remoção tema vitrine · [STATUS](./dark-theme-icons-STATUS.md)
+10. [prompts/README.md](./prompts/README.md) — **prompts copy-paste por fase**
+11. [naming-policy.md](./naming-policy.md) — **ban codinome Lojão** + allowlist legada
+12. [db-schema-english.md](./db-schema-english.md) — **PostgreSQL em inglês** (MA greenfield)
+13. [merchant-account-architecture-spec.md](./merchant-account-architecture-spec.md) — **conta → lojas** (MA0–MA9) · [STATUS](./merchant-account-STATUS.md)
+14. [multi-tenant-isolation-fix.md](./multi-tenant-isolation-fix.md) — fix interim database-per-store
+15. [admin-shell-ui-refactor-spec.md](./admin-shell-ui-refactor-spec.md) — shell sidebar+header, Platform Ops dashboard, grid de lojas
+16. [storefront-vitrine-ui-refactor-spec.md](./storefront-vitrine-ui-refactor-spec.md) — vitrine `/store/[slug]`
+17. [../migration/TESTING-STRATEGY.md](../migration/TESTING-STRATEGY.md) — testids e Playwright
+18. [../migration/TESTING-IMPLEMENTATION.md](../migration/TESTING-IMPLEMENTATION.md) — como implementar testes
+19. [../migration/runbooks/render-blueprint.md](../migration/runbooks/render-blueprint.md) — deploy Render
 
 ## Regra de ouro
 
@@ -36,6 +43,17 @@ Especificações **spec-driven** pós-migração (Fase 8 concluída). Complement
 | F | `ata-f` | Platform Hub `/platform` + API tenants |
 | G | `ata-g` | Onboarding self-service (API signup + trial) |
 | H | `ata-h` | Merchant Hub — login sem slug, `/admin/my-stores` |
+
+## Merchant Account (initiative MA — pós-H)
+
+Spec: [merchant-account-architecture-spec.md](./merchant-account-architecture-spec.md) · Status: [merchant-account-STATUS.md](./merchant-account-STATUS.md)
+
+Conta do cliente (merchant) → várias lojas (stores) no mesmo banco `atacommerce_<merchant>`, com `store_id` em todas as tabelas de negócio. Substitui modelo `tenants` = loja = banco.
+
+| Fase | ID | Objetivo |
+|------|-----|----------|
+| MA0 | `ma0` | Spec + naming policy |
+| MA1–MA9 | `ma1`… | Ver spec MA |
 
 ## shadcn/ui (sub-initiative)
 
@@ -66,6 +84,32 @@ Onboarding UI: [storefront-onboarding-spec.md](./storefront-onboarding-spec.md) 
 | M5 | `store-m5` | Demo `/demo` |
 | M6 | `store-m6` | Vitrine `/store/[slug]` + redirects |
 | M7 | `store-m7` | Checkout self-service `/signup/*` (protótipo checkout/success) |
+
+## Dark Theme + Ícones (sub-initiative)
+
+Spec: [dark-theme-icons-spec.md](./dark-theme-icons-spec.md) · Status: [dark-theme-icons-STATUS.md](./dark-theme-icons-STATUS.md)
+
+| Fase | ID | Objetivo |
+|------|-----|----------|
+| DT0 | `dt0` | Audit PDF Dark Theme → tokens admin/platform |
+| I1 | `icons-i1` | react-icons + IconButton em `@lojao/ui` |
+| I2 | `icons-i2` | Toggle sol/lua (admin + platform) |
+| I3 | `icons-i3` | Remover tema vitrine (Aparência, API, storefront) |
+| I4 | `icons-i4` | Ícones admin CRUD + shell |
+| I5 | `icons-i5` | Ícones storefront (carrinho, nav) |
+| I6 | `icons-i6` | QA, E2E, docs |
+
+## Admin Shell UI (sub-initiative)
+
+Spec: [admin-shell-ui-refactor-spec.md](./admin-shell-ui-refactor-spec.md)
+
+| Fase | ID | Objetivo |
+|------|-----|----------|
+| P0 | `shell-p0` | Spec + tokens shell |
+| P1 | `shell-p1` | AppShell + Platform dashboard + lojas grid |
+| P2 | `shell-p2` | Admin lojista no AppShell + KpiStrip |
+| P3 | `shell-p3` | Command palette + notificações + merchants |
+| P4 | `shell-p4` | Detalhe loja tabs + billing + analytics |
 
 ## Ordem recomendada pós-F
 

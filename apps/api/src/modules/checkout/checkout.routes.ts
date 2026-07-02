@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 
+import { requireStoreScope } from '../../lib/store-scope.js';
 import { requireAuth } from '../../plugins/auth-guard.js';
 import { getCheckoutPreview, getCheckoutResult, processCheckout } from './checkout.service.js';
 
@@ -27,7 +28,8 @@ export async function checkoutRoutes(app: FastifyInstance): Promise<void> {
   app.addHook('preHandler', requireAuth);
 
   app.get('/checkout', async (request, reply) => {
-    const data = await getCheckoutPreview(request.db, request.session.usuarioId!);
+    const scope = requireStoreScope(request);
+    const data = await getCheckoutPreview(scope, request.session.usuarioId!);
     if (data.itens.length === 0) {
       return reply.code(400).send({ error: 'Carrinho vazio.', code: 'EMPTY_CART' });
     }
@@ -45,9 +47,8 @@ export async function checkoutRoutes(app: FastifyInstance): Promise<void> {
     }
 
     const result = await processCheckout(
-      request.db,
+      requireStoreScope(request),
       request.session.usuarioId!,
-      request.tenantId,
       parsed.data,
     );
 
@@ -70,7 +71,7 @@ export async function checkoutRoutes(app: FastifyInstance): Promise<void> {
       return reply.code(400).send({ error: 'ID inválido.', code: 'VALIDATION_ERROR' });
     }
 
-    const data = await getCheckoutResult(request.db, request.session.usuarioId!, id);
+    const data = await getCheckoutResult(requireStoreScope(request), request.session.usuarioId!, id);
     if (!data) {
       return reply.code(404).send({ error: 'Pedido não encontrado.', code: 'NOT_FOUND' });
     }

@@ -1,10 +1,12 @@
 /**
  * Agregações SQL compartilhadas entre dashboard charts e relatórios.
- * Regras de receita confirmada: status NOT IN ('cancelado', 'aguardando_pagamento').
+ * Regras de receita confirmada: status NOT IN ('cancelled', 'awaiting_payment').
  * Timezone: intervalo via Date JS + BETWEEN no Postgres (CURRENT_DATE implícito no servidor DB).
  */
 import type { DashboardPeriodo } from '@lojao/types/dashboard';
-import type pg from 'pg';
+
+import type { StoreScope } from '../../lib/store-scope.js';
+import { orderStatusToApi } from '../../lib/merchant-schema-map.js';
 
 export function toNum(v: string | number | null | undefined): number {
   return Number(v ?? 0);
@@ -31,19 +33,19 @@ export function parseDashboardPeriodo(periodo: DashboardPeriodo): {
 
 /** Receita confirmada e pedidos (não cancelados) por dia — usado em financeiro e dashboard. */
 export async function fetchReceitaPorDia(
-  db: pg.Pool,
+  { pool, storeId }: StoreScope,
   dataInicio: Date,
   dataFim: Date,
 ): Promise<Array<{ dia: string; receita: number; pedidos: number }>> {
-  const res = await db.query(
+  const res = await pool.query(
     `SELECT DATE_TRUNC('day', created_at) AS dia,
-            COUNT(*) FILTER (WHERE status NOT IN ('cancelado'))::int AS pedidos,
-            ROUND(COALESCE(SUM(total) FILTER (WHERE status NOT IN ('cancelado','aguardando_pagamento')), 0), 2) AS receita
-     FROM pedidos
-     WHERE created_at BETWEEN $1 AND $2
+            COUNT(*) FILTER (WHERE status NOT IN ('cancelled'))::int AS pedidos,
+            ROUND(COALESCE(SUM(total) FILTER (WHERE status NOT IN ('cancelled','awaiting_payment')), 0), 2) AS receita
+     FROM orders
+     WHERE store_id = $3 AND created_at BETWEEN $1 AND $2
      GROUP BY dia
      ORDER BY dia`,
-    [dataInicio, dataFim],
+    [dataInicio, dataFim, storeId],
   );
 
   return res.rows.map((r) => ({
@@ -55,40 +57,40 @@ export async function fetchReceitaPorDia(
 
 /** Contagem de todos os pedidos no período por status (inclui cancelados). */
 export async function fetchPedidosPorStatus(
-  db: pg.Pool,
+  { pool, storeId }: StoreScope,
   dataInicio: Date,
   dataFim: Date,
 ): Promise<Array<{ status: string; total: number }>> {
-  const res = await db.query(
+  const res = await pool.query(
     `SELECT status, COUNT(*)::int AS total
-     FROM pedidos
-     WHERE created_at BETWEEN $1 AND $2
+     FROM orders
+     WHERE store_id = $3 AND created_at BETWEEN $1 AND $2
      GROUP BY status
      ORDER BY total DESC`,
-    [dataInicio, dataFim],
+    [dataInicio, dataFim, storeId],
   );
 
   return res.rows.map((r) => ({
-    status: String(r.status),
+    status: orderStatusToApi(String(r.status)),
     total: Number(r.total ?? 0),
   }));
 }
 
 /** Receita confirmada por método de pagamento. */
 export async function fetchReceitaPorMetodo(
-  db: pg.Pool,
+  { pool, storeId }: StoreScope,
   dataInicio: Date,
   dataFim: Date,
 ): Promise<Array<{ metodo: string; receita: number; pedidos: number }>> {
-  const res = await db.query(
-    `SELECT COALESCE(metodo_pagamento, 'N/A') AS metodo,
+  const res = await pool.query(
+    `SELECT COALESCE(payment_method, 'N/A') AS metodo,
             COUNT(*)::int AS pedidos,
-            ROUND(COALESCE(SUM(total) FILTER (WHERE status NOT IN ('cancelado','aguardando_pagamento')), 0), 2) AS receita
-     FROM pedidos
-     WHERE created_at BETWEEN $1 AND $2
-     GROUP BY metodo_pagamento
+            ROUND(COALESCE(SUM(total) FILTER (WHERE status NOT IN ('cancelled','awaiting_payment')), 0), 2) AS receita
+     FROM orders
+     WHERE store_id = $3 AND created_at BETWEEN $1 AND $2
+     GROUP BY payment_method
      ORDER BY receita DESC`,
-    [dataInicio, dataFim],
+    [dataInicio, dataFim, storeId],
   );
 
   return res.rows.map((r) => ({
@@ -100,23 +102,24 @@ export async function fetchReceitaPorMetodo(
 
 /** Top produtos por quantidade vendida no período. */
 export async function fetchTopProdutos(
-  db: pg.Pool,
+  scope: StoreScope,
   dataInicio: Date,
   dataFim: Date,
   limit = 5,
 ): Promise<Array<{ nome: string; quantidade: number; receita: number }>> {
-  const res = await db.query(
-    `SELECT pi.nome_produto AS nome,
-            SUM(pi.quantidade)::int AS quantidade,
-            ROUND(SUM(pi.subtotal), 2) AS receita
-     FROM pedido_itens pi
-     JOIN pedidos p ON p.id = pi.pedido_id
-     WHERE p.created_at BETWEEN $1 AND $2
-       AND p.status NOT IN ('cancelado')
-     GROUP BY pi.nome_produto
+  const { pool, storeId } = scope;
+  const res = await pool.query(
+    `SELECT oi.product_name AS nome,
+            SUM(oi.quantity)::int AS quantidade,
+            ROUND(SUM(oi.subtotal), 2) AS receita
+     FROM order_items oi
+     JOIN orders o ON o.id = oi.order_id AND o.store_id = oi.store_id
+     WHERE o.store_id = $4 AND o.created_at BETWEEN $1 AND $2
+       AND o.status NOT IN ('cancelled')
+     GROUP BY oi.product_name
      ORDER BY quantidade DESC
      LIMIT $3`,
-    [dataInicio, dataFim, limit],
+    [dataInicio, dataFim, limit, storeId],
   );
 
   return res.rows.map((r) => ({

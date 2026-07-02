@@ -29,7 +29,7 @@ const RELATORIO_ABAS = [
 
 type RelatorioAba = (typeof RELATORIO_ABAS)[number];
 
-const TENANT_SLUG = import.meta.env.VITE_TENANT_SLUG ?? 'loja';
+const STORE_SLUG = import.meta.env.VITE_STORE_SLUG ?? import.meta.env.VITE_TENANT_SLUG ?? 'loja';
 
 const TAB_LABELS: Record<RelatorioAba, string> = {
   vendas: 'Vendas',
@@ -133,7 +133,7 @@ export function RelatoriosPage() {
       `${browserApiBase()}/api/v1/admin/relatorios/csv/${aba}?${qs.toString()}`,
       {
         credentials: 'include',
-        headers: { 'X-Tenant-Slug': TENANT_SLUG },
+        headers: { 'X-Store-Slug': STORE_SLUG },
       },
     );
     if (!res.ok) return;

@@ -2,12 +2,14 @@ import type { PublicBanner, PublicProduct, PublicStoreData } from '@lojao/types/
 import type { Metadata } from 'next';
 import { cache } from 'react';
 
-import { getDefaultStoreSlug } from '@lojao/tenant-host';
+import { getDefaultStoreSlug } from '@lojao/store-host';
 
+import { storeCacheTag } from '@/lib/cache-tags';
 import { getSsrApiBase } from '@/lib/ssr-fetch';
 
-/** Segundos de cache ISR para dados públicos (home, produto). */
-const PUBLIC_REVALIDATE_SEC = Number(process.env.STOREFRONT_PUBLIC_REVALIDATE ?? 60);
+/** Segundos de cache ISR em produção (fallback se on-demand falhar). Dev: sempre no-store. */
+const PUBLIC_REVALIDATE_SEC = Number(process.env.STOREFRONT_PUBLIC_REVALIDATE ?? 30);
+const IS_DEV = process.env.NODE_ENV === 'development';
 
 export function assetUrl(path: string): string {
   if (!path) return '';
@@ -45,12 +47,15 @@ async function fetchApi<T>(
   slug: string,
   options?: { revalidate?: number | false },
 ): Promise<T> {
-  const revalidate = options?.revalidate ?? PUBLIC_REVALIDATE_SEC;
+  const tag = storeCacheTag(slug);
+  const useNoStore = IS_DEV || options?.revalidate === false;
+  const revalidate = useNoStore ? undefined : (options?.revalidate ?? PUBLIC_REVALIDATE_SEC);
+
   const res = await fetch(`${getSsrApiBase()}${path}`, {
-    headers: { 'X-Tenant-Slug': slug },
-    ...(revalidate === false
+    headers: { 'X-Store-Slug': slug },
+    ...(useNoStore
       ? { cache: 'no-store' as const }
-      : { next: { revalidate } }),
+      : { next: { revalidate, tags: [tag] } }),
   });
 
   const body = (await res.json().catch(() => ({}))) as {

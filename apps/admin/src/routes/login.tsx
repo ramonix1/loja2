@@ -16,7 +16,7 @@ import { ApiError } from '../lib/api-client';
 import { useAuth } from '../lib/auth-context';
 
 export function LoginPage() {
-  const { login, isAuthenticated, isLoading, needsTenantSelection, isPlatformAdmin } = useAuth();
+  const { login, isAuthenticated, isLoading, needsStoreSelection, isPlatformAdmin } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
@@ -24,21 +24,21 @@ export function LoginPage() {
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
       if (isPlatformAdmin) {
-        navigate('/platform/tenants', { replace: true });
+        navigate('/platform/stores', { replace: true });
         return;
       }
-      if (needsTenantSelection) {
+      if (needsStoreSelection) {
         navigate('/admin/my-stores', { replace: true });
         return;
       }
       navigate('/admin/dashboard', { replace: true });
     }
-  }, [isLoading, isAuthenticated, needsTenantSelection, isPlatformAdmin, navigate]);
+  }, [isLoading, isAuthenticated, needsStoreSelection, isPlatformAdmin, navigate]);
 
   const mutation = useMutation({
     mutationFn: () => login(email, senha),
     onSuccess: (step) => {
-      if (step === 'select_tenant') {
+      if (step === 'select_store') {
         navigate('/admin/my-stores', { replace: true });
         return;
       }

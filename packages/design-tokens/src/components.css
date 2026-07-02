@@ -169,7 +169,8 @@
 }
 
 [data-admin-ui-theme='escuro'] .admin-auth-shell {
-  background-image: var(--ata-commerce-hero-gradient);
+  /* PDF DT: fundo neutro — sem gradiente de marca na tela */
+  background-image: none;
 }
 
 .admin-auth-shell--centered {
@@ -245,7 +246,8 @@
 }
 
 [data-platform-ui-theme='escuro'] .platform-auth-shell {
-  background-image: var(--ata-hero-gradient);
+  /* PDF DT: fundo neutro — sem gradiente de marca na tela */
+  background-image: none;
 }
 
 .platform-auth-shell--centered {
@@ -270,6 +272,7 @@
   backdrop-filter: blur(4px);
 }
 
+.platform-store-row,
 .platform-tenant-row {
   display: flex;
   align-items: center;

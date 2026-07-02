@@ -4,7 +4,7 @@ import { z } from 'zod';
 export const storeThemeSchema = z.enum(['escuro', 'claro']);
 export type StoreTheme = z.infer<typeof storeThemeSchema>;
 
-export const DEFAULT_STORE_THEME: StoreTheme = 'escuro';
+export const DEFAULT_STORE_THEME: StoreTheme = 'claro';
 
 export function parseStoreTheme(value: string | undefined | null): StoreTheme {
   const parsed = storeThemeSchema.safeParse(value);

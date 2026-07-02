@@ -1,5 +1,5 @@
 import { marketing as testIds } from '@lojao/test-utils/test-ids/marketing';
-import { buildStorePath } from '@lojao/tenant-host';
+import { buildStorePath } from '@lojao/store-host';
 import Link from 'next/link';
 
 import { BrowserFrame } from '@/components/marketing/browser-frame';

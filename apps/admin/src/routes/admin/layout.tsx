@@ -5,40 +5,31 @@ import {
   adminSidebarLinkClass,
   cn,
 } from '@lojao/ui';
+import { ActionIcons } from '@lojao/ui/icons';
 import { testIds } from '@lojao/test-utils';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 
 import { AdminUiThemeSwitch } from '../../components/admin-ui-theme-switch';
+import { ADMIN_NAV_ITEMS } from '../../lib/admin-nav-items';
 import { storefrontHomeUrl } from '../../lib/api-client';
 import { useAdminUiTheme } from '../../lib/admin-ui-theme';
 import { useAuth } from '../../lib/auth-context';
 
-const NAV_ITEMS = [
-  { to: '/admin/dashboard', label: 'Dashboard' },
-  { to: '/admin/categorias', label: 'Categorias' },
-  { to: '/admin/banners', label: 'Banners' },
-  { to: '/admin/aparencia', label: 'Aparência' },
-  { to: '/admin/produtos', label: 'Produtos' },
-  { to: '/admin/compradores', label: 'Compradores' },
-  { to: '/admin/pedidos', label: 'Pedidos' },
-  { to: '/admin/configuracoes', label: 'Configurações' },
-  { to: '/admin/relatorios', label: 'Relatórios' },
-  { to: '/admin/agenda', label: 'Agenda' },
-  { to: '/admin/permissoes', label: 'Permissões' },
-  { to: '/admin/chat', label: 'Chat' },
-];
-
 export function AdminLayout() {
-  const { user, tenant, logout } = useAuth();
+  const { user, store, logout, impersonation, endImpersonation } = useAuth();
   const { theme: uiTheme } = useAdminUiTheme();
   const navigate = useNavigate();
+
+  const LogoutIcon = ActionIcons.logout;
+  const ExternalLinkIcon = ActionIcons.externalLink;
+  const SwitchStoreIcon = ActionIcons.switchStore;
 
   async function handleLogout() {
     await logout();
     navigate('/login', { replace: true });
   }
 
-  const vitrineUrl = tenant ? storefrontHomeUrl(tenant.slug) : undefined;
+  const vitrineUrl = store ? storefrontHomeUrl(store.slug) : undefined;
 
   function renderSidebar(closeMobileMenu: () => void) {
     return (
@@ -51,7 +42,7 @@ export function AdminLayout() {
             <span className="text-[var(--admin-accent-hover)]">·</span>
           </span>
         }
-        subtitle={tenant?.lojaNome ?? 'Painel Admin'}
+        subtitle={store?.lojaNome ?? 'Painel Admin'}
         navTestId={testIds.admin.sidebarNav}
         footer={
           <>
@@ -67,6 +58,7 @@ export function AdminLayout() {
                   'text-[var(--admin-link)] hover:text-[var(--admin-link-hover)]',
                 )}
               >
+                <ExternalLinkIcon className="size-5 shrink-0" aria-hidden />
                 Ver vitrine
               </a>
             )}
@@ -76,6 +68,7 @@ export function AdminLayout() {
               className={({ isActive }) => adminSidebarLinkClass(isActive)}
               onClick={closeMobileMenu}
             >
+              <SwitchStoreIcon className="size-5 shrink-0" aria-hidden />
               Trocar loja
             </NavLink>
             <div className="px-3 py-2 text-xs text-[var(--admin-sidebar-muted)]">{user?.nome}</div>
@@ -90,21 +83,26 @@ export function AdminLayout() {
                 'text-[var(--admin-error)] hover:bg-[var(--admin-error-bg)] hover:text-[var(--admin-error-text)]',
               )}
             >
+              <LogoutIcon className="size-5 shrink-0" aria-hidden />
               Sair
             </button>
           </>
         }
       >
-        {NAV_ITEMS.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            onClick={closeMobileMenu}
-            className={({ isActive }) => adminNavLinkClass(isActive)}
-          >
-            {item.label}
-          </NavLink>
-        ))}
+        {ADMIN_NAV_ITEMS.map((item) => {
+          const Icon = item.icon;
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              onClick={closeMobileMenu}
+              className={({ isActive }) => adminNavLinkClass(isActive)}
+            >
+              <Icon className="size-5 shrink-0" aria-hidden />
+              {item.label}
+            </NavLink>
+          );
+        })}
       </SidebarPanel>
     );
   }
@@ -116,6 +114,22 @@ export function AdminLayout() {
       surface="admin"
       uiMode={uiTheme}
     >
+      {impersonation ? (
+        <div
+          className="border-b border-amber-500/40 bg-amber-500/15 px-4 py-2 text-sm text-[var(--admin-text)]"
+          data-testid="admin-impersonation-banner"
+        >
+          Modo suporte — loja <strong>{impersonation.storeSlug}</strong> (operador:{' '}
+          {impersonation.operatorEmail}).{' '}
+          <button
+            type="button"
+            className="font-semibold underline"
+            onClick={() => void endImpersonation()}
+          >
+            Sair da impersonação
+          </button>
+        </div>
+      ) : null}
       <Outlet />
     </LayoutAdmin>
   );

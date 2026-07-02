@@ -5,7 +5,7 @@ import {
   buildStorePath,
   getDefaultStoreSlug,
   parseStorePath,
-} from '@lojao/tenant-host';
+} from '@lojao/store-host';
 
 const LEGACY_EXACT = new Set([
   '/carrinho',
@@ -31,8 +31,7 @@ function legacyRedirect(request: NextRequest, subpath: string): NextResponse {
 }
 
 /**
- * Injeta slug do tenant em rotas `/store/{slug}/...`.
- * Rotas marketing (`/`, `/pricing`, …) não recebem tenant.
+ * Injeta slug da loja em rotas `/store/{slug}/...`.
  * Paths legados na raiz redirecionam 301 para `/store/{defaultSlug}/...`.
  */
 export function middleware(request: NextRequest) {
@@ -66,11 +65,11 @@ export function middleware(request: NextRequest) {
   const parsed = parseStorePath(pathname);
   if (parsed.slug) {
     const requestHeaders = new Headers(request.headers);
-    requestHeaders.set('x-tenant-slug', parsed.slug);
+    requestHeaders.set('x-store-slug', parsed.slug);
     const response = NextResponse.next({
       request: { headers: requestHeaders },
     });
-    response.headers.set('x-tenant-slug', parsed.slug);
+    response.headers.set('x-store-slug', parsed.slug);
     return response;
   }
 

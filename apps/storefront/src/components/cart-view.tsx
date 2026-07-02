@@ -1,5 +1,7 @@
 'use client';
 
+import { IconButton } from '@lojao/ui';
+import { ActionIcons } from '@lojao/ui/icons';
 import { store as testIds } from '@lojao/test-utils/test-ids/store';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -10,7 +12,6 @@ import { fetchCart, removeCartItem, updateCartItem, type CartItem } from '@/lib/
 import {
   storeBodyClass,
   storeEmptyStateClass,
-  storeErrorTextClass,
   storeHeadingClass,
   storeMutedClass,
   storePanelClass,
@@ -108,20 +109,36 @@ export function CartView() {
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-2">
-                      <button type="button" className="btn-outline px-2 py-1" onClick={() => changeQty(item, item.quantidade - 1)}>
-                        −
-                      </button>
-                      <span>{item.quantidade}</span>
-                      <button type="button" className="btn-outline px-2 py-1" onClick={() => changeQty(item, item.quantidade + 1)}>
-                        +
-                      </button>
+                      <IconButton
+                        icon={<ActionIcons.minus />}
+                        label="Diminuir quantidade"
+                        onClick={() => changeQty(item, item.quantidade - 1)}
+                        surface="store"
+                        variant="ghost"
+                        size="md"
+                        disabled={item.quantidade <= 1}
+                      />
+                      <span className="min-w-[1.5rem] text-center">{item.quantidade}</span>
+                      <IconButton
+                        icon={<ActionIcons.plus />}
+                        label="Aumentar quantidade"
+                        onClick={() => changeQty(item, item.quantidade + 1)}
+                        surface="store"
+                        variant="ghost"
+                        size="md"
+                      />
                     </div>
                   </td>
                   <td className="px-4 py-4 font-semibold">{BRL.format(item.subtotal)}</td>
                   <td className="px-4 py-4">
-                    <button type="button" className={storeErrorTextClass('text-sm hover:underline')} onClick={() => remove(item)}>
-                      Remover
-                    </button>
+                    <IconButton
+                      icon={<ActionIcons.delete />}
+                      label="Remover item do carrinho"
+                      onClick={() => remove(item)}
+                      surface="store"
+                      variant="destructive"
+                      size="md"
+                    />
                   </td>
                 </tr>
               ))}

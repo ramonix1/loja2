@@ -1,6 +1,7 @@
 import { updateConfiguracoesSchema } from '@lojao/types/configuracoes';
 import type { FastifyInstance } from 'fastify';
 
+import { requireStoreScope } from '../../lib/store-scope.js';
 import { requireAdmin } from '../../plugins/auth-guard.js';
 import { getConfiguracoes, updateConfiguracoes } from './configuracoes.service.js';
 
@@ -8,7 +9,7 @@ export async function configuracoesRoutes(app: FastifyInstance): Promise<void> {
   app.addHook('preHandler', requireAdmin);
 
   app.get('/admin/configuracoes', async (request, reply) => {
-    const data = await getConfiguracoes(request.db);
+    const data = await getConfiguracoes(requireStoreScope(request));
     return reply.send({ data });
   });
 
@@ -22,7 +23,7 @@ export async function configuracoesRoutes(app: FastifyInstance): Promise<void> {
       });
     }
 
-    const data = await updateConfiguracoes(request.db, parsed.data);
+    const data = await updateConfiguracoes(requireStoreScope(request), parsed.data);
     return reply.send({ data });
   });
 }

@@ -16,7 +16,7 @@ Convenção: `{app}-{pagina}-{elemento}[-{id}]` — ver [TESTING-STRATEGY.md](./
 | `auth-login-password-input` | admin | Input senha | 2 | admin/login.spec.ts |
 | `auth-login-submit-btn` | admin | Botão entrar | 2 | admin/login.spec.ts |
 | `auth-login-error-msg` | admin | Erro de credencial | 2 | admin/login.spec.ts |
-| `admin-ui-theme-switch` | admin | Toggle tema claro painel | theme | admin/theme.spec.ts |
+| `admin-ui-theme-switch` | admin | Botão ícone sol/lua (`ThemeIconToggle`) | I2 | admin/theme.spec.ts |
 
 Constantes: `@lojao/test-utils/test-ids` → `testIds.auth.*`, `testIds.admin.uiThemeSwitch`.
 
@@ -46,19 +46,19 @@ Constantes: `testIds.merchantHub.*`.
 | `platform-login-error-msg` | /platform/login | Erro de credencial | F | — |
 | `platform-sidebar-nav` | layout | Nav lateral | F | — |
 | `platform-mobile-menu-btn` | layout | Hamburger menu (&lt; lg) | S4 | — |
-| `platform-ui-theme-switch` | layout / login | Toggle tema claro | theme | admin/theme.spec.ts |
-| `platform-tenants-list` | /platform/tenants | Lista de lojas | F | admin/platform.spec.ts |
-| `platform-tenants-empty-state` | /platform/tenants | Lista vazia | F | — |
-| `platform-tenants-row-{slug}` | /platform/tenants | Linha de loja | F | admin/platform.spec.ts |
-| `platform-tenant-create-link` | /platform/tenants | Link nova loja | F | admin/platform.spec.ts |
-| `platform-tenant-create-form` | /platform/tenants/novo | Form criar | F | admin/platform.spec.ts |
-| `platform-tenant-create-slug` | /platform/tenants/novo | Input slug | F | admin/platform.spec.ts |
-| `platform-tenant-create-nome` | /platform/tenants/novo | Input nome | F | admin/platform.spec.ts |
-| `platform-tenant-create-submit` | /platform/tenants/novo | Botão criar | F | admin/platform.spec.ts |
-| `platform-tenant-create-error` | /platform/tenants/novo | Erro criar | F | — |
-| `platform-tenant-detail` | /platform/tenants/:slug | Container detalhe | F | admin/platform.spec.ts |
-| `platform-tenant-toggle-ativo` | /platform/tenants/:slug | Suspender/reativar | F | — |
-| `platform-tenant-save-nome` | /platform/tenants/:slug | Salvar nome | F | — |
+| `platform-ui-theme-switch` | layout / login | Botão ícone sol/lua (`ThemeIconToggle`) | I2 | admin/theme.spec.ts |
+| `platform-stores-list` | /platform/stores | Lista de lojas | F | admin/platform.spec.ts |
+| `platform-stores-empty-state` | /platform/stores | Lista vazia | F | — |
+| `platform-stores-row-{slug}` | /platform/stores | Linha de loja | F | admin/platform.spec.ts |
+| `platform-store-create-link` | /platform/stores | Link nova loja | F | admin/platform.spec.ts |
+| `platform-store-create-form` | /platform/stores/novo | Form criar | F | admin/platform.spec.ts |
+| `platform-store-create-slug` | /platform/stores/novo | Input slug | F | admin/platform.spec.ts |
+| `platform-store-create-nome` | /platform/stores/novo | Input nome | F | admin/platform.spec.ts |
+| `platform-store-create-submit` | /platform/stores/novo | Botão criar | F | admin/platform.spec.ts |
+| `platform-store-create-error` | /platform/stores/novo | Erro criar | F | — |
+| `platform-store-detail` | /platform/stores/:slug | Container detalhe | F | admin/platform.spec.ts |
+| `platform-store-toggle-ativo` | /platform/stores/:slug | Suspender/reativar | F | — |
+| `platform-store-save-nome` | /platform/stores/:slug | Salvar nome | F | — |
 
 Constantes: `@lojao/test-utils/test-ids` → `testIds.platform.*`.
 
@@ -151,8 +151,9 @@ Constantes: `testIds.adminBanners.*`.
 | `admin-aparencia-favicon-input` | aparencia | Input favicon | 3 | — |
 | `admin-aparencia-form-submit-btn` | aparencia | Salvar | 3 | — |
 | `admin-aparencia-success-msg` | aparencia | Mensagem sucesso | 3 | — |
+| ~~`admin-aparencia-tema-switch`~~ | aparencia | ~~Toggle tema vitrine~~ **removido (I3)** | — | — |
 
-Constantes: `testIds.adminAparencia.*`.
+Constantes: `testIds.adminAparencia.*` (`temaSwitch` deprecado).
 
 ### admin-produtos (Fase 3)
 
@@ -166,7 +167,7 @@ Constantes: `testIds.adminAparencia.*`.
 | `admin-produtos-imagens-preview` | produtos | Grid preview antes de salvar | 3 | — |
 | `admin-produtos-imagens-preview-{index}` | produtos | Item do preview (dinâmico) | 3 | — |
 | `admin-produtos-form-submit-btn` | produtos | Salvar novo | 3 | — |
-| `admin-produtos-delete-btn` | produtos | Excluir | 3 | — |
+| `admin-produtos-delete-btn` | produtos | Excluir (`IconButton` trash) | I4 | — |
 | `admin-produtos-empty-state` | produtos | Estado vazio | 3 | — |
 | `admin-produtos-row-{id}` | produtos | Linha (dinâmico) | 3 | — |
 | `admin-produtos-edit-nome-input` | produtos/:id | Input nome edição | 3 | — |
@@ -311,13 +312,15 @@ Constantes: `testIds.adminChat.*` (`filter`, `conversaItem` são funções).
 | `admin-diagnostico-token-swatch` | diagnostico | Swatch tokens Fase 1 | theme | — |
 | `admin-diagnostico-token-swatch-switch` | diagnostico | Switch demo swatch | theme | — |
 
-### store vitrine (tema API)
+### store vitrine (tema fixo + ícones I5)
 
 | data-testid | Página | Elemento | Fase | Spec |
 |-------------|--------|----------|------|------|
-| `store-slug-layout` | /store/{slug} | Container + `data-store-theme` | theme | store/vitrine.spec.ts |
+| `store-slug-layout` | /store/{slug} | Container + `data-store-theme="claro"` fixo | I3 | store/vitrine.spec.ts |
+| `store-header-menu` | layout | Botão menu mobile (&lt; md) | I5 | store/icons.spec.ts |
+| `store-nav-cart` | layout nav | Link carrinho (comprador logado) | I5 | store/icons.spec.ts |
 
-Vitrine: **sem** toggle visitante — `data-store-theme` vem da API (`loja_tema`), não de `localStorage`.
+Vitrine: **sem** toggle visitante — tema claro fixo; `data-store-theme` não vem de preferência do visitante.
 
 Constantes: `testIds.adminDiagnostico.*` (`item(nome)` é função).
 
@@ -329,6 +332,8 @@ Constantes: `testIds.adminDiagnostico.*` (`item(nome)` é função).
 |-------------|--------|----------|------|------|
 | `store-slug-layout` | `/store/[slug]` layout | Container vitrine tenant | D | store/vitrine.spec.ts |
 | `store-header` | layout | Header | 5 | store/vitrine.spec.ts |
+| `store-header-menu` | layout | Menu hamburger mobile | I5 | store/icons.spec.ts |
+| `store-nav-cart` | layout nav | Link carrinho (auth comprador) | I5 | store/icons.spec.ts |
 | `store-home-product-grid` | home | Grade de produtos | 5 | store/vitrine.spec.ts |
 | `store-home-product-card-{id}` | home | Card produto (dinâmico) | 5 | store/vitrine.spec.ts, store/cart.spec.ts |
 | `store-home-banner-carousel` | home | Carrossel banners | 6 | — |

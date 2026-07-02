@@ -18,6 +18,10 @@
     "./schema/master": {
       "types": "./dist/schema/master/index.d.ts",
       "default": "./dist/schema/master/index.js"
+    },
+    "./schema/merchant": {
+      "types": "./dist/schema/merchant/index.d.ts",
+      "default": "./dist/schema/merchant/index.js"
     }
   },
   "scripts": {
@@ -25,6 +29,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
+    "db:generate:merchant": "drizzle-kit generate --config=drizzle.merchant.config.ts",
     "db:migrate": "tsx src/migrate.ts",
     "db:studio": "drizzle-kit studio"
   },

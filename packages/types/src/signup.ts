@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { tenantSlugSchema } from './platform.js';
+import { platformStoreSlugSchema } from './platform.js';
 
 /**
  * Slugs reservados: não podem ser usados como slug de loja no signup público.
@@ -55,7 +55,7 @@ export const signupPaymentMethodSchema = z.enum(['card', 'pix']);
  * slugs reservados é feito na camada de rota/serviço (`checkSlugAvailability`),
  * para devolver `409 SLUG_RESERVED` em vez de erro genérico de validação.
  */
-export const signupSlugSchema = tenantSlugSchema;
+export const signupSlugSchema = platformStoreSlugSchema;
 
 export const signupSchema = z.object({
   planSlug: signupPlanSchema,

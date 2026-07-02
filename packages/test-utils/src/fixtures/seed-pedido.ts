@@ -7,7 +7,7 @@
 export interface SeedPedidoTesteOptions {
   apiUrl: string;
   sessionCookie: string;
-  tenantSlug: string;
+  storeSlug: string;
   /** ID do produto a adicionar ao carrinho (default: 1 ou `E2E_PRODUCT_ID`) */
   produtoId?: number;
 }
@@ -31,16 +31,16 @@ const DEFAULT_ADDRESS = {
 /** Login programático de comprador (role usuario). */
 export async function loginComprador(
   apiUrl: string,
-  opts: { email?: string; senha?: string; tenantSlug?: string } = {},
+  opts: { email?: string; senha?: string; storeSlug?: string } = {},
 ): Promise<string> {
   const email = opts.email ?? 'comprador-test@loja.com';
   const senha = opts.senha ?? 'comprador123';
-  const tenantSlug = opts.tenantSlug ?? 'loja';
+  const storeSlug = opts.storeSlug ?? 'loja';
 
   const res = await fetch(`${apiUrl.replace(/\/$/, '')}/api/v1/auth/login`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Tenant-Slug': tenantSlug },
-    body: JSON.stringify({ email, senha }),
+    headers: { 'Content-Type': 'application/json', 'X-Store-Slug': storeSlug },
+    body: JSON.stringify({ email, senha, storeSlug }),
   });
   if (!res.ok) throw new Error(`loginComprador falhou: HTTP ${res.status}`);
   const setCookie = res.headers.get('set-cookie');
@@ -56,7 +56,7 @@ export async function seedPedidoTeste(opts: SeedPedidoTesteOptions): Promise<{ p
   const base = opts.apiUrl.replace(/\/$/, '');
   const headers = {
     'Content-Type': 'application/json',
-    'X-Tenant-Slug': opts.tenantSlug,
+    'X-Store-Slug': opts.storeSlug,
     Cookie: opts.sessionCookie,
   };
 

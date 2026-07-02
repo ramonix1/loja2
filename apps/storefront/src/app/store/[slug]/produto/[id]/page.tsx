@@ -1,5 +1,5 @@
 import { store as testIds } from '@lojao/test-utils/test-ids/store';
-import { buildStorePath } from '@lojao/tenant-host';
+import { buildStorePath } from '@lojao/store-host';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -18,7 +18,7 @@ import {
   storePageTitleClass,
 } from '@/lib/store-styles';
 
-export const revalidate = 60;
+export const revalidate = 30;
 
 interface PageProps {
   params: Promise<{ slug: string; id: string }>;

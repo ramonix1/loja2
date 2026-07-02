@@ -12,5 +12,9 @@ export const adminAparencia = {
   faviconInput: 'admin-aparencia-favicon-input',
   formSubmit: 'admin-aparencia-form-submit-btn',
   successMsg: 'admin-aparencia-success-msg',
+  /**
+   * @deprecated I3 (dark-theme-icons): toggle de tema da vitrine removido da UI.
+   * Mantido apenas para compat de catálogo; não há elemento correspondente.
+   */
   temaSwitch: 'admin-aparencia-tema-switch',
 } as const;

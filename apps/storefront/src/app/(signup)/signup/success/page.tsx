@@ -1,16 +1,15 @@
-import { buildStorePath } from '@lojao/tenant-host';
+import { buildStorePath } from '@lojao/store-host';
 import { signup as testIds } from '@lojao/test-utils/test-ids/signup';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
+import { adminDashboardUrl } from '@/lib/config';
 import { MARKETING_PLANS } from '@/lib/marketing/plans';
 
 import { Confetti } from './confetti';
 
 export const metadata: Metadata = { title: 'Loja criada com sucesso' };
-
-const ADMIN_URL = (process.env.NEXT_PUBLIC_ADMIN_URL ?? 'https://app.atalabs.com.br').replace(/\/$/, '');
 
 function planName(slug?: string): string {
   return MARKETING_PLANS.find((p) => p.slug === slug)?.name ?? 'Ata Commerce';
@@ -26,7 +25,7 @@ function formatDate(iso?: string): string | null {
 const TIMELINE = [
   {
     title: 'Acesse seu painel',
-    body: 'Entre com o e-mail e a senha que você acabou de cadastrar. Sem precisar decorar endereço da loja.',
+    body: 'Você já está autenticado — clique em "Ir para o painel" para começar a configurar sua loja.',
   },
   {
     title: 'Personalize sua loja',
@@ -47,7 +46,7 @@ export default async function SuccessPage({
   if (!slug) redirect('/signup');
 
   const storePath = buildStorePath(slug);
-  const adminLoginUrl = `${ADMIN_URL}/login`;
+  const adminDashboardLink = adminDashboardUrl();
   const trialDate = formatDate(trial);
 
   return (
@@ -91,7 +90,7 @@ export default async function SuccessPage({
           <div className="mx-auto mt-10 flex max-w-md flex-col gap-3 sm:flex-row">
             <a
               data-testid={testIds.successAdminLink}
-              href={adminLoginUrl}
+              href={adminDashboardLink}
               className="flex-1 rounded-xl bg-gradient-to-r from-azul-comercio to-azul-vivido px-6 py-4 text-center text-sm font-extrabold text-white transition-all hover:shadow-lg"
             >
               Ir para o painel

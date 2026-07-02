@@ -39,7 +39,7 @@ export const publicStoreSchema = z.object({
   loja: z.object({
     nome: z.string(),
     cor_primaria: z.string(),
-    tema: storeThemeSchema.default('escuro'),
+    tema: storeThemeSchema.default('claro'),
     logo: z.string(),
     slogan: z.string(),
     favicon: z.string().optional(),

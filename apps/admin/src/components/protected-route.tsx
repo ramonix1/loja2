@@ -7,7 +7,7 @@ interface ProtectedRouteProps {
   /** Papel exigido. `admin` = lojista; `platform_admin` = operador Ata Labs. */
   role?: 'admin' | 'platform_admin';
   /** Permite admin autenticado sem loja selecionada (Merchant Hub). */
-  allowMissingTenant?: boolean;
+  allowMissingStore?: boolean;
 }
 
 /**
@@ -16,9 +16,9 @@ interface ProtectedRouteProps {
  */
 export function ProtectedRoute({
   role,
-  allowMissingTenant = false,
+  allowMissingStore = false,
 }: ProtectedRouteProps = {}) {
-  const { isLoading, isAuthenticated, isPlatformAdmin, needsTenantSelection } = useAuth();
+  const { isLoading, isAuthenticated, isPlatformAdmin, needsStoreSelection } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
@@ -38,10 +38,10 @@ export function ProtectedRoute({
   }
 
   if (role === 'admin' && isPlatformAdmin) {
-    return <Navigate to="/platform/tenants" replace />;
+    return <Navigate to="/platform/stores" replace />;
   }
 
-  if (role === 'admin' && needsTenantSelection && !allowMissingTenant) {
+  if (role === 'admin' && needsStoreSelection && !allowMissingStore) {
     return <Navigate to="/admin/my-stores" replace />;
   }
 

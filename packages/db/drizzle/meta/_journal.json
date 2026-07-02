@@ -8,6 +8,41 @@
       "when": 1718208000000,
       "tag": "0000_baseline",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1782929638257,
+      "tag": "0001_merchant_account_baseline",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782933984594,
+      "tag": "0002_ma5_login_attempts",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1782940056223,
+      "tag": "0003_ma6_max_stores",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1782945000000,
+      "tag": "0004_ma7_merchant_billing",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1782950000000,
+      "tag": "0005_ma8_drop_legacy",
+      "breakpoints": true
     }
   ]
 }

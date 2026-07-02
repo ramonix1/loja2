@@ -1,7 +1,6 @@
 import type { PedidoStatus } from '@lojao/types/pedidos';
 import { PEDIDO_STATUS } from '@lojao/types/pedidos';
 import {
-  Button,
   Table,
   TableCell,
   TableHead,
@@ -18,9 +17,13 @@ import {
 import { testIds } from '@lojao/test-utils';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 
 import { apiFetch } from '../../lib/api-client';
+import {
+  NextIconButton,
+  PrevIconButton,
+  ViewIconButton,
+} from '../../components/crud-icon-buttons';
 
 interface Pedido {
   id: number;
@@ -171,13 +174,11 @@ export function PedidosPage() {
                     {BRL.format(pedido.total)}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Link
+                    <ViewIconButton
                       to={`/admin/pedidos/${pedido.id}`}
-                      data-testid={testIds.admin.pedidosViewBtn(pedido.id)}
-                      className="ds-link text-sm font-medium"
-                    >
-                      Ver
-                    </Link>
+                      testId={testIds.admin.pedidosViewBtn(pedido.id)}
+                      label="Ver pedido"
+                    />
                   </TableCell>
                 </TableRow>
               ))
@@ -191,20 +192,11 @@ export function PedidosPage() {
           {total} pedido{total === 1 ? '' : 's'} · página {page} de {totalPages}
         </span>
         <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            disabled={page <= 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-          >
-            Anterior
-          </Button>
-          <Button
-            variant="secondary"
+          <PrevIconButton disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))} />
+          <NextIconButton
             disabled={page >= totalPages}
             onClick={() => setPage((p) => p + 1)}
-          >
-            Próxima
-          </Button>
+          />
         </div>
       </div>
     </div>

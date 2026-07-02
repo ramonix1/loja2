@@ -1,5 +1,6 @@
 'use client';
 
+import { NavIcons } from '@lojao/ui/icons';
 import { store as testIds } from '@lojao/test-utils/test-ids/store';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -50,8 +51,12 @@ export function AddToCartButton({
         disabled={disabled || loading}
         data-testid={testIds.productAddCartBtn}
         onClick={handleClick}
-        className={className ?? 'btn-primary px-8 py-3 text-base disabled:cursor-not-allowed disabled:opacity-50'}
+        className={
+          className ??
+          'btn-primary inline-flex items-center justify-center gap-2 px-8 py-3 text-base disabled:cursor-not-allowed disabled:opacity-50'
+        }
       >
+        <NavIcons.cart className="size-5 shrink-0" aria-hidden />
         {loading ? 'Adicionando…' : disabled ? 'Esgotado' : label}
       </button>
       {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}

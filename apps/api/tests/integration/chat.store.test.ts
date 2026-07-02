@@ -3,7 +3,9 @@ import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { buildTestApp } from '../helpers/build-app.js';
+import { merchantDbName, merchantPoolConfig } from '../../src/lib/merchant-provision.js';
 import { loginUserCookie, TENANT_HEADER } from '../helpers/session.js';
+import { TEST_PRIMARY_MERCHANT_SLUG } from '../helpers/seed.js';
 
 describe('Store chat', () => {
   let app: FastifyInstance;
@@ -13,7 +15,7 @@ describe('Store chat', () => {
   beforeAll(async () => {
     app = await buildTestApp();
     userCookie = await loginUserCookie(app);
-    pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, ssl: false });
+    pool = new pg.Pool(merchantPoolConfig(merchantDbName(TEST_PRIMARY_MERCHANT_SLUG)));
   });
 
   afterAll(async () => {
@@ -36,10 +38,10 @@ describe('Store chat', () => {
     expect(data.bot_mensagem.remetente).toBe('bot');
 
     const msgs = await pool.query(
-      'SELECT * FROM mensagens WHERE conversa_id = $1 ORDER BY id',
+      'SELECT * FROM chat_messages WHERE conversation_id = $1 ORDER BY id',
       [data.conversa_id],
     );
     expect(msgs.rows.length).toBeGreaterThanOrEqual(2);
-    expect(msgs.rows.some((m) => m.remetente === 'bot')).toBe(true);
+    expect(msgs.rows.some((m) => m.sender === 'bot')).toBe(true);
   });
 });

@@ -1,8 +1,9 @@
 import type { AparenciaConfig, AparenciaFields } from '@lojao/types/aparencia';
 import { DEFAULT_LOJA_COR_PRIMARIA } from '@lojao/types/aparencia';
-import { DEFAULT_STORE_THEME, parseStoreTheme } from '@lojao/types/store-theme';
-import type { Pool } from 'pg';
+import { DEFAULT_STORE_THEME } from '@lojao/types/store-theme';
 
+import { settingKeyFromEn, settingKeyToEn } from '../../lib/merchant-schema-map.js';
+import type { StoreScope } from '../../lib/store-scope.js';
 import type { ImageStorage } from '../../ports/image-storage.js';
 
 const DEFAULT_STORE_NAME = 'Ata Commerce Demo';
@@ -19,27 +20,28 @@ const DEFAULTS: AparenciaConfig = {
   loja_favicon: '',
 };
 
-export async function getAparencia(db: Pool): Promise<AparenciaConfig> {
-  const r = await db.query(
-    "SELECT chave, valor FROM configuracoes WHERE chave LIKE 'loja_%'",
+const APARENCIA_PT_KEYS = Object.keys(DEFAULTS) as (keyof AparenciaConfig)[];
+
+export async function getAparencia({ pool, storeId }: StoreScope): Promise<AparenciaConfig> {
+  const enKeys = APARENCIA_PT_KEYS.filter((k) => k !== 'loja_tema').map((k) => settingKeyToEn(k));
+  const r = await pool.query(
+    'SELECT key, value FROM store_settings WHERE store_id = $1 AND key = ANY($2::text[])',
+    [storeId, enKeys],
   );
   const cfg = { ...DEFAULTS };
-  for (const row of r.rows as { chave: string; valor: string | null }[]) {
-    const key = row.chave as keyof AparenciaConfig;
-    if (key === 'loja_tema') continue;
-    if (key in cfg) {
-      cfg[key] = row.valor ?? '';
+  for (const row of r.rows as { key: string; value: string | null }[]) {
+    const ptKey = settingKeyFromEn(row.key) as keyof AparenciaConfig;
+    if (ptKey === 'loja_tema') continue;
+    if (ptKey in cfg) {
+      cfg[ptKey] = row.value ?? '';
     }
   }
-  const temaRow = (r.rows as { chave: string; valor: string | null }[]).find(
-    (row) => row.chave === 'loja_tema',
-  );
-  cfg.loja_tema = parseStoreTheme(temaRow?.valor);
+  cfg.loja_tema = DEFAULT_STORE_THEME;
   return cfg;
 }
 
 export async function updateAparencia(
-  db: Pool,
+  scope: StoreScope,
   storage: ImageStorage,
   fields: AparenciaFields,
   files: {
@@ -47,11 +49,12 @@ export async function updateAparencia(
     favicon?: { buffer: Buffer; mimetype: string; filename: string };
   },
 ): Promise<void> {
+  const { pool, storeId } = scope;
   const pares: [string, string][] = [
     ['loja_nome', (fields.loja_nome ?? '').trim()],
     ['loja_slogan', (fields.loja_slogan ?? '').trim()],
     ['loja_cor_primaria', fields.loja_cor_primaria ?? DEFAULT_LOJA_COR_PRIMARIA],
-    ['loja_tema', fields.loja_tema ?? DEFAULT_STORE_THEME],
+    ['loja_tema', DEFAULT_STORE_THEME],
     ['loja_rodape', (fields.loja_rodape ?? '').trim()],
     ['loja_email', (fields.loja_email ?? '').trim()],
     ['loja_whatsapp', (fields.loja_whatsapp ?? '').trim()],
@@ -75,10 +78,11 @@ export async function updateAparencia(
   }
 
   for (const [chave, valor] of pares) {
-    await db.query(
-      `INSERT INTO configuracoes (chave, valor, updated_at) VALUES ($1, $2, NOW())
-       ON CONFLICT (chave) DO UPDATE SET valor = EXCLUDED.valor, updated_at = NOW()`,
-      [chave, valor],
+    const enKey = settingKeyToEn(chave);
+    await pool.query(
+      `INSERT INTO store_settings (store_id, key, value, updated_at) VALUES ($1, $2, $3, NOW())
+       ON CONFLICT (store_id, key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()`,
+      [storeId, enKey, valor],
     );
   }
 }

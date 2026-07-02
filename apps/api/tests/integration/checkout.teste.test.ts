@@ -3,6 +3,8 @@ import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { buildTestApp } from '../helpers/build-app.js';
+import { merchantDbName, merchantPoolConfig } from '../../src/lib/merchant-provision.js';
+import { TEST_PRIMARY_MERCHANT_SLUG } from '../helpers/seed.js';
 import { CHECKOUT_ADDRESS, clearUserCart, seedCartItem, seedPedidoViaCheckout } from '../helpers/seed-order.js';
 import { loginUserCookie, TENANT_HEADER } from '../helpers/session.js';
 import { getTestProdutoEstoqueId, getTestProdutoId } from '../helpers/fixture-ids.js';
@@ -65,13 +67,10 @@ describe('Checkout método teste', () => {
 
   it('fluxo login → cart → checkout teste → pedido pago', async () => {
     const { pedidoId } = await seedPedidoViaCheckout(app);
-    const pool = new pg.Pool({
-      connectionString: process.env.DATABASE_URL,
-      ssl: false,
-    });
+    const pool = new pg.Pool(merchantPoolConfig(merchantDbName(TEST_PRIMARY_MERCHANT_SLUG)));
     try {
-      const r = await pool.query('SELECT status FROM pedidos WHERE id = $1', [pedidoId]);
-      expect(r.rows[0]?.status).toBe('pago');
+      const r = await pool.query('SELECT status FROM orders WHERE id = $1', [pedidoId]);
+      expect(r.rows[0]?.status).toBe('paid');
     } finally {
       await pool.end();
     }

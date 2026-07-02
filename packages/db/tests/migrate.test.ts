@@ -3,40 +3,29 @@ import pg from 'pg';
 
 import { runMigrations } from '../src/client.js';
 
-const MASTER_TABLES = [
-  'tenants',
+/** Tabelas master após MA8 (0005 dropa legado tenant/PT do master). */
+const MASTER_TABLES_MA8 = [
   'sessao',
   'billing_plans',
-  'tenant_billing',
-  'invoices',
-  'commission_transactions',
   'platform_config',
   'leads',
-  'webhook_events',
+  'merchants',
+  'stores',
+  'merchant_members',
+  'login_attempts',
+  'merchant_billing',
+  'merchant_invoices',
+  'merchant_commission_transactions',
 ];
 
-const TENANT_TABLES = [
+/** Tabelas legado removidas pelo cutover MA8 (0005_ma8_drop_legacy.sql). */
+const DROPPED_LEGACY_TABLES = [
+  'tenants',
+  'tenant_billing',
   'usuarios',
-  'tentativas_login',
-  'tokens_recuperacao',
-  'categorias',
   'produtos',
-  'produtos_imagens',
-  'configuracoes',
-  'banners',
-  'carrinho_itens',
   'pedidos',
-  'pedido_itens',
-  'pagamentos',
-  'clientes',
-  'auditoria',
-  'movimentacoes_estoque',
-  'agenda_config',
-  'agenda_dias_especiais',
-  'agendamentos',
-  'conversas',
-  'mensagens',
-  'bot_respostas',
+  'configuracoes',
 ];
 
 async function tableExists(pool: pg.Pool, name: string): Promise<boolean> {
@@ -45,7 +34,7 @@ async function tableExists(pool: pg.Pool, name: string): Promise<boolean> {
 }
 
 describe('db:migrate baseline', () => {
-  it('aplica baseline e garante tabelas master + tenant', async () => {
+  it('aplica migrations MA8 e garante master greenfield (sem tabelas PT legado)', async () => {
     const connectionString =
       process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5432/lojao';
 
@@ -53,14 +42,18 @@ describe('db:migrate baseline', () => {
 
     const pool = new pg.Pool({ connectionString, ssl: false });
     try {
-      for (const table of [...MASTER_TABLES, ...TENANT_TABLES]) {
+      for (const table of MASTER_TABLES_MA8) {
         expect(await tableExists(pool, table), `tabela ${table}`).toBe(true);
+      }
+
+      for (const table of DROPPED_LEGACY_TABLES) {
+        expect(await tableExists(pool, table), `legado ${table} deve estar ausente`).toBe(false);
       }
 
       const journal = await pool.query(
         `SELECT COUNT(*)::int AS c FROM drizzle.__drizzle_migrations`,
       );
-      expect(journal.rows[0]?.c).toBeGreaterThanOrEqual(1);
+      expect(journal.rows[0]?.c).toBeGreaterThanOrEqual(6);
     } finally {
       await pool.end();
     }

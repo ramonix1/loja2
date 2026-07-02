@@ -22,8 +22,14 @@ import {
 import { testIds } from '@lojao/test-utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
 
+import {
+  DeleteIconButton,
+  EditIconButton,
+  ImageRemoveIconButton,
+  SaveIconButton,
+  ViewIconButton,
+} from '../../../components/crud-icon-buttons';
 import { ApiError, apiFetch, apiUpload, legacyImageUrl, storefrontProductUrl } from '../../../lib/api-client';
 import { formatBRL, maskBRLInput, parseBRLInput } from '../../../lib/currency';
 import { useImageFilePreviews } from '../../../lib/use-image-file-previews';
@@ -204,14 +210,7 @@ export function ProdutosPage() {
                       alt=""
                       className="h-20 w-20 rounded-lg border border-[var(--admin-border)] object-cover"
                     />
-                    <button
-                      type="button"
-                      aria-label="Remover imagem"
-                      onClick={() => removeImagem(index)}
-                      className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--admin-error)] text-xs text-[var(--admin-text)] opacity-0 transition group-hover:opacity-100"
-                    >
-                      ×
-                    </button>
+                    <ImageRemoveIconButton onClick={() => removeImagem(index)} />
                   </div>
                 ))}
               </div>
@@ -308,9 +307,7 @@ export function ProdutosPage() {
                                 'border-[var(--admin-warning)] text-[var(--admin-warning-text)]',
                             )}
                           />
-                          <Button type="submit" variant="secondary" className="px-2 py-1.5 text-xs">
-                            ✓
-                          </Button>
+                          <SaveIconButton type="submit" label="Salvar estoque" />
                         </form>
                         <div
                           className={cn(
@@ -326,29 +323,17 @@ export function ProdutosPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <a
+                          <ViewIconButton
                             href={storefrontProductUrl(p.id)}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            <Button variant="secondary" className="text-xs">
-                              Ver
-                            </Button>
-                          </a>
-                          <Link to={`/admin/produtos/${p.id}`}>
-                            <Button variant="secondary" className="text-xs">
-                              Editar
-                            </Button>
-                          </Link>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            data-testid={testIds.adminProdutos.deleteBtn}
+                            external
+                            label="Ver na vitrine"
+                          />
+                          <EditIconButton to={`/admin/produtos/${p.id}`} />
+                          <DeleteIconButton
+                            testId={testIds.adminProdutos.deleteBtn}
                             onClick={() => handleDelete(p.id, p.nome)}
-                            className="text-xs text-[var(--admin-error-text)] hover:bg-[var(--admin-error-bg)]"
-                          >
-                            Excluir
-                          </Button>
+                            label="Excluir produto"
+                          />
                         </div>
                       </TableCell>
                     </TableRow>

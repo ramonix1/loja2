@@ -60,14 +60,14 @@ export {
 } from './banners.js';
 
 export {
-  tenantSlugSchema,
+  platformStoreSlugSchema,
   platformLoginSchema,
-  createTenantSchema,
-  updateTenantSchema,
+  createPlatformStoreSchema,
+  updatePlatformStoreSchema,
   type PlatformLoginInput,
-  type CreateTenantInput,
-  type UpdateTenantInput,
-  type PlatformTenant,
+  type CreatePlatformStoreInput,
+  type UpdatePlatformStoreInput,
+  type PlatformStore,
 } from './platform.js';
 
 export {
@@ -86,3 +86,10 @@ export {
   type SignupResult,
   type SignupPlanPublic,
 } from './signup.js';
+
+export {
+  merchantSlugSchema,
+  createMerchantSchema,
+  type CreateMerchantInput,
+  type MerchantSummary,
+} from './merchant.js';

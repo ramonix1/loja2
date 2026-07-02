@@ -1,6 +1,8 @@
 'use client';
 
-import { buildStorePath } from '@lojao/tenant-host';
+import { buildStorePath } from '@lojao/store-host';
+import { IconButton } from '@lojao/ui';
+import { ActionIcons } from '@lojao/ui/icons';
 import { store as testIds } from '@lojao/test-utils/test-ids/store';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -57,22 +59,24 @@ export function BannerCarousel({ banners, storeSlug }: BannerCarouselProps) {
 
       {banners.length > 1 ? (
         <>
-          <button
-            type="button"
-            aria-label="Banner anterior"
-            className="absolute left-3 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/50 px-3 py-2 text-white"
+          <IconButton
+            icon={<ActionIcons.prev />}
+            label="Banner anterior"
             onClick={() => setIndex((i) => (i - 1 + banners.length) % banners.length)}
-          >
-            ‹
-          </button>
-          <button
-            type="button"
-            aria-label="Próximo banner"
-            className="absolute right-3 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/50 px-3 py-2 text-white"
+            surface="store"
+            variant="ghost"
+            size="md"
+            className="absolute left-3 top-1/2 z-20 -translate-y-1/2 bg-black/50 text-white hover:bg-black/70"
+          />
+          <IconButton
+            icon={<ActionIcons.next />}
+            label="Próximo banner"
             onClick={() => setIndex((i) => (i + 1) % banners.length)}
-          >
-            ›
-          </button>
+            surface="store"
+            variant="ghost"
+            size="md"
+            className="absolute right-3 top-1/2 z-20 -translate-y-1/2 bg-black/50 text-white hover:bg-black/70"
+          />
           <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 gap-2">
             {banners.map((b, i) => (
               <button

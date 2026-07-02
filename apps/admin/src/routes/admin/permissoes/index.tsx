@@ -22,6 +22,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
 
 import { ApiError, apiFetch } from '../../../lib/api-client';
+import {
+  DeleteIconButton,
+  ToggleActiveIconButton,
+} from '../../../components/crud-icon-buttons';
 import { useAuth } from '../../../lib/auth-context';
 
 interface AdminUsuario {
@@ -304,26 +308,20 @@ export function PermissoesPage() {
                         </span>
                       ) : (
                         <div className="flex gap-2">
-                          <Button
-                            type="button"
-                            variant="secondary"
+                          <ToggleActiveIconButton
+                            active={admin.ativo}
+                            activeLabel="Suspender administrador"
+                            inactiveLabel="Ativar administrador"
                             disabled={toggleMutation.isPending}
-                            data-testid={testIds.adminPermissoes.toggleBtn(admin.id)}
-                            className="px-3 py-1.5 text-xs"
+                            testId={testIds.adminPermissoes.toggleBtn(admin.id)}
                             onClick={() => toggleMutation.mutate(admin.id)}
-                          >
-                            {admin.ativo ? 'Suspender' : 'Ativar'}
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
+                          />
+                          <DeleteIconButton
                             disabled={deleteMutation.isPending}
-                            data-testid={testIds.adminPermissoes.deleteBtn(admin.id)}
-                            className="px-3 py-1.5 text-xs text-[var(--admin-error-text)] hover:bg-[var(--admin-error-bg)]"
+                            testId={testIds.adminPermissoes.deleteBtn(admin.id)}
+                            label="Remover administrador"
                             onClick={() => handleDelete(admin)}
-                          >
-                            Remover
-                          </Button>
+                          />
                         </div>
                       )}
                     </TableCell>

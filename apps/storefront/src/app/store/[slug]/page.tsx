@@ -6,7 +6,7 @@ import { ProductGrid } from '@/components/product-grid';
 import { buildStoreMetadata, fetchPublicBanners, fetchPublicStore, flattenStoreProducts } from '@/lib/api';
 import { storeEmptyStateClass, storeMutedClass, storePageTitleClass } from '@/lib/store-styles';
 
-export const revalidate = 60;
+export const revalidate = 30;
 
 interface PageProps {
   params: Promise<{ slug: string }>;

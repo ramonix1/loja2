@@ -36,7 +36,7 @@ describe('API bootstrap @smoke', () => {
       headers: { ...TENANT_HEADER, cookie },
     });
     expect(me.statusCode).toBe(200);
-    expect(me.json().data.usuario.role).toBe('admin');
-    expect(me.json().data.tenant.slug).toBe('loja');
+    expect(me.json().data.usuario.role).toBe('owner');
+    expect(me.json().data.store.slug).toBe('loja');
   });
 });

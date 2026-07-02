@@ -1,5 +1,16 @@
 export { cn } from './cn';
 export { Button, type ButtonProps } from './button';
+export {
+  IconButton,
+  type IconButtonProps,
+  type IconButtonSize,
+  type IconButtonVariant,
+} from './icon-button';
+export {
+  ThemeIconToggle,
+  type ThemeIconToggleProps,
+  type UiThemeMode,
+} from './theme-icon-toggle';
 export { Card, type CardProps } from './card';
 export { ChartCard, type ChartCardProps } from './chart-card';
 export {
