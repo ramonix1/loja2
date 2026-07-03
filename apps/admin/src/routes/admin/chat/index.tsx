@@ -1,7 +1,8 @@
 import {
   Button,
   Card,
-  adminInputClass,
+  FieldInput,
+  FieldTextarea,
   adminMutedClass,
   adminPageSubtitleClass,
   adminPageTitleClass,
@@ -15,6 +16,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 
 import { apiFetch } from '../../../lib/api-client';
+import { DeleteIconButton, EditIconButton } from '../../../components/crud-icon-buttons';
 import { createChatSocket } from '../../../lib/chat-socket';
 
 interface Conversa {
@@ -445,7 +447,8 @@ export function ChatPage() {
                 onSubmit={enviarMensagem}
               >
                 <div className="flex gap-3">
-                  <input
+                  <FieldInput
+                    surface="admin"
                     type="text"
                     value={mensagemInput}
                     disabled={inputDisabled}
@@ -454,7 +457,7 @@ export function ChatPage() {
                     }
                     data-testid={testIds.adminChat.input}
                     onChange={(e) => setMensagemInput(e.target.value)}
-                    className={adminInputClass('flex-1 rounded-xl disabled:opacity-50')}
+                    className="flex-1 rounded-xl disabled:opacity-50"
                   />
                   <Button
                     type="submit"
@@ -516,30 +519,22 @@ export function ChatPage() {
                           <div className={cn('text-sm', adminMutedClass())}>{r.resposta}</div>
                         </div>
                         <div className="flex shrink-0 gap-2">
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            className="px-2 py-1 text-xs"
+                          <EditIconButton
+                            label="Editar resposta automática"
                             onClick={() => {
                               setBotEditId(r.id);
                               setBotKw(r.palavra_chave);
                               setBotResp(r.resposta);
                             }}
-                          >
-                            Editar
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            className="px-2 py-1 text-xs text-[var(--admin-error-text)] hover:bg-[var(--admin-error-bg)]"
+                          />
+                          <DeleteIconButton
+                            label="Excluir resposta automática"
                             onClick={() => {
                               if (window.confirm('Excluir esta resposta automática?')) {
                                 deleteBotMutation.mutate(r.id);
                               }
                             }}
-                          >
-                            Excluir
-                          </Button>
+                          />
                         </div>
                       </div>
                     </div>
@@ -551,19 +546,20 @@ export function ChatPage() {
                   {botEditId ? 'Editando resposta' : '+ Nova resposta automática'}
                 </h3>
                 <div className="space-y-3">
-                  <input
+                  <FieldInput
+                    surface="admin"
                     type="text"
                     value={botKw}
                     placeholder="ex: preço, valor, quanto custa"
                     onChange={(e) => setBotKw(e.target.value)}
-                    className={adminInputClass()}
                   />
-                  <textarea
+                  <FieldTextarea
+                    surface="admin"
                     rows={3}
                     value={botResp}
                     placeholder="Digite a resposta automática..."
                     onChange={(e) => setBotResp(e.target.value)}
-                    className={adminInputClass('resize-none')}
+                    className="resize-none"
                   />
                   <div className="flex gap-2">
                     <Button

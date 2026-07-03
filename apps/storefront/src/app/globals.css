@@ -1,17 +1,25 @@
-@import 'tailwindcss';
-
-/* Tokens oficiais — packages/design-tokens (manual PDF → design-system.md) */
+/* Tokens semânticos (CSS puro) */
 @import '../../../../packages/design-tokens/src/primitives.css';
 @import '../../../../packages/design-tokens/src/semantic-store.css';
 @import '@lojao/design-tokens/shadcn-bridge.css';
-@import '@lojao/ui/styles/shadcn.css';
 @import '../../../../packages/design-tokens/src/components.css';
 
 @import '../styles/ata-labs-theme.css';
 @import '../styles/ata-commerce-theme.css';
+@import '../styles/banner-swiper.css';
+
+@import 'swiper/css';
+
+/**
+ * shadcn @theme + tw-animate — caminho RELATIVO (PostCSS/Next não processa @theme
+ * de @import de pacote npm). Ordem igual ao admin: shadcn.css → tailwindcss → @source.
+ */
+@import '../../../../packages/ui/src/styles/shadcn.css';
+
+@import 'tailwindcss';
 
 @source "../**/*.{ts,tsx}";
-@source "../../../packages/ui/src/**/*.{ts,tsx}";
+@source "../../../../packages/ui/src";
 
 :root {
   --cor-primaria: var(--ata-azul-comercio);
@@ -19,6 +27,11 @@
 
 body {
   @apply min-h-screen antialiased;
+}
+
+html:has([data-store-theme]),
+body:has([data-store-theme]) {
+  overflow-x: clip;
 }
 
 html:has([data-store-theme]) {
@@ -56,11 +69,29 @@ html:has([data-store-theme])::-webkit-scrollbar-button {
   @apply inline-flex min-h-11 touch-manipulation items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50;
 }
 
+.btn-pill {
+  border-radius: var(--store-radius-pill, 9999px);
+}
+
 [data-store-theme] .btn-outline {
   @apply inline-flex min-h-11 touch-manipulation items-center justify-center rounded-lg border px-4 py-2 text-sm font-medium transition hover:brightness-95;
   border-color: var(--store-border);
   background-color: var(--store-surface);
   color: var(--store-text);
+}
+
+[data-store-theme] .btn-outline.btn-pill:hover:not(:disabled) {
+  background-color: var(--cor-primaria);
+  border-color: var(--cor-primaria);
+  color: #ffffff;
+}
+
+[data-store-theme] .btn-outline.btn-pill:focus-visible:not(:disabled) {
+  background-color: var(--cor-primaria);
+  border-color: var(--cor-primaria);
+  color: #ffffff;
+  outline: 2px solid var(--store-focus-ring);
+  outline-offset: 2px;
 }
 
 /* Fallback marketing/signup fora da vitrine tenant */

@@ -1,4 +1,4 @@
-import { Switch } from '@lojao/ui';
+import { ThemeIconToggle } from '@lojao/ui';
 import { testIds } from '@lojao/test-utils';
 
 import { usePlatformUiTheme } from '../lib/platform-ui-theme';
@@ -8,28 +8,22 @@ interface PlatformUiThemeSwitchProps {
   inset?: boolean;
 }
 
-/** Preferência local: paleta clara Ata Labs (verde/creme) no Platform Hub. */
+/** Preferência local: paleta clara/escura Ata Labs (verde/creme) no Platform Hub. */
 export function PlatformUiThemeSwitch({ className, inset = true }: PlatformUiThemeSwitchProps) {
   const { theme, setTheme } = usePlatformUiTheme();
-  const isClaro = theme === 'claro';
 
   return (
-    <label
+    <ThemeIconToggle
+      surface="platform"
+      theme={theme}
+      onToggle={() => setTheme(theme === 'claro' ? 'escuro' : 'claro')}
+      testId={testIds.platform.uiThemeSwitch}
       className={
         className ??
         (inset
-          ? 'mb-3 flex cursor-pointer items-center gap-3 px-3 py-2'
-          : 'flex cursor-pointer items-center gap-2 rounded-lg border border-[var(--platform-border)] bg-[var(--platform-surface)] px-3 py-2 shadow-sm')
+          ? undefined
+          : 'border border-(--platform-border) bg-(--platform-surface) shadow-sm')
       }
-    >
-      <Switch
-        label="Tema claro do Platform Hub"
-        checked={isClaro}
-        onChange={(checked) => setTheme(checked ? 'claro' : 'escuro')}
-        testId={testIds.platform.uiThemeSwitch}
-        surface="platform"
-      />
-      <span className="text-sm text-[var(--platform-text-muted)]">Tema claro</span>
-    </label>
+    />
   );
 }

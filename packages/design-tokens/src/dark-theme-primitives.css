@@ -1,0 +1,32 @@
+/**
+ * Dark Theme System v1 — jun/2026
+ * Fonte: docs/design/AtaLabs_-_Dark_Theme_System.pdf
+ *
+ * Fundos neutros (cinza); identidade de marca (verde/azul) só em acentos —
+ * CTAs, nav ativo, badges, ícones. Princípio: “Cor é acento”.
+ */
+:root {
+  /* Platform Hub / Ata Labs */
+  --ata-dt-platform-bg-base: #13161a;
+  --ata-dt-platform-bg-surface: #1a1e24;
+  --ata-dt-platform-bg-elevated: #21262e;
+  --ata-dt-platform-bg-hover: #282e38;
+  --ata-dt-platform-bg-active: #1c2614;
+  --ata-dt-platform-border: #2a2f38;
+  --ata-dt-platform-text-primary: #f0f2f4;
+  --ata-dt-platform-text-secondary: #8892a0;
+  --ata-dt-platform-accent: var(--ata-verde-broto);
+  --ata-dt-platform-accent-hover: var(--ata-verde-broto-hover);
+
+  /* Admin lojista / Ata Commerce */
+  --ata-dt-admin-bg-base: #13151a;
+  --ata-dt-admin-bg-surface: #191c24;
+  --ata-dt-admin-bg-elevated: #1f2430;
+  --ata-dt-admin-bg-hover: #252b38;
+  --ata-dt-admin-bg-active: #152038;
+  --ata-dt-admin-border: #252b38;
+  --ata-dt-admin-text-primary: #eef0f4;
+  --ata-dt-admin-text-secondary: #8892a4;
+  --ata-dt-admin-accent: var(--ata-azul-vivido);
+  --ata-dt-admin-accent-hover: var(--ata-azul-ceu);
+}

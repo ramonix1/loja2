@@ -37,8 +37,8 @@ Alias `@/` no Vite/tsconfig do admin aponta para `packages/ui/src` (imports inte
 ### Storefront (`apps/storefront/src/app/globals.css`)
 
 1. tokens store + `shadcn-bridge.css` (escopo `[data-store-theme]`)
-2. `@lojao/ui/styles/shadcn.css`
-3. `tailwindcss` + `@source` em `packages/ui/src`
+2. `@import '../../../../packages/ui/src/styles/shadcn.css'` (caminho **relativo** — PostCSS/Next não processa `@theme` de import npm)
+3. `@import 'tailwindcss'` + `@source "../../../../packages/ui/src"` (4 níveis a partir de `src/app/`)
 
 `next.config.ts`: `transpilePackages: ['@lojao/ui']` + aliases `@/components/ui` e `@/lib/utils` para resolução interna do pacote.
 

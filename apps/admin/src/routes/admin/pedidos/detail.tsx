@@ -21,9 +21,10 @@ import {
 import { testIds } from '@lojao/test-utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import { apiFetch } from '../../../lib/api-client';
+import { BackLink } from '../../../components/crud-icon-buttons';
 import { formatBRL } from '../../../lib/currency';
 
 const STATUS_LABEL: Record<PedidoStatus, string> = {
@@ -91,13 +92,9 @@ export function PedidoDetailPage() {
   if (isError || !pedido) {
     return (
       <div>
-        <Link
-          to="/admin/pedidos"
-          data-testid={testIds.adminPedidoDetail.backLink}
-          className="ds-link mb-4 inline-block text-sm"
-        >
-          ← Voltar a pedidos
-        </Link>
+        <BackLink to="/admin/pedidos" testId={testIds.adminPedidoDetail.backLink} className="mb-4">
+          Voltar a pedidos
+        </BackLink>
         <p className="ds-alert-error text-sm">
           Pedido não encontrado.
         </p>
@@ -107,13 +104,9 @@ export function PedidoDetailPage() {
 
   return (
     <div data-testid={testIds.adminPedidoDetail.panel}>
-      <Link
-        to="/admin/pedidos"
-        data-testid={testIds.adminPedidoDetail.backLink}
-        className="ds-link mb-4 inline-block text-sm"
-      >
-        ← Voltar a pedidos
-      </Link>
+      <BackLink to="/admin/pedidos" testId={testIds.adminPedidoDetail.backLink} className="mb-4">
+        Voltar a pedidos
+      </BackLink>
 
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <h1 className={adminPageTitleClass()}>Pedido #{pedido.id}</h1>

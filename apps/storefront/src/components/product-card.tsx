@@ -1,13 +1,16 @@
-import { buildStorePath } from '@lojao/tenant-host';
+import { buildStorePath } from '@lojao/store-host';
 import { store as testIds } from '@lojao/test-utils/test-ids/store';
 import { AddToCartButton } from '@/components/add-to-cart-button';
+import { ProductRating } from '@/components/product-rating';
+import { WishlistButton } from '@/components/wishlist-button';
 import Link from 'next/link';
 
+import { Badge, Card } from '@lojao/ui';
 import { BRL, legacyAssetUrl } from '@/lib/api';
 import {
-  storeCardClass,
-  storeErrorTextClass,
   storeHeadingClass,
+  storeImageWellClass,
+  storePriceClass,
   storeSubtleClass,
 } from '@/lib/store-styles';
 import type { PublicProduct } from '@lojao/types/public-store';
@@ -28,48 +31,74 @@ export function ProductCard({ product, controlaEstoque, storeSlug }: ProductCard
   const imgSrc =
     product.primeira_imagem != null
       ? legacyAssetUrl(product.primeira_imagem)
-      : 'https://placehold.co/400x220/eee/aaa?text=Sem+Imagem';
+      : 'https://placehold.co/400x400/f3f4f6/9ca3af?text=Sem+Imagem';
 
   const productHref = buildStorePath(storeSlug, `/produto/${product.id}`);
 
   return (
-    <article
+    <Card
+      surface="store"
       data-testid={testIds.homeProductCard(product.id)}
-      className={storeCardClass('flex flex-col overflow-hidden shadow-sm transition hover:shadow-md')}
+      className="flex flex-col overflow-hidden p-0 shadow-sm"
     >
-      <Link href={productHref} className="block">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={imgSrc}
-          alt={product.nome}
-          className="aspect-[4/3] w-full object-cover"
-          loading="lazy"
-          decoding="async"
-        />
-        <div className="p-4">
-          <h2 className={storeHeadingClass()}>{product.nome}</h2>
-          {product.subtitulo ? (
-            <p className={storeSubtleClass('mt-1 line-clamp-2 text-sm')}>{product.subtitulo}</p>
-          ) : null}
-          <p className="mt-3 text-xl font-black" style={{ color: 'var(--cor-primaria)' }}>
-            {BRL.format(product.valor)}
-          </p>
-          {esgotado ? (
-            <p className={storeErrorTextClass('mt-2 text-xs font-semibold')}>Esgotado</p>
-          ) : null}
-        </div>
-      </Link>
-      <div className="mt-auto flex gap-2 border-t border-[var(--store-border)] p-4 pt-0">
-        <Link href={productHref} className="btn-outline flex-1 text-center text-xs">
-          Ver detalhes
+      <div className="relative">
+        <Link href={productHref} className="group block focus-visible:outline-none">
+          <div className={storeImageWellClass('border-b border-[var(--store-border)]/50')}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={imgSrc}
+              alt={product.nome}
+              className="max-h-[86%] max-w-[86%] object-contain transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
         </Link>
+        <div className="absolute top-2 right-2 z-10">
+          <WishlistButton productId={product.id} />
+        </div>
+        {esgotado ? (
+          <>
+            <div
+              className="pointer-events-none absolute inset-0 bg-[var(--store-text)]/40"
+              aria-hidden
+            />
+            <Badge
+              variant="secondary"
+              className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 px-3 py-1 text-xs font-semibold shadow-sm"
+            >
+              Esgotado
+            </Badge>
+          </>
+        ) : null}
+      </div>
+
+      <div className="flex flex-1 flex-col gap-2 p-4">
+        <Link
+          href={productHref}
+          className="min-w-0 focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--store-focus-ring)]"
+        >
+          <h2 className={storeHeadingClass('line-clamp-2 text-base leading-snug')}>
+            {product.nome}
+          </h2>
+        </Link>
+        <p className={storePriceClass('text-lg')}>{BRL.format(product.valor)}</p>
+
+        {product.subtitulo ? (
+          <p className={storeSubtleClass('line-clamp-2 text-sm')}>{product.subtitulo}</p>
+        ) : null}
+
+        {product.rating_summary && product.rating_summary.count > 0 ? (
+          <ProductRating summary={product.rating_summary} compact />
+        ) : null}
+
         <AddToCartButton
           produtoId={product.id}
           disabled={esgotado}
-          className="btn-primary flex-1 text-xs"
-          label="Adicionar"
+          className="mt-auto w-full text-sm"
+          label="Adicionar ao carrinho"
         />
       </div>
-    </article>
+    </Card>
   );
 }

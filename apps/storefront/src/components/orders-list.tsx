@@ -1,14 +1,16 @@
 'use client';
 
-import { buildStorePath } from '@lojao/tenant-host';
+import { buildStorePath } from '@lojao/store-host';
 import { store as testIds } from '@lojao/test-utils/test-ids/store';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { Button } from '@lojao/ui';
 import { BRL } from '@/lib/api';
 import { fetchOrders, type BuyerOrder } from '@/lib/client-api';
 import {
+  storeButtonPillClass,
   storeEmptyStateClass,
   storeLinkClass,
   storeMutedClass,
@@ -49,9 +51,9 @@ export function OrdersList() {
     return (
       <div className={storeEmptyStateClass()}>
         <p className={storeMutedClass()}>Você ainda não fez nenhum pedido.</p>
-        <Link href={homeHref} className="btn-primary mt-4 inline-block">
-          Ver produtos
-        </Link>
+        <Button surface="store" variant="primary" asChild className={storeButtonPillClass('mt-4')}>
+          <Link href={homeHref}>Ver produtos</Link>
+        </Button>
       </div>
     );
   }

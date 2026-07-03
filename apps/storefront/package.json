@@ -12,13 +12,15 @@
   },
   "dependencies": {
     "@lojao/design-tokens": "workspace:*",
-    "@lojao/tenant-host": "workspace:*",
+    "@lojao/store-host": "workspace:*",
     "@lojao/test-utils": "workspace:*",
     "@lojao/types": "workspace:*",
     "@lojao/ui": "workspace:*",
     "next": "^15.1.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "swiper": "^14.0.1",
+    "tw-animate-css": "^1.2.5"
   },
   "devDependencies": {
     "@lojao/eslint-config": "workspace:*",

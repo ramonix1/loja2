@@ -62,7 +62,8 @@ export const CORS_ALLOWED_METHODS = [
 export const CORS_ALLOWED_HEADERS = [
   'Content-Type',
   'Authorization',
-  'X-Tenant-Slug',
+  'X-Store-Slug',
+  'X-Auth-Context',
   'Idempotency-Key',
 ];
 

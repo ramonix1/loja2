@@ -12,7 +12,7 @@ COPY apps/storefront/package.json apps/storefront/
 COPY packages/types/package.json packages/types/
 COPY packages/ui/package.json packages/ui/
 COPY packages/design-tokens/package.json packages/design-tokens/
-COPY packages/tenant-host/package.json packages/tenant-host/
+COPY packages/store-host/package.json packages/store-host/
 COPY packages/test-utils/package.json packages/test-utils/
 COPY packages/eslint-config/package.json packages/eslint-config/
 RUN pnpm install --filter storefront... --frozen-lockfile

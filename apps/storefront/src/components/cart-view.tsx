@@ -1,5 +1,7 @@
 'use client';
 
+import { IconButton, Button, Card } from '@lojao/ui';
+import { ActionIcons } from '@lojao/ui/icons';
 import { store as testIds } from '@lojao/test-utils/test-ids/store';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -7,33 +9,25 @@ import { useEffect, useState } from 'react';
 
 import { BRL, legacyAssetUrl } from '@/lib/api';
 import { fetchCart, removeCartItem, updateCartItem, type CartItem } from '@/lib/client-api';
-import {
-  storeBodyClass,
-  storeEmptyStateClass,
-  storeErrorTextClass,
-  storeHeadingClass,
-  storeMutedClass,
-  storePanelClass,
-  storeSubtleClass,
-  storeTableHeadClass,
-  storeTableRowClass,
-  storeTableWrapClass,
-} from '@/lib/store-styles';
+import { useStoreCartOptional } from '@/lib/store-cart-context';
+import { storeButtonPillClass, storeEmptyStateClass, storeHeadingClass, storeMutedClass, storeSubtleClass, storeTableHeadClass, storeTableRowClass, storeTableWrapClass } from '@/lib/store-styles';
 import { useStoreHref, useStoreLoginHref } from '@/lib/use-store-href';
 
 export function CartView() {
   const router = useRouter();
   const homeHref = useStoreHref('/');
   const checkoutHref = useStoreHref('/checkout');
-  const loginHref = useStoreLoginHref('/carrinho');
+  const loginHref = useStoreLoginHref('/cart');
   const [itens, setItens] = useState<CartItem[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const cartContext = useStoreCartOptional();
 
   async function reload() {
     const data = await fetchCart();
     setItens(data.itens);
     setTotal(data.total);
+    await cartContext?.refreshCount();
   }
 
   useEffect(() => {
@@ -61,9 +55,9 @@ export function CartView() {
     return (
       <div className={storeEmptyStateClass()}>
         <p className={storeMutedClass()}>Seu carrinho está vazio.</p>
-        <Link href={homeHref} className="btn-primary mt-4 inline-block">
-          Continuar comprando
-        </Link>
+        <Button surface="store" variant="primary" asChild className={storeButtonPillClass('mt-4')}>
+          <Link href={homeHref}>Continuar comprando</Link>
+        </Button>
       </div>
     );
   }
@@ -99,7 +93,7 @@ export function CartView() {
                         />
                       ) : null}
                       <div>
-                        <p className={storeBodyClass('font-semibold')}>{item.nome}</p>
+                        <p className="font-semibold text-[var(--store-text)]">{item.nome}</p>
                         {item.subtitulo ? (
                           <p className={storeSubtleClass('text-xs')}>{item.subtitulo}</p>
                         ) : null}
@@ -108,20 +102,36 @@ export function CartView() {
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-2">
-                      <button type="button" className="btn-outline px-2 py-1" onClick={() => changeQty(item, item.quantidade - 1)}>
-                        −
-                      </button>
-                      <span>{item.quantidade}</span>
-                      <button type="button" className="btn-outline px-2 py-1" onClick={() => changeQty(item, item.quantidade + 1)}>
-                        +
-                      </button>
+                      <IconButton
+                        icon={<ActionIcons.minus />}
+                        label="Diminuir quantidade"
+                        onClick={() => changeQty(item, item.quantidade - 1)}
+                        surface="store"
+                        variant="ghost"
+                        size="md"
+                        disabled={item.quantidade <= 1}
+                      />
+                      <span className="min-w-[1.5rem] text-center">{item.quantidade}</span>
+                      <IconButton
+                        icon={<ActionIcons.plus />}
+                        label="Aumentar quantidade"
+                        onClick={() => changeQty(item, item.quantidade + 1)}
+                        surface="store"
+                        variant="ghost"
+                        size="md"
+                      />
                     </div>
                   </td>
                   <td className="px-4 py-4 font-semibold">{BRL.format(item.subtotal)}</td>
                   <td className="px-4 py-4">
-                    <button type="button" className={storeErrorTextClass('text-sm hover:underline')} onClick={() => remove(item)}>
-                      Remover
-                    </button>
+                    <IconButton
+                      icon={<ActionIcons.delete />}
+                      label="Remover item do carrinho"
+                      onClick={() => remove(item)}
+                      surface="store"
+                      variant="destructive"
+                      size="md"
+                    />
                   </td>
                 </tr>
               ))}
@@ -130,21 +140,24 @@ export function CartView() {
         </div>
       </div>
 
-      <aside className={storePanelClass('h-fit')}>
+      <Card surface="store" className="h-fit p-6 shadow-sm">
         <h2 className={storeHeadingClass('mb-4')}>Resumo</h2>
         <p className={storeMutedClass('flex justify-between text-sm')}>
           <span>Subtotal</span>
-          <span className={storeBodyClass('font-semibold')}>{BRL.format(total)}</span>
+          <span className="font-semibold text-[var(--store-text)]">{BRL.format(total)}</span>
         </p>
         <p className={storeSubtleClass('mt-2 text-xs')}>Frete calculado no checkout.</p>
-        <Link
-          href={checkoutHref}
-          data-testid={testIds.cartCheckoutBtn}
-          className="btn-primary mt-6 block w-full py-3 text-center"
+        <Button
+          surface="store"
+          variant="primary"
+          asChild
+          className={storeButtonPillClass('mt-6 block w-full py-3 text-center')}
         >
-          Ir para checkout
-        </Link>
-      </aside>
+          <Link href={checkoutHref} data-testid={testIds.cartCheckoutBtn}>
+            Ir para checkout
+          </Link>
+        </Button>
+      </Card>
     </div>
   );
 }

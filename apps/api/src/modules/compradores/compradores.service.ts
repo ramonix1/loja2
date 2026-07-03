@@ -1,5 +1,3 @@
-import type pg from 'pg';
-
 import type {
   CompradorDetail,
   CompradorDetailResponse,
@@ -8,6 +6,12 @@ import type {
   ListCompradoresQuery,
 } from '@lojao/types/compradores';
 
+import {
+  appointmentStatusToApi,
+  orderStatusToApi,
+} from '../../lib/merchant-schema-map.js';
+import type { StoreScope } from '../../lib/store-scope.js';
+
 function toIso(value: Date | string | null | undefined): string | null {
   if (value == null) return null;
   return value instanceof Date ? value.toISOString() : String(value);
@@ -15,29 +19,29 @@ function toIso(value: Date | string | null | undefined): string | null {
 
 function mapListRow(row: {
   id: number;
-  nome: string;
+  name: string;
   email: string;
-  telefone: string | null;
+  phone: string | null;
   cpf: string | null;
-  cidade: string | null;
-  estado: string | null;
-  ativo: boolean;
+  city: string | null;
+  state: string | null;
+  active: boolean;
   created_at: Date | string;
-  ultimo_acesso: Date | string | null;
+  last_access_at: Date | string | null;
   total_pedidos: string | number;
   total_gasto: string | number;
 }): CompradorListItem {
   return {
     id: row.id,
-    nome: row.nome,
+    nome: row.name,
     email: row.email,
-    telefone: row.telefone,
+    telefone: row.phone,
     cpf: row.cpf,
-    cidade: row.cidade,
-    estado: row.estado,
-    ativo: row.ativo,
+    cidade: row.city,
+    estado: row.state,
+    ativo: row.active,
     created_at: toIso(row.created_at) ?? '',
-    ultimo_acesso: toIso(row.ultimo_acesso),
+    ultimo_acesso: toIso(row.last_access_at),
     total_pedidos: Number(row.total_pedidos),
     total_gasto: Number(row.total_gasto),
   };
@@ -45,50 +49,53 @@ function mapListRow(row: {
 
 /** Porta `compradorController.listar`. */
 export async function listCompradores(
-  db: pg.Pool,
+  { pool, storeId }: StoreScope,
   query: ListCompradoresQuery,
 ): Promise<{ compradores: CompradorListItem[]; totais: CompradoresTotais }> {
   const busca = query.busca?.trim() ?? '';
 
   let listSql: string;
-  let params: string[];
+  let params: (string | number)[];
 
   if (busca) {
     listSql = `
-      SELECT u.id, u.nome, u.email, u.telefone, u.cpf, u.cidade, u.estado,
-             u.ativo, u.created_at, u.ultimo_acesso,
-             COUNT(p.id) AS total_pedidos,
-             COALESCE(SUM(p.total) FILTER (WHERE p.status NOT IN ('cancelado')), 0) AS total_gasto
-      FROM usuarios u
-      LEFT JOIN pedidos p ON p.usuario_id = u.id
-      WHERE u.role = 'usuario'
-        AND (u.nome ILIKE $1 OR u.email ILIKE $1 OR u.cpf ILIKE $1 OR u.telefone ILIKE $1)
-      GROUP BY u.id ORDER BY u.created_at DESC
+      SELECT b.id, b.name, b.email, b.phone, b.cpf, b.city, b.state,
+             b.active, b.created_at, b.last_access_at,
+             COUNT(o.id) AS total_pedidos,
+             COALESCE(SUM(o.total) FILTER (WHERE o.status NOT IN ('cancelled')), 0) AS total_gasto
+      FROM buyers b
+      LEFT JOIN orders o ON o.buyer_id = b.id AND o.store_id = b.store_id
+      WHERE b.store_id = $1
+        AND (b.name ILIKE $2 OR b.email ILIKE $2 OR b.cpf ILIKE $2 OR b.phone ILIKE $2)
+      GROUP BY b.id ORDER BY b.created_at DESC
     `;
-    params = [`%${busca}%`];
+    params = [storeId, `%${busca}%`];
   } else {
     listSql = `
-      SELECT u.id, u.nome, u.email, u.telefone, u.cpf, u.cidade, u.estado,
-             u.ativo, u.created_at, u.ultimo_acesso,
-             COUNT(p.id) AS total_pedidos,
-             COALESCE(SUM(p.total) FILTER (WHERE p.status NOT IN ('cancelado')), 0) AS total_gasto
-      FROM usuarios u
-      LEFT JOIN pedidos p ON p.usuario_id = u.id
-      WHERE u.role = 'usuario'
-      GROUP BY u.id ORDER BY u.created_at DESC
+      SELECT b.id, b.name, b.email, b.phone, b.cpf, b.city, b.state,
+             b.active, b.created_at, b.last_access_at,
+             COUNT(o.id) AS total_pedidos,
+             COALESCE(SUM(o.total) FILTER (WHERE o.status NOT IN ('cancelled')), 0) AS total_gasto
+      FROM buyers b
+      LEFT JOIN orders o ON o.buyer_id = b.id AND o.store_id = b.store_id
+      WHERE b.store_id = $1
+      GROUP BY b.id ORDER BY b.created_at DESC
     `;
-    params = [];
+    params = [storeId];
   }
 
   const [compradoresRes, totaisRes] = await Promise.all([
-    db.query(listSql, params),
-    db.query(`
+    pool.query(listSql, params),
+    pool.query(
+      `
       SELECT
         COUNT(*)::int AS total_compradores,
-        COUNT(*) FILTER (WHERE ativo = true)::int AS ativos,
+        COUNT(*) FILTER (WHERE active = true)::int AS ativos,
         COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '30 days')::int AS novos_mes
-      FROM usuarios WHERE role = 'usuario'
-    `),
+      FROM buyers WHERE store_id = $1
+    `,
+      [storeId],
+    ),
   ]);
 
   const totaisRow = totaisRes.rows[0] as {
@@ -109,71 +116,71 @@ export async function listCompradores(
 
 /** Porta `compradorController.detalhe`. */
 export async function getComprador(
-  db: pg.Pool,
+  { pool, storeId }: StoreScope,
   id: number,
 ): Promise<CompradorDetailResponse | null> {
-  const [usuarioRes, pedidosRes, agendamentosRes, totalRes] = await Promise.all([
-    db.query(`SELECT * FROM usuarios WHERE id = $1 AND role = 'usuario'`, [id]),
-    db.query(
-      `SELECT p.*,
-              COUNT(pi.id)::int AS qtd_itens,
+  const [buyerRes, pedidosRes, agendamentosRes, totalRes] = await Promise.all([
+    pool.query(`SELECT * FROM buyers WHERE id = $1 AND store_id = $2`, [id, storeId]),
+    pool.query(
+      `SELECT o.*,
+              COUNT(oi.id)::int AS qtd_itens,
               COALESCE(
                 JSON_AGG(
                   JSON_BUILD_OBJECT(
-                    'nome', pi.nome_produto,
-                    'quantidade', pi.quantidade,
-                    'preco_unitario', pi.preco_unitario,
-                    'subtotal', pi.subtotal
-                  ) ORDER BY pi.id
-                ) FILTER (WHERE pi.id IS NOT NULL),
+                    'nome', oi.product_name,
+                    'quantidade', oi.quantity,
+                    'preco_unitario', oi.unit_price,
+                    'subtotal', oi.subtotal
+                  ) ORDER BY oi.id
+                ) FILTER (WHERE oi.id IS NOT NULL),
                 '[]'::json
               ) AS itens
-       FROM pedidos p
-       LEFT JOIN pedido_itens pi ON pi.pedido_id = p.id
-       WHERE p.usuario_id = $1
-       GROUP BY p.id
-       ORDER BY p.created_at DESC`,
-      [id],
+       FROM orders o
+       LEFT JOIN order_items oi ON oi.order_id = o.id AND oi.store_id = o.store_id
+       WHERE o.buyer_id = $1 AND o.store_id = $2
+       GROUP BY o.id
+       ORDER BY o.created_at DESC`,
+      [id, storeId],
     ),
-    db.query(
-      `SELECT a.*, p.id AS pedido_id, p.total AS pedido_total,
-              p.nome_entrega, p.status AS pedido_status
-       FROM agendamentos a
-       JOIN pedidos p ON p.id = a.pedido_id
-       WHERE p.usuario_id = $1
-       ORDER BY a.data_evento DESC`,
-      [id],
+    pool.query(
+      `SELECT a.*, o.id AS pedido_id, o.total AS pedido_total,
+              o.shipping_name AS nome_entrega, o.status AS pedido_status
+       FROM appointments a
+       JOIN orders o ON o.id = a.order_id AND o.store_id = a.store_id
+       WHERE o.buyer_id = $1 AND a.store_id = $2
+       ORDER BY a.event_date DESC`,
+      [id, storeId],
     ).catch(() => ({ rows: [] as Record<string, unknown>[] })),
-    db.query(
+    pool.query(
       `SELECT
          COUNT(*)::int AS total_pedidos,
-         COALESCE(SUM(total) FILTER (WHERE status NOT IN ('cancelado')), 0) AS total_gasto,
-         COALESCE(SUM(total) FILTER (WHERE status = 'cancelado'), 0) AS total_cancelado,
+         COALESCE(SUM(total) FILTER (WHERE status NOT IN ('cancelled')), 0) AS total_gasto,
+         COALESCE(SUM(total) FILTER (WHERE status = 'cancelled'), 0) AS total_cancelado,
          MAX(created_at) AS ultimo_pedido
-       FROM pedidos WHERE usuario_id = $1`,
-      [id],
+       FROM orders WHERE buyer_id = $1 AND store_id = $2`,
+      [id, storeId],
     ),
   ]);
 
-  const usuarioRow = usuarioRes.rows[0];
-  if (!usuarioRow) return null;
+  const buyerRow = buyerRes.rows[0];
+  if (!buyerRow) return null;
 
   const comprador: CompradorDetail = {
-    id: usuarioRow.id as number,
-    nome: usuarioRow.nome as string,
-    email: usuarioRow.email as string,
-    telefone: (usuarioRow.telefone as string | null) ?? null,
-    cpf: (usuarioRow.cpf as string | null) ?? null,
-    cep: (usuarioRow.cep as string | null) ?? null,
-    logradouro: (usuarioRow.logradouro as string | null) ?? null,
-    numero: (usuarioRow.numero as string | null) ?? null,
-    complemento: (usuarioRow.complemento as string | null) ?? null,
-    bairro: (usuarioRow.bairro as string | null) ?? null,
-    cidade: (usuarioRow.cidade as string | null) ?? null,
-    estado: (usuarioRow.estado as string | null) ?? null,
-    ativo: Boolean(usuarioRow.ativo),
-    created_at: toIso(usuarioRow.created_at as Date | string) ?? '',
-    ultimo_acesso: toIso(usuarioRow.ultimo_acesso as Date | string | null),
+    id: buyerRow.id as number,
+    nome: buyerRow.name as string,
+    email: buyerRow.email as string,
+    telefone: (buyerRow.phone as string | null) ?? null,
+    cpf: (buyerRow.cpf as string | null) ?? null,
+    cep: (buyerRow.postal_code as string | null) ?? null,
+    logradouro: (buyerRow.street as string | null) ?? null,
+    numero: (buyerRow.number as string | null) ?? null,
+    complemento: (buyerRow.complement as string | null) ?? null,
+    bairro: (buyerRow.district as string | null) ?? null,
+    cidade: (buyerRow.city as string | null) ?? null,
+    estado: (buyerRow.state as string | null) ?? null,
+    ativo: Boolean(buyerRow.active),
+    created_at: toIso(buyerRow.created_at as Date | string) ?? '',
+    ultimo_acesso: toIso(buyerRow.last_access_at as Date | string | null),
   };
 
   const pedidos = pedidosRes.rows.map((row) => {
@@ -189,9 +196,9 @@ export async function getComprador(
 
     return {
       id: row.id as number,
-      status: String(row.status),
+      status: orderStatusToApi(String(row.status)),
       total: Number(row.total),
-      frete: Number(row.frete ?? 0),
+      frete: Number(row.shipping_fee ?? 0),
       created_at: toIso(row.created_at as Date | string) ?? '',
       qtd_itens: Number(row.qtd_itens),
       itens,
@@ -202,13 +209,13 @@ export async function getComprador(
     id: row.id as number,
     pedido_id: row.pedido_id as number,
     data_evento:
-      row.data_evento instanceof Date
-        ? row.data_evento.toISOString().slice(0, 10)
-        : String(row.data_evento).slice(0, 10),
-    status: String(row.status),
+      row.event_date instanceof Date
+        ? row.event_date.toISOString().slice(0, 10)
+        : String(row.event_date).slice(0, 10),
+    status: appointmentStatusToApi(String(row.status)),
     pedido_total: Number(row.pedido_total),
     nome_entrega: (row.nome_entrega as string | null) ?? null,
-    pedido_status: String(row.pedido_status),
+    pedido_status: orderStatusToApi(String(row.pedido_status)),
   }));
 
   const resumoRow = totalRes.rows[0] as {

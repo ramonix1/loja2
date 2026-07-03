@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 
+import { requireStoreScope } from '../../lib/store-scope.js';
 import { requireAuth } from '../../plugins/auth-guard.js';
 import { sendStoreMessage } from './store-chat.service.js';
 
@@ -25,7 +26,7 @@ export async function storeChatRoutes(app: FastifyInstance): Promise<void> {
     }
 
     const sessionId = `user-${request.session.usuarioId}`;
-    const result = await sendStoreMessage(request.db, {
+    const result = await sendStoreMessage(requireStoreScope(request), {
       sessionId,
       usuarioId: request.session.usuarioId,
       nome: parsed.data.nome ?? request.session.nome ?? undefined,

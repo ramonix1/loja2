@@ -3,6 +3,8 @@ import type { FastifyInstance } from 'fastify';
 
 import { parseMultipartMulti } from '../../lib/multipart.js';
 import { UploadError } from '../../lib/image-validation.js';
+import { afterStoreMutation } from '../../lib/storefront-revalidate.js';
+import { requireStoreScope } from '../../lib/store-scope.js';
 import { requireAdmin } from '../../plugins/auth-guard.js';
 import { getAparencia, updateAparencia } from './aparencia.service.js';
 
@@ -10,7 +12,7 @@ export async function aparenciaRoutes(app: FastifyInstance): Promise<void> {
   app.addHook('preHandler', requireAdmin);
 
   app.get('/admin/aparencia', async (request, reply) => {
-    const data = await getAparencia(request.db);
+    const data = await getAparencia(requireStoreScope(request));
     return reply.send({ data });
   });
 
@@ -35,12 +37,14 @@ export async function aparenciaRoutes(app: FastifyInstance): Promise<void> {
         });
       }
 
-      await updateAparencia(request.db, request.server.imageStorage, parsed.data, {
+      await updateAparencia(requireStoreScope(request), request.server.imageStorage, parsed.data, {
         logo: files.logo,
         favicon: files.favicon,
       });
 
-      const data = await getAparencia(request.db);
+      afterStoreMutation(request);
+
+      const data = await getAparencia(requireStoreScope(request));
       return reply.send({ data });
     } catch (err) {
       if (err instanceof UploadError) {

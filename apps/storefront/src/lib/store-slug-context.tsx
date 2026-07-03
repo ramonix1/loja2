@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect } from 'react';
 
-import { setClientTenantSlug } from '@/lib/client-api';
+import { setClientStoreSlug } from '@/lib/client-api';
 
 const StoreSlugContext = createContext<string>('loja');
 
@@ -13,8 +13,11 @@ export function StoreSlugProvider({
   slug: string;
   children: React.ReactNode;
 }) {
+  // Sincroniza antes dos filhos montarem — evita fetch com slug default `loja`.
+  setClientStoreSlug(slug);
+
   useEffect(() => {
-    setClientTenantSlug(slug);
+    setClientStoreSlug(slug);
   }, [slug]);
 
   return <StoreSlugContext.Provider value={slug}>{children}</StoreSlugContext.Provider>;

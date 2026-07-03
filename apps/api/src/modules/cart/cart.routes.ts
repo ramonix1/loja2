@@ -1,7 +1,8 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 
-import { requireAuth } from '../../plugins/auth-guard.js';
+import { requireStoreScope } from '../../lib/store-scope.js';
+import { requireAuth, requireBuyer } from '../../plugins/auth-guard.js';
 import {
   addCartItem,
   countCartItems,
@@ -21,16 +22,20 @@ const updateItemSchema = z.object({
 
 export async function cartRoutes(app: FastifyInstance): Promise<void> {
   app.addHook('preHandler', requireAuth);
+  app.addHook('preHandler', requireBuyer);
 
   app.get('/cart', async (request, reply) => {
-    const itens = await getCartItems(request.db, request.session.usuarioId!);
+    const scope = requireStoreScope(request);
+    const buyerId = request.session.usuarioId!;
+    const itens = await getCartItems(scope, buyerId);
     const total = itens.reduce((s, i) => s + i.subtotal, 0);
     return reply.send({ data: { itens, total } });
   });
 
   app.get('/cart/count', async (request, reply) => {
-    const contagem = await countCartItems(request.db, request.session.usuarioId!);
-    return reply.send({ data: { contagem } });
+    const scope = requireStoreScope(request);
+    const count = await countCartItems(scope, request.session.usuarioId!);
+    return reply.send({ data: { count } });
   });
 
   app.post('/cart/items', async (request, reply) => {
@@ -44,7 +49,7 @@ export async function cartRoutes(app: FastifyInstance): Promise<void> {
     }
 
     const result = await addCartItem(
-      request.db,
+      requireStoreScope(request),
       request.session.usuarioId!,
       parsed.data.produto_id,
       parsed.data.quantidade ?? 1,
@@ -65,7 +70,7 @@ export async function cartRoutes(app: FastifyInstance): Promise<void> {
     }
 
     const data = await updateCartItem(
-      request.db,
+      requireStoreScope(request),
       request.session.usuarioId!,
       id,
       parsed.data.quantidade,
@@ -79,7 +84,7 @@ export async function cartRoutes(app: FastifyInstance): Promise<void> {
       return reply.code(400).send({ error: 'ID inválido.', code: 'VALIDATION_ERROR' });
     }
 
-    const data = await removeCartItem(request.db, request.session.usuarioId!, id);
+    const data = await removeCartItem(requireStoreScope(request), request.session.usuarioId!, id);
     return reply.send({ data });
   });
 }

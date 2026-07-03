@@ -4,6 +4,8 @@ import { z } from 'zod';
 
 import { parseMultipartAll } from '../../lib/multipart.js';
 import { UploadError } from '../../lib/image-validation.js';
+import { afterStoreMutation } from '../../lib/storefront-revalidate.js';
+import { requireStoreScope } from '../../lib/store-scope.js';
 import { requireAdmin } from '../../plugins/auth-guard.js';
 import {
   createProduto,
@@ -36,7 +38,7 @@ export async function produtosRoutes(app: FastifyInstance): Promise<void> {
   app.addHook('preHandler', requireAdmin);
 
   app.get('/admin/produtos', async (request, reply) => {
-    const data = await listProdutos(request.db);
+    const data = await listProdutos(requireStoreScope(request));
     return reply.send({ data });
   });
 
@@ -46,7 +48,7 @@ export async function produtosRoutes(app: FastifyInstance): Promise<void> {
       return reply.code(400).send({ error: 'ID inválido.', code: 'VALIDATION_ERROR' });
     }
 
-    const data = await getProduto(request.db, id);
+    const data = await getProduto(requireStoreScope(request), id);
     if (!data) {
       return reply.code(404).send({ error: 'Produto não encontrado.', code: 'NOT_FOUND' });
     }
@@ -74,7 +76,8 @@ export async function produtosRoutes(app: FastifyInstance): Promise<void> {
         });
       }
 
-      const { id } = await createProduto(request.db, request.server.imageStorage, parsed.data, imagens);
+      const { id } = await createProduto(requireStoreScope(request), request.server.imageStorage, parsed.data, imagens);
+      afterStoreMutation(request);
       return reply.code(201).send({ data: { id } });
     } catch (err) {
       if (err instanceof UploadError) {
@@ -102,11 +105,12 @@ export async function produtosRoutes(app: FastifyInstance): Promise<void> {
         });
       }
 
-      const ok = await updateProduto(request.db, request.server.imageStorage, id, parsed.data, imagens);
+      const ok = await updateProduto(requireStoreScope(request), request.server.imageStorage, id, parsed.data, imagens);
       if (!ok) {
         return reply.code(404).send({ error: 'Produto não encontrado.', code: 'NOT_FOUND' });
       }
 
+      afterStoreMutation(request);
       return reply.send({ data: { ok: true } });
     } catch (err) {
       if (err instanceof UploadError) {
@@ -122,11 +126,12 @@ export async function produtosRoutes(app: FastifyInstance): Promise<void> {
       return reply.code(400).send({ error: 'ID inválido.', code: 'VALIDATION_ERROR' });
     }
 
-    const ok = await deleteProduto(request.db, request.server.imageStorage, id);
+    const ok = await deleteProduto(requireStoreScope(request), request.server.imageStorage, id);
     if (!ok) {
       return reply.code(404).send({ error: 'Produto não encontrado.', code: 'NOT_FOUND' });
     }
 
+    afterStoreMutation(request);
     return reply.send({ data: { ok: true } });
   });
 
@@ -146,7 +151,7 @@ export async function produtosRoutes(app: FastifyInstance): Promise<void> {
     }
 
     const ok = await updateProdutoEstoque(
-      request.db,
+      requireStoreScope(request),
       id,
       parsed.data.estoque,
       parsed.data.observacao,
@@ -155,6 +160,7 @@ export async function produtosRoutes(app: FastifyInstance): Promise<void> {
       return reply.code(404).send({ error: 'Produto não encontrado.', code: 'NOT_FOUND' });
     }
 
+    afterStoreMutation(request);
     return reply.send({ data: { ok: true } });
   });
 
@@ -164,11 +170,12 @@ export async function produtosRoutes(app: FastifyInstance): Promise<void> {
       return reply.code(400).send({ error: 'ID inválido.', code: 'VALIDATION_ERROR' });
     }
 
-    const ok = await deleteProdutoImagem(request.db, request.server.imageStorage, imagemId);
+    const ok = await deleteProdutoImagem(requireStoreScope(request), request.server.imageStorage, imagemId);
     if (!ok) {
       return reply.code(404).send({ error: 'Imagem não encontrada.', code: 'NOT_FOUND' });
     }
 
+    afterStoreMutation(request);
     return reply.send({ data: { ok: true } });
   });
 }

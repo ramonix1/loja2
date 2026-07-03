@@ -1,28 +1,14 @@
-import { browserApiBase } from '@/lib/config';
+import type { MerchantSignupInput, MerchantSignupResult } from '@lojao/types/merchant';
+
+import { API_URL, browserApiBase } from '@/lib/config';
 
 function signupApiPath(suffix = ''): string {
-  return `${browserApiBase()}/api/v1/public/signup${suffix}`;
+  return `${browserApiBase()}/api/v1/public/merchant-signup${suffix}`;
 }
 
-export type SignupPlanSlug = 'starter' | 'professional' | 'enterprise';
-export type SignupBillingCycle = 'monthly' | 'annual';
-
-export interface SignupPayload {
-  planSlug: SignupPlanSlug;
-  billingCycle: SignupBillingCycle;
-  trial: boolean;
-  loja: { nome: string; slug: string };
-  admin: { nome: string; email: string; senha: string };
-}
-
-export interface SignupResult {
-  tenantSlug: string;
-  lojaNome: string;
-  adminEmail: string;
-  storefrontUrl: string;
-  adminUrl: string;
-  trialEndsAt?: string;
-}
+export type SignupPlanSlug = MerchantSignupInput['planSlug'];
+export type SignupPayload = MerchantSignupInput;
+export type SignupResult = MerchantSignupResult;
 
 export type SlugCheck =
   | { available: true }
@@ -41,10 +27,15 @@ export function slugify(input: string): string {
 }
 
 /** Consulta disponibilidade do slug (GET público). */
-export async function checkSlug(slug: string, signal?: AbortSignal): Promise<SlugCheck> {
+export async function checkSlug(
+  slug: string,
+  options?: { type?: 'merchant' | 'store'; signal?: AbortSignal },
+): Promise<SlugCheck> {
+  const typeParam =
+    options?.type === 'merchant' ? '&type=merchant' : '';
   const res = await fetch(
-    `${signupApiPath()}/check-slug?slug=${encodeURIComponent(slug)}`,
-    { signal },
+    `${signupApiPath()}/check-slug?slug=${encodeURIComponent(slug)}${typeParam}`,
+    { signal: options?.signal },
   );
   const body = (await res.json().catch(() => ({}))) as {
     data?: { available: boolean; reason?: 'RESERVED' | 'TAKEN' };
@@ -68,11 +59,16 @@ export type SignupResponse =
   | { ok: true; data: SignupResult }
   | { ok: false; error: SignupError };
 
-/** Envia o cadastro self-service (POST público). */
+/**
+ * Envia o cadastro self-service (POST público).
+ * Usa a API diretamente (não o proxy Next) para o cookie `lojao.sid` com
+ * `Domain=localhost` ser compartilhado entre storefront, admin e API em dev.
+ */
 export async function submitSignup(payload: SignupPayload): Promise<SignupResponse> {
-  const res = await fetch(signupApiPath(), {
+  const res = await fetch(`${API_URL}/api/v1/public/merchant-signup`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify(payload),
   });
 

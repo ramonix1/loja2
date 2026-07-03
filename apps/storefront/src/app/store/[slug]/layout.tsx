@@ -5,11 +5,12 @@ import { notFound } from 'next/navigation';
 import { DEFAULT_LOJA_COR_PRIMARIA, storeShellClasses } from '@/lib/store-styles';
 import { StoreFooter } from '@/components/layout/store-footer';
 import { StoreHeader } from '@/components/layout/store-header';
+import { StoreProviders } from '@/components/store-providers';
 import { ApiError, buildStoreMetadata, fetchPublicStore } from '@/lib/api';
 import { StoreSlugProvider } from '@/lib/store-slug-context';
-import { parseStoreTheme } from '@lojao/types/store-theme';
+import { DEFAULT_STORE_THEME } from '@lojao/types/store-theme';
 
-export const revalidate = 60;
+export const revalidate = 30;
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -40,21 +41,28 @@ export default async function StoreLayout({ children, params }: LayoutProps) {
   }
 
   const cor = storeData.loja.cor_primaria || DEFAULT_LOJA_COR_PRIMARIA;
-  const tema = parseStoreTheme(storeData.loja.tema);
-  const shell = storeShellClasses(tema);
+  // Vitrine fixa em claro — visitante não troca tema (spec futura).
+  const tema = DEFAULT_STORE_THEME;
+  const shell = storeShellClasses();
 
   return (
     <StoreSlugProvider slug={slug}>
-      <div
-        data-testid={testIds.slugLayout}
-        data-store-theme={tema}
-        className={`flex min-h-screen flex-col ${shell.page}`}
-      >
-        <style>{`:root { --cor-primaria: ${cor}; }`}</style>
-        <StoreHeader store={storeData.loja} storeSlug={slug} />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
-        <StoreFooter store={storeData.loja} />
-      </div>
+      <StoreProviders>
+        <div
+          data-testid={testIds.slugLayout}
+          data-store-theme={tema}
+          className={`flex min-h-screen flex-col ${shell.page}`}
+        >
+          <style>{`:root { --cor-primaria: ${cor}; }`}</style>
+          <StoreHeader
+            store={storeData.loja}
+            storeSlug={slug}
+            categorias={storeData.categorias.map((c) => ({ id: c.id, nome: c.nome }))}
+          />
+          <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8">{children}</main>
+          <StoreFooter store={storeData.loja} />
+        </div>
+      </StoreProviders>
     </StoreSlugProvider>
   );
 }

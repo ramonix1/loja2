@@ -92,8 +92,14 @@ test('/store/demo vitrine acessível @smoke', async ({ page }) => {
   await expect(page.getByTestId(storeTestIds.slugLayout)).toBeVisible();
 });
 
-test('redirect legado /carrinho → /store/{slug}/carrinho @smoke', async ({ page }) => {
+test('redirect legado /carrinho → /store/{slug}/cart @smoke', async ({ page }) => {
   const response = await page.goto('/carrinho');
-  expect(page.url()).toMatch(/\/store\/[^/]+\/carrinho/);
+  expect(page.url()).toMatch(/\/store\/[^/]+\/cart/);
+  expect(response?.status()).not.toBe(500);
+});
+
+test('redirect legado /favoritos → /store/{slug}/wishlist @smoke', async ({ page }) => {
+  const response = await page.goto('/favoritos');
+  expect(page.url()).toMatch(/\/store\/[^/]+\/wishlist/);
   expect(response?.status()).not.toBe(500);
 });

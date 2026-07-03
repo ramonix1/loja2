@@ -1,4 +1,4 @@
-import { Button } from '@lojao/ui';
+import { Button, FieldInput } from '@lojao/ui';
 import { testIds } from '@lojao/test-utils';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState, type FormEvent } from 'react';
@@ -8,7 +8,6 @@ import { AdminUiThemeSwitch } from '../components/admin-ui-theme-switch';
 import {
   AtaCommerceBrand,
   authCardClass,
-  authInputClass,
   authLabelClass,
   authShellClass,
 } from '../components/ata-brand';
@@ -16,7 +15,7 @@ import { ApiError } from '../lib/api-client';
 import { useAuth } from '../lib/auth-context';
 
 export function LoginPage() {
-  const { login, isAuthenticated, isLoading, needsTenantSelection, isPlatformAdmin } = useAuth();
+  const { login, isAuthenticated, isLoading, needsStoreSelection, isPlatformAdmin } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
@@ -24,21 +23,21 @@ export function LoginPage() {
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
       if (isPlatformAdmin) {
-        navigate('/platform/tenants', { replace: true });
+        navigate('/platform/dashboard', { replace: true });
         return;
       }
-      if (needsTenantSelection) {
+      if (needsStoreSelection) {
         navigate('/admin/my-stores', { replace: true });
         return;
       }
       navigate('/admin/dashboard', { replace: true });
     }
-  }, [isLoading, isAuthenticated, needsTenantSelection, isPlatformAdmin, navigate]);
+  }, [isLoading, isAuthenticated, needsStoreSelection, isPlatformAdmin, navigate]);
 
   const mutation = useMutation({
     mutationFn: () => login(email, senha),
     onSuccess: (step) => {
-      if (step === 'select_tenant') {
+      if (step === 'select_store') {
         navigate('/admin/my-stores', { replace: true });
         return;
       }
@@ -75,7 +74,8 @@ export function LoginPage() {
             <label htmlFor="email" className={authLabelClass()}>
               E-mail
             </label>
-            <input
+            <FieldInput
+              surface="admin"
               id="email"
               type="email"
               autoComplete="username"
@@ -83,7 +83,6 @@ export function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               data-testid={testIds.auth.loginEmail}
-              className={authInputClass()}
             />
           </div>
 
@@ -91,7 +90,8 @@ export function LoginPage() {
             <label htmlFor="senha" className={authLabelClass()}>
               Senha
             </label>
-            <input
+            <FieldInput
+              surface="admin"
               id="senha"
               type="password"
               autoComplete="current-password"
@@ -99,7 +99,6 @@ export function LoginPage() {
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               data-testid={testIds.auth.loginPassword}
-              className={authInputClass()}
             />
           </div>
 

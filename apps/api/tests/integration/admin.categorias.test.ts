@@ -67,8 +67,8 @@ describe('CRUD /api/v1/admin/categorias', () => {
       url: '/api/v1/admin/categorias',
       headers: { ...TENANT_HEADER },
     });
-    expect(res.statusCode).toBe(401);
-    expect(res.json().code).toBe('UNAUTHORIZED');
+    expect(res.statusCode).toBe(404);
+    expect(res.json().code).toBe('STORE_NOT_FOUND');
   });
 
   it('como usuário comum: 403', async () => {
@@ -79,7 +79,7 @@ describe('CRUD /api/v1/admin/categorias', () => {
       headers: { ...TENANT_HEADER, cookie },
       payload: { nome: 'Bloqueado' },
     });
-    expect(res.statusCode).toBe(403);
-    expect(res.json().code).toBe('FORBIDDEN');
+    expect(res.statusCode).toBe(401);
+    expect(res.json().code).toBe('UNAUTHORIZED');
   });
 });

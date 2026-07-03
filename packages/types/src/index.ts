@@ -60,15 +60,29 @@ export {
 } from './banners.js';
 
 export {
-  tenantSlugSchema,
+  platformStoreSlugSchema,
   platformLoginSchema,
-  createTenantSchema,
-  updateTenantSchema,
+  createPlatformStoreSchema,
+  updatePlatformStoreSchema,
   type PlatformLoginInput,
-  type CreateTenantInput,
-  type UpdateTenantInput,
-  type PlatformTenant,
+  type CreatePlatformStoreInput,
+  type UpdatePlatformStoreInput,
+  type PlatformStore,
+  type PlatformDashboardStats,
+  type PlatformStoreListItem,
+  type PlatformStoreHealth,
 } from './platform.js';
+
+export {
+  platformDashboardChartsQuerySchema,
+  DASHBOARD_PERIODOS,
+  type DashboardPeriodo,
+  type PlatformDashboardChartsData,
+  type PlatformLojasPorDia,
+  type PlatformSaudeLojas,
+  type PlatformBillingStatus,
+  type PlatformLojasPorPlano,
+} from './platform-dashboard-charts.js';
 
 export {
   RESERVED_SLUGS,
@@ -86,3 +100,10 @@ export {
   type SignupResult,
   type SignupPlanPublic,
 } from './signup.js';
+
+export {
+  merchantSlugSchema,
+  createMerchantSchema,
+  type CreateMerchantInput,
+  type MerchantSummary,
+} from './merchant.js';

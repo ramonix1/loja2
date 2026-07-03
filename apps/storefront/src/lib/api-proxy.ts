@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { getSsrApiBase } from '@/lib/ssr-fetch';
 
-const FORWARD_REQUEST_HEADERS = ['cookie', 'content-type', 'x-tenant-slug', 'authorization'];
+const FORWARD_REQUEST_HEADERS = ['cookie', 'content-type', 'x-store-slug', 'x-auth-context', 'authorization'];
 
 /** Repassa request ao Fastify e devolve resposta (cookies incluídos). */
 export async function proxyToApi(

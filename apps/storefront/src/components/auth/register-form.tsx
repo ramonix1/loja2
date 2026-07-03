@@ -1,5 +1,6 @@
 'use client';
 
+import { Button, Card, FieldInput, Label } from '@lojao/ui';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
@@ -7,10 +8,7 @@ import { useState, type FormEvent } from 'react';
 import { ApiError, lookupCep, register } from '@/lib/client-api';
 import {
   storeErrorTextClass,
-  storeInputClass,
-  storeLabelClass,
   storeLinkClass,
-  storePanelClass,
   storeSectionTitleClass,
   storeSubtleClass,
 } from '@/lib/store-styles';
@@ -71,7 +69,7 @@ export function RegisterForm() {
   }
 
   return (
-    <div className={storePanelClass('mx-auto max-w-2xl rounded-2xl p-8')}>
+    <Card surface="store" className="mx-auto max-w-2xl rounded-2xl p-8 shadow-sm">
       <h1 className={storeSectionTitleClass('mb-6')}>Criar conta</h1>
 
       {errors.length > 0 ? (
@@ -88,58 +86,130 @@ export function RegisterForm() {
 
       <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <label className={storeLabelClass()}>Nome completo</label>
-          <input required className={storeInputClass()} value={form.nome} onChange={(e) => update('nome', e.target.value)} />
+          <Label className="mb-1 block text-[var(--store-text-muted)]">Nome completo</Label>
+          <FieldInput
+            surface="store"
+            required
+            value={form.nome}
+            onChange={(e) => update('nome', e.target.value)}
+          />
         </div>
         <div>
-          <label className={storeLabelClass()}>E-mail</label>
-          <input required type="email" className={storeInputClass()} value={form.email} onChange={(e) => update('email', e.target.value)} />
+          <Label className="mb-1 block text-[var(--store-text-muted)]">E-mail</Label>
+          <FieldInput
+            surface="store"
+            required
+            type="email"
+            value={form.email}
+            onChange={(e) => update('email', e.target.value)}
+          />
         </div>
         <div>
-          <label className={storeLabelClass()}>Telefone</label>
-          <input required className={storeInputClass()} value={form.telefone} onChange={(e) => update('telefone', e.target.value)} />
+          <Label className="mb-1 block text-[var(--store-text-muted)]">Telefone</Label>
+          <FieldInput
+            surface="store"
+            required
+            value={form.telefone}
+            onChange={(e) => update('telefone', e.target.value)}
+          />
         </div>
         <div>
-          <label className={storeLabelClass()}>Senha</label>
-          <input required type="password" minLength={8} className={storeInputClass()} value={form.senha} onChange={(e) => update('senha', e.target.value)} />
+          <Label className="mb-1 block text-[var(--store-text-muted)]">Senha</Label>
+          <FieldInput
+            surface="store"
+            required
+            type="password"
+            minLength={8}
+            value={form.senha}
+            onChange={(e) => update('senha', e.target.value)}
+          />
         </div>
         <div>
-          <label className={storeLabelClass()}>Confirmar senha</label>
-          <input required type="password" className={storeInputClass()} value={form.confirmacao} onChange={(e) => update('confirmacao', e.target.value)} />
+          <Label className="mb-1 block text-[var(--store-text-muted)]">Confirmar senha</Label>
+          <FieldInput
+            surface="store"
+            required
+            type="password"
+            value={form.confirmacao}
+            onChange={(e) => update('confirmacao', e.target.value)}
+          />
         </div>
         <div>
-          <label className={storeLabelClass()}>CEP</label>
+          <Label className="mb-1 block text-[var(--store-text-muted)]">CEP</Label>
           <div className="flex gap-2">
-            <input required className={storeInputClass()} value={form.cep} onChange={(e) => update('cep', e.target.value)} />
-            <button type="button" onClick={buscarCep} className="btn-outline whitespace-nowrap px-3">
+            <FieldInput
+              surface="store"
+              required
+              value={form.cep}
+              onChange={(e) => update('cep', e.target.value)}
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              surface="store"
+              onClick={buscarCep}
+              className="shrink-0 whitespace-nowrap px-3"
+            >
               Buscar
-            </button>
+            </Button>
           </div>
         </div>
         <div>
-          <label className={storeLabelClass()}>Número</label>
-          <input required className={storeInputClass()} value={form.numero} onChange={(e) => update('numero', e.target.value)} />
+          <Label className="mb-1 block text-[var(--store-text-muted)]">Número</Label>
+          <FieldInput
+            surface="store"
+            required
+            value={form.numero}
+            onChange={(e) => update('numero', e.target.value)}
+          />
         </div>
         <div className="sm:col-span-2">
-          <label className={storeLabelClass()}>Logradouro</label>
-          <input required className={storeInputClass()} value={form.logradouro} onChange={(e) => update('logradouro', e.target.value)} />
+          <Label className="mb-1 block text-[var(--store-text-muted)]">Logradouro</Label>
+          <FieldInput
+            surface="store"
+            required
+            value={form.logradouro}
+            onChange={(e) => update('logradouro', e.target.value)}
+          />
         </div>
         <div>
-          <label className={storeLabelClass()}>Bairro</label>
-          <input required className={storeInputClass()} value={form.bairro} onChange={(e) => update('bairro', e.target.value)} />
+          <Label className="mb-1 block text-[var(--store-text-muted)]">Bairro</Label>
+          <FieldInput
+            surface="store"
+            required
+            value={form.bairro}
+            onChange={(e) => update('bairro', e.target.value)}
+          />
         </div>
         <div>
-          <label className={storeLabelClass()}>Cidade</label>
-          <input required className={storeInputClass()} value={form.cidade} onChange={(e) => update('cidade', e.target.value)} />
+          <Label className="mb-1 block text-[var(--store-text-muted)]">Cidade</Label>
+          <FieldInput
+            surface="store"
+            required
+            value={form.cidade}
+            onChange={(e) => update('cidade', e.target.value)}
+          />
         </div>
         <div>
-          <label className={storeLabelClass()}>Estado (UF)</label>
-          <input required maxLength={2} className={storeInputClass()} value={form.estado} onChange={(e) => update('estado', e.target.value.toUpperCase())} />
+          <Label className="mb-1 block text-[var(--store-text-muted)]">Estado (UF)</Label>
+          <FieldInput
+            surface="store"
+            required
+            maxLength={2}
+            value={form.estado}
+            onChange={(e) => update('estado', e.target.value.toUpperCase())}
+          />
         </div>
         <div className="sm:col-span-2">
-          <button type="submit" disabled={loading} className="btn-primary w-full py-2.5">
+          <Button
+            type="submit"
+            surface="store"
+            variant="primary"
+            disabled={loading}
+            className="w-full py-2.5"
+          >
             {loading ? 'Cadastrando…' : 'Criar conta'}
-          </button>
+          </Button>
         </div>
       </form>
 
@@ -149,6 +219,6 @@ export function RegisterForm() {
           Entrar
         </Link>
       </p>
-    </div>
+    </Card>
   );
 }

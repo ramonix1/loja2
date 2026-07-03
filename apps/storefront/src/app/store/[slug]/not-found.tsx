@@ -1,4 +1,4 @@
-import { buildStorePath } from '@lojao/tenant-host';
+import { buildStorePath } from '@lojao/store-host';
 import Link from 'next/link';
 
 import { storeLinkClass, storeMutedClass, storePageTitleClass, storeSubtleClass } from '@/lib/store-styles';

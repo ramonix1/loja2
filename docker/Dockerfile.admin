@@ -33,10 +33,10 @@ CMD ["pnpm", "--filter", "admin", "dev"]
 FROM deps AS builder
 COPY . .
 ARG VITE_API_URL=http://localhost:3001
-ARG VITE_TENANT_SLUG=loja
+ARG VITE_STORE_SLUG=loja
 ARG VITE_LEGACY_URL=http://localhost:3000
 ENV VITE_API_URL=$VITE_API_URL \
-    VITE_TENANT_SLUG=$VITE_TENANT_SLUG \
+    VITE_STORE_SLUG=$VITE_STORE_SLUG \
     VITE_LEGACY_URL=$VITE_LEGACY_URL
 RUN pnpm --filter admin build
 

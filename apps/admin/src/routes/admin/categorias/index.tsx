@@ -14,9 +14,9 @@ import {
 import { testIds } from '@lojao/test-utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
-import { Link } from 'react-router-dom';
 
 import { ApiError, apiFetch } from '../../../lib/api-client';
+import { DeleteIconButton, EditIconButton } from '../../../components/crud-icon-buttons';
 
 interface Categoria {
   id: number;
@@ -110,20 +110,13 @@ export function CategoriasPage() {
                     </div>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
-                    <Link to={`/admin/categorias/${cat.id}`}>
-                      <Button variant="secondary" className="text-sm">
-                        Editar
-                      </Button>
-                    </Link>
-                    <Button
-                      variant="ghost"
-                      data-testid={testIds.adminCategorias.deleteBtn}
-                      className={cn('text-[var(--admin-error-text)] hover:bg-[var(--admin-error-bg)]')}
+                    <EditIconButton to={`/admin/categorias/${cat.id}`} />
+                    <DeleteIconButton
+                      testId={testIds.adminCategorias.deleteBtn}
+                      label="Remover categoria"
                       onClick={() => handleDelete(cat.id, cat.nome)}
                       disabled={deleteMutation.isPending}
-                    >
-                      Remover
-                    </Button>
+                    />
                   </div>
                 </div>
               )))}

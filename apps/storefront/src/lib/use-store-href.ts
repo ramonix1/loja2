@@ -1,6 +1,6 @@
 'use client';
 
-import { buildStorePath } from '@lojao/tenant-host';
+import { buildStorePath } from '@lojao/store-host';
 
 import { useStoreSlug } from '@/lib/store-slug-context';
 

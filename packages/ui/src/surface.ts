@@ -1,4 +1,12 @@
 import { cn } from './cn';
+import {
+  inputControlClass,
+  mobileControlExtras,
+  nativeSelectControlClass,
+  selectTriggerControlClass,
+  storeControlShape,
+  storeSurfaceControlExtras,
+} from './control-styles';
 
 /** Painéis admin e platform (sidebar, layout). */
 export type PanelSurface = 'admin' | 'platform';
@@ -25,33 +33,59 @@ const surfacePrefix: Record<UiSurface, string> = {
   store: '--store',
 };
 
-/** Classes de input mobile-first (~44px) — tokens semânticos. */
+/** Classes de input mobile-first (~44px) — shadcn + tokens via bridge CSS. */
 export function adminInputClass(className?: string) {
-  return cn(
-    'w-full min-h-[2.75rem] touch-manipulation rounded-lg border px-3 py-2 text-sm outline-none',
-    'border-[var(--admin-input-border)] bg-[var(--admin-input-bg)] text-[var(--admin-text)]',
-    'placeholder:text-[var(--admin-input-placeholder)]',
-    'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-[var(--admin-focus-ring)]',
-    className,
-  );
+  return cn(inputControlClass(), mobileControlExtras, className);
 }
 
 export function platformInputClass(className?: string) {
-  return cn(
-    'w-full min-h-[2.75rem] touch-manipulation rounded-lg border px-3 py-2 text-sm outline-none',
-    'border-[var(--platform-input-border)] bg-[var(--platform-input-bg)] text-[var(--platform-text)]',
-    'placeholder:text-[var(--platform-input-placeholder)]',
-    'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-[var(--platform-focus-ring)]',
-    className,
-  );
+  return cn(inputControlClass(), mobileControlExtras, className);
 }
 
 export function storeInputClass(className?: string) {
   return cn(
-    'w-full min-h-[2.75rem] touch-manipulation rounded-lg border px-3 py-2 text-sm outline-none',
-    'border-[var(--store-input-border)] bg-[var(--store-input-bg)] text-[var(--store-text)]',
-    'placeholder:text-[var(--store-text-subtle)]',
-    'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-[var(--store-focus-ring)]',
+    inputControlClass(),
+    mobileControlExtras,
+    storeControlShape,
+    storeSurfaceControlExtras,
+    className,
+  );
+}
+
+/** @internal — trigger shadcn para FieldSelect. */
+export function adminSelectTriggerClass(className?: string) {
+  return cn(selectTriggerControlClass(), mobileControlExtras, className);
+}
+
+export function platformSelectTriggerClass(className?: string) {
+  return cn(selectTriggerControlClass(), mobileControlExtras, className);
+}
+
+export function storeSelectTriggerClass(className?: string) {
+  return cn(
+    selectTriggerControlClass(),
+    mobileControlExtras,
+    storeControlShape,
+    storeSurfaceControlExtras,
+    className,
+  );
+}
+
+/** @internal — select nativo estilizado como shadcn. */
+export function adminNativeSelectClass(className?: string) {
+  return cn(nativeSelectControlClass(), mobileControlExtras, className);
+}
+
+export function platformNativeSelectClass(className?: string) {
+  return cn(nativeSelectControlClass(), mobileControlExtras, className);
+}
+
+export function storeNativeSelectClass(className?: string) {
+  return cn(
+    nativeSelectControlClass(),
+    mobileControlExtras,
+    storeControlShape,
+    storeSurfaceControlExtras,
     className,
   );
 }

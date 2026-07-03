@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from 'react';
 
+import { Card } from '@lojao/ui';
 import { browserApiBase } from '@/lib/config';
-import { getClientTenantSlug } from '@/lib/client-api';
+import { getClientStoreSlug } from '@/lib/client-api';
 import {
   storeBodyClass,
   storeErrorTextClass,
   storeHeadingClass,
   storeMutedClass,
-  storePanelClass,
   storeSubtleClass,
 } from '@/lib/store-styles';
 
@@ -26,7 +26,7 @@ export function BillingDashboard() {
   useEffect(() => {
     fetch(`${browserApiBase()}/api/v1/billing/config`, {
       credentials: 'include',
-      headers: { 'X-Tenant-Slug': getClientTenantSlug() },
+      headers: { 'X-Store-Slug': getClientStoreSlug() },
     })
       .then(async (res) => {
         if (!res.ok) throw new Error('Não foi possível carregar billing.');
@@ -40,7 +40,7 @@ export function BillingDashboard() {
   if (!config) return <p className={storeMutedClass()}>Carregando…</p>;
 
   return (
-    <div className={storePanelClass()}>
+    <Card surface="store" className="p-6 shadow-sm">
       <h2 className={storeHeadingClass()}>Plano da loja</h2>
       <dl className="mt-4 space-y-2 text-sm">
         <div className="flex justify-between">
@@ -58,6 +58,6 @@ export function BillingDashboard() {
           </div>
         ) : null}
       </dl>
-    </div>
+    </Card>
   );
 }

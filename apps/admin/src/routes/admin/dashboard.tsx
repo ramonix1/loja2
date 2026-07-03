@@ -1,6 +1,7 @@
 import type { PedidoRecente } from '@lojao/types/pedidos';
 import {
-  Card,
+  KpiCell,
+  KpiStrip,
   Table,
   TableCell,
   TableHead,
@@ -10,14 +11,12 @@ import {
   adminPageSubtitleClass,
   adminPageTitleClass,
   adminSectionTitleClass,
-  adminStatValueClass,
-  adminStatValueSuccessClass,
   StatusBadge,
-  cn,
 } from '@lojao/ui';
 import { testIds } from '@lojao/test-utils';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
+import { ActionIcons } from '@lojao/ui/icons';
 
 import { apiFetch } from '../../lib/api-client';
 import { DashboardCharts } from './dashboard/dashboard-charts';
@@ -66,51 +65,48 @@ export function DashboardPage() {
         <p className="ds-alert-error mb-4">Não foi possível carregar as estatísticas.</p>
       )}
 
-      <div
-        data-testid={testIds.admin.dashboardStats}
-        className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5"
-      >
-        <Card surface="admin" title="Produtos">
-          <span className={adminStatValueClass()}>{isLoading ? '—' : (data?.produtos_ativos ?? 0)}</span>
-        </Card>
-        <Card surface="admin" title="Categorias">
-          <span className={adminStatValueClass()}>{isLoading ? '—' : (data?.total_categorias ?? 0)}</span>
-        </Card>
-        <Card surface="admin" title="Pedidos">
-          <span className={adminStatValueClass()}>{isLoading ? '—' : (data?.total_pedidos ?? 0)}</span>
-        </Card>
-        <Card surface="admin" title="Banners ativos">
-          <span className={adminStatValueClass()}>{isLoading ? '—' : (data?.total_banners ?? 0)}</span>
-        </Card>
-        <Card surface="admin" title="Receita (pagos)">
-          <span className={adminStatValueSuccessClass()}>
-            {isLoading ? '—' : BRL.format(data?.receita_total ?? 0)}
-          </span>
-        </Card>
-      </div>
-
-      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card surface="admin" title="Pedidos hoje">
-          <span className={cn(adminStatValueClass(), 'text-2xl')}>
-            {isLoading ? '—' : (data?.pedidos_hoje ?? 0)}
-          </span>
-        </Card>
-        <Card surface="admin" title="Pedidos pendentes">
-          <span className={cn(adminStatValueClass(), 'text-2xl')}>
-            {isLoading ? '—' : (data?.pedidos_pendentes ?? 0)}
-          </span>
-        </Card>
-        <Card surface="admin" title="Receita do mês">
-          <span className={cn(adminStatValueClass(), 'text-2xl')}>
-            {isLoading ? '—' : BRL.format(data?.receita_mes ?? 0)}
-          </span>
-        </Card>
-        <Card surface="admin" title="Produtos cadastrados">
-          <span className={cn(adminStatValueClass(), 'text-2xl')}>
-            {isLoading ? '—' : (data?.produtos_ativos ?? 0)}
-          </span>
-        </Card>
-      </div>
+      {isLoading || !data ? (
+        <KpiStrip
+          surface="admin"
+          testId={testIds.admin.dashboardStats}
+          primary={
+            <>
+              {[1, 2, 3, 4].map((i) => (
+                <KpiCell key={i} label="…" value="—" />
+              ))}
+            </>
+          }
+          secondary={
+            <>
+              {[1, 2, 3, 4].map((i) => (
+                <KpiCell key={`s-${i}`} label="…" value="—" />
+              ))}
+            </>
+          }
+        />
+      ) : (
+        <KpiStrip
+          surface="admin"
+          testId={testIds.admin.dashboardStats}
+          className="mb-8"
+          primary={
+            <>
+              <KpiCell label="Pedidos hoje" value={data.pedidos_hoje} />
+              <KpiCell label="Pedidos pendentes" value={data.pedidos_pendentes} />
+              <KpiCell label="Total de pedidos" value={data.total_pedidos} />
+              <KpiCell label="Banners ativos" value={data.total_banners} />
+            </>
+          }
+          secondary={
+            <>
+              <KpiCell label="Receita do mês" value={BRL.format(data.receita_mes)} />
+              <KpiCell label="Receita (pagos)" value={BRL.format(data.receita_total)} />
+              <KpiCell label="Produtos ativos" value={data.produtos_ativos} />
+              <KpiCell label="Categorias" value={data.total_categorias} />
+            </>
+          }
+        />
+      )}
 
       <DashboardCharts />
 
@@ -118,8 +114,12 @@ export function DashboardPage() {
         <div data-testid={testIds.admin.dashboardRecentOrders}>
           <div className="mb-4 flex items-center justify-between">
             <h2 className={adminSectionTitleClass()}>Pedidos recentes</h2>
-            <Link to="/admin/pedidos" className="ds-link text-sm">
+            <Link
+              to="/admin/pedidos"
+              className="inline-flex items-center gap-1 text-sm text-[var(--admin-link)] hover:underline"
+            >
               Ver todos
+              <ActionIcons.next className="size-4" aria-hidden />
             </Link>
           </div>
           <Table surface="admin">

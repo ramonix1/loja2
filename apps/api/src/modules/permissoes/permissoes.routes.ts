@@ -1,6 +1,7 @@
 import { createAdminSchema } from '@lojao/types/permissoes';
 import type { FastifyInstance } from 'fastify';
 
+import { requireStoreScope } from '../../lib/store-scope.js';
 import { requireAdmin } from '../../plugins/auth-guard.js';
 import { createAdmin, deleteAdmin, listAdmins, toggleAdmin } from './permissoes.service.js';
 
@@ -8,7 +9,7 @@ export async function permissoesRoutes(app: FastifyInstance): Promise<void> {
   app.addHook('preHandler', requireAdmin);
 
   app.get('/admin/permissoes', async (request, reply) => {
-    const data = await listAdmins(request.db);
+    const data = await listAdmins(requireStoreScope(request));
     return reply.send({ data });
   });
 
@@ -23,7 +24,7 @@ export async function permissoesRoutes(app: FastifyInstance): Promise<void> {
       });
     }
 
-    const result = await createAdmin(request.db, parsed.data);
+    const result = await createAdmin(requireStoreScope(request), parsed.data);
     if (!result.ok) {
       const status = result.code === 'EMAIL_EXISTS' ? 409 : 400;
       return reply.code(status).send({ error: result.message, code: result.code });
@@ -38,7 +39,9 @@ export async function permissoesRoutes(app: FastifyInstance): Promise<void> {
       return reply.code(400).send({ error: 'ID inválido.', code: 'VALIDATION_ERROR' });
     }
 
-    const result = await toggleAdmin(request.db, id, request.session!.usuarioId!);
+    const currentMemberId = request.session!.memberId ?? request.session!.usuarioId!;
+
+    const result = await toggleAdmin(requireStoreScope(request), id, currentMemberId);
     if (result === 'self') {
       return reply.code(403).send({
         error: 'Você não pode alterar sua própria conta.',
@@ -49,7 +52,7 @@ export async function permissoesRoutes(app: FastifyInstance): Promise<void> {
       return reply.code(404).send({ error: 'Administrador não encontrado.', code: 'NOT_FOUND' });
     }
 
-    const data = await listAdmins(request.db);
+    const data = await listAdmins(requireStoreScope(request));
     return reply.send({ data });
   });
 
@@ -59,7 +62,9 @@ export async function permissoesRoutes(app: FastifyInstance): Promise<void> {
       return reply.code(400).send({ error: 'ID inválido.', code: 'VALIDATION_ERROR' });
     }
 
-    const result = await deleteAdmin(request.db, id, request.session!.usuarioId!);
+    const currentMemberId = request.session!.memberId ?? request.session!.usuarioId!;
+
+    const result = await deleteAdmin(requireStoreScope(request), id, currentMemberId);
     if (result === 'self') {
       return reply.code(403).send({
         error: 'Você não pode remover sua própria conta.',

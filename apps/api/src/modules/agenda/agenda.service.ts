@@ -4,15 +4,16 @@ import type {
   SaveAgendaDiaInput,
   UpdateAgendaConfigInput,
 } from '@lojao/types/agenda';
-import type pg from 'pg';
 
-export async function getAgendaConfig(db: pg.Pool): Promise<AgendaConfig> {
-  const r = await db.query('SELECT * FROM agenda_config WHERE id = 1');
+import type { StoreScope } from '../../lib/store-scope.js';
+
+export async function getAgendaConfig({ pool, storeId }: StoreScope): Promise<AgendaConfig> {
+  const r = await pool.query('SELECT * FROM schedule_config WHERE store_id = $1', [storeId]);
   const row = r.rows[0];
   return {
-    capacidade_diaria: Number(row?.capacidade_diaria ?? 1),
-    antecedencia_minima_dias: Number(row?.antecedencia_minima_dias ?? 1),
-    antecedencia_maxima_dias: Number(row?.antecedencia_maxima_dias ?? 180),
+    capacidade_diaria: Number(row?.daily_capacity ?? 1),
+    antecedencia_minima_dias: Number(row?.min_lead_days ?? 1),
+    antecedencia_maxima_dias: Number(row?.max_lead_days ?? 180),
   };
 }
 
@@ -26,22 +27,26 @@ function parseMes(mes?: string): { mes: string; ano: number; mesNum: number; las
 }
 
 /** Porta `agendaController.getDisponibilidade`. */
-export async function getDisponibilidade(db: pg.Pool, data: string) {
-  const config = await getAgendaConfig(db);
+export async function getDisponibilidade(scope: StoreScope, data: string) {
+  const config = await getAgendaConfig(scope);
+  const { pool, storeId } = scope;
 
-  const especial = await db.query('SELECT * FROM agenda_dias_especiais WHERE data = $1', [data]);
-  const e = especial.rows[0] as { capacidade: number | null; motivo: string | null } | undefined;
+  const especial = await pool.query(
+    'SELECT * FROM schedule_special_days WHERE store_id = $1 AND date = $2',
+    [storeId, data],
+  );
+  const e = especial.rows[0] as { capacity: number | null; reason: string | null } | undefined;
 
   let capacidade = config.capacidade_diaria;
   let bloqueado = false;
   let motivo: string | null = null;
 
   if (e) {
-    motivo = e.motivo;
-    if (e.capacidade === null || e.capacidade === 0) {
+    motivo = e.reason;
+    if (e.capacity === null || e.capacity === 0) {
       bloqueado = true;
     } else {
-      capacidade = e.capacidade;
+      capacidade = e.capacity;
     }
   }
 
@@ -49,9 +54,9 @@ export async function getDisponibilidade(db: pg.Pool, data: string) {
     return { disponivel: false, vagas_total: 0, vagas_usadas: 0, vagas_livres: 0, bloqueado: true, motivo };
   }
 
-  const r = await db.query(
-    "SELECT COUNT(*) FROM agendamentos WHERE data_evento = $1 AND status = 'confirmado'",
-    [data],
+  const r = await pool.query(
+    "SELECT COUNT(*) FROM appointments WHERE store_id = $1 AND event_date = $2 AND status = 'confirmed'",
+    [storeId, data],
   );
   const vagas_usadas = parseInt(String(r.rows[0]?.count ?? 0), 10);
   const vagas_livres = Math.max(0, capacidade - vagas_usadas);
@@ -67,27 +72,28 @@ export async function getDisponibilidade(db: pg.Pool, data: string) {
 }
 
 /** Porta `agendaController.exibirAgenda`. */
-export async function getAgendaAdmin(db: pg.Pool, mesParam?: string): Promise<AgendaAdminData> {
-  const config = await getAgendaConfig(db);
+export async function getAgendaAdmin(scope: StoreScope, mesParam?: string): Promise<AgendaAdminData> {
+  const config = await getAgendaConfig(scope);
+  const { pool, storeId } = scope;
   const { mes, ano, mesNum, lastDay } = parseMes(mesParam);
   const pad = (n: number) => String(n).padStart(2, '0');
   const inicio = `${mes}-01`;
   const fim = `${mes}-${pad(lastDay)}`;
 
   const [especiaisRes, agendadosRes] = await Promise.all([
-    db.query(
-      `SELECT data::text AS data, capacidade, motivo
-       FROM agenda_dias_especiais
-       WHERE data BETWEEN $1 AND $2
-       ORDER BY data`,
-      [inicio, fim],
+    pool.query(
+      `SELECT date::text AS data, capacity, reason AS motivo
+       FROM schedule_special_days
+       WHERE store_id = $1 AND date BETWEEN $2 AND $3
+       ORDER BY date`,
+      [storeId, inicio, fim],
     ),
-    db.query(
-      `SELECT data_evento::text AS data, COUNT(*)::int AS count
-       FROM agendamentos
-       WHERE data_evento BETWEEN $1 AND $2 AND status = 'confirmado'
-       GROUP BY data_evento`,
-      [inicio, fim],
+    pool.query(
+      `SELECT event_date::text AS data, COUNT(*)::int AS count
+       FROM appointments
+       WHERE store_id = $1 AND event_date BETWEEN $2 AND $3 AND status = 'confirmed'
+       GROUP BY event_date`,
+      [storeId, inicio, fim],
     ),
   ]);
 
@@ -104,7 +110,7 @@ export async function getAgendaAdmin(db: pg.Pool, mesParam?: string): Promise<Ag
     lastDay,
     especiais: especiaisRes.rows.map((e) => ({
       data: String(e.data).slice(0, 10),
-      capacidade: e.capacidade === null ? null : Number(e.capacidade),
+      capacidade: e.capacity === null ? null : Number(e.capacity),
       motivo: (e.motivo as string | null) ?? null,
     })),
     agendadosMap,
@@ -113,36 +119,42 @@ export async function getAgendaAdmin(db: pg.Pool, mesParam?: string): Promise<Ag
 
 /** Porta `agendaController.salvarConfig`. */
 export async function updateAgendaConfig(
-  db: pg.Pool,
+  scope: StoreScope,
   input: UpdateAgendaConfigInput,
 ): Promise<AgendaConfig> {
-  await db.query(
-    `INSERT INTO agenda_config (id, capacidade_diaria, antecedencia_minima_dias, antecedencia_maxima_dias, updated_at)
-     VALUES (1, $1, $2, $3, NOW())
-     ON CONFLICT (id) DO UPDATE SET
-       capacidade_diaria = $1,
-       antecedencia_minima_dias = $2,
-       antecedencia_maxima_dias = $3,
+  const { pool, storeId } = scope;
+  await pool.query(
+    `INSERT INTO schedule_config (store_id, daily_capacity, min_lead_days, max_lead_days, updated_at)
+     VALUES ($1, $2, $3, $4, NOW())
+     ON CONFLICT (store_id) DO UPDATE SET
+       daily_capacity = $2,
+       min_lead_days = $3,
+       max_lead_days = $4,
        updated_at = NOW()`,
-    [input.capacidade_diaria, input.antecedencia_minima_dias, input.antecedencia_maxima_dias],
+    [storeId, input.capacidade_diaria, input.antecedencia_minima_dias, input.antecedencia_maxima_dias],
   );
-  return getAgendaConfig(db);
+  return getAgendaConfig(scope);
 }
 
 /** Porta `agendaController.salvarDia`. */
-export async function saveAgendaDia(db: pg.Pool, input: SaveAgendaDiaInput): Promise<void> {
+export async function saveAgendaDia(scope: StoreScope, input: SaveAgendaDiaInput): Promise<void> {
+  const { pool, storeId } = scope;
   const cap =
     input.capacidade === undefined || input.capacidade === null ? null : Number(input.capacidade);
-  await db.query(
-    `INSERT INTO agenda_dias_especiais (data, capacidade, motivo)
-     VALUES ($1, $2, $3)
-     ON CONFLICT (data) DO UPDATE SET capacidade = $2, motivo = $3`,
-    [input.data, cap, input.motivo ?? null],
+  await pool.query(
+    `INSERT INTO schedule_special_days (store_id, date, capacity, reason)
+     VALUES ($1, $2, $3, $4)
+     ON CONFLICT (store_id, date) DO UPDATE SET capacity = $3, reason = $4`,
+    [storeId, input.data, cap, input.motivo ?? null],
   );
 }
 
 /** Porta `agendaController.removerDia`. */
-export async function removeAgendaDia(db: pg.Pool, data: string): Promise<boolean> {
-  const r = await db.query('DELETE FROM agenda_dias_especiais WHERE data = $1', [data]);
+export async function removeAgendaDia(scope: StoreScope, data: string): Promise<boolean> {
+  const { pool, storeId } = scope;
+  const r = await pool.query(
+    'DELETE FROM schedule_special_days WHERE store_id = $1 AND date = $2',
+    [storeId, data],
+  );
   return (r.rowCount ?? 0) > 0;
 }

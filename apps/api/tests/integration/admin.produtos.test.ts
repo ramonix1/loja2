@@ -87,6 +87,7 @@ describe('CRUD /api/v1/admin/produtos', () => {
     });
     expect(getRes.statusCode).toBe(200);
     expect(getRes.json().data.nome).toBe('Produto Vitest');
+    expect(getRes.json().data.valor).toBe(25.9);
     expect(getRes.json().data.imagens.length).toBeGreaterThan(0);
 
     const updateRes = await app.inject({
@@ -102,6 +103,13 @@ describe('CRUD /api/v1/admin/produtos', () => {
         '------upd\r\nContent-Disposition: form-data; name="valor"\r\n\r\n30.00\r\n------upd--\r\n',
     });
     expect(updateRes.statusCode).toBe(200);
+
+    const getAfterUpdate = await app.inject({
+      method: 'GET',
+      url: `/api/v1/admin/produtos/${id}`,
+      headers: { ...TENANT_HEADER, cookie: adminCookie },
+    });
+    expect(getAfterUpdate.json().data.valor).toBe(30);
 
     const estoqueRes = await app.inject({
       method: 'PATCH',
@@ -127,13 +135,48 @@ describe('CRUD /api/v1/admin/produtos', () => {
     expect(deleteRes.statusCode).toBe(200);
   });
 
+  it('POST preserva centavos (375.06) — formato decimal do admin', async () => {
+    const createRes = await app.inject({
+      method: 'POST',
+      url: '/api/v1/admin/produtos',
+      headers: {
+        ...TENANT_HEADER,
+        cookie: adminCookie,
+        'content-type': 'multipart/form-data; boundary=----dec',
+      },
+      payload:
+        '------dec\r\nContent-Disposition: form-data; name="nome"\r\n\r\nProduto Centavos\r\n' +
+        '------dec\r\nContent-Disposition: form-data; name="valor"\r\n\r\n375.06\r\n' +
+        '------dec\r\nContent-Disposition: form-data; name="imagens"; filename="t.jpg"\r\n' +
+        'Content-Type: image/jpeg\r\n\r\n' +
+        MIN_JPEG.toString('binary') +
+        '\r\n------dec--\r\n',
+    });
+    expect(createRes.statusCode).toBe(201);
+    const id = createRes.json().data.id as number;
+
+    const getRes = await app.inject({
+      method: 'GET',
+      url: `/api/v1/admin/produtos/${id}`,
+      headers: { ...TENANT_HEADER, cookie: adminCookie },
+    });
+    expect(getRes.json().data.valor).toBe(375.06);
+
+    await app.inject({
+      method: 'DELETE',
+      url: `/api/v1/admin/produtos/${id}`,
+      headers: { ...TENANT_HEADER, cookie: adminCookie },
+    });
+  });
+
   it('GET sem sessão: 401', async () => {
     const res = await app.inject({
       method: 'GET',
       url: '/api/v1/admin/produtos',
       headers: TENANT_HEADER,
     });
-    expect(res.statusCode).toBe(401);
+    expect(res.statusCode).toBe(404);
+    expect(res.json().code).toBe('STORE_NOT_FOUND');
   });
 
   it('GET como comprador: 403', async () => {
@@ -143,6 +186,6 @@ describe('CRUD /api/v1/admin/produtos', () => {
       url: '/api/v1/admin/produtos',
       headers: { ...TENANT_HEADER, cookie: userCookie },
     });
-    expect(res.statusCode).toBe(403);
+    expect(res.statusCode).toBe(401);
   });
 });

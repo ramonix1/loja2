@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { testIds } from '@lojao/test-utils/test-ids';
 
+import { selectFieldOption } from '../../lib/field-select';
+
 test('lista pedidos @smoke', async ({ page }) => {
   await page.goto('/admin/pedidos');
 
@@ -16,7 +18,7 @@ test('sidebar do admin está visível', async ({ page }) => {
 
 test('filtro de status e link Ver @smoke', async ({ page }) => {
   await page.goto('/admin/pedidos');
-  await page.getByTestId(testIds.admin.pedidosFilterStatus).selectOption('pago');
+  await selectFieldOption(page, testIds.admin.pedidosFilterStatus, 'Entregue');
 
   const firstRow = page.locator('[data-testid^="admin-pedidos-row-"]').first();
   await expect(firstRow).toBeVisible({ timeout: 10_000 });

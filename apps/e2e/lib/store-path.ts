@@ -1,4 +1,4 @@
-import { buildStorePath, getDefaultStoreSlug } from '@lojao/tenant-host';
+import { buildStorePath, getDefaultStoreSlug } from '@lojao/store-host';
 
 export const E2E_STORE_SLUG =
   process.env.E2E_STORE_SLUG ??

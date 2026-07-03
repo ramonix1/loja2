@@ -26,7 +26,7 @@ describe('GET /api/v1/auth/me', () => {
     expect(res.json().code).toBe('UNAUTHORIZED');
   });
 
-  it('retorna usuário e tenant após login', async () => {
+  it('retorna usuário e loja após login merchant', async () => {
     const cookie = await loginAdminCookie(app);
 
     const res = await app.inject({
@@ -37,9 +37,9 @@ describe('GET /api/v1/auth/me', () => {
 
     expect(res.statusCode).toBe(200);
     const body = res.json();
-    expect(body.data.usuario.role).toBe('admin');
-    expect(body.data.tenant.slug).toBe('loja');
-    expect(body.data.tenant.lojaNome).toEqual(expect.any(String));
-    expect(body.data.tenant.lojaNome.length).toBeGreaterThan(0);
+    expect(body.data.usuario.role).toBe('owner');
+    expect(body.data.store.slug).toBe('loja');
+    expect(body.data.store.nome).toEqual(expect.any(String));
+    expect(body.data.store.nome.length).toBeGreaterThan(0);
   });
 });

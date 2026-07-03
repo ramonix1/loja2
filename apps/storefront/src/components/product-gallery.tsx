@@ -4,9 +4,9 @@ import { store as testIds } from '@lojao/test-utils/test-ids/store';
 import { useState } from 'react';
 
 import { legacyAssetUrl } from '@/lib/api';
+import { storeImageWellClass } from '@/lib/store-styles';
 
-const PLACEHOLDER =
-  'https://placehold.co/600x450/f3f4f6/9ca3af?text=Sem+Imagem';
+const PLACEHOLDER = 'https://placehold.co/600x600/f3f4f6/9ca3af?text=Sem+Imagem';
 
 export interface ProductGalleryImage {
   id: number;
@@ -26,22 +26,23 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
 
   return (
     <div data-testid={testIds.productGallery}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={mainSrc}
-        alt={productName}
-        className="w-full rounded-xl object-cover shadow-sm"
-        style={{ maxHeight: 460 }}
-        decoding="async"
-        fetchPriority="high"
-      />
+      <div className={storeImageWellClass('rounded-[var(--store-radius-card)]')}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={mainSrc}
+          alt={productName}
+          className="mx-auto size-full max-h-[460px] object-contain p-6"
+          decoding="async"
+          fetchPriority="high"
+        />
+      </div>
       {images.length > 1 ? (
         <div className="mt-4 flex flex-wrap gap-2" role="list" aria-label="Miniaturas do produto">
           {images.map((img, index) => {
             const selected = index === safeIndex;
             return (
               <button
-                key={img.id}
+                key={`${img.id}-${index}`}
                 type="button"
                 role="listitem"
                 aria-label={`Ver imagem ${index + 1} de ${images.length}`}
@@ -58,7 +59,7 @@ export function ProductGallery({ images, productName }: ProductGalleryProps) {
                 <img
                   src={legacyAssetUrl(img.url)}
                   alt=""
-                  className="h-16 w-16 object-cover"
+                  className="size-16 object-contain bg-[var(--store-image-bg)] p-1"
                   loading="lazy"
                   decoding="async"
                 />

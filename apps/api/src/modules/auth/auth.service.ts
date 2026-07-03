@@ -1,12 +1,19 @@
-import type { TenantDatabase } from '@lojao/db';
-import { and, eq, sql, tentativasLogin, tokensRecuperacao, usuarios, getCachedTenantDb } from '@lojao/db';
+import { and, createMasterDb, eq, loginAttempts, merchantMembers, sql } from '@lojao/db';
+import { buyers, passwordResetTokens } from '@lojao/db/schema/merchant';
 import argon2 from 'argon2';
 import crypto from 'node:crypto';
 
-import { findAdminTenantsWithEmail } from '../../lib/resolve-login-tenant.js';
-import { getTenant } from '../../lib/tenant-db.js';
+import { masterPool } from '../../lib/master-db.js';
+import type { StoreScope } from '../../lib/store-scope.js';
+import {
+  findActiveMembersByEmail,
+  listActiveStoresForMerchant,
+  type MemberMatch,
+} from '../../lib/resolve-member-login.js';
 import { enviarEmailRecuperacao } from '../../services/email.service.js';
 import type { LoginInput, RecoverPasswordInput, RegisterInput, ResetPasswordInput } from './auth.schemas.js';
+
+const masterDb = createMasterDb(masterPool);
 
 const MAX_TENTATIVAS = Number.parseInt(process.env.MAX_TENTATIVAS_LOGIN ?? '', 10) || 5;
 const BLOQUEIO_MIN = Number.parseInt(process.env.BLOQUEIO_MINUTOS ?? '', 10) || 15;
@@ -30,277 +37,45 @@ export type LoginResult =
   | { ok: true; usuario: UsuarioAutenticado }
   | { ok: false; code: 'UNAUTHORIZED' | 'ACCOUNT_LOCKED' | 'IP_BLOCKED' };
 
-export interface MerchantStoreSummary {
+export interface MemberAuthenticated {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  merchantId: number;
+  merchantSlug: string;
+  merchantName: string;
+}
+
+export interface StoreSummaryLite {
+  id: number;
   slug: string;
-  lojaNome: string;
+  nome: string;
 }
 
-export type MerchantHubLoginResult =
-  | {
-      ok: true;
-      step: 'ready';
-      usuario: UsuarioAutenticado;
-      tenant: MerchantStoreSummary;
-    }
-  | {
-      ok: true;
-      step: 'select_tenant';
-      usuario: Pick<UsuarioAutenticado, 'nome' | 'email' | 'role'>;
-      stores: MerchantStoreSummary[];
-    }
-  | { ok: false; code: 'NO_TENANT_ACCESS' | 'UNAUTHORIZED' | 'IP_BLOCKED' };
+export type MerchantAccountLoginResult =
+  | { ok: true; step: 'ready'; member: MemberAuthenticated; store: StoreSummaryLite }
+  | { ok: true; step: 'select_store'; member: MemberAuthenticated; stores: StoreSummaryLite[] }
+  | { ok: false; code: 'NO_MERCHANT_ACCOUNT' | 'UNAUTHORIZED' | 'ACCOUNT_LOCKED' | 'IP_BLOCKED' };
 
-/**
- * Login Merchant Hub — sem tenantSlug no body.
- * Autentica cross-tenant e retorna step `ready` (1 loja) ou `select_tenant` (N lojas).
- */
-export async function loginMerchantHub(
-  { email, senha }: LoginInput,
-  ip: string,
-): Promise<MerchantHubLoginResult> {
-  const adminTenants = await findAdminTenantsWithEmail(email);
-  if (adminTenants.length === 0) {
-    return { ok: false, code: 'NO_TENANT_ACCESS' };
-  }
-
-  const matching: Array<{ tenant: MerchantStoreSummary; usuario: UsuarioAutenticado }> = [];
-  let ipBlocked = false;
-  let firstDb: TenantDatabase | null = null;
-
-  for (const tenant of adminTenants) {
-    try {
-      const { pool, tenant: masterTenant } = await getTenant(tenant.slug);
-      const db = getCachedTenantDb(tenant.slug, pool);
-      if (!firstDb) firstDb = db;
-
-      const verified = await verifyAdminPassword(db, email, senha, ip);
-      if (!verified.ok && verified.code === 'IP_BLOCKED') {
-        ipBlocked = true;
-        break;
-      }
-      if (verified.ok) {
-        matching.push({
-          tenant: { slug: masterTenant.slug, lojaNome: masterTenant.nome },
-          usuario: verified.usuario,
-        });
-      }
-    } catch {
-      // tenant inacessível — ignora
-    }
-  }
-
-  if (ipBlocked) {
-    return { ok: false, code: 'IP_BLOCKED' };
-  }
-
-  if (matching.length === 0) {
-    if (firstDb) {
-      await login(firstDb, { email, senha }, ip);
-    }
-    return { ok: false, code: 'UNAUTHORIZED' };
-  }
-
-  if (matching.length === 1) {
-    const match = matching[0]!;
-    const { pool } = await getTenant(match.tenant.slug);
-    const db = getCachedTenantDb(match.tenant.slug, pool);
-    const finalized = await login(db, { email, senha }, ip);
-    if (!finalized.ok) {
-      return { ok: false, code: finalized.code === 'IP_BLOCKED' ? 'IP_BLOCKED' : 'UNAUTHORIZED' };
-    }
-    return {
-      ok: true,
-      step: 'ready',
-      usuario: finalized.usuario,
-      tenant: match.tenant,
-    };
-  }
-
-  const first = matching[0]!;
-  return {
-    ok: true,
-    step: 'select_tenant',
-    usuario: {
-      nome: first.usuario.nome,
-      email: first.usuario.email,
-      role: first.usuario.role,
-    },
-    stores: matching.map((m) => m.tenant),
-  };
-}
-
-async function verifyAdminPassword(
-  db: TenantDatabase,
-  email: string,
-  senha: string,
-  ip: string,
-): Promise<
-  | { ok: true; usuario: UsuarioAutenticado }
-  | { ok: false; code: 'UNAUTHORIZED' | 'ACCOUNT_LOCKED' | 'IP_BLOCKED' }
-> {
-  const bloqIp = await db
-    .select({ id: tentativasLogin.id })
-    .from(tentativasLogin)
-    .where(and(eq(tentativasLogin.ip, ip), sql`${tentativasLogin.bloqueadoAte} > NOW()`))
+async function isIpBlockedForMerchantLogin(ip: string): Promise<boolean> {
+  const rows = await masterDb
+    .select({ id: loginAttempts.id })
+    .from(loginAttempts)
+    .where(and(eq(loginAttempts.ip, ip), sql`${loginAttempts.blockedUntil} > NOW()`))
     .limit(1);
-
-  if (bloqIp.length > 0) {
-    return { ok: false, code: 'IP_BLOCKED' };
-  }
-
-  const normalizedEmail = email.toLowerCase().trim();
-  const rows = await db
-    .select()
-    .from(usuarios)
-    .where(
-      and(eq(usuarios.email, normalizedEmail), eq(usuarios.ativo, true), eq(usuarios.role, 'admin')),
-    )
-    .limit(1);
-
-  const usuario = rows[0];
-  if (!usuario) {
-    return { ok: false, code: 'UNAUTHORIZED' };
-  }
-
-  if (usuario.bloqueadoAte && new Date(usuario.bloqueadoAte) > new Date()) {
-    return { ok: false, code: 'ACCOUNT_LOCKED' };
-  }
-
-  const senhaCorreta = await argon2.verify(usuario.senhaHash, senha);
-  if (!senhaCorreta) {
-    return { ok: false, code: 'UNAUTHORIZED' };
-  }
-
-  return {
-    ok: true,
-    usuario: {
-      id: usuario.id,
-      nome: usuario.nome,
-      email: usuario.email,
-      role: usuario.role as 'admin',
-    },
-  };
+  return rows.length > 0;
 }
 
-/** Valida acesso admin do e-mail autenticado a um tenant e retorna o usuário local. */
-export async function resolveAdminInTenant(
-  email: string,
-  tenantSlug: string,
-): Promise<{ ok: true; usuario: UsuarioAutenticado; tenantId: number; lojaNome: string } | { ok: false }> {
-  const normalizedEmail = email.trim().toLowerCase();
-  const adminTenants = await findAdminTenantsWithEmail(normalizedEmail);
-  const allowed = adminTenants.some((t) => t.slug === tenantSlug);
-  if (!allowed) return { ok: false };
-
-  try {
-    const { pool, tenant } = await getTenant(tenantSlug);
-    const db = getCachedTenantDb(tenantSlug, pool);
-    const rows = await db
-      .select({
-        id: usuarios.id,
-        nome: usuarios.nome,
-        email: usuarios.email,
-        role: usuarios.role,
-      })
-      .from(usuarios)
-      .where(
-        and(
-          eq(usuarios.email, normalizedEmail),
-          eq(usuarios.ativo, true),
-          eq(usuarios.role, 'admin'),
-        ),
-      )
-      .limit(1);
-
-    const row = rows[0];
-    if (!row) return { ok: false };
-
-    return {
-      ok: true,
-      usuario: {
-        id: row.id,
-        nome: row.nome,
-        email: row.email,
-        role: row.role as 'admin',
-      },
-      tenantId: tenant.id,
-      lojaNome: tenant.nome,
-    };
-  } catch {
-    return { ok: false };
-  }
-}
-
-/**
- * Autentica um usuário no banco do tenant via Drizzle.
- * Upserts de tentativas permanecem em SQL raw (compatível com legacy).
- */
-export async function login(
-  db: TenantDatabase,
-  { email, senha }: LoginInput,
-  ip: string,
-): Promise<LoginResult> {
-  const bloqIp = await db
-    .select({ id: tentativasLogin.id })
-    .from(tentativasLogin)
-    .where(and(eq(tentativasLogin.ip, ip), sql`${tentativasLogin.bloqueadoAte} > NOW()`))
-    .limit(1);
-
-  if (bloqIp.length > 0) {
-    return { ok: false, code: 'IP_BLOCKED' };
-  }
-
-  const normalizedEmail = email.toLowerCase().trim();
-  const rows = await db
-    .select()
-    .from(usuarios)
-    .where(and(eq(usuarios.email, normalizedEmail), eq(usuarios.ativo, true)))
-    .limit(1);
-
-  const usuario = rows[0];
-
-  if (usuario?.bloqueadoAte && new Date(usuario.bloqueadoAte) > new Date()) {
-    return { ok: false, code: 'ACCOUNT_LOCKED' };
-  }
-
-  const senhaCorreta = usuario ? await argon2.verify(usuario.senhaHash, senha) : false;
-
-  if (!senhaCorreta) {
-    await registrarTentativaFalha(db, ip, email);
-    if (usuario) await incrementarFalhaUsuario(db, usuario.id);
-    return { ok: false, code: 'UNAUTHORIZED' };
-  }
-
-  await limparTentativas(db, ip, usuario!.id);
-  await db
-    .update(usuarios)
-    .set({ ultimoAcesso: sql`NOW()` })
-    .where(eq(usuarios.id, usuario!.id));
-
-  return {
-    ok: true,
-    usuario: {
-      id: usuario!.id,
-      nome: usuario!.nome,
-      email: usuario!.email,
-      role: usuario!.role as 'admin' | 'usuario',
-    },
-  };
-}
-
-async function registrarTentativaFalha(
-  db: TenantDatabase,
-  ip: string,
-  email: string,
-): Promise<void> {
-  await db.execute(sql`
-    INSERT INTO tentativas_login (ip, email, tentativas, bloqueado_ate)
+async function registrarTentativaFalhaMerchant(ip: string, email: string): Promise<void> {
+  await masterDb.execute(sql`
+    INSERT INTO login_attempts (ip, email, attempts, blocked_until)
     VALUES (${ip}, ${email}, 1, NULL)
     ON CONFLICT (ip) DO UPDATE
-    SET tentativas = tentativas_login.tentativas + 1,
+    SET attempts = login_attempts.attempts + 1,
         email = ${email},
-        bloqueado_ate = CASE
-          WHEN tentativas_login.tentativas + 1 >= ${MAX_TENTATIVAS}
+        blocked_until = CASE
+          WHEN login_attempts.attempts + 1 >= ${MAX_TENTATIVAS}
           THEN NOW() + (${BLOQUEIO_MIN} || ' minutes')::INTERVAL
           ELSE NULL
         END,
@@ -308,38 +83,177 @@ async function registrarTentativaFalha(
   `);
 }
 
-async function incrementarFalhaUsuario(db: TenantDatabase, usuarioId: number): Promise<void> {
-  await db.execute(sql`
-    UPDATE usuarios SET
-      tentativas_falha = tentativas_falha + 1,
-      bloqueado_ate = CASE
-        WHEN tentativas_falha + 1 >= ${MAX_TENTATIVAS}
-        THEN NOW() + (${BLOQUEIO_MIN} || ' minutes')::INTERVAL
-        ELSE NULL
-      END
-    WHERE id = ${usuarioId}
-  `);
+async function limparTentativasMerchant(ip: string): Promise<void> {
+  await masterDb.delete(loginAttempts).where(eq(loginAttempts.ip, ip));
 }
 
-async function limparTentativas(db: TenantDatabase, ip: string, usuarioId: number): Promise<void> {
-  await db.delete(tentativasLogin).where(eq(tentativasLogin.ip, ip));
-  await db
-    .update(usuarios)
-    .set({ tentativasFalha: 0, bloqueadoAte: null })
-    .where(eq(usuarios.id, usuarioId));
+async function incrementarFalhaMembro(memberId: number, failedAttempts: number): Promise<void> {
+  const next = failedAttempts + 1;
+  await masterDb
+    .update(merchantMembers)
+    .set({
+      failedAttempts: next,
+      blockedUntil:
+        next >= MAX_TENTATIVAS ? sql`NOW() + (${BLOQUEIO_MIN} || ' minutes')::INTERVAL` : null,
+    })
+    .where(eq(merchantMembers.id, memberId));
+}
+
+async function limparFalhaMembro(memberId: number): Promise<void> {
+  await masterDb
+    .update(merchantMembers)
+    .set({ failedAttempts: 0, blockedUntil: null, lastAccessAt: sql`NOW()` })
+    .where(eq(merchantMembers.id, memberId));
+}
+
+async function incrementarFalhaBuyer(
+  { merchantDb }: Pick<StoreScope, 'merchantDb'>,
+  buyerId: number,
+  failedAttempts: number,
+): Promise<void> {
+  const next = failedAttempts + 1;
+  await merchantDb
+    .update(buyers)
+    .set({
+      failedAttempts: next,
+      lockedUntil:
+        next >= MAX_TENTATIVAS ? sql`NOW() + (${BLOQUEIO_MIN} || ' minutes')::INTERVAL` : null,
+    })
+    .where(eq(buyers.id, buyerId));
+}
+
+async function limparFalhaBuyer({ merchantDb }: Pick<StoreScope, 'merchantDb'>, buyerId: number): Promise<void> {
+  await merchantDb
+    .update(buyers)
+    .set({ failedAttempts: 0, lockedUntil: null, lastAccessAt: sql`NOW()` })
+    .where(eq(buyers.id, buyerId));
+}
+
+function toMemberAuthenticated(match: MemberMatch): MemberAuthenticated {
+  return {
+    id: match.memberId,
+    name: match.name,
+    email: match.email,
+    role: match.role,
+    merchantId: match.merchantId,
+    merchantSlug: match.merchantSlug,
+    merchantName: match.merchantName,
+  };
+}
+
+/**
+ * Login **O(1)** da conta merchant (MA5/MA8) — consulta `merchant_members` no master.
+ */
+export async function loginMerchantAccount(
+  { email, senha }: LoginInput,
+  ip: string,
+): Promise<MerchantAccountLoginResult> {
+  const matches = await findActiveMembersByEmail(email);
+  const match = matches[0];
+  if (!match) {
+    return { ok: false, code: 'NO_MERCHANT_ACCOUNT' };
+  }
+
+  if (await isIpBlockedForMerchantLogin(ip)) {
+    return { ok: false, code: 'IP_BLOCKED' };
+  }
+
+  if (match.blockedUntil && new Date(match.blockedUntil) > new Date()) {
+    return { ok: false, code: 'ACCOUNT_LOCKED' };
+  }
+
+  const senhaCorreta = await argon2.verify(match.passwordHash, senha);
+  if (!senhaCorreta) {
+    await registrarTentativaFalhaMerchant(ip, email);
+    await incrementarFalhaMembro(match.memberId, match.failedAttempts);
+    return { ok: false, code: 'UNAUTHORIZED' };
+  }
+
+  await limparTentativasMerchant(ip);
+  await limparFalhaMembro(match.memberId);
+
+  const member = toMemberAuthenticated(match);
+  const activeStores = await listActiveStoresForMerchant(match.merchantId);
+  const storesLite: StoreSummaryLite[] = activeStores.map((s) => ({
+    id: s.id,
+    slug: s.slug,
+    nome: s.name,
+  }));
+
+  if (storesLite.length === 1) {
+    return { ok: true, step: 'ready', member, store: storesLite[0]! };
+  }
+
+  return { ok: true, step: 'select_store', member, stores: storesLite };
+}
+
+/**
+ * MA8 — login de comprador (`buyers`) no merchant DB da loja resolvida.
+ * Bloqueio por IP usa `login_attempts` no master (mesmo padrão da conta merchant).
+ */
+export async function loginBuyer(
+  scope: Pick<StoreScope, 'merchantDb' | 'storeId'>,
+  { email, senha }: LoginInput,
+  ip: string,
+): Promise<LoginResult> {
+  if (await isIpBlockedForMerchantLogin(ip)) {
+    return { ok: false, code: 'IP_BLOCKED' };
+  }
+
+  const normalizedEmail = email.toLowerCase().trim();
+  const rows = await scope.merchantDb
+    .select()
+    .from(buyers)
+    .where(
+      and(
+        eq(buyers.email, normalizedEmail),
+        eq(buyers.storeId, scope.storeId),
+        eq(buyers.active, true),
+      ),
+    )
+    .limit(1);
+
+  const buyer = rows[0];
+
+  if (buyer?.lockedUntil && new Date(buyer.lockedUntil) > new Date()) {
+    return { ok: false, code: 'ACCOUNT_LOCKED' };
+  }
+
+  const senhaCorreta = buyer ? await argon2.verify(buyer.passwordHash, senha) : false;
+
+  if (!senhaCorreta) {
+    await registrarTentativaFalhaMerchant(ip, email);
+    if (buyer) {
+      await incrementarFalhaBuyer(scope, buyer.id, buyer.failedAttempts ?? 0);
+    }
+    return { ok: false, code: 'UNAUTHORIZED' };
+  }
+
+  await limparTentativasMerchant(ip);
+  await limparFalhaBuyer(scope, buyer!.id);
+
+  return {
+    ok: true,
+    usuario: {
+      id: buyer!.id,
+      nome: buyer!.name,
+      email: buyer!.email,
+      role: 'usuario',
+    },
+  };
 }
 
 export type RegisterResult =
   | { ok: true; usuario: UsuarioAutenticado }
   | { ok: false; code: 'VALIDATION_ERROR' | 'EMAIL_EXISTS' };
 
-/** Cadastro público — espelha `authController.processarCadastro`. */
-export async function register(db: TenantDatabase, input: RegisterInput): Promise<RegisterResult> {
+/** Cadastro público de comprador — tabela `buyers` (schema EN, MA8). */
+export async function register(scope: StoreScope, input: RegisterInput): Promise<RegisterResult> {
   const email = input.email.toLowerCase().trim();
-  const existe = await db
-    .select({ id: usuarios.id })
-    .from(usuarios)
-    .where(eq(usuarios.email, email))
+  const existe = await scope.merchantDb
+    .select({ id: buyers.id })
+    .from(buyers)
+    .where(and(eq(buyers.email, email), eq(buyers.storeId, scope.storeId)))
     .limit(1);
 
   if (existe[0]) {
@@ -350,27 +264,26 @@ export async function register(db: TenantDatabase, input: RegisterInput): Promis
   const telLimpo = input.telefone.replace(/\D/g, '');
   const cepLimpo = input.cep.replace(/\D/g, '').replace(/^(\d{5})(\d{3})$/, '$1-$2');
 
-  const inserted = await db
-    .insert(usuarios)
+  const inserted = await scope.merchantDb
+    .insert(buyers)
     .values({
-      nome: input.nome.trim(),
+      storeId: scope.storeId,
+      name: input.nome.trim(),
       email,
-      senhaHash,
-      role: 'usuario',
-      telefone: telLimpo,
-      cep: cepLimpo,
-      logradouro: input.logradouro.trim(),
-      numero: input.numero.trim(),
-      complemento: input.complemento?.trim() || null,
-      bairro: input.bairro.trim(),
-      cidade: input.cidade.trim(),
-      estado: input.estado.toUpperCase(),
+      passwordHash: senhaHash,
+      phone: telLimpo,
+      postalCode: cepLimpo,
+      street: input.logradouro.trim(),
+      number: input.numero.trim(),
+      complement: input.complemento?.trim() || null,
+      district: input.bairro.trim(),
+      city: input.cidade.trim(),
+      state: input.estado.toUpperCase(),
     })
     .returning({
-      id: usuarios.id,
-      nome: usuarios.nome,
-      email: usuarios.email,
-      role: usuarios.role,
+      id: buyers.id,
+      name: buyers.name,
+      email: buyers.email,
     });
 
   const row = inserted[0];
@@ -382,9 +295,9 @@ export async function register(db: TenantDatabase, input: RegisterInput): Promis
     ok: true,
     usuario: {
       id: row.id,
-      nome: row.nome,
+      nome: row.name,
       email: row.email,
-      role: row.role as 'usuario',
+      role: 'usuario',
     },
   };
 }
@@ -393,57 +306,67 @@ export type RecoverPasswordResult = { ok: true };
 
 /** Recuperação de senha por e-mail — resposta genérica (não vaza existência). */
 export async function recoverPassword(
-  db: TenantDatabase,
+  scope: StoreScope,
   { email }: RecoverPasswordInput,
 ): Promise<RecoverPasswordResult> {
   const normalized = email.toLowerCase().trim();
-  const rows = await db
-    .select({ id: usuarios.id, nome: usuarios.nome, email: usuarios.email })
-    .from(usuarios)
-    .where(and(eq(usuarios.email, normalized), eq(usuarios.ativo, true)))
+  const rows = await scope.merchantDb
+    .select({ id: buyers.id, name: buyers.name, email: buyers.email })
+    .from(buyers)
+    .where(
+      and(eq(buyers.email, normalized), eq(buyers.storeId, scope.storeId), eq(buyers.active, true)),
+    )
     .limit(1);
 
-  const usuario = rows[0];
-  if (!usuario) {
+  const buyer = rows[0];
+  if (!buyer) {
     return { ok: true };
   }
 
-  await db
-    .update(tokensRecuperacao)
-    .set({ usado: true })
-    .where(and(eq(tokensRecuperacao.usuarioId, usuario.id), eq(tokensRecuperacao.usado, false)));
+  await scope.merchantDb
+    .update(passwordResetTokens)
+    .set({ used: true })
+    .where(
+      and(
+        eq(passwordResetTokens.buyerId, buyer.id),
+        eq(passwordResetTokens.storeId, scope.storeId),
+        eq(passwordResetTokens.used, false),
+      ),
+    );
 
   const tokenBruto = crypto.randomBytes(32).toString('hex');
   const tokenHash = crypto.createHash('sha256').update(tokenBruto).digest('hex');
   const expiracao = new Date(Date.now() + TOKEN_EXP_MIN * 60 * 1000);
 
-  await db.insert(tokensRecuperacao).values({
-    usuarioId: usuario.id,
+  await scope.merchantDb.insert(passwordResetTokens).values({
+    storeId: scope.storeId,
+    buyerId: buyer.id,
     tokenHash,
-    canal: 'email',
-    expiraEm: expiracao,
+    channel: 'email',
+    expiresAt: expiracao,
   });
 
-  await enviarEmailRecuperacao(usuario.email, usuario.nome, tokenBruto);
+  await enviarEmailRecuperacao(buyer.email, buyer.name, tokenBruto);
   return { ok: true };
 }
 
 export type ResetPasswordResult = { ok: true } | { ok: false; code: 'INVALID_TOKEN' };
 
 export async function resetPassword(
-  db: TenantDatabase,
+  scope: StoreScope,
   token: string,
   input: ResetPasswordInput,
 ): Promise<ResetPasswordResult> {
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-  const rows = await db
+  const rows = await scope.merchantDb
     .select()
-    .from(tokensRecuperacao)
+    .from(passwordResetTokens)
     .where(
       and(
-        eq(tokensRecuperacao.tokenHash, tokenHash),
-        eq(tokensRecuperacao.usado, false),
-        sql`${tokensRecuperacao.expiraEm} > NOW()`,
+        eq(passwordResetTokens.tokenHash, tokenHash),
+        eq(passwordResetTokens.storeId, scope.storeId),
+        eq(passwordResetTokens.used, false),
+        sql`${passwordResetTokens.expiresAt} > NOW()`,
       ),
     )
     .limit(1);
@@ -454,24 +377,28 @@ export async function resetPassword(
   }
 
   const senhaHash = await argon2.hash(input.senha, ARGON2_OPTIONS);
-  await db
-    .update(usuarios)
-    .set({ senhaHash, bloqueadoAte: null, tentativasFalha: 0 })
-    .where(eq(usuarios.id, row.usuarioId));
-  await db.update(tokensRecuperacao).set({ usado: true }).where(eq(tokensRecuperacao.id, row.id));
+  await scope.merchantDb
+    .update(buyers)
+    .set({ passwordHash: senhaHash, lockedUntil: null, failedAttempts: 0 })
+    .where(and(eq(buyers.id, row.buyerId), eq(buyers.storeId, scope.storeId)));
+  await scope.merchantDb
+    .update(passwordResetTokens)
+    .set({ used: true })
+    .where(eq(passwordResetTokens.id, row.id));
   return { ok: true };
 }
 
-export async function isResetTokenValid(db: TenantDatabase, token: string): Promise<boolean> {
+export async function isResetTokenValid(scope: StoreScope, token: string): Promise<boolean> {
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-  const rows = await db
-    .select({ id: tokensRecuperacao.id })
-    .from(tokensRecuperacao)
+  const rows = await scope.merchantDb
+    .select({ id: passwordResetTokens.id })
+    .from(passwordResetTokens)
     .where(
       and(
-        eq(tokensRecuperacao.tokenHash, tokenHash),
-        eq(tokensRecuperacao.usado, false),
-        sql`${tokensRecuperacao.expiraEm} > NOW()`,
+        eq(passwordResetTokens.tokenHash, tokenHash),
+        eq(passwordResetTokens.storeId, scope.storeId),
+        eq(passwordResetTokens.used, false),
+        sql`${passwordResetTokens.expiresAt} > NOW()`,
       ),
     )
     .limit(1);

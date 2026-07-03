@@ -2,13 +2,8 @@ import type { ComponentProps } from 'react';
 
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import {
-  adminInputClass,
-  platformInputClass,
-  resolveSurface,
-  type SidebarTheme,
-  type UiSurface,
-} from './surface';
+import { mobileControlExtras } from './control-styles';
+import { resolveSurface, type SidebarTheme, type UiSurface } from './surface';
 
 export interface FieldTextareaProps extends ComponentProps<'textarea'> {
   surface?: UiSurface;
@@ -16,9 +11,10 @@ export interface FieldTextareaProps extends ComponentProps<'textarea'> {
   theme?: SidebarTheme;
 }
 
-/** Textarea shadcn com tokens Ata por surface. */
+/** Textarea shadcn com tokens Ata por surface (via bridge CSS). */
 export function FieldTextarea({ surface, theme, className, ...props }: FieldTextareaProps) {
-  const resolved = resolveSurface(surface, theme);
-  const surfaceClass = resolved === 'platform' ? platformInputClass : adminInputClass;
-  return <Textarea className={cn(surfaceClass(), 'min-h-[5rem]', className)} {...props} />;
+  resolveSurface(surface, theme);
+  return (
+    <Textarea className={cn(mobileControlExtras, 'min-h-[5rem]', className)} {...props} />
+  );
 }

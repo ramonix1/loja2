@@ -1,10 +1,13 @@
-import type pg from 'pg';
-
 import { getConfigs, getLojaInfo } from '../../lib/config.js';
+import {
+  orderStatusToApi,
+  paymentStatusToApi,
+  paymentStatusToDb,
+} from '../../lib/merchant-schema-map.js';
+import type { StoreScope } from '../../lib/store-scope.js';
 import { validateCheckoutData } from '../../lib/validation.js';
-import { getAgendaConfig, getDisponibilidade } from '../agenda/agenda.service.js';
 import { getCartItems } from '../cart/cart.service.js';
-import { recordCommissionOnOrder } from '../../services/billing.service.js';
+import { recordCommissionOnMerchantOrder } from '../../services/merchant-billing.service.js';
 import { enviarNotificacaoPedidoPago } from '../../services/email.service.js';
 import * as stripeService from '../../services/stripe.service.js';
 import * as sumupService from '../../services/sumup.service.js';
@@ -37,11 +40,133 @@ export type CheckoutResult =
     }
   | { ok: false; error: string; code: string; status: number };
 
-async function notificarPedidoPago(db: pg.Pool, pedidoId: number, itens: Awaited<ReturnType<typeof getCartItems>>) {
+async function getScheduleDisponibilidade(scope: StoreScope, data: string) {
+  const configRes = await scope.pool.query(
+    'SELECT daily_capacity FROM schedule_config WHERE store_id = $1 LIMIT 1',
+    [scope.storeId],
+  );
+  const capacidadeDiaria = Number(configRes.rows[0]?.daily_capacity ?? 1);
+
+  const especial = await scope.pool.query(
+    'SELECT capacity, reason FROM schedule_special_days WHERE store_id = $1 AND date = $2',
+    [scope.storeId, data],
+  );
+  const e = especial.rows[0] as { capacity: number | null; reason: string | null } | undefined;
+
+  let capacidade = capacidadeDiaria;
+  let bloqueado = false;
+  let motivo: string | null = null;
+
+  if (e) {
+    motivo = e.reason;
+    if (e.capacity === null || e.capacity === 0) {
+      bloqueado = true;
+    } else {
+      capacidade = e.capacity;
+    }
+  }
+
+  if (bloqueado) {
+    return { disponivel: false, vagas_total: 0, vagas_usadas: 0, vagas_livres: 0, bloqueado: true, motivo };
+  }
+
+  const r = await scope.pool.query(
+    "SELECT COUNT(*) FROM appointments WHERE store_id = $1 AND event_date = $2 AND status = 'confirmed'",
+    [scope.storeId, data],
+  );
+  const vagas_usadas = parseInt(String(r.rows[0]?.count ?? 0), 10);
+  const vagas_livres = Math.max(0, capacidade - vagas_usadas);
+
+  return {
+    disponivel: vagas_livres > 0,
+    vagas_total: capacidade,
+    vagas_usadas,
+    vagas_livres,
+    bloqueado: false,
+    motivo,
+  };
+}
+
+async function getAgendaConfigForCheckout(scope: StoreScope) {
+  const r = await scope.pool.query(
+    'SELECT daily_capacity, min_lead_days, max_lead_days FROM schedule_config WHERE store_id = $1 LIMIT 1',
+    [scope.storeId],
+  );
+  const row = r.rows[0];
+  return {
+    capacidade_diaria: Number(row?.daily_capacity ?? 1),
+    antecedencia_minima_dias: Number(row?.min_lead_days ?? 1),
+    antecedencia_maxima_dias: Number(row?.max_lead_days ?? 180),
+  };
+}
+
+function mapOrderRowToApi(row: Record<string, unknown>) {
+  return {
+    id: row.id,
+    usuario_id: row.buyer_id,
+    nome_entrega: row.shipping_name,
+    email_entrega: row.shipping_email,
+    telefone_entrega: row.shipping_phone,
+    cpf_entrega: row.shipping_cpf,
+    cep: row.shipping_postal_code,
+    logradouro: row.shipping_street,
+    numero: row.shipping_number,
+    complemento: row.shipping_complement,
+    bairro: row.shipping_district,
+    cidade: row.shipping_city,
+    estado: row.shipping_state,
+    subtotal: row.subtotal,
+    frete: row.shipping_fee,
+    frete_servico: row.shipping_service,
+    total: row.total,
+    status: orderStatusToApi(String(row.status)),
+    metodo_pagamento: row.payment_method,
+    mp_payment_id: row.mp_payment_id,
+    data_evento: row.event_date,
+    codigo_rastreio: row.tracking_code,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  };
+}
+
+function mapOrderItemRowToApi(row: Record<string, unknown>) {
+  return {
+    id: row.id,
+    pedido_id: row.order_id,
+    produto_id: row.product_id,
+    nome_produto: row.product_name,
+    quantidade: row.quantity,
+    preco_unitario: row.unit_price,
+    subtotal: row.subtotal,
+  };
+}
+
+function mapPaymentRowToApi(row: Record<string, unknown>) {
+  return {
+    id: row.id,
+    pedido_id: row.order_id,
+    mp_payment_id: row.mp_payment_id,
+    status: paymentStatusToApi(String(row.status)),
+    status_mp: row.status_mp,
+    valor: row.amount,
+    metodo: row.method,
+    resposta_json: row.raw_response,
+    created_at: row.created_at,
+  };
+}
+
+async function notificarPedidoPago(
+  scope: StoreScope,
+  pedidoId: number,
+  itens: Awaited<ReturnType<typeof getCartItems>>,
+) {
   try {
-    const loja = await getLojaInfo(db);
+    const loja = await getLojaInfo(scope);
     if (!loja.email) return;
-    const pedidoRes = await db.query('SELECT * FROM pedidos WHERE id = $1', [pedidoId]);
+    const pedidoRes = await scope.pool.query(
+      'SELECT id, total, payment_method AS metodo_pagamento FROM orders WHERE id = $1 AND store_id = $2',
+      [pedidoId, scope.storeId],
+    );
     if (!pedidoRes.rows[0]) return;
     await enviarNotificacaoPedidoPago({
       lojaNome: loja.nome,
@@ -58,21 +183,20 @@ async function notificarPedidoPago(db: pg.Pool, pedidoId: number, itens: Awaited
   }
 }
 
-async function registrarComissao(tenantId: number | undefined, pedidoId: number, total: number) {
-  if (!tenantId) return;
+async function registrarComissao(merchantId: number, pedidoId: number, total: number) {
   try {
-    await recordCommissionOnOrder(tenantId, pedidoId, total);
+    await recordCommissionOnMerchantOrder(merchantId, pedidoId, total);
   } catch (err) {
     console.error('[Billing] Erro ao registrar comissão:', err instanceof Error ? err.message : err);
   }
 }
 
-export async function getCheckoutPreview(db: pg.Pool, usuarioId: number) {
-  const itens = await getCartItems(db, usuarioId);
+export async function getCheckoutPreview(scope: StoreScope, buyerId: number) {
+  const itens = await getCartItems(scope, buyerId);
   const subtotal = itens.reduce((s, i) => s + i.subtotal, 0);
-  const configs = await getConfigs(db);
+  const configs = await getConfigs(scope);
   const moduloAgenda = configs.modulo_agenda === 'true';
-  const agendaConfig = moduloAgenda ? await getAgendaConfig(db) : null;
+  const agendaConfig = moduloAgenda ? await getAgendaConfigForCheckout(scope) : null;
   const sumupHabilitado = configs.habilitar_sumup === 'true';
 
   return {
@@ -86,11 +210,11 @@ export async function getCheckoutPreview(db: pg.Pool, usuarioId: number) {
 }
 
 export async function processCheckout(
-  db: pg.Pool,
-  usuarioId: number,
-  tenantId: number | undefined,
+  scope: StoreScope,
+  buyerId: number,
   input: CheckoutInput,
 ): Promise<CheckoutResult> {
+  const { pool, storeId, merchantId } = scope;
   const erros = validateCheckoutData(input);
   if (erros.length > 0) {
     return { ok: false, error: erros.join('; '), code: 'VALIDATION_ERROR', status: 400 };
@@ -101,7 +225,7 @@ export async function processCheckout(
     return { ok: false, error: 'Frete inválido.', code: 'INVALID_SHIPPING', status: 400 };
   }
 
-  const configs = await getConfigs(db);
+  const configs = await getConfigs(scope);
   const moduloAgenda = configs.modulo_agenda === 'true';
   if (moduloAgenda) {
     if (!input.data_evento || !/^\d{4}-\d{2}-\d{2}$/.test(input.data_evento)) {
@@ -112,7 +236,7 @@ export async function processCheckout(
         status: 400,
       };
     }
-    const disp = await getDisponibilidade(db, input.data_evento);
+    const disp = await getScheduleDisponibilidade(scope, input.data_evento);
     if (!disp.disponivel) {
       return {
         ok: false,
@@ -123,22 +247,24 @@ export async function processCheckout(
     }
   }
 
-  await db.query('BEGIN');
+  await pool.query('BEGIN');
 
   try {
-    const itens = await getCartItems(db, usuarioId);
+    const itens = await getCartItems(scope, buyerId);
     if (itens.length === 0) {
-      await db.query('ROLLBACK');
+      await pool.query('ROLLBACK');
       return { ok: false, error: 'Carrinho vazio.', code: 'EMPTY_CART', status: 400 };
     }
 
-    // Verificar estoque antes de criar pedido
     if (configs.controla_estoque === 'true') {
       for (const item of itens) {
-        const prod = await db.query('SELECT estoque FROM produtos WHERE id = $1', [item.produto_id]);
+        const prod = await pool.query(
+          'SELECT stock AS estoque FROM products WHERE id = $1 AND store_id = $2',
+          [item.produto_id, storeId],
+        );
         const estoque = prod.rows[0]?.estoque as number | null;
         if (estoque !== null && item.quantidade > estoque) {
-          await db.query('ROLLBACK');
+          await pool.query('ROLLBACK');
           return {
             ok: false,
             error: `Estoque insuficiente para ${item.nome}.`,
@@ -154,15 +280,17 @@ export async function processCheckout(
     const freteServico = (input.frete_servico || '').slice(0, 100);
     const total = subtotal + frete;
 
-    const pedidoRes = await db.query<{ id: number }>(
-      `INSERT INTO pedidos
-         (usuario_id, nome_entrega, email_entrega, telefone_entrega, cpf_entrega,
-          cep, logradouro, numero, complemento, bairro, cidade, estado,
-          subtotal, frete, frete_servico, total, status, metodo_pagamento)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,'aguardando_pagamento',$17)
+    const pedidoRes = await pool.query<{ id: number }>(
+      `INSERT INTO orders
+         (store_id, buyer_id, shipping_name, shipping_email, shipping_phone, shipping_cpf,
+          shipping_postal_code, shipping_street, shipping_number, shipping_complement,
+          shipping_district, shipping_city, shipping_state,
+          subtotal, shipping_fee, shipping_service, total, status, payment_method)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,'awaiting_payment',$18)
        RETURNING id`,
       [
-        usuarioId,
+        storeId,
+        buyerId,
         input.nome_entrega,
         input.email_entrega,
         input.telefone_entrega ?? null,
@@ -185,33 +313,45 @@ export async function processCheckout(
     const pedidoId = pedidoRes.rows[0]!.id;
 
     for (const item of itens) {
-      await db.query(
-        `INSERT INTO pedido_itens (pedido_id, produto_id, nome_produto, quantidade, preco_unitario, subtotal)
-         VALUES ($1, $2, $3, $4, $5, $6)`,
-        [pedidoId, item.produto_id, item.nome, item.quantidade, item.preco_unitario, item.subtotal],
+      await pool.query(
+        `INSERT INTO order_items
+           (store_id, order_id, product_id, product_name, quantity, unit_price, subtotal)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [
+          storeId,
+          pedidoId,
+          item.produto_id,
+          item.nome,
+          item.quantidade,
+          item.preco_unitario,
+          item.subtotal,
+        ],
       );
     }
 
     if (moduloAgenda && input.data_evento) {
-      await db.query('INSERT INTO agendamentos (pedido_id, data_evento) VALUES ($1, $2)', [
-        pedidoId,
+      await pool.query(
+        'INSERT INTO appointments (store_id, order_id, event_date) VALUES ($1, $2, $3)',
+        [storeId, pedidoId, input.data_evento],
+      );
+      await pool.query('UPDATE orders SET event_date = $1 WHERE id = $2 AND store_id = $3', [
         input.data_evento,
-      ]);
-      await db.query('UPDATE pedidos SET data_evento = $1 WHERE id = $2', [
-        input.data_evento,
         pedidoId,
+        storeId,
       ]);
     }
 
     if (configs.controla_estoque === 'true') {
       for (const item of itens) {
-        await db.query(
-          'UPDATE produtos SET estoque = GREATEST(0, estoque - $1), updated_at = NOW() WHERE id = $2 AND estoque IS NOT NULL',
-          [item.quantidade, item.produto_id],
+        await pool.query(
+          'UPDATE products SET stock = GREATEST(0, stock - $1), updated_at = NOW() WHERE id = $2 AND store_id = $3 AND stock IS NOT NULL',
+          [item.quantidade, item.produto_id, storeId],
         );
-        await db.query(
-          'INSERT INTO movimentacoes_estoque (produto_id, tipo, quantidade, origem, origem_id) VALUES ($1, $2, $3, $4, $5)',
-          [item.produto_id, 'saida', item.quantidade, 'pedido', pedidoId],
+        await pool.query(
+          `INSERT INTO inventory_movements
+             (store_id, product_id, type, quantity, source, source_id)
+           VALUES ($1, $2, 'outbound', $3, 'order', $4)`,
+          [storeId, item.produto_id, item.quantidade, pedidoId],
         ).catch(() => {});
       }
     }
@@ -227,24 +367,28 @@ export async function processCheckout(
 
     if (input.metodo_pagamento === 'teste') {
       if (process.env.NODE_ENV === 'production') {
-        await db.query('ROLLBACK');
+        await pool.query('ROLLBACK');
         return { ok: false, error: 'Método inválido.', code: 'INVALID_PAYMENT', status: 400 };
       }
 
-      await db.query(
-        `INSERT INTO pagamentos (pedido_id, mp_payment_id, status, status_mp, valor, metodo, resposta_json)
-         VALUES ($1, $2, 'pago', 'approved', $3, 'teste', $4)`,
-        [pedidoId, `TESTE-${pedidoId}`, total, JSON.stringify({ test: true })],
+      await pool.query(
+        `INSERT INTO payments
+           (store_id, order_id, mp_payment_id, status, status_mp, amount, method, raw_response)
+         VALUES ($1, $2, $3, 'paid', 'approved', $4, 'teste', $5)`,
+        [storeId, pedidoId, `TESTE-${pedidoId}`, total, JSON.stringify({ test: true })],
       );
-      await db.query("UPDATE pedidos SET status = 'pago', mp_payment_id = $1 WHERE id = $2", [
-        `TESTE-${pedidoId}`,
-        pedidoId,
+      await pool.query(
+        "UPDATE orders SET status = 'paid', mp_payment_id = $1 WHERE id = $2 AND store_id = $3",
+        [`TESTE-${pedidoId}`, pedidoId, storeId],
+      );
+      await pool.query('DELETE FROM cart_items WHERE buyer_id = $1 AND store_id = $2', [
+        buyerId,
+        storeId,
       ]);
-      await db.query('DELETE FROM carrinho_itens WHERE usuario_id = $1', [usuarioId]);
-      await db.query('COMMIT');
+      await pool.query('COMMIT');
 
-      void notificarPedidoPago(db, pedidoId, itens);
-      await registrarComissao(tenantId, pedidoId, total);
+      void notificarPedidoPago(scope, pedidoId, itens);
+      await registrarComissao(merchantId, pedidoId, total);
 
       return { ok: true, pedido_id: pedidoId, status: 'pago' };
     }
@@ -258,17 +402,21 @@ export async function processCheckout(
         redirectUrl: `${process.env.APP_URL ?? 'http://localhost:3000'}/checkout/resultado/${pedidoId}`,
       });
 
-      await db.query(
-        `INSERT INTO pagamentos (pedido_id, mp_payment_id, status, status_mp, valor, metodo, resposta_json)
-         VALUES ($1, $2, 'pendente', 'PENDING', $3, 'sumup_online', $4)`,
-        [pedidoId, checkoutSumup.id, total, JSON.stringify(checkoutSumup)],
+      await pool.query(
+        `INSERT INTO payments
+           (store_id, order_id, mp_payment_id, status, status_mp, amount, method, raw_response)
+         VALUES ($1, $2, $3, 'pending', 'PENDING', $4, 'sumup_online', $5)`,
+        [storeId, pedidoId, checkoutSumup.id, total, JSON.stringify(checkoutSumup)],
       );
-      await db.query(
-        "UPDATE pedidos SET status = 'aguardando_pagamento', mp_payment_id = $1 WHERE id = $2",
-        [checkoutSumup.id, pedidoId],
+      await pool.query(
+        "UPDATE orders SET status = 'awaiting_payment', mp_payment_id = $1 WHERE id = $2 AND store_id = $3",
+        [checkoutSumup.id, pedidoId, storeId],
       );
-      await db.query('DELETE FROM carrinho_itens WHERE usuario_id = $1', [usuarioId]);
-      await db.query('COMMIT');
+      await pool.query('DELETE FROM cart_items WHERE buyer_id = $1 AND store_id = $2', [
+        buyerId,
+        storeId,
+      ]);
+      await pool.query('COMMIT');
 
       return {
         ok: true,
@@ -297,7 +445,7 @@ export async function processCheckout(
       });
     } else if (input.metodo_pagamento === 'cartao') {
       if (!input.stripe_payment_method_id) {
-        await db.query('ROLLBACK');
+        await pool.query('ROLLBACK');
         return { ok: false, error: 'Método inválido.', code: 'INVALID_PAYMENT', status: 400 };
       }
       stripeResult = await stripeService.criarPagamentoCartao({
@@ -305,19 +453,23 @@ export async function processCheckout(
         paymentMethodId: input.stripe_payment_method_id,
       });
     } else {
-      await db.query('ROLLBACK');
+      await pool.query('ROLLBACK');
       return { ok: false, error: 'Método inválido.', code: 'INVALID_PAYMENT', status: 400 };
     }
 
     const statusInterno = stripeService.mapearStatus(stripeResult.status);
+    const statusDb = paymentStatusToDb(statusInterno);
+    const orderStatusDb = statusInterno === 'pago' ? 'paid' : 'awaiting_payment';
 
-    await db.query(
-      `INSERT INTO pagamentos (pedido_id, mp_payment_id, status, status_mp, valor, metodo, resposta_json)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+    await pool.query(
+      `INSERT INTO payments
+         (store_id, order_id, mp_payment_id, status, status_mp, amount, method, raw_response)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
       [
+        storeId,
         pedidoId,
         stripeResult.id,
-        statusInterno,
+        statusDb,
         stripeResult.status,
         total,
         input.metodo_pagamento,
@@ -325,10 +477,11 @@ export async function processCheckout(
       ],
     );
 
-    await db.query("UPDATE pedidos SET status = $1, mp_payment_id = $2 WHERE id = $3", [
-      statusInterno === 'pago' ? 'pago' : 'aguardando_pagamento',
+    await pool.query('UPDATE orders SET status = $1, mp_payment_id = $2 WHERE id = $3 AND store_id = $4', [
+      orderStatusDb,
       stripeResult.id,
       pedidoId,
+      storeId,
     ]);
 
     let redirectUrl: string | undefined;
@@ -340,12 +493,12 @@ export async function processCheckout(
       redirectUrl = stripeResult.next_action.redirect_to_url?.url ?? undefined;
     }
 
-    await db.query('DELETE FROM carrinho_itens WHERE usuario_id = $1', [usuarioId]);
-    await db.query('COMMIT');
+    await pool.query('DELETE FROM cart_items WHERE buyer_id = $1 AND store_id = $2', [buyerId, storeId]);
+    await pool.query('COMMIT');
 
     if (statusInterno === 'pago') {
-      void notificarPedidoPago(db, pedidoId, itens);
-      await registrarComissao(tenantId, pedidoId, total);
+      void notificarPedidoPago(scope, pedidoId, itens);
+      await registrarComissao(merchantId, pedidoId, total);
     }
 
     return {
@@ -355,7 +508,7 @@ export async function processCheckout(
       redirect_url: redirectUrl,
     };
   } catch (err) {
-    await db.query('ROLLBACK').catch(() => {});
+    await pool.query('ROLLBACK').catch(() => {});
     console.error('[Checkout] Erro:', err);
     return {
       ok: false,
@@ -366,26 +519,32 @@ export async function processCheckout(
   }
 }
 
-export async function getCheckoutResult(db: pg.Pool, usuarioId: number, pedidoId: number) {
-  const pedidoRes = await db.query(
-    `SELECT p.* FROM pedidos p WHERE p.id = $1 AND p.usuario_id = $2`,
-    [pedidoId, usuarioId],
+export async function getCheckoutResult(scope: StoreScope, buyerId: number, pedidoId: number) {
+  const pedidoRes = await scope.pool.query(
+    `SELECT * FROM orders WHERE id = $1 AND buyer_id = $2 AND store_id = $3`,
+    [pedidoId, buyerId, scope.storeId],
   );
   if (!pedidoRes.rows[0]) return null;
 
-  const itensRes = await db.query('SELECT * FROM pedido_itens WHERE pedido_id = $1', [pedidoId]);
-  const pagamentoRes = await db.query(
-    'SELECT * FROM pagamentos WHERE pedido_id = $1 ORDER BY id DESC LIMIT 1',
-    [pedidoId],
+  const itensRes = await scope.pool.query(
+    'SELECT * FROM order_items WHERE order_id = $1 AND store_id = $2',
+    [pedidoId, scope.storeId],
+  );
+  const pagamentoRes = await scope.pool.query(
+    'SELECT * FROM payments WHERE order_id = $1 AND store_id = $2 ORDER BY id DESC LIMIT 1',
+    [pedidoId, scope.storeId],
   );
 
-  const pedido = pedidoRes.rows[0] as Record<string, unknown>;
-  const pagamento = pagamentoRes.rows[0] as Record<string, unknown> | undefined;
+  const pedidoRaw = pedidoRes.rows[0] as Record<string, unknown>;
+  const pedido = mapOrderRowToApi(pedidoRaw);
+  const pagamentoRaw = pagamentoRes.rows[0] as Record<string, unknown> | undefined;
+  const pagamento = pagamentoRaw ? mapPaymentRowToApi(pagamentoRaw) : null;
+
   let pixInfo: Record<string, unknown> | null = null;
   let boletoUrl: string | null = null;
 
-  if (pagamento) {
-    const resp = JSON.parse(String(pagamento.resposta_json || '{}')) as {
+  if (pagamentoRaw) {
+    const resp = JSON.parse(String(pagamentoRaw.raw_response || '{}')) as {
       next_action?: {
         pix_display_qr_code?: { data?: string; image_url_png?: string; expires_at?: number };
         boleto_display_details?: { hosted_voucher_url?: string };
@@ -404,5 +563,11 @@ export async function getCheckoutResult(db: pg.Pool, usuarioId: number, pedidoId
     }
   }
 
-  return { pedido, itens: itensRes.rows, pagamento: pagamento ?? null, pixInfo, boletoUrl };
+  return {
+    pedido,
+    itens: itensRes.rows.map((row) => mapOrderItemRowToApi(row as Record<string, unknown>)),
+    pagamento,
+    pixInfo,
+    boletoUrl,
+  };
 }

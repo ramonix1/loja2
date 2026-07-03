@@ -5,6 +5,7 @@ import {
 } from '@lojao/types/agenda';
 import type { FastifyInstance } from 'fastify';
 
+import { requireStoreScope } from '../../lib/store-scope.js';
 import { requireAdmin } from '../../plugins/auth-guard.js';
 import {
   getAgendaAdmin,
@@ -26,7 +27,7 @@ export async function agendaRoutes(app: FastifyInstance): Promise<void> {
       });
     }
 
-    const data = await getAgendaAdmin(request.db, parsed.data.mes);
+    const data = await getAgendaAdmin(requireStoreScope(request), parsed.data.mes);
     return reply.send({ data });
   });
 
@@ -40,7 +41,7 @@ export async function agendaRoutes(app: FastifyInstance): Promise<void> {
       });
     }
 
-    const config = await updateAgendaConfig(request.db, parsed.data);
+    const config = await updateAgendaConfig(requireStoreScope(request), parsed.data);
     return reply.send({ data: { config } });
   });
 
@@ -54,7 +55,7 @@ export async function agendaRoutes(app: FastifyInstance): Promise<void> {
       });
     }
 
-    await saveAgendaDia(request.db, parsed.data);
+    await saveAgendaDia(requireStoreScope(request), parsed.data);
     return reply.code(200).send({ data: { ok: true } });
   });
 
@@ -67,7 +68,7 @@ export async function agendaRoutes(app: FastifyInstance): Promise<void> {
       });
     }
 
-    const removed = await removeAgendaDia(request.db, data);
+    const removed = await removeAgendaDia(requireStoreScope(request), data);
     if (!removed) {
       return reply.code(404).send({
         error: 'Dia especial não encontrado.',

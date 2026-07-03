@@ -1,5 +1,4 @@
 import type { PublicStoreData } from '@lojao/types/public-store';
-import type { StoreTheme } from '@lojao/types/store-theme';
 
 import { storeShellClasses } from '@/lib/store-styles';
 
@@ -8,8 +7,7 @@ interface StoreFooterProps {
 }
 
 export function StoreFooter({ store }: StoreFooterProps) {
-  const tema: StoreTheme = store.tema ?? 'escuro';
-  const styles = storeShellClasses(tema);
+  const styles = storeShellClasses();
 
   return (
     <footer className={`mt-auto border-t py-8 ${styles.footer}`}>

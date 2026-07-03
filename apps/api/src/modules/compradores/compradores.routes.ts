@@ -1,6 +1,7 @@
 import { listCompradoresQuerySchema } from '@lojao/types/compradores';
 import type { FastifyInstance } from 'fastify';
 
+import { requireStoreScope } from '../../lib/store-scope.js';
 import { requireAdmin } from '../../plugins/auth-guard.js';
 import { getComprador, listCompradores } from './compradores.service.js';
 
@@ -17,7 +18,7 @@ export async function compradoresRoutes(app: FastifyInstance): Promise<void> {
       });
     }
 
-    const { compradores, totais } = await listCompradores(request.db, parsed.data);
+    const { compradores, totais } = await listCompradores(requireStoreScope(request), parsed.data);
     return reply.send({
       data: compradores,
       meta: { totais, busca: parsed.data.busca ?? '' },
@@ -30,7 +31,7 @@ export async function compradoresRoutes(app: FastifyInstance): Promise<void> {
       return reply.code(400).send({ error: 'ID inválido.', code: 'VALIDATION_ERROR' });
     }
 
-    const data = await getComprador(request.db, id);
+    const data = await getComprador(requireStoreScope(request), id);
     if (!data) {
       return reply.code(404).send({ error: 'Comprador não encontrado.', code: 'NOT_FOUND' });
     }

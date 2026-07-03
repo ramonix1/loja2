@@ -78,6 +78,18 @@
     "./store-theme": {
       "types": "./dist/store-theme.d.ts",
       "default": "./dist/store-theme.js"
+    },
+    "./merchant": {
+      "types": "./dist/merchant.d.ts",
+      "default": "./dist/merchant.js"
+    },
+    "./reviews": {
+      "types": "./dist/reviews.d.ts",
+      "default": "./dist/reviews.js"
+    },
+    "./wishlist": {
+      "types": "./dist/wishlist.d.ts",
+      "default": "./dist/wishlist.js"
     }
   },
   "scripts": {

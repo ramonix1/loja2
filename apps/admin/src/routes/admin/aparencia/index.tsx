@@ -1,7 +1,6 @@
 import {
   Button,
   Card,
-  Switch,
   DEFAULT_LOJA_COR_PRIMARIA,
   FieldInput,
   adminFieldLabelClass,
@@ -15,6 +14,7 @@ import {
 } from '@lojao/ui';
 import { testIds } from '@lojao/test-utils';
 import type { StoreTheme } from '@lojao/types/store-theme';
+import { DEFAULT_STORE_THEME } from '@lojao/types/store-theme';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState, type FormEvent } from 'react';
 
@@ -42,7 +42,6 @@ export function AparenciaPage() {
   const [slogan, setSlogan] = useState('');
   const [rodape, setRodape] = useState('');
   const [cor, setCor] = useState(DEFAULT_LOJA_COR_PRIMARIA);
-  const [tema, setTema] = useState<StoreTheme>('escuro');
   const [email, setEmail] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -63,7 +62,6 @@ export function AparenciaPage() {
     setSlogan(cfg.loja_slogan);
     setRodape(cfg.loja_rodape);
     setCor(cfg.loja_cor_primaria || DEFAULT_LOJA_COR_PRIMARIA);
-    setTema(cfg.loja_tema ?? 'escuro');
     setEmail(cfg.loja_email);
     setWhatsapp(cfg.loja_whatsapp);
     if (cfg.loja_logo) setLogoPreview(legacyImageUrl(cfg.loja_logo));
@@ -90,7 +88,6 @@ export function AparenciaPage() {
       fd.append('loja_nome', nome);
       fd.append('loja_slogan', slogan);
       fd.append('loja_cor_primaria', cor);
-      fd.append('loja_tema', tema);
       fd.append('loja_rodape', rodape);
       fd.append('loja_email', email);
       fd.append('loja_whatsapp', whatsapp);
@@ -143,7 +140,7 @@ export function AparenciaPage() {
       <div className="mb-6">
         <div className="ds-preview-label mb-2">Pré-visualização do header</div>
         <div
-          data-store-theme={tema}
+          data-store-theme={DEFAULT_STORE_THEME}
           data-testid={testIds.adminAparencia.preview}
           className="flex items-center gap-3 rounded-lg border border-[var(--store-border)] bg-[var(--store-header-bg)] px-6 py-3"
         >
@@ -211,25 +208,6 @@ export function AparenciaPage() {
 
           <Card surface="admin" className="space-y-4">
             <h2 className={adminSectionTitleClass()}>Identidade visual</h2>
-
-            <div>
-              <label className="flex cursor-pointer items-start gap-4">
-                <Switch
-                  label="Vitrine com tema claro Ata Commerce"
-                  checked={tema === 'claro'}
-                  onChange={(checked) => setTema(checked ? 'claro' : 'escuro')}
-                  testId={testIds.adminAparencia.temaSwitch}
-                  disabled={saveMutation.isPending}
-                  surface="admin"
-                />
-                <div>
-                  <div className="text-sm font-medium text-[var(--admin-text)]">Tema claro</div>
-                  <div className={cn('mt-0.5 text-xs', adminMutedClass())}>
-                    Paleta clara Ata Commerce na vitrine (padrão: escuro).
-                  </div>
-                </div>
-              </label>
-            </div>
 
             <div>
               <label className={adminFieldLabelClass()}>Cor principal</label>

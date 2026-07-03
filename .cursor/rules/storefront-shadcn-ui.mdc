@@ -1,0 +1,58 @@
+---
+description: Vitrine storefront — primitivos UI via shadcn (@lojao/ui), não HTML cru
+globs: apps/storefront/**/*.{tsx,ts}
+alwaysApply: false
+---
+
+# Storefront — shadcn/ui obrigatório
+
+## Regra
+
+Em **código novo ou refatorado** em `apps/storefront`, primitivos interativos devem vir de **`@lojao/ui`** (facades sobre shadcn em `packages/ui/src/components/ui/*`).
+
+**Usar:**
+
+| Necessidade | Import |
+|-------------|--------|
+| Botão texto/CTA | `Button` (`surface="store"`) |
+| Botão só ícone | `IconButton` (`surface="store"`) |
+| Input / textarea | `FieldInput`, `FieldTextarea` ou `Input` / `Textarea` |
+| Card, alerta, separador | `Card`, `Alert`, `Separator` |
+| Drawer mobile | `Sheet`, `SheetContent`, … |
+| Dialog / confirmação | `Dialog` ou `ConfirmDialog` |
+| Select, checkbox, tabs | `Select`, `Checkbox`, `Tabs` |
+| Tabela | `Table` (facade) ou primitivos `@lojao/ui` |
+| Toast / feedback | `Alert` ou `Dialog` shadcn — **não** `div` fixa custom (considerar `sonner` quando instalado no monorepo) |
+
+**Proibido em código novo:**
+
+- `<button>` / `<input>` / `<select>` / `<textarea>` com classes utilitárias soltas (ex.: `btn-primary`, `storeInputClass` direto no elemento)
+- Duplicar primitivos que já existem em `@lojao/ui`
+- Importar Radix ou `lucide-react` direto no storefront (exceto se spec de ícones disser o contrário para primitivos internos)
+
+## Ondas de migração (storefront)
+
+| Onda | Status inicial (2026-07) | Alvo |
+|------|--------------------------|------|
+| 1 — CTAs | **em progresso** | `Button` (`AddToCartButton`, PDP, cart, wishlist, banner, login, checkout) |
+| 2 — Inputs | **em progresso** | `FieldInput` (busca, quantidade) |
+| 3 — Selects | **em progresso** | `FieldSelect` (`ProductFiltersBar` sort) |
+| 4 — Feedback | **em progresso** | `Alert` (`AddToCartToast`) |
+| 5 — Auth/forms restantes | pendente | `register-form`, radios checkout |
+
+Componentes de vitrine (`ProductCard`, `QuantitySelector`, etc.) **podem** existir em `apps/storefront/src/components/**`, mas devem **compor** primitivos shadcn — não reimplementá-los.
+
+Exemplo correto: `AddToCartButton` usa `Button surface="store" variant="outline"`.
+Exemplo incorreto: `<button className="btn-outline btn-pill">`.
+
+## Branding da loja
+
+Cor CTA por tenant: `Button` com `surface="store"` + classes pill (`rounded-full` / token `--store-radius-pill`). A cor vem de `--cor-primaria` via bridge shadcn — **não** manter paralelo `.btn-primary` em elementos novos.
+
+Classes legadas `.btn-primary` / `.btn-outline` em `globals.css` permanecem só até migração completa; **não expandir** uso delas.
+
+## Referências
+
+- `docs/specs/shadcn-ui-migration-spec.md` · `packages/ui/README.md`
+- `docs/design/UX-PRINCIPLES.md` — ícones produto vs lucide em primitivos
+- Decisão anterior S5 (“manter btn-primary”) **revogada** para vitrine a partir da refatoração UI contínua

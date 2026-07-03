@@ -1,4 +1,4 @@
-import { buildStorePath } from '@lojao/tenant-host';
+import { buildStorePath } from '@lojao/store-host';
 
 import { browserApiBase } from './browser-api.js';
 export const STOREFRONT_URL = (import.meta.env.VITE_STOREFRONT_URL ?? 'http://localhost:3000').replace(
@@ -6,37 +6,47 @@ export const STOREFRONT_URL = (import.meta.env.VITE_STOREFRONT_URL ?? 'http://lo
   '',
 );
 
-/** Slug do tenant autenticado (sessão). Dev: fallback opcional via VITE_TENANT_SLUG. */
-let sessionTenantSlug: string | null = null;
+/** Slug da loja autenticada (sessão). Dev: fallback opcional via VITE_STORE_SLUG ou VITE_TENANT_SLUG. */
+let sessionStoreSlug: string | null = null;
 
-export function setSessionTenantSlug(slug: string | null): void {
-  sessionTenantSlug = slug;
+export function setSessionStoreSlug(slug: string | null): void {
+  sessionStoreSlug = slug;
 }
 
-function resolveTenantSlug(explicit?: string): string {
+export function getSessionStoreSlug(): string | null {
+  return sessionStoreSlug;
+}
+
+function resolveStoreSlug(explicit?: string): string {
   if (explicit) return explicit;
-  if (sessionTenantSlug) return sessionTenantSlug;
-  if (import.meta.env.DEV && import.meta.env.VITE_TENANT_SLUG) {
-    return import.meta.env.VITE_TENANT_SLUG;
+  if (sessionStoreSlug) return sessionStoreSlug;
+  if (import.meta.env.DEV) {
+    const fromEnv = import.meta.env.VITE_STORE_SLUG ?? import.meta.env.VITE_TENANT_SLUG;
+    if (fromEnv) return fromEnv;
   }
-  throw new Error('Tenant não identificado — faça login novamente.');
+  throw new Error('Loja não identificada — faça login novamente.');
+}
+
+/** Prefixo de query keys escopadas à loja ativa na sessão. */
+export function storeQueryKey(...parts: readonly unknown[]): readonly unknown[] {
+  return ['store', sessionStoreSlug ?? '_none', ...parts] as const;
 }
 
 /** URL absoluta da vitrine para um subpath da loja atual. */
-export function storefrontProductUrl(produtoId: number, tenantSlug?: string): string {
-  const slug = tenantSlug ?? resolveTenantSlug();
+export function storefrontProductUrl(produtoId: number, storeSlug?: string): string {
+  const slug = storeSlug ?? resolveStoreSlug();
   return `${STOREFRONT_URL}${buildStorePath(slug, `/produto/${produtoId}`)}`;
 }
 
 /** Subpath da vitrine (para CTA de banner). */
-export function storefrontStorePath(subpath: string, tenantSlug?: string): string {
-  const slug = tenantSlug ?? resolveTenantSlug();
+export function storefrontStorePath(subpath: string, storeSlug?: string): string {
+  const slug = storeSlug ?? resolveStoreSlug();
   return buildStorePath(slug, subpath);
 }
 
-/** URL absoluta da home da vitrine do tenant autenticado. */
-export function storefrontHomeUrl(tenantSlug?: string): string {
-  const slug = tenantSlug ?? resolveTenantSlug();
+/** URL absoluta da home da vitrine da loja autenticada. */
+export function storefrontHomeUrl(storeSlug?: string): string {
+  const slug = storeSlug ?? resolveStoreSlug();
   return `${STOREFRONT_URL}${buildStorePath(slug, '/')}`;
 }
 
@@ -73,15 +83,26 @@ export class ApiError extends Error {
   }
 }
 
+/** Contexto de sessão pedido à API (`buyer` na vitrine, `merchant` no admin). */
+function authContextHeader(path: string): string {
+  // Durante impersonate a sessão ativa é merchant — não pedir swap para platform.
+  if (path.includes('/platform/end-impersonation')) return 'merchant';
+  return path.startsWith('/api/v1/platform') ? 'platform' : 'merchant';
+}
+
 /**
  * fetch com `credentials: 'include'` (cookie de sessão `lojao.sid`).
- * Tenant autenticado vem da sessão; no login envie `tenantSlug` no body.
+ * Loja autenticada vem da sessão; envia `X-Store-Slug` quando disponível.
  */
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const hasBody = options.body != null && options.body !== '';
   const headers: Record<string, string> = {
+    'X-Auth-Context': authContextHeader(path),
     ...((options.headers as Record<string, string> | undefined) ?? {}),
   };
+  if (sessionStoreSlug) {
+    headers['X-Store-Slug'] = sessionStoreSlug;
+  }
   if (hasBody) {
     headers['Content-Type'] = 'application/json';
   }
@@ -106,9 +127,17 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
 
 /** POST/PUT multipart (upload de imagem) — não define Content-Type (boundary automático). */
 export async function apiUpload<T>(path: string, formData: FormData, method = 'POST'): Promise<T> {
+  const headers: Record<string, string> = {
+    'X-Auth-Context': authContextHeader(path),
+  };
+  if (sessionStoreSlug) {
+    headers['X-Store-Slug'] = sessionStoreSlug;
+  }
+
   const res = await fetch(`${browserApiBase()}${path}`, {
     method,
     credentials: 'include',
+    headers,
     body: formData,
   });
 

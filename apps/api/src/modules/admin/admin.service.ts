@@ -1,7 +1,10 @@
 import type { PedidoDetalhe, PedidoRecente, UpdatePedidoStatusInput } from '@lojao/types/pedidos';
-import type { TenantDatabase } from '@lojao/db';
-import { count, desc, eq, pedidos, sql, usuarios } from '@lojao/db';
-import type pg from 'pg';
+
+import {
+  orderStatusFromApi,
+  orderStatusToApi,
+} from '../../lib/merchant-schema-map.js';
+import type { StoreScope } from '../../lib/store-scope.js';
 
 import type { PedidosQuery } from './admin.schemas.js';
 
@@ -31,35 +34,51 @@ export interface PedidoResumo {
 /**
  * Estatísticas do dashboard admin. Porta as queries de
  * `produtoController.dashboard` / `checkoutController.adminPedidos`, adaptadas
- * para os 4 cards da Fase 2. (Tabela `produtos` não tem flag `ativo`, então
+ * para os 4 cards da Fase 2. (Tabela `products` não tem flag `active`, então
  * `produtos_ativos` = total de produtos, igual ao card do legacy.)
  */
-export async function getDashboardStats(db: pg.Pool): Promise<DashboardStats> {
+export async function getDashboardStats({ pool, storeId }: StoreScope): Promise<DashboardStats> {
   const [hoje, pendentes, receita, produtos, categorias, banners, totalPedidos, receitaTotal, recentes] =
     await Promise.all([
-      db.query<{ c: number }>(
-        "SELECT COUNT(*)::int AS c FROM pedidos WHERE created_at::date = CURRENT_DATE",
+      pool.query<{ c: number }>(
+        'SELECT COUNT(*)::int AS c FROM orders WHERE store_id = $1 AND created_at::date = CURRENT_DATE',
+        [storeId],
       ),
-      db.query<{ c: number }>(
-        "SELECT COUNT(*)::int AS c FROM pedidos WHERE status = 'aguardando_pagamento'",
+      pool.query<{ c: number }>(
+        "SELECT COUNT(*)::int AS c FROM orders WHERE store_id = $1 AND status = 'awaiting_payment'",
+        [storeId],
       ),
-      db.query<{ s: string }>(
-        "SELECT COALESCE(SUM(total), 0) AS s FROM pedidos WHERE status = 'pago' AND created_at >= date_trunc('month', CURRENT_DATE)",
+      pool.query<{ s: string }>(
+        "SELECT COALESCE(SUM(total), 0) AS s FROM orders WHERE store_id = $1 AND status = 'paid' AND created_at >= date_trunc('month', CURRENT_DATE)",
+        [storeId],
       ),
-      db.query<{ c: number }>('SELECT COUNT(*)::int AS c FROM produtos'),
-      db.query<{ c: number }>('SELECT COUNT(*)::int AS c FROM categorias').catch(() => ({ rows: [{ c: 0 }] })),
-      db.query<{ c: number }>("SELECT COUNT(*)::int AS c FROM banners WHERE ativo = true").catch(() => ({ rows: [{ c: 0 }] })),
-      db.query<{ c: number }>('SELECT COUNT(*)::int AS c FROM pedidos'),
-      db.query<{ s: string }>(
-        "SELECT COALESCE(SUM(total), 0) AS s FROM pedidos WHERE status = 'pago'",
+      pool.query<{ c: number }>('SELECT COUNT(*)::int AS c FROM products WHERE store_id = $1', [
+        storeId,
+      ]),
+      pool.query<{ c: number }>(
+        'SELECT COUNT(*)::int AS c FROM categories WHERE store_id = $1',
+        [storeId],
+      ).catch(() => ({ rows: [{ c: 0 }] })),
+      pool.query<{ c: number }>(
+        'SELECT COUNT(*)::int AS c FROM banners WHERE store_id = $1 AND active = true',
+        [storeId],
+      ).catch(() => ({ rows: [{ c: 0 }] })),
+      pool.query<{ c: number }>('SELECT COUNT(*)::int AS c FROM orders WHERE store_id = $1', [
+        storeId,
+      ]),
+      pool.query<{ s: string }>(
+        "SELECT COALESCE(SUM(total), 0) AS s FROM orders WHERE store_id = $1 AND status = 'paid'",
+        [storeId],
       ),
-      db.query(
-        `SELECT p.id, p.status, p.total, p.created_at, p.metodo_pagamento,
-                u.nome AS cliente_nome
-         FROM pedidos p
-         JOIN usuarios u ON u.id = p.usuario_id
-         ORDER BY p.created_at DESC
+      pool.query(
+        `SELECT o.id, o.status, o.total, o.created_at, o.payment_method AS metodo_pagamento,
+                b.name AS cliente_nome
+         FROM orders o
+         JOIN buyers b ON b.id = o.buyer_id AND b.store_id = o.store_id
+         WHERE o.store_id = $1
+         ORDER BY o.created_at DESC
          LIMIT 5`,
+        [storeId],
       ),
     ]);
 
@@ -74,7 +93,7 @@ export async function getDashboardStats(db: pg.Pool): Promise<DashboardStats> {
     receita_total: Number(receitaTotal.rows[0]?.s ?? 0),
     pedidos_recentes: recentes.rows.map((r) => ({
       id: Number(r.id),
-      status: String(r.status),
+      status: orderStatusToApi(String(r.status)),
       total: Number(r.total),
       created_at: String(r.created_at),
       metodo_pagamento: (r.metodo_pagamento as string | null) ?? null,
@@ -83,96 +102,94 @@ export async function getDashboardStats(db: pg.Pool): Promise<DashboardStats> {
   };
 }
 
-/** Lista paginada de pedidos (read-only) com dados do cliente — Drizzle. */
+/** Lista paginada de pedidos (read-only) com dados do cliente. */
 export async function listPedidos(
-  db: TenantDatabase,
+  scope: StoreScope,
   { page, perPage, status }: PedidosQuery,
 ): Promise<{ data: PedidoResumo[]; total: number }> {
+  const { pool, storeId } = scope;
   const offset = (page - 1) * perPage;
+  const enStatus = status ? orderStatusFromApi(status) : null;
 
-  const totalQuery = status
-    ? db.select({ total: count() }).from(pedidos).where(eq(pedidos.status, status))
-    : db.select({ total: count() }).from(pedidos);
+  const countParams = enStatus ? [storeId, enStatus] : [storeId];
+  const countSql = enStatus
+    ? 'SELECT COUNT(*)::int AS total FROM orders WHERE store_id = $1 AND status = $2'
+    : 'SELECT COUNT(*)::int AS total FROM orders WHERE store_id = $1';
 
-  const [totalRow] = await totalQuery;
-  const total = Number(totalRow?.total ?? 0);
+  const countRes = await pool.query<{ total: number }>(countSql, countParams);
+  const total = Number(countRes.rows[0]?.total ?? 0);
 
-  const rowsRes = status
-    ? await db
-        .select({
-          id: pedidos.id,
-          createdAt: pedidos.createdAt,
-          status: pedidos.status,
-          total: pedidos.total,
-          metodoPagamento: pedidos.metodoPagamento,
-          clienteNome: usuarios.nome,
-          clienteEmail: usuarios.email,
-          totalItens: sql<number>`(
-            SELECT COUNT(*)::int FROM pedido_itens pi WHERE pi.pedido_id = ${pedidos.id}
-          )`.as('total_itens'),
-        })
-        .from(pedidos)
-        .innerJoin(usuarios, eq(usuarios.id, pedidos.usuarioId))
-        .where(eq(pedidos.status, status))
-        .orderBy(desc(pedidos.createdAt))
-        .limit(perPage)
-        .offset(offset)
-    : await db
-        .select({
-          id: pedidos.id,
-          createdAt: pedidos.createdAt,
-          status: pedidos.status,
-          total: pedidos.total,
-          metodoPagamento: pedidos.metodoPagamento,
-          clienteNome: usuarios.nome,
-          clienteEmail: usuarios.email,
-          totalItens: sql<number>`(
-            SELECT COUNT(*)::int FROM pedido_itens pi WHERE pi.pedido_id = ${pedidos.id}
-          )`.as('total_itens'),
-        })
-        .from(pedidos)
-        .innerJoin(usuarios, eq(usuarios.id, pedidos.usuarioId))
-        .orderBy(desc(pedidos.createdAt))
-        .limit(perPage)
-        .offset(offset);
+  const listParams = enStatus
+    ? [storeId, enStatus, perPage, offset]
+    : [storeId, perPage, offset];
+  const listSql = enStatus
+    ? `
+      SELECT o.id, o.created_at, o.status, o.total, o.payment_method AS metodo_pagamento,
+             b.name AS cliente_nome, b.email AS cliente_email,
+             (SELECT COUNT(*)::int FROM order_items oi WHERE oi.order_id = o.id AND oi.store_id = o.store_id) AS total_itens
+      FROM orders o
+      INNER JOIN buyers b ON b.id = o.buyer_id AND b.store_id = o.store_id
+      WHERE o.store_id = $1 AND o.status = $2
+      ORDER BY o.created_at DESC
+      LIMIT $3 OFFSET $4
+    `
+    : `
+      SELECT o.id, o.created_at, o.status, o.total, o.payment_method AS metodo_pagamento,
+             b.name AS cliente_nome, b.email AS cliente_email,
+             (SELECT COUNT(*)::int FROM order_items oi WHERE oi.order_id = o.id AND oi.store_id = o.store_id) AS total_itens
+      FROM orders o
+      INNER JOIN buyers b ON b.id = o.buyer_id AND b.store_id = o.store_id
+      WHERE o.store_id = $1
+      ORDER BY o.created_at DESC
+      LIMIT $2 OFFSET $3
+    `;
 
-  const data: PedidoResumo[] = rowsRes.map((row) => ({
-    id: row.id,
+  const rowsRes = await pool.query(listSql, listParams);
+
+  const data: PedidoResumo[] = rowsRes.rows.map((row) => ({
+    id: row.id as number,
     created_at:
-      row.createdAt instanceof Date ? row.createdAt.toISOString() : String(row.createdAt ?? ''),
-    status: row.status,
+      row.created_at instanceof Date
+        ? row.created_at.toISOString()
+        : String(row.created_at ?? ''),
+    status: orderStatusToApi(String(row.status)),
     total: Number(row.total),
-    metodo_pagamento: row.metodoPagamento,
-    total_itens: Number(row.totalItens ?? 0),
-    cliente_nome: row.clienteNome,
-    cliente_email: row.clienteEmail,
+    metodo_pagamento: (row.metodo_pagamento as string | null) ?? null,
+    total_itens: Number(row.total_itens ?? 0),
+    cliente_nome: row.cliente_nome as string,
+    cliente_email: row.cliente_email as string,
   }));
 
   return { data, total };
 }
 
 /** Porta `checkoutController.adminDetalhePedido`. */
-export async function getPedidoById(db: pg.Pool, id: number): Promise<PedidoDetalhe | null> {
-  const pedidoRes = await db.query(
-    `SELECT p.*, u.nome AS usuario_nome, u.email AS usuario_email
-     FROM pedidos p
-     JOIN usuarios u ON u.id = p.usuario_id
-     WHERE p.id = $1`,
-    [id],
+export async function getPedidoById(
+  { pool, storeId }: StoreScope,
+  id: number,
+): Promise<PedidoDetalhe | null> {
+  const pedidoRes = await pool.query(
+    `SELECT o.*, b.name AS usuario_nome, b.email AS usuario_email
+     FROM orders o
+     JOIN buyers b ON b.id = o.buyer_id AND b.store_id = o.store_id
+     WHERE o.id = $1 AND o.store_id = $2`,
+    [id, storeId],
   );
   const row = pedidoRes.rows[0];
   if (!row) return null;
 
-  const itensRes = await db.query(
-    'SELECT id, produto_id, nome_produto, quantidade, preco_unitario, subtotal FROM pedido_itens WHERE pedido_id = $1 ORDER BY id',
-    [id],
+  const itensRes = await pool.query(
+    `SELECT id, product_id, product_name, quantity, unit_price, subtotal
+     FROM order_items WHERE order_id = $1 AND store_id = $2 ORDER BY id`,
+    [id, storeId],
   );
 
   let pagamento: PedidoDetalhe['pagamento'] = null;
   try {
-    const pagRes = await db.query(
-      'SELECT id, mp_payment_id, status, status_mp, metodo FROM pagamentos WHERE pedido_id = $1 ORDER BY id DESC LIMIT 1',
-      [id],
+    const pagRes = await pool.query(
+      `SELECT id, mp_payment_id, status, status_mp, method
+       FROM payments WHERE order_id = $1 AND store_id = $2 ORDER BY id DESC LIMIT 1`,
+      [id, storeId],
     );
     if (pagRes.rows[0]) {
       pagamento = {
@@ -180,41 +197,43 @@ export async function getPedidoById(db: pg.Pool, id: number): Promise<PedidoDeta
         mp_payment_id: (pagRes.rows[0].mp_payment_id as string | null) ?? null,
         status: String(pagRes.rows[0].status),
         status_mp: (pagRes.rows[0].status_mp as string | null) ?? null,
-        metodo: (pagRes.rows[0].metodo as string | null) ?? null,
+        metodo: (pagRes.rows[0].method as string | null) ?? null,
       };
     }
   } catch {
     pagamento = null;
   }
 
+  const ptStatus = orderStatusToApi(String(row.status)) as PedidoDetalhe['status'];
+
   return {
     id: Number(row.id),
-    status: row.status as PedidoDetalhe['status'],
+    status: ptStatus,
     subtotal: Number(row.subtotal ?? 0),
-    frete: Number(row.frete ?? 0),
+    frete: Number(row.shipping_fee ?? 0),
     total: Number(row.total ?? 0),
-    metodo_pagamento: (row.metodo_pagamento as string | null) ?? null,
-    codigo_rastreio: (row.codigo_rastreio as string | null) ?? null,
+    metodo_pagamento: (row.payment_method as string | null) ?? null,
+    codigo_rastreio: (row.tracking_code as string | null) ?? null,
     created_at: String(row.created_at),
     usuario_nome: String(row.usuario_nome),
     usuario_email: String(row.usuario_email),
-    nome_entrega: (row.nome_entrega as string | null) ?? null,
-    email_entrega: (row.email_entrega as string | null) ?? null,
-    telefone_entrega: (row.telefone_entrega as string | null) ?? null,
-    cpf_entrega: (row.cpf_entrega as string | null) ?? null,
-    cep: (row.cep as string | null) ?? null,
-    logradouro: (row.logradouro as string | null) ?? null,
-    numero: (row.numero as string | null) ?? null,
-    complemento: (row.complemento as string | null) ?? null,
-    bairro: (row.bairro as string | null) ?? null,
-    cidade: (row.cidade as string | null) ?? null,
-    estado: (row.estado as string | null) ?? null,
+    nome_entrega: (row.shipping_name as string | null) ?? null,
+    email_entrega: (row.shipping_email as string | null) ?? null,
+    telefone_entrega: (row.shipping_phone as string | null) ?? null,
+    cpf_entrega: (row.shipping_cpf as string | null) ?? null,
+    cep: (row.shipping_postal_code as string | null) ?? null,
+    logradouro: (row.shipping_street as string | null) ?? null,
+    numero: (row.shipping_number as string | null) ?? null,
+    complemento: (row.shipping_complement as string | null) ?? null,
+    bairro: (row.shipping_district as string | null) ?? null,
+    cidade: (row.shipping_city as string | null) ?? null,
+    estado: (row.shipping_state as string | null) ?? null,
     itens: itensRes.rows.map((i) => ({
       id: Number(i.id),
-      produto_id: i.produto_id === null ? null : Number(i.produto_id),
-      nome_produto: String(i.nome_produto),
-      quantidade: Number(i.quantidade),
-      preco_unitario: Number(i.preco_unitario),
+      produto_id: i.product_id === null ? null : Number(i.product_id),
+      nome_produto: String(i.product_name),
+      quantidade: Number(i.quantity),
+      preco_unitario: Number(i.unit_price),
       subtotal: Number(i.subtotal),
     })),
     pagamento,
@@ -223,19 +242,23 @@ export async function getPedidoById(db: pg.Pool, id: number): Promise<PedidoDeta
 
 /** Porta `checkoutController.adminAtualizarStatus` (sem e-mail — ver STATUS). */
 export async function updatePedidoStatus(
-  db: pg.Pool,
+  scope: StoreScope,
   id: number,
   input: UpdatePedidoStatusInput,
 ): Promise<PedidoDetalhe | null> {
+  const { pool, storeId } = scope;
   const rastreio = input.codigo_rastreio?.trim() || null;
+  const enStatus = orderStatusFromApi(input.status);
 
-  await db.query(
-    `UPDATE pedidos
+  const upd = await pool.query(
+    `UPDATE orders
      SET status = $1,
-         codigo_rastreio = COALESCE($2, codigo_rastreio)
-     WHERE id = $3`,
-    [input.status, rastreio, id],
+         tracking_code = COALESCE($2, tracking_code),
+         updated_at = NOW()
+     WHERE id = $3 AND store_id = $4`,
+    [enStatus, rastreio, id, storeId],
   );
+  if ((upd.rowCount ?? 0) === 0) return null;
 
-  return getPedidoById(db, id);
+  return getPedidoById(scope, id);
 }

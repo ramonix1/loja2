@@ -1,4 +1,5 @@
 import { Button, adminMutedClass, cn } from '@lojao/ui';
+import { ActionIcons } from '@lojao/ui/icons';
 import { testIds } from '@lojao/test-utils';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
@@ -12,7 +13,12 @@ import { queryClient } from '../lib/query-client';
 
 interface StoreSummary {
   slug: string;
-  lojaNome: string;
+  nome?: string;
+  lojaNome?: string;
+}
+
+function storeDisplayName(store: StoreSummary): string {
+  return store.nome ?? store.lojaNome ?? store.slug;
 }
 
 interface MyStoresResponse {
@@ -29,10 +35,10 @@ function storeVitrineLabel(slug: string): string {
 }
 
 export function MyStoresPage() {
-  const { user, tenant, logout, selectTenant, clearTenantForSwitch, isLoading } = useAuth();
+  const { user, store, logout, selectStore, clearStoreForSwitch, isLoading } = useAuth();
   const navigate = useNavigate();
 
-  /** Evita limpar tenant após `select-tenant` — só na chegada com loja já ativa ("Trocar loja"). */
+  /** Evita limpar loja após `select-store` — só na chegada com loja já ativa ("Trocar loja"). */
   const hubInitDone = useRef(false);
 
   useEffect(() => {
@@ -45,19 +51,19 @@ export function MyStoresPage() {
     if (isLoading || !user || hubInitDone.current) return;
     hubInitDone.current = true;
 
-    if (tenant) {
-      void clearTenantForSwitch();
+    if (store) {
+      void clearStoreForSwitch();
     }
-  }, [isLoading, user, tenant, clearTenantForSwitch]);
+  }, [isLoading, user, store, clearStoreForSwitch]);
 
   const storesQuery = useQuery({
     queryKey: ['auth', 'my-stores'],
     queryFn: () => apiFetch<MyStoresResponse>('/api/v1/auth/my-stores'),
-    enabled: !!user && !tenant,
+    enabled: !!user && !store,
   });
 
   const selectMutation = useMutation({
-    mutationFn: (slug: string) => selectTenant(slug),
+    mutationFn: (slug: string) => selectStore(slug),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['auth', 'my-stores'] });
       navigate('/admin/dashboard', { replace: true });
@@ -133,11 +139,11 @@ export function MyStoresPage() {
               >
                 <div className="mb-5 flex items-center gap-4">
                   <div className="admin-hub-avatar" aria-hidden>
-                    {store.lojaNome.charAt(0).toUpperCase()}
+                    {storeDisplayName(store).charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
                     <h2 className="truncate text-lg font-semibold text-[var(--admin-text)] sm:text-xl">
-                      {store.lojaNome}
+                      {storeDisplayName(store)}
                     </h2>
                     <p className={cn('mt-1 truncate text-sm', adminMutedClass())}>
                       {storeVitrineLabel(store.slug)}
@@ -153,6 +159,7 @@ export function MyStoresPage() {
                   className="mt-auto min-h-12 w-full touch-manipulation text-base active:scale-[0.98]"
                   onClick={() => selectMutation.mutate(store.slug)}
                 >
+                  <ActionIcons.forward className="mr-2 inline size-5" aria-hidden />
                   {selectMutation.isPending ? 'Abrindo…' : 'Entrar na loja'}
                 </Button>
               </article>

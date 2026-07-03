@@ -1,8 +1,8 @@
 import { seedTestDatabase } from './seed.js';
 
 /**
- * GlobalSetup do vitest: roda uma vez antes da suíte. Garante schema + tenant
- * `loja` + admin de testes no banco apontado por `DATABASE_URL`.
+ * GlobalSetup do vitest: roda uma vez antes da suíte. Aplica migrations MA8,
+ * provisiona merchant `test-loja` + loja `loja` e fixtures EN no merchant DB.
  */
 export default async function setup(): Promise<void> {
   process.env.NODE_ENV ??= 'test';

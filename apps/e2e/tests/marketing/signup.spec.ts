@@ -33,7 +33,7 @@ test('/signup/success mostra links de painel e loja @smoke', async ({ page }) =>
   await expect(page.getByTestId(testIds.successPage)).toBeVisible();
 
   const adminLink = page.getByTestId(testIds.successAdminLink);
-  await expect(adminLink).toHaveAttribute('href', /\/login$/);
+  await expect(adminLink).toHaveAttribute('href', /\/admin\/dashboard$/);
 
   const storeLink = page.getByTestId(testIds.successStoreLink);
   await expect(storeLink).toHaveAttribute('href', '/store/demo');

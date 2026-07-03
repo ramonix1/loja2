@@ -3,23 +3,26 @@ import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { buildTestApp } from '../helpers/build-app.js';
+import { merchantDbName, merchantPoolConfig } from '../../src/lib/merchant-provision.js';
+import { masterPool } from '../../src/lib/master-db.js';
 import { loginAdminCookie, loginUserCookie, TENANT_HEADER } from '../helpers/session.js';
-
-const { Pool } = pg;
+import { TEST_PRIMARY_MERCHANT_SLUG, TEST_STORE_SLUG } from '../helpers/seed.js';
 
 describe('CRUD /api/v1/admin/banners', () => {
   let app: FastifyInstance;
   let adminCookie: string;
   let db: pg.Pool;
+  let storeId: number;
 
   beforeAll(async () => {
     app = await buildTestApp();
     adminCookie = await loginAdminCookie(app);
-    db = new Pool({
-      connectionString:
-        process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@localhost:5432/lojao',
-      ssl: false,
-    });
+    const storeRes = await masterPool.query<{ id: number }>(
+      'SELECT id FROM stores WHERE slug = $1',
+      [TEST_STORE_SLUG],
+    );
+    storeId = storeRes.rows[0]!.id;
+    db = new pg.Pool(merchantPoolConfig(merchantDbName(TEST_PRIMARY_MERCHANT_SLUG)));
   });
 
   afterAll(async () => {
@@ -65,8 +68,9 @@ describe('CRUD /api/v1/admin/banners', () => {
 
   it('PUT atualizar campos + DELETE: happy path', async () => {
     const ins = await db.query(
-      `INSERT INTO banners (titulo, imagem, ativo, ordem) VALUES ($1, $2, true, 0) RETURNING id`,
-      ['Banner Vitest', '/images/test-vitest.jpg'],
+      `INSERT INTO banners (store_id, title, image, active, "order")
+       VALUES ($1, $2, $3, true, 0) RETURNING id`,
+      [storeId, 'Banner Vitest', '/images/test-vitest.jpg'],
     );
     const id = ins.rows[0].id as number;
 
@@ -106,7 +110,8 @@ describe('CRUD /api/v1/admin/banners', () => {
       url: '/api/v1/admin/banners',
       headers: { ...TENANT_HEADER },
     });
-    expect(res.statusCode).toBe(401);
+    expect(res.statusCode).toBe(404);
+    expect(res.json().code).toBe('STORE_NOT_FOUND');
   });
 
   it('como usuário comum: 403', async () => {
@@ -116,7 +121,7 @@ describe('CRUD /api/v1/admin/banners', () => {
       url: '/api/v1/admin/banners',
       headers: { ...TENANT_HEADER, cookie },
     });
-    expect(res.statusCode).toBe(403);
-    expect(res.json().code).toBe('FORBIDDEN');
+    expect(res.statusCode).toBe(401);
+    expect(res.json().code).toBe('UNAUTHORIZED');
   });
 });

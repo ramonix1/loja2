@@ -68,6 +68,27 @@ export const PAYMENT_CHART_COLORS = [
   'var(--ata-cinza-pedra)',
 ];
 
+export const PLATFORM_HEALTH_CHART_COLORS: Record<string, string> = {
+  healthy: 'var(--platform-success)',
+  attention: 'var(--platform-warning)',
+  suspended: 'var(--platform-error)',
+};
+
+export const PLATFORM_BILLING_CHART_COLORS: Record<string, string> = {
+  active: 'var(--platform-success)',
+  trialing: 'var(--platform-accent)',
+  past_due: 'var(--platform-warning)',
+  cancelled: 'var(--platform-error)',
+  unpaid: 'var(--platform-error)',
+  sem_billing: 'color-mix(in srgb, var(--platform-text-muted) 55%, transparent)',
+};
+
+export const PLATFORM_PLAN_CHART_COLORS: Record<string, string> = {
+  starter: 'var(--platform-accent)',
+  professional: 'var(--platform-link)',
+  enterprise: 'var(--platform-success)',
+};
+
 /** Re-renderiza quando o tema muda (toggle escuro/claro). */
 export function useChartTheme(surface: UiSurface = 'admin', theme?: 'commerce' | 'platform') {
   const resolved = resolveSurface(surface, theme);

@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@lojao/design-tokens": "workspace:*",
-    "@lojao/tenant-host": "workspace:*",
+    "@lojao/store-host": "workspace:*",
     "@lojao/test-utils": "workspace:*",
     "@lojao/types": "workspace:*",
     "@lojao/ui": "workspace:*",

@@ -1,7 +1,11 @@
 import type { FiltroEstoque, RelatorioAba, RelatorioCsvTipo } from '@lojao/types/relatorios';
 import { FILTROS_ESTOQUE, STATUS_LABEL } from '@lojao/types/relatorios';
-import type pg from 'pg';
 
+import {
+  appointmentStatusToApi,
+  orderStatusToApi,
+} from '../../lib/merchant-schema-map.js';
+import type { StoreScope } from '../../lib/store-scope.js';
 import {
   fetchReceitaPorDia,
   fetchReceitaPorMetodo,
@@ -10,10 +14,10 @@ import {
 
 const FILTROS_ESTOQUE_VALIDOS: Record<FiltroEstoque, string> = {
   todos: '',
-  esgotado: 'WHERE p.estoque = 0',
-  baixo: 'WHERE p.estoque > 0 AND p.estoque <= 5',
-  ok: 'WHERE p.estoque > 5',
-  ilimitado: 'WHERE p.estoque IS NULL',
+  esgotado: 'AND p.stock = 0',
+  baixo: 'AND p.stock > 0 AND p.stock <= 5',
+  ok: 'AND p.stock > 5',
+  ilimitado: 'AND p.stock IS NULL',
 };
 
 export interface RelatorioDateRange {
@@ -50,23 +54,23 @@ function fmtDate(d: Date | string): string {
 }
 
 export async function getRelatorioDados(
-  db: pg.Pool,
+  scope: StoreScope,
   aba: RelatorioAba,
   range: RelatorioDateRange,
   filtroEstoque: FiltroEstoque,
 ): Promise<Record<string, unknown>> {
-  if (aba === 'vendas') return getDadosVendas(db, range.dataInicio, range.dataFim);
-  if (aba === 'estoque') return getDadosEstoque(db, filtroEstoque);
-  if (aba === 'entregas') return getDadosEntregas(db);
-  if (aba === 'produtos') return getDadosProdutos(db, range.dataInicio, range.dataFim);
-  if (aba === 'financeiro') return getDadosFinanceiro(db, range.dataInicio, range.dataFim);
-  if (aba === 'clientes') return getDadosClientes(db, range.dataInicio, range.dataFim);
-  if (aba === 'agendamentos') return getDadosAgendamentos(db, range.dataInicio, range.dataFim);
+  if (aba === 'vendas') return getDadosVendas(scope, range.dataInicio, range.dataFim);
+  if (aba === 'estoque') return getDadosEstoque(scope, filtroEstoque);
+  if (aba === 'entregas') return getDadosEntregas(scope);
+  if (aba === 'produtos') return getDadosProdutos(scope, range.dataInicio, range.dataFim);
+  if (aba === 'financeiro') return getDadosFinanceiro(scope, range.dataInicio, range.dataFim);
+  if (aba === 'clientes') return getDadosClientes(scope, range.dataInicio, range.dataFim);
+  if (aba === 'agendamentos') return getDadosAgendamentos(scope, range.dataInicio, range.dataFim);
   return {};
 }
 
 export async function buildRelatorioCsv(
-  db: pg.Pool,
+  scope: StoreScope,
   tipo: RelatorioCsvTipo,
   range: RelatorioDateRange,
 ): Promise<{ csv: string; filename: string }> {
@@ -74,7 +78,7 @@ export async function buildRelatorioCsv(
   let filename: string = tipo;
 
   if (tipo === 'vendas') {
-    const d = await getDadosVendas(db, range.dataInicio, range.dataFim);
+    const d = await getDadosVendas(scope, range.dataInicio, range.dataFim);
     const pedidos = d.pedidos as Array<Record<string, unknown>>;
     linhas = [
       ['ID', 'Data', 'Cliente', 'E-mail', 'Itens', 'Subtotal', 'Frete', 'Total', 'Pagamento', 'Status'],
@@ -93,7 +97,7 @@ export async function buildRelatorioCsv(
     ];
     filename = `vendas_${range.dataInicioStr}_${range.dataFimStr}`;
   } else if (tipo === 'estoque') {
-    const d = await getDadosEstoque(db, 'todos');
+    const d = await getDadosEstoque(scope, 'todos');
     const produtos = d.produtos as Array<Record<string, unknown>>;
     linhas = [
       ['Produto', 'Categoria', 'Estoque', 'Status'],
@@ -112,7 +116,7 @@ export async function buildRelatorioCsv(
     ];
     filename = 'estoque';
   } else if (tipo === 'entregas') {
-    const d = await getDadosEntregas(db);
+    const d = await getDadosEntregas(scope);
     const pedidos = d.pedidos as Array<Record<string, unknown>>;
     linhas = [
       ['ID', 'Data', 'Cliente', 'Status', 'Rastreio', 'Cidade/UF', 'Total'],
@@ -128,7 +132,7 @@ export async function buildRelatorioCsv(
     ];
     filename = 'entregas';
   } else if (tipo === 'produtos') {
-    const d = await getDadosProdutos(db, range.dataInicio, range.dataFim);
+    const d = await getDadosProdutos(scope, range.dataInicio, range.dataFim);
     const top = d.topProdutos as Array<Record<string, unknown>>;
     linhas = [
       ['Produto', 'Qtd Vendida', 'Receita (R$)', 'Pedidos'],
@@ -141,7 +145,7 @@ export async function buildRelatorioCsv(
     ];
     filename = `produtos_${range.dataInicioStr}_${range.dataFimStr}`;
   } else if (tipo === 'financeiro') {
-    const d = await getDadosFinanceiro(db, range.dataInicio, range.dataFim);
+    const d = await getDadosFinanceiro(scope, range.dataInicio, range.dataFim);
     const porMetodo = d.porMetodo as Array<Record<string, unknown>>;
     const porDia = d.porDia as Array<Record<string, unknown>>;
     linhas = [
@@ -161,7 +165,7 @@ export async function buildRelatorioCsv(
     ];
     filename = `financeiro_${range.dataInicioStr}_${range.dataFimStr}`;
   } else if (tipo === 'clientes') {
-    const d = await getDadosClientes(db, range.dataInicio, range.dataFim);
+    const d = await getDadosClientes(scope, range.dataInicio, range.dataFim);
     const top = d.topClientes as Array<Record<string, unknown>>;
     linhas = [
       ['Cliente', 'E-mail', 'Pedidos', 'Total Gasto (R$)', 'Último Pedido'],
@@ -175,7 +179,7 @@ export async function buildRelatorioCsv(
     ];
     filename = `clientes_${range.dataInicioStr}_${range.dataFimStr}`;
   } else if (tipo === 'agendamentos') {
-    const d = await getDadosAgendamentos(db, range.dataInicio, range.dataFim);
+    const d = await getDadosAgendamentos(scope, range.dataInicio, range.dataFim);
     const agendamentos = d.agendamentos as Array<Record<string, unknown>>;
     linhas = [
       [
@@ -216,52 +220,54 @@ export async function buildRelatorioCsv(
   return { csv, filename };
 }
 
-async function getDadosVendas(db: pg.Pool, dataInicio: Date, dataFim: Date) {
+async function getDadosVendas(scope: StoreScope, dataInicio: Date, dataFim: Date) {
+  const { pool, storeId } = scope;
   const [pedidosRes, resumoRes, porDiaRes] = await Promise.all([
-    db.query(
-      `SELECT p.id, p.created_at, p.nome_entrega, p.email_entrega,
-              p.subtotal, p.frete, p.total, p.status, p.metodo_pagamento,
-              u.nome AS cliente_nome,
-              COUNT(pi.id)::int AS qtd_itens
-       FROM pedidos p
-       JOIN usuarios u ON u.id = p.usuario_id
-       LEFT JOIN pedido_itens pi ON pi.pedido_id = p.id
-       WHERE p.created_at BETWEEN $1 AND $2
-       GROUP BY p.id, u.nome
-       ORDER BY p.created_at DESC`,
-      [dataInicio, dataFim],
+    pool.query(
+      `SELECT o.id, o.created_at, o.shipping_name AS nome_entrega, o.shipping_email AS email_entrega,
+              o.subtotal, o.shipping_fee AS frete, o.total, o.status, o.payment_method AS metodo_pagamento,
+              b.name AS cliente_nome,
+              COUNT(oi.id)::int AS qtd_itens
+       FROM orders o
+       JOIN buyers b ON b.id = o.buyer_id AND b.store_id = o.store_id
+       LEFT JOIN order_items oi ON oi.order_id = o.id AND oi.store_id = o.store_id
+       WHERE o.store_id = $3 AND o.created_at BETWEEN $1 AND $2
+       GROUP BY o.id, b.name
+       ORDER BY o.created_at DESC`,
+      [dataInicio, dataFim, storeId],
     ),
-    db.query(
+    pool.query(
       `SELECT
         COUNT(*)::int AS total_pedidos,
-        COALESCE(SUM(total) FILTER (WHERE status NOT IN ('cancelado','aguardando_pagamento')), 0) AS receita_confirmada,
-        COALESCE(SUM(total) FILTER (WHERE status = 'aguardando_pagamento'), 0) AS receita_pendente,
-        COALESCE(SUM(total) FILTER (WHERE status = 'cancelado'), 0) AS receita_cancelada,
-        COUNT(*) FILTER (WHERE status = 'cancelado')::int AS pedidos_cancelados,
-        CASE WHEN COUNT(*) FILTER (WHERE status NOT IN ('cancelado','aguardando_pagamento')) > 0
-             THEN ROUND(SUM(total) FILTER (WHERE status NOT IN ('cancelado','aguardando_pagamento'))
-                  / COUNT(*) FILTER (WHERE status NOT IN ('cancelado','aguardando_pagamento')), 2)
+        COALESCE(SUM(total) FILTER (WHERE status NOT IN ('cancelled','awaiting_payment')), 0) AS receita_confirmada,
+        COALESCE(SUM(total) FILTER (WHERE status = 'awaiting_payment'), 0) AS receita_pendente,
+        COALESCE(SUM(total) FILTER (WHERE status = 'cancelled'), 0) AS receita_cancelada,
+        COUNT(*) FILTER (WHERE status = 'cancelled')::int AS pedidos_cancelados,
+        CASE WHEN COUNT(*) FILTER (WHERE status NOT IN ('cancelled','awaiting_payment')) > 0
+             THEN ROUND(SUM(total) FILTER (WHERE status NOT IN ('cancelled','awaiting_payment'))
+                  / COUNT(*) FILTER (WHERE status NOT IN ('cancelled','awaiting_payment')), 2)
              ELSE 0 END AS ticket_medio
-       FROM pedidos
-       WHERE created_at BETWEEN $1 AND $2`,
-      [dataInicio, dataFim],
+       FROM orders
+       WHERE store_id = $3 AND created_at BETWEEN $1 AND $2`,
+      [dataInicio, dataFim, storeId],
     ),
-    db.query(
+    pool.query(
       `SELECT
         DATE_TRUNC('day', created_at) AS dia,
         COUNT(*)::int AS total_pedidos,
-        COALESCE(SUM(total) FILTER (WHERE status NOT IN ('cancelado')), 0) AS receita
-       FROM pedidos
-       WHERE created_at BETWEEN $1 AND $2
+        COALESCE(SUM(total) FILTER (WHERE status NOT IN ('cancelled')), 0) AS receita
+       FROM orders
+       WHERE store_id = $3 AND created_at BETWEEN $1 AND $2
        GROUP BY dia
        ORDER BY dia`,
-      [dataInicio, dataFim],
+      [dataInicio, dataFim, storeId],
     ),
   ]);
 
   return {
     pedidos: pedidosRes.rows.map((r) => ({
       ...r,
+      status: orderStatusToApi(String(r.status)),
       subtotal: toNum(r.subtotal),
       frete: toNum(r.frete),
       total: toNum(r.total),
@@ -283,29 +289,37 @@ async function getDadosVendas(db: pg.Pool, dataInicio: Date, dataFim: Date) {
   };
 }
 
-async function getDadosEstoque(db: pg.Pool, filtro: FiltroEstoque) {
+async function getDadosEstoque(scope: StoreScope, filtro: FiltroEstoque) {
+  const { pool, storeId } = scope;
   if (!FILTROS_ESTOQUE.includes(filtro)) {
     filtro = 'todos';
   }
   const condicao = FILTROS_ESTOQUE_VALIDOS[filtro];
 
   const [produtosRes, resumoRes] = await Promise.all([
-    db.query(`
-      SELECT p.id, p.nome, p.valor, p.estoque, c.nome AS categoria_nome
-      FROM produtos p
-      LEFT JOIN categorias c ON c.id = p.categoria_id
-      ${condicao}
-      ORDER BY p.estoque ASC NULLS LAST, p.nome
-    `),
-    db.query(`
+    pool.query(
+      `
+      SELECT p.id, p.name AS nome, p.price AS valor, p.stock AS estoque, c.name AS categoria_nome
+      FROM products p
+      LEFT JOIN categories c ON c.id = p.category_id AND c.store_id = p.store_id
+      WHERE p.store_id = $1 ${condicao}
+      ORDER BY p.stock ASC NULLS LAST, p.name
+    `,
+      [storeId],
+    ),
+    pool.query(
+      `
       SELECT
         COUNT(*)::int AS total,
-        COUNT(*) FILTER (WHERE estoque IS NULL)::int AS ilimitados,
-        COUNT(*) FILTER (WHERE estoque IS NOT NULL AND estoque > 5)::int AS ok,
-        COUNT(*) FILTER (WHERE estoque IS NOT NULL AND estoque > 0 AND estoque <= 5)::int AS baixo,
-        COUNT(*) FILTER (WHERE estoque = 0)::int AS esgotados
-      FROM produtos
-    `),
+        COUNT(*) FILTER (WHERE stock IS NULL)::int AS ilimitados,
+        COUNT(*) FILTER (WHERE stock IS NOT NULL AND stock > 5)::int AS ok,
+        COUNT(*) FILTER (WHERE stock IS NOT NULL AND stock > 0 AND stock <= 5)::int AS baixo,
+        COUNT(*) FILTER (WHERE stock = 0)::int AS esgotados
+      FROM products
+      WHERE store_id = $1
+    `,
+      [storeId],
+    ),
   ]);
 
   return {
@@ -324,71 +338,84 @@ async function getDadosEstoque(db: pg.Pool, filtro: FiltroEstoque) {
   };
 }
 
-async function getDadosEntregas(db: pg.Pool) {
+async function getDadosEntregas(scope: StoreScope) {
+  const { pool, storeId } = scope;
   const [statusRes, pedidosRes] = await Promise.all([
-    db.query(`
+    pool.query(
+      `
       SELECT status, COUNT(*)::int AS total, COALESCE(SUM(total), 0) AS valor
-      FROM pedidos
+      FROM orders
+      WHERE store_id = $1
       GROUP BY status
       ORDER BY status
-    `),
-    db.query(`
-      SELECT p.id, p.created_at, p.nome_entrega, p.email_entrega,
-             p.cidade, p.estado, p.total, p.status, p.codigo_rastreio,
-             p.frete_servico
-      FROM pedidos p
-      WHERE p.status NOT IN ('entregue', 'cancelado')
+    `,
+      [storeId],
+    ),
+    pool.query(
+      `
+      SELECT o.id, o.created_at, o.shipping_name AS nome_entrega, o.shipping_email AS email_entrega,
+             o.shipping_city AS cidade, o.shipping_state AS estado, o.total, o.status,
+             o.tracking_code AS codigo_rastreio, o.shipping_service AS frete_servico
+      FROM orders o
+      WHERE o.store_id = $1 AND o.status NOT IN ('delivered', 'cancelled')
       ORDER BY
-        CASE p.status
-          WHEN 'pago' THEN 1
-          WHEN 'em_separacao' THEN 2
-          WHEN 'enviado' THEN 3
-          WHEN 'aguardando_pagamento' THEN 4
+        CASE o.status
+          WHEN 'paid' THEN 1
+          WHEN 'in_separation' THEN 2
+          WHEN 'shipped' THEN 3
+          WHEN 'awaiting_payment' THEN 4
           ELSE 5
         END,
-        p.created_at DESC
-    `),
+        o.created_at DESC
+    `,
+      [storeId],
+    ),
   ]);
 
   return {
     porStatus: statusRes.rows.map((r) => ({
-      status: r.status as string,
+      status: orderStatusToApi(String(r.status)),
       total: Number(r.total),
       valor: toNum(r.valor),
     })),
-    pedidos: pedidosRes.rows.map((r) => ({ ...r, total: toNum(r.total) })),
+    pedidos: pedidosRes.rows.map((r) => ({
+      ...r,
+      status: orderStatusToApi(String(r.status)),
+      total: toNum(r.total),
+    })),
   };
 }
 
-async function getDadosProdutos(db: pg.Pool, dataInicio: Date, dataFim: Date) {
+async function getDadosProdutos(scope: StoreScope, dataInicio: Date, dataFim: Date) {
+  const { pool, storeId } = scope;
   const [topRes, categoriaRes] = await Promise.all([
-    db.query(
-      `SELECT pi.nome_produto,
-              SUM(pi.quantidade)::int AS total_vendido,
-              ROUND(SUM(pi.subtotal), 2) AS receita_total,
-              COUNT(DISTINCT pi.pedido_id)::int AS total_pedidos
-       FROM pedido_itens pi
-       JOIN pedidos p ON p.id = pi.pedido_id
-       WHERE p.created_at BETWEEN $1 AND $2
-         AND p.status NOT IN ('cancelado')
-       GROUP BY pi.nome_produto
+    pool.query(
+      `SELECT oi.product_name AS nome_produto,
+              SUM(oi.quantity)::int AS total_vendido,
+              ROUND(SUM(oi.subtotal), 2) AS receita_total,
+              COUNT(DISTINCT oi.order_id)::int AS total_pedidos
+       FROM order_items oi
+       JOIN orders o ON o.id = oi.order_id AND o.store_id = oi.store_id
+       WHERE o.store_id = $3 AND o.created_at BETWEEN $1 AND $2
+         AND o.status NOT IN ('cancelled')
+       GROUP BY oi.product_name
        ORDER BY total_vendido DESC
        LIMIT 20`,
-      [dataInicio, dataFim],
+      [dataInicio, dataFim, storeId],
     ),
-    db.query(
-      `SELECT COALESCE(c.nome, 'Sem categoria') AS categoria,
-              SUM(pi.quantidade)::int AS total_vendido,
-              ROUND(SUM(pi.subtotal), 2) AS receita_total
-       FROM pedido_itens pi
-       JOIN pedidos p ON p.id = pi.pedido_id
-       LEFT JOIN produtos pr ON pr.id = pi.produto_id
-       LEFT JOIN categorias c ON c.id = pr.categoria_id
-       WHERE p.created_at BETWEEN $1 AND $2
-         AND p.status NOT IN ('cancelado')
-       GROUP BY c.nome
+    pool.query(
+      `SELECT COALESCE(c.name, 'Sem categoria') AS categoria,
+              SUM(oi.quantity)::int AS total_vendido,
+              ROUND(SUM(oi.subtotal), 2) AS receita_total
+       FROM order_items oi
+       JOIN orders o ON o.id = oi.order_id AND o.store_id = oi.store_id
+       LEFT JOIN products pr ON pr.id = oi.product_id AND pr.store_id = oi.store_id
+       LEFT JOIN categories c ON c.id = pr.category_id AND c.store_id = pr.store_id
+       WHERE o.store_id = $3 AND o.created_at BETWEEN $1 AND $2
+         AND o.status NOT IN ('cancelled')
+       GROUP BY c.name
        ORDER BY receita_total DESC`,
-      [dataInicio, dataFim],
+      [dataInicio, dataFim, storeId],
     ),
   ]);
 
@@ -407,31 +434,35 @@ async function getDadosProdutos(db: pg.Pool, dataInicio: Date, dataFim: Date) {
   };
 }
 
-async function getDadosFinanceiro(db: pg.Pool, dataInicio: Date, dataFim: Date) {
+async function getDadosFinanceiro(scope: StoreScope, dataInicio: Date, dataFim: Date) {
+  const { pool, storeId } = scope;
   const [resumoRes, metodosRows, porDiaRows, porMesRes] = await Promise.all([
-    db.query(
+    pool.query(
       `SELECT
-        COUNT(*) FILTER (WHERE status NOT IN ('cancelado'))::int AS total_pedidos,
-        COALESCE(SUM(total) FILTER (WHERE status NOT IN ('cancelado','aguardando_pagamento')), 0) AS receita_total,
-        COALESCE(SUM(frete) FILTER (WHERE status NOT IN ('cancelado')), 0) AS total_frete,
-        CASE WHEN COUNT(*) FILTER (WHERE status NOT IN ('cancelado','aguardando_pagamento')) > 0
-             THEN ROUND(SUM(total) FILTER (WHERE status NOT IN ('cancelado','aguardando_pagamento'))
-                  / COUNT(*) FILTER (WHERE status NOT IN ('cancelado','aguardando_pagamento')), 2)
+        COUNT(*) FILTER (WHERE status NOT IN ('cancelled'))::int AS total_pedidos,
+        COALESCE(SUM(total) FILTER (WHERE status NOT IN ('cancelled','awaiting_payment')), 0) AS receita_total,
+        COALESCE(SUM(shipping_fee) FILTER (WHERE status NOT IN ('cancelled')), 0) AS total_frete,
+        CASE WHEN COUNT(*) FILTER (WHERE status NOT IN ('cancelled','awaiting_payment')) > 0
+             THEN ROUND(SUM(total) FILTER (WHERE status NOT IN ('cancelled','awaiting_payment'))
+                  / COUNT(*) FILTER (WHERE status NOT IN ('cancelled','awaiting_payment')), 2)
              ELSE 0 END AS ticket_medio
-       FROM pedidos
-       WHERE created_at BETWEEN $1 AND $2`,
-      [dataInicio, dataFim],
+       FROM orders
+       WHERE store_id = $3 AND created_at BETWEEN $1 AND $2`,
+      [dataInicio, dataFim, storeId],
     ),
-    fetchReceitaPorMetodo(db, dataInicio, dataFim),
-    fetchReceitaPorDia(db, dataInicio, dataFim),
-    db.query(`
+    fetchReceitaPorMetodo(scope, dataInicio, dataFim),
+    fetchReceitaPorDia(scope, dataInicio, dataFim),
+    pool.query(
+      `
       SELECT DATE_TRUNC('month', created_at) AS mes,
-             COUNT(*) FILTER (WHERE status NOT IN ('cancelado'))::int AS total_pedidos,
-             ROUND(COALESCE(SUM(total) FILTER (WHERE status NOT IN ('cancelado','aguardando_pagamento')), 0), 2) AS receita
-       FROM pedidos
-       WHERE created_at >= NOW() - INTERVAL '12 months'
+             COUNT(*) FILTER (WHERE status NOT IN ('cancelled'))::int AS total_pedidos,
+             ROUND(COALESCE(SUM(total) FILTER (WHERE status NOT IN ('cancelled','awaiting_payment')), 0), 2) AS receita
+       FROM orders
+       WHERE store_id = $1 AND created_at >= NOW() - INTERVAL '12 months'
        GROUP BY mes ORDER BY mes
-    `),
+    `,
+      [storeId],
+    ),
   ]);
 
   return {
@@ -459,31 +490,32 @@ async function getDadosFinanceiro(db: pg.Pool, dataInicio: Date, dataFim: Date) 
   };
 }
 
-async function getDadosClientes(db: pg.Pool, dataInicio: Date, dataFim: Date) {
+async function getDadosClientes(scope: StoreScope, dataInicio: Date, dataFim: Date) {
+  const { pool, storeId } = scope;
   const [topRes, novosRes, totalClientesRes] = await Promise.all([
-    db.query(
-      `SELECT u.nome, u.email, u.created_at AS membro_desde,
-              COUNT(p.id)::int AS total_pedidos,
-              ROUND(COALESCE(SUM(p.total) FILTER (WHERE p.status NOT IN ('cancelado')), 0), 2) AS total_gasto,
-              MAX(p.created_at) AS ultimo_pedido
-       FROM usuarios u
-       LEFT JOIN pedidos p ON p.usuario_id = u.id
-         AND p.created_at BETWEEN $1 AND $2
-       WHERE u.role = 'usuario'
-       GROUP BY u.id, u.nome, u.email, u.created_at
-       HAVING COUNT(p.id) > 0
+    pool.query(
+      `SELECT b.name AS nome, b.email, b.created_at AS membro_desde,
+              COUNT(o.id)::int AS total_pedidos,
+              ROUND(COALESCE(SUM(o.total) FILTER (WHERE o.status NOT IN ('cancelled')), 0), 2) AS total_gasto,
+              MAX(o.created_at) AS ultimo_pedido
+       FROM buyers b
+       LEFT JOIN orders o ON o.buyer_id = b.id AND o.store_id = b.store_id
+         AND o.created_at BETWEEN $2 AND $3
+       WHERE b.store_id = $1
+       GROUP BY b.id, b.name, b.email, b.created_at
+       HAVING COUNT(o.id) > 0
        ORDER BY total_gasto DESC
        LIMIT 30`,
-      [dataInicio, dataFim],
+      [storeId, dataInicio, dataFim],
     ),
-    db.query(
+    pool.query(
       `SELECT DATE_TRUNC('day', created_at) AS dia, COUNT(*)::int AS novos
-       FROM usuarios
-       WHERE role = 'usuario' AND created_at BETWEEN $1 AND $2
+       FROM buyers
+       WHERE store_id = $1 AND created_at BETWEEN $2 AND $3
        GROUP BY dia ORDER BY dia`,
-      [dataInicio, dataFim],
+      [storeId, dataInicio, dataFim],
     ),
-    db.query("SELECT COUNT(*)::int AS total FROM usuarios WHERE role = 'usuario'"),
+    pool.query('SELECT COUNT(*)::int AS total FROM buyers WHERE store_id = $1', [storeId]),
   ]);
 
   return {
@@ -503,64 +535,70 @@ async function getDadosClientes(db: pg.Pool, dataInicio: Date, dataFim: Date) {
   };
 }
 
-async function getDadosAgendamentos(db: pg.Pool, dataInicio: Date, dataFim: Date) {
+async function getDadosAgendamentos(scope: StoreScope, dataInicio: Date, dataFim: Date) {
+  const { pool, storeId } = scope;
   try {
     const [agendamentosRes, resumoRes, porMesRes] = await Promise.all([
-      db.query(
+      pool.query(
         `SELECT
           a.id,
-          a.data_evento,
+          a.event_date AS data_evento,
           a.status AS status_agendamento,
           a.created_at AS data_agendamento,
-          p.id AS pedido_id,
-          p.created_at AS data_compra,
-          p.total,
-          p.status AS status_pedido,
-          p.nome_entrega AS cliente_nome,
-          p.email_entrega AS email,
-          p.telefone_entrega AS telefone,
-          u.id AS usuario_id,
+          o.id AS pedido_id,
+          o.created_at AS data_compra,
+          o.total,
+          o.status AS status_pedido,
+          o.shipping_name AS cliente_nome,
+          o.shipping_email AS email,
+          o.shipping_phone AS telefone,
+          b.id AS usuario_id,
           COALESCE(
-            STRING_AGG(pi.nome_produto || ' ×' || pi.quantidade, ', '),
+            STRING_AGG(oi.product_name || ' ×' || oi.quantity, ', '),
             ''
           ) AS produtos
-         FROM agendamentos a
-         JOIN pedidos p ON p.id = a.pedido_id
-         JOIN usuarios u ON u.id = p.usuario_id
-         LEFT JOIN pedido_itens pi ON pi.pedido_id = p.id
-         WHERE a.data_evento BETWEEN $1::date AND $2::date
-         GROUP BY a.id, p.id, u.id
-         ORDER BY a.data_evento ASC`,
-        [dataInicio, dataFim],
+         FROM appointments a
+         JOIN orders o ON o.id = a.order_id AND o.store_id = a.store_id
+         JOIN buyers b ON b.id = o.buyer_id AND b.store_id = o.store_id
+         LEFT JOIN order_items oi ON oi.order_id = o.id AND oi.store_id = o.store_id
+         WHERE a.store_id = $3 AND a.event_date BETWEEN $1::date AND $2::date
+         GROUP BY a.id, o.id, b.id
+         ORDER BY a.event_date ASC`,
+        [dataInicio, dataFim, storeId],
       ),
-      db.query(
+      pool.query(
         `SELECT
           COUNT(*)::int AS total,
-          COUNT(*) FILTER (WHERE a.status = 'confirmado')::int AS confirmados,
-          COUNT(*) FILTER (WHERE a.status = 'cancelado')::int AS cancelados,
-          COALESCE(SUM(p.total) FILTER (WHERE a.status = 'confirmado'), 0) AS receita_confirmada
-         FROM agendamentos a
-         JOIN pedidos p ON p.id = a.pedido_id
-         WHERE a.data_evento BETWEEN $1::date AND $2::date`,
-        [dataInicio, dataFim],
+          COUNT(*) FILTER (WHERE a.status = 'confirmed')::int AS confirmados,
+          COUNT(*) FILTER (WHERE a.status = 'cancelled')::int AS cancelados,
+          COALESCE(SUM(o.total) FILTER (WHERE a.status = 'confirmed'), 0) AS receita_confirmada
+         FROM appointments a
+         JOIN orders o ON o.id = a.order_id AND o.store_id = a.store_id
+         WHERE a.store_id = $3 AND a.event_date BETWEEN $1::date AND $2::date`,
+        [dataInicio, dataFim, storeId],
       ),
-      db.query(`
+      pool.query(
+        `
         SELECT
-          DATE_TRUNC('month', a.data_evento) AS mes,
+          DATE_TRUNC('month', a.event_date) AS mes,
           COUNT(*)::int AS total,
-          COUNT(*) FILTER (WHERE a.status = 'confirmado')::int AS confirmados,
-          COALESCE(SUM(p.total) FILTER (WHERE a.status = 'confirmado'), 0) AS receita
-         FROM agendamentos a
-         JOIN pedidos p ON p.id = a.pedido_id
-         WHERE a.data_evento >= NOW() - INTERVAL '12 months'
+          COUNT(*) FILTER (WHERE a.status = 'confirmed')::int AS confirmados,
+          COALESCE(SUM(o.total) FILTER (WHERE a.status = 'confirmed'), 0) AS receita
+         FROM appointments a
+         JOIN orders o ON o.id = a.order_id AND o.store_id = a.store_id
+         WHERE a.store_id = $1 AND a.event_date >= NOW() - INTERVAL '12 months'
          GROUP BY mes ORDER BY mes
-      `),
+      `,
+        [storeId],
+      ),
     ]);
 
     return {
       agendamentos: agendamentosRes.rows.map((r) => ({
         ...r,
         data_evento: String(r.data_evento).slice(0, 10),
+        status_agendamento: appointmentStatusToApi(String(r.status_agendamento)),
+        status_pedido: orderStatusToApi(String(r.status_pedido)),
         total: toNum(r.total),
       })),
       resumo: {

@@ -1,13 +1,11 @@
-import { CartView } from '@/components/cart-view';
-import { storePageTitleClass } from '@/lib/store-styles';
+import { redirect } from 'next/navigation';
 
-export const dynamic = 'force-dynamic';
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
 
-export default function CartPage() {
-  return (
-    <div>
-      <h1 className={storePageTitleClass('mb-8')}>Carrinho</h1>
-      <CartView />
-    </div>
-  );
+/** @deprecated Use `/cart`. */
+export default async function LegacyCartRedirect({ params }: PageProps) {
+  const { slug } = await params;
+  redirect(`/store/${slug}/cart`);
 }

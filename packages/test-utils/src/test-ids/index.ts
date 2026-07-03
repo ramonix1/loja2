@@ -14,6 +14,7 @@ import { adminChat } from './admin-chat.js';
 import { adminDiagnostico } from './admin-diagnostico.js';
 import { adminPedidoDetail } from './admin-pedido-detail.js';
 import { adminProdutos } from './admin-produtos.js';
+import { adminAvaliacoes } from './admin-avaliacoes.js';
 import { auth } from './auth.js';
 import { platform } from './platform.js';
 import { store } from './store.js';
@@ -39,6 +40,7 @@ export const testIds = {
   adminChat,
   adminDiagnostico,
   adminPedidoDetail,
+  adminAvaliacoes,
   platform,
   store,
   marketing,
@@ -61,6 +63,7 @@ export {
   adminChat,
   adminDiagnostico,
   adminPedidoDetail,
+  adminAvaliacoes,
   platform,
   store,
   marketing,

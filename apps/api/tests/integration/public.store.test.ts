@@ -32,15 +32,15 @@ describe('GET /api/v1/public/store', () => {
     expect(typeof data.controla_estoque).toBe('boolean');
   });
 
-  it('404 tenant inexistente', async () => {
+  it('404 store inexistente', async () => {
     const res = await app.inject({
       method: 'GET',
       url: '/api/v1/public/store',
-      headers: { 'x-tenant-slug': 'nao-existe-' + TEST_TENANT_SLUG },
+      headers: { 'x-store-slug': 'nao-existe-' + TEST_TENANT_SLUG },
     });
 
     expect(res.statusCode).toBe(404);
-    expect(res.json().code).toBe('TENANT_NOT_FOUND');
+    expect(res.json().code).toBe('STORE_NOT_FOUND');
   });
 });
 

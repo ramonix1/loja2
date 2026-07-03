@@ -6,43 +6,56 @@
 
 :root,
 [data-platform-ui-theme='escuro'] {
-  --platform-bg: var(--ata-verde-hero-inicio);
-  --platform-surface: var(--ata-verde-conde);
-  --platform-surface-elevated: color-mix(in srgb, var(--ata-verde-conde) 88%, #000000);
-  --platform-border: color-mix(in srgb, var(--ata-verde-broto) 20%, transparent);
-  --platform-text: var(--ata-creme);
-  --platform-text-muted: color-mix(in srgb, var(--ata-creme) 72%, transparent);
-  --platform-text-subtle: color-mix(in srgb, var(--ata-creme) 52%, transparent);
-  --platform-accent: var(--ata-verde-broto);
-  --platform-accent-hover: var(--ata-verde-mata);
-  --platform-link: var(--ata-verde-broto);
-  --platform-link-hover: color-mix(in srgb, var(--ata-verde-broto) 80%, #ffffff);
-  --platform-focus-ring: color-mix(in srgb, var(--ata-verde-broto) 40%, transparent);
-  --platform-sidebar-bg: var(--ata-verde-conde);
-  --platform-sidebar-border: color-mix(in srgb, var(--ata-verde-broto) 18%, transparent);
-  --platform-sidebar-text: var(--ata-creme);
-  --platform-sidebar-muted: color-mix(in srgb, var(--ata-creme) 65%, transparent);
-  --platform-sidebar-active-bg: color-mix(in srgb, var(--ata-verde-broto) 16%, transparent);
-  --platform-sidebar-hover-bg: color-mix(in srgb, var(--ata-verde-broto) 10%, transparent);
-  --platform-input-bg: color-mix(in srgb, var(--ata-verde-conde) 92%, #000000);
-  --platform-input-border: color-mix(in srgb, var(--ata-verde-broto) 22%, var(--ata-verde-conde));
+  /* Dark Theme System v1 — PDF jun/2026 (fundos neutros, verde só em acentos) */
+  --platform-bg: var(--ata-dt-platform-bg-base);
+  --platform-surface: var(--ata-dt-platform-bg-surface);
+  --platform-surface-elevated: var(--ata-dt-platform-bg-elevated);
+  --platform-border: var(--ata-dt-platform-border);
+  --platform-text: var(--ata-dt-platform-text-primary);
+  --platform-text-muted: var(--ata-dt-platform-text-secondary);
+  --platform-text-subtle: color-mix(in srgb, var(--ata-dt-platform-text-secondary) 72%, transparent);
+  --platform-accent: var(--ata-dt-platform-accent);
+  --platform-accent-hover: var(--ata-dt-platform-accent-hover);
+  --platform-link: var(--ata-dt-platform-accent);
+  --platform-link-hover: var(--ata-dt-platform-accent-hover);
+  --platform-focus-ring: color-mix(in srgb, var(--ata-dt-platform-accent) 40%, transparent);
+  --platform-sidebar-bg: var(--ata-dt-platform-bg-surface);
+  --platform-sidebar-border: var(--ata-dt-platform-border);
+  --platform-sidebar-text: var(--ata-dt-platform-text-primary);
+  --platform-sidebar-muted: var(--ata-dt-platform-text-secondary);
+  --platform-sidebar-active-bg: var(--ata-dt-platform-bg-active);
+  --platform-sidebar-hover-bg: var(--ata-dt-platform-bg-hover);
+  --platform-input-bg: var(--ata-dt-platform-bg-surface);
+  --platform-input-border: var(--ata-dt-platform-border);
   --platform-input-placeholder: var(--platform-text-subtle);
-  --platform-switch-track-on: var(--ata-verde-broto);
-  --platform-switch-track-off: color-mix(in srgb, var(--ata-verde-conde) 70%, var(--ata-cinza-areia));
-  --platform-table-header-bg: color-mix(in srgb, var(--ata-verde-folha) 35%, var(--ata-verde-conde));
-  --platform-table-row-hover: color-mix(in srgb, var(--ata-verde-broto) 8%, var(--ata-verde-conde));
+  --platform-switch-track-on: var(--ata-dt-platform-accent);
+  --platform-switch-track-off: color-mix(
+    in srgb,
+    var(--ata-dt-platform-bg-hover) 75%,
+    var(--ata-dt-platform-bg-base)
+  );
+  --platform-table-header-bg: var(--ata-dt-platform-bg-elevated);
+  --platform-table-row-hover: var(--ata-dt-platform-bg-hover);
   --platform-table-border: var(--platform-border);
-  --platform-chart-grid: color-mix(in srgb, var(--ata-verde-broto) 14%, transparent);
-  --platform-chart-axis: color-mix(in srgb, var(--ata-creme) 75%, transparent);
+  --platform-chart-grid: color-mix(in srgb, var(--ata-dt-platform-border) 90%, transparent);
+  --platform-chart-axis: var(--ata-dt-platform-text-secondary);
   --platform-success: var(--ata-verde-broto);
-  --platform-success-bg: color-mix(in srgb, var(--ata-verde-broto) 18%, var(--ata-verde-conde));
+  --platform-success-bg: color-mix(in srgb, var(--ata-verde-broto) 18%, var(--ata-dt-platform-bg-surface));
   --platform-error: #e05252;
-  --platform-error-bg: color-mix(in srgb, #e05252 14%, var(--ata-verde-conde));
+  --platform-error-bg: color-mix(in srgb, #e05252 14%, var(--ata-dt-platform-bg-surface));
   --platform-warning: #e6a817;
-  --platform-warning-bg: color-mix(in srgb, #e6a817 14%, var(--ata-verde-conde));
+  --platform-warning-bg: color-mix(in srgb, #e6a817 14%, var(--ata-dt-platform-bg-surface));
   --platform-scrollbar-track: transparent;
-  --platform-scrollbar-thumb: color-mix(in srgb, var(--ata-creme) 28%, var(--ata-verde-conde));
-  --platform-scrollbar-thumb-hover: color-mix(in srgb, var(--ata-creme) 45%, var(--ata-verde-conde));
+  --platform-scrollbar-thumb: color-mix(
+    in srgb,
+    var(--ata-dt-platform-text-secondary) 28%,
+    var(--ata-dt-platform-bg-surface)
+  );
+  --platform-scrollbar-thumb-hover: color-mix(
+    in srgb,
+    var(--ata-dt-platform-text-secondary) 45%,
+    var(--ata-dt-platform-bg-surface)
+  );
 }
 
 [data-platform-ui-theme='claro'] {

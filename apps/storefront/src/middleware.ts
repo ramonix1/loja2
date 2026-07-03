@@ -5,10 +5,13 @@ import {
   buildStorePath,
   getDefaultStoreSlug,
   parseStorePath,
-} from '@lojao/tenant-host';
+} from '@lojao/store-host';
 
 const LEGACY_EXACT = new Set([
+  '/cart',
   '/carrinho',
+  '/wishlist',
+  '/favoritos',
   '/checkout',
   '/login',
   '/cadastro',
@@ -16,6 +19,17 @@ const LEGACY_EXACT = new Set([
   '/recuperar-senha',
   '/dashboard/billing',
 ]);
+
+const LEGACY_STORE_PATH: Record<string, string> = {
+  carrinho: 'cart',
+  favoritos: 'wishlist',
+};
+
+function mapLegacyStorePath(subpath: string): string {
+  if (subpath === '/carrinho') return '/cart';
+  if (subpath === '/favoritos') return '/wishlist';
+  return subpath;
+}
 
 function defaultSlug(): string {
   return getDefaultStoreSlug({
@@ -26,13 +40,12 @@ function defaultSlug(): string {
 
 function legacyRedirect(request: NextRequest, subpath: string): NextResponse {
   const slug = defaultSlug();
-  const target = new URL(buildStorePath(slug, subpath), request.url);
+  const target = new URL(buildStorePath(slug, mapLegacyStorePath(subpath)), request.url);
   return NextResponse.redirect(target, 301);
 }
 
 /**
- * Injeta slug do tenant em rotas `/store/{slug}/...`.
- * Rotas marketing (`/`, `/pricing`, …) não recebem tenant.
+ * Injeta slug da loja em rotas `/store/{slug}/...`.
  * Paths legados na raiz redirecionam 301 para `/store/{defaultSlug}/...`.
  */
 export function middleware(request: NextRequest) {
@@ -63,14 +76,24 @@ export function middleware(request: NextRequest) {
     return legacyRedirect(request, pathname);
   }
 
+  const storeLegacyMatch = pathname.match(/^\/store\/([^/]+)\/(carrinho|favoritos)\/?$/);
+  if (storeLegacyMatch) {
+    const [, slug, legacySegment] = storeLegacyMatch;
+    const target = new URL(
+      buildStorePath(slug!, `/${LEGACY_STORE_PATH[legacySegment!]}`),
+      request.url,
+    );
+    return NextResponse.redirect(target, 301);
+  }
+
   const parsed = parseStorePath(pathname);
   if (parsed.slug) {
     const requestHeaders = new Headers(request.headers);
-    requestHeaders.set('x-tenant-slug', parsed.slug);
+    requestHeaders.set('x-store-slug', parsed.slug);
     const response = NextResponse.next({
       request: { headers: requestHeaders },
     });
-    response.headers.set('x-tenant-slug', parsed.slug);
+    response.headers.set('x-store-slug', parsed.slug);
     return response;
   }
 

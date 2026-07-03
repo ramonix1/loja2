@@ -147,7 +147,11 @@ Banco limpo:
 
 Runbook: [`docs/migration/runbooks/db-migration.md`](docs/migration/runbooks/db-migration.md).
 
-A API aplica migrations e provisiona o tenant (`TENANT_SLUG`) automaticamente no boot.
+A API aplica migrations e provisiona tenant demo (`TENANT_SLUG`) no boot — **legado**; substituído pelo cutover MA (greenfield). Ver [docs/specs/merchant-account-architecture-spec.md](docs/specs/merchant-account-architecture-spec.md).
+
+### Isolamento multi-tenant (estado atual → alvo MA)
+
+**Interim:** database-per-store (fix de segurança). **Alvo:** 1 banco por **conta merchant**, N lojas com `store_id`. **Sem** migração de dados legados — reset + signup na arquitetura nova.
 
 ---
 
@@ -195,6 +199,9 @@ Detalhes: [`apps/e2e/README.md`](apps/e2e/README.md).
 | `PGSSL` | `disable` em dev (híbrido e Docker local) |
 | `SESSION_SECRET` | Cookie `lojao.sid` |
 | `TENANT_SLUG` | Tenant dev (`loja`) |
+| `TENANT_DB_STRATEGY` | Isolamento de dados: `database` (banco por loja, padrão) ou `shared` (só testes) |
+| `TENANT_POOL_MAX` | Máx. de conexões por pool de loja (padrão `5`) |
+| `BOOTSTRAP_TENANT_SLUGS` | Lojas que mantêm o banco principal (default: `demo` + `TENANT_SLUG`) |
 | `API_URL` | SSR storefront → API (`http://localhost:3001` no híbrido) |
 | `UPLOAD_DIR` | Pasta de imagens quando `STORAGE_PROVIDER=local` |
 | `STORAGE_PROVIDER` | `local` ou `r2` (Cloudflare R2) |

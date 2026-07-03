@@ -45,10 +45,16 @@ Monorepo SaaS e-commerce **multi-tenant** (PostgreSQL, slug por loja). Stack pó
 
 ## Fluxo multi-tenant
 
-1. Cliente envia header `X-Tenant-Slug` (ou subdomínio em produção).
-2. API consulta tabela `tenants` no banco master.
+1. Cliente envia header `X-Tenant-Slug` (ou subdomínio em produção); o admin usa `session.tenantSlug` (loja selecionada no Merchant Hub).
+2. API consulta a tabela `tenants` no banco **master** (`db_name` da loja).
 3. Pool PostgreSQL do tenant é resolvido por slug (`tenant-db.ts`); Drizzle cache por slug (`getCachedTenantDb`).
-4. Sessão compartilhada via cookie `lojao.sid` na tabela `sessao`.
+4. Sessão compartilhada via cookie `lojao.sid` na tabela `sessao` (banco master).
+
+### Isolamento de dados
+
+- **Hoje (interim):** database-per-store — removido no cutover MA8.
+- **Alvo (MA):** 1 banco **por conta merchant** (`atacommerce_<merchant>`) + `store_id` por loja. Greenfield — **sem** migração de `tenants`. Ver [merchant-account-architecture-spec.md](./specs/merchant-account-architecture-spec.md).
+- Nomenclatura: [naming-policy.md](./specs/naming-policy.md).
 
 ## Rotas (proxy produção)
 

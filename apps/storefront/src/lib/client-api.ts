@@ -1,16 +1,19 @@
 'use client';
 
+import type { PublicProduct } from '@lojao/types/public-store';
+import type { PublicProductReview } from '@lojao/types/reviews';
+
 import { browserApiBase } from '@/lib/config';
 
-let clientTenantSlug = 'loja';
+let clientStoreSlug = 'loja';
 
 /** Sincronizado pelo `StoreSlugProvider` em rotas `/store/[slug]`. */
-export function setClientTenantSlug(slug: string): void {
-  clientTenantSlug = slug;
+export function setClientStoreSlug(slug: string): void {
+  clientStoreSlug = slug;
 }
 
-export function getClientTenantSlug(): string {
-  return clientTenantSlug;
+export function getClientStoreSlug(): string {
+  return clientStoreSlug;
 }
 
 export class ApiError extends Error {
@@ -30,7 +33,8 @@ async function apiFetch<T>(
 ): Promise<T> {
   const hasBody = init.body != null && init.body !== '';
   const headers: Record<string, string> = {
-    'X-Tenant-Slug': clientTenantSlug,
+    'X-Store-Slug': clientStoreSlug,
+    'X-Auth-Context': 'buyer',
     ...((init.headers as Record<string, string> | undefined) ?? {}),
   };
   if (hasBody) {
@@ -73,12 +77,14 @@ export async function fetchMe(): Promise<AuthUser | null> {
   }
 }
 
-export async function login(email: string, senha: string): Promise<AuthUser> {
-  const { data } = await apiFetch<{ data: { user: AuthUser } }>('/api/v1/auth/login', {
+export async function login(email: string, senha: string): Promise<AuthUser & { redirectToAdmin?: boolean }> {
+  const { data } = await apiFetch<{
+    data: { user: AuthUser; redirectToAdmin?: boolean };
+  }>('/api/v1/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ email, senha, tenantSlug: getClientTenantSlug() }),
+    body: JSON.stringify({ email, senha, storeSlug: getClientStoreSlug() }),
   });
-  return data.user;
+  return { ...data.user, redirectToAdmin: data.redirectToAdmin };
 }
 
 export async function logout(): Promise<void> {
@@ -138,6 +144,16 @@ export interface CartItem {
   nome: string;
   subtitulo: string | null;
   imagem: string | null;
+}
+
+export async function fetchCartCount(): Promise<number> {
+  try {
+    const { data } = await apiFetch<{ data: { count: number } }>('/api/v1/cart/count');
+    return data.count;
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 401) return 0;
+    throw e;
+  }
 }
 
 export async function fetchCart(): Promise<{ itens: CartItem[]; total: number }> {
@@ -284,4 +300,68 @@ export async function lookupCep(cep: string): Promise<{
     uf?: string;
     erro?: boolean;
   }>;
+}
+
+// ——— Reviews ———
+
+export async function fetchProductReviews(
+  productId: number,
+  page = 1,
+  limit = 10,
+): Promise<{ reviews: PublicProductReview[]; total: number }> {
+  const res = await apiFetch<{
+    data: PublicProductReview[];
+    meta: { total: number };
+  }>(`/api/v1/public/products/${productId}/reviews?page=${page}&limit=${limit}`);
+  return { reviews: res.data, total: res.meta.total };
+}
+
+export async function submitProductReview(
+  productId: number,
+  rating: number,
+  comment?: string | null,
+): Promise<{ id: number }> {
+  const { data } = await apiFetch<{ data: { id: number } }>(
+    `/api/v1/products/${productId}/reviews`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ rating, comment: comment ?? null }),
+    },
+  );
+  return data;
+}
+
+// ——— Wishlist ———
+
+export async function fetchWishlistIds(): Promise<number[]> {
+  try {
+    const { data } = await apiFetch<{ data: { product_ids: number[] } }>('/api/v1/wishlist/ids');
+    return data.product_ids;
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 401) return [];
+    throw e;
+  }
+}
+
+export async function fetchWishlistCount(): Promise<number> {
+  try {
+    const { data } = await apiFetch<{ data: { count: number } }>('/api/v1/wishlist/count');
+    return data.count;
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 401) return 0;
+    throw e;
+  }
+}
+
+export async function fetchWishlistProducts(): Promise<PublicProduct[]> {
+  const { data } = await apiFetch<{ data: { products: PublicProduct[] } }>('/api/v1/wishlist');
+  return data.products;
+}
+
+export async function addWishlistItem(productId: number): Promise<void> {
+  await apiFetch(`/api/v1/wishlist/${productId}`, { method: 'POST' });
+}
+
+export async function removeWishlistItem(productId: number): Promise<void> {
+  await apiFetch(`/api/v1/wishlist/${productId}`, { method: 'DELETE' });
 }

@@ -5,8 +5,8 @@ import pg from 'pg';
 const { Pool } = pg;
 
 /**
- * Pool do banco MASTER (tabelas `tenants` e `sessao`), portado de
- * `apps/legacy/config/masterDb.js`.
+ * Pool do banco MASTER (`merchants`, `stores`, `sessao`, billing).
+ * Portado de `apps/legacy/config/masterDb.js`.
  *
  * SSL: ligado em produção ou quando há `DATABASE_URL` (Render). Pode ser
  * desligado explicitamente em dev/Docker (Postgres sem SSL) via `PGSSL=disable`.

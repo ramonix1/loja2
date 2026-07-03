@@ -13,7 +13,12 @@ export const aparenciaFieldsSchema = z.object({
     .regex(/^#[0-9A-Fa-f]{6}$/, 'Cor inválida. Use formato #RRGGBB.')
     .optional()
     .default(DEFAULT_LOJA_COR_PRIMARIA),
-  loja_tema: storeThemeSchema.optional().default('escuro'),
+  /**
+   * @deprecated Vitrine fixa em tema claro. Mantido por backward compat de payload;
+   * a API ignora o valor enviado e sempre persiste/retorna `DEFAULT_STORE_THEME`.
+   * A UI Aparência não edita.
+   */
+  loja_tema: storeThemeSchema.optional().default('claro'),
   loja_rodape: z.string().max(500).optional().default(''),
   loja_email: z
     .union([z.string().email('E-mail inválido.'), z.literal('')])
@@ -30,6 +35,7 @@ export interface AparenciaConfig {
   loja_nome: string;
   loja_slogan: string;
   loja_cor_primaria: string;
+  /** @deprecated Vitrine fixa em claro; sempre `DEFAULT_STORE_THEME`. */
   loja_tema: StoreTheme;
   loja_rodape: string;
   loja_email: string;

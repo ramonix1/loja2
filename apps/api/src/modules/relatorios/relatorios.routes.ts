@@ -5,6 +5,7 @@ import {
 } from '@lojao/types/relatorios';
 import type { FastifyInstance } from 'fastify';
 
+import { requireStoreScope } from '../../lib/store-scope.js';
 import { requireAdmin } from '../../plugins/auth-guard.js';
 import {
   buildRelatorioCsv,
@@ -29,7 +30,7 @@ export async function relatoriosRoutes(app: FastifyInstance): Promise<void> {
 
     try {
       const dados = await getRelatorioDados(
-        request.db,
+        requireStoreScope(request),
         parsed.data.aba,
         range,
         parsed.data.filtro_estoque,
@@ -76,7 +77,7 @@ export async function relatoriosRoutes(app: FastifyInstance): Promise<void> {
     try {
       const range = parseRelatorioDatas(parsed.data);
       const { csv, filename } = await buildRelatorioCsv(
-        request.db,
+        requireStoreScope(request),
         tipo as (typeof RELATORIO_CSV_TIPOS)[number],
         range,
       );

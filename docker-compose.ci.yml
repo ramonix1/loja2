@@ -8,8 +8,7 @@ services:
     environment:
       GITHUB_ACTIONS: "true"
       SKIP_DOCKER_DEPS_SYNC: "true"
-      # Mono-loja: evita login Merchant Hub ir para /admin/my-stores (demo+loja no mesmo DB).
-      BOOTSTRAP_TENANT_SLUGS: loja
+      # Seed CI: `run-seed.mjs` → seedTestDatabase (merchant test-loja + loja loja).
       MASTER_EMAIL: master@suaplataforma.com
       MASTER_PASSWORD: troque-por-senha-forte-aqui
     volumes: !override
@@ -34,7 +33,6 @@ services:
       SKIP_DOCKER_DEPS_SYNC: "true"
       API_URL: http://api:3001
       NEXT_PUBLIC_API_URL: http://localhost:3001
-      TENANT_SLUG: loja
       NEXT_PUBLIC_DEFAULT_STORE_SLUG: loja
     volumes: !override
       - .:/app

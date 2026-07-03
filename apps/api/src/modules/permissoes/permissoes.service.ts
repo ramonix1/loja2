@@ -1,6 +1,13 @@
 import argon2 from 'argon2';
 import type { AdminPermissao, CreateAdminInput } from '@lojao/types/permissoes';
-import type pg from 'pg';
+import { and, createMasterDb, eq, merchantMembers } from '@lojao/db';
+
+import { masterPool } from '../../lib/master-db.js';
+import type { StoreScope } from '../../lib/store-scope.js';
+
+const masterDb = createMasterDb(masterPool);
+
+const ADMIN_ROLES = ['owner', 'admin', 'operator'] as const;
 
 const ARGON2_OPTIONS = {
   type: argon2.argon2id,
@@ -24,32 +31,40 @@ function validarCpf(cpf: string): boolean {
   return r === parseInt(n[10]!, 10);
 }
 
-function formatCpf(cpf: string): string {
-  const n = cpf.replace(/\D/g, '');
-  return n.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
-}
-
-function mapAdmin(row: Record<string, unknown>): AdminPermissao {
+function mapMember(row: {
+  id: number;
+  name: string;
+  email: string;
+  active: boolean | null;
+  last_access_at: Date | string | null;
+  created_at: Date | string | null;
+}): AdminPermissao {
   return {
-    id: Number(row.id),
-    nome: String(row.nome),
-    email: String(row.email),
-    cpf: (row.cpf as string | null) ?? null,
-    ativo: Boolean(row.ativo),
-    ultimo_acesso: row.ultimo_acesso ? String(row.ultimo_acesso) : null,
-    created_at: String(row.created_at),
+    id: row.id,
+    nome: row.name,
+    email: row.email,
+    cpf: null,
+    ativo: Boolean(row.active),
+    ultimo_acesso: row.last_access_at
+      ? row.last_access_at instanceof Date
+        ? row.last_access_at.toISOString()
+        : String(row.last_access_at)
+      : null,
+    created_at:
+      row.created_at instanceof Date ? row.created_at.toISOString() : String(row.created_at ?? ''),
   };
 }
 
-/** Porta `authController.exibirPermissoes`. */
-export async function listAdmins(db: pg.Pool): Promise<AdminPermissao[]> {
-  const r = await db.query(
-    `SELECT id, nome, email, cpf, ativo, ultimo_acesso, created_at
-     FROM usuarios
-     WHERE role = 'admin'
+/** Porta `authController.exibirPermissoes` — operadores em `merchant_members` (master). */
+export async function listAdmins({ merchantId }: StoreScope): Promise<AdminPermissao[]> {
+  const r = await masterPool.query(
+    `SELECT id, name, email, active, last_access_at, created_at
+     FROM merchant_members
+     WHERE merchant_id = $1 AND role = ANY($2::text[])
      ORDER BY created_at DESC`,
+    [merchantId, ADMIN_ROLES],
   );
-  return r.rows.map(mapAdmin);
+  return r.rows.map((row) => mapMember(row as Parameters<typeof mapMember>[0]));
 }
 
 export type CreateAdminResult =
@@ -59,44 +74,49 @@ export type CreateAdminResult =
 
 /** Porta `authController.criarAdmin`. */
 export async function createAdmin(
-  db: pg.Pool,
+  { merchantId }: StoreScope,
   input: CreateAdminInput,
 ): Promise<CreateAdminResult> {
   if (input.cpf?.trim() && !validarCpf(input.cpf)) {
     return { ok: false, code: 'VALIDATION_ERROR', message: 'CPF inválido.' };
   }
 
-  const existe = await db.query('SELECT id FROM usuarios WHERE email = $1', [
-    input.email.toLowerCase().trim(),
-  ]);
-  if (existe.rows[0]) {
+  const email = input.email.toLowerCase().trim();
+  const [existing] = await masterDb
+    .select({ id: merchantMembers.id })
+    .from(merchantMembers)
+    .where(and(eq(merchantMembers.merchantId, merchantId), eq(merchantMembers.email, email)))
+    .limit(1);
+
+  if (existing) {
     return { ok: false, code: 'EMAIL_EXISTS', message: 'Email já cadastrado.' };
   }
 
-  const cpfLimpo = input.cpf?.trim() ? formatCpf(input.cpf) : null;
   const senhaHash = await argon2.hash(input.senha, ARGON2_OPTIONS);
 
-  const inserted = await db.query(
-    `INSERT INTO usuarios (nome, email, senha_hash, role, cpf)
-     VALUES ($1, $2, $3, 'admin', $4)
-     RETURNING id, nome, email, cpf, ativo, ultimo_acesso, created_at`,
-    [input.nome.trim(), input.email.toLowerCase().trim(), senhaHash, cpfLimpo],
+  const inserted = await masterPool.query(
+    `INSERT INTO merchant_members (merchant_id, name, email, password_hash, role, active)
+     VALUES ($1, $2, $3, $4, 'operator', true)
+     RETURNING id, name, email, active, last_access_at, created_at`,
+    [merchantId, input.nome.trim(), email, senhaHash],
   );
 
-  return { ok: true, admin: mapAdmin(inserted.rows[0]!) };
+  return { ok: true, admin: mapMember(inserted.rows[0] as Parameters<typeof mapMember>[0]) };
 }
 
 /** Porta `authController.toggleAdmin`. */
 export async function toggleAdmin(
-  db: pg.Pool,
+  { merchantId }: StoreScope,
   id: number,
-  currentUserId: number,
+  currentMemberId: number,
 ): Promise<'ok' | 'self' | 'not_found'> {
-  if (id === currentUserId) return 'self';
+  if (id === currentMemberId) return 'self';
 
-  const r = await db.query(
-    'UPDATE usuarios SET ativo = NOT ativo WHERE id = $1 AND role = $2 RETURNING id',
-    [id, 'admin'],
+  const r = await masterPool.query(
+    `UPDATE merchant_members SET active = NOT active
+     WHERE id = $1 AND merchant_id = $2 AND role = ANY($3::text[])
+     RETURNING id`,
+    [id, merchantId, ADMIN_ROLES],
   );
   if ((r.rowCount ?? 0) === 0) return 'not_found';
   return 'ok';
@@ -104,15 +124,18 @@ export async function toggleAdmin(
 
 /** Porta `authController.excluirAdmin`. */
 export async function deleteAdmin(
-  db: pg.Pool,
+  { merchantId }: StoreScope,
   id: number,
-  currentUserId: number,
+  currentMemberId: number,
 ): Promise<'ok' | 'self' | 'not_found'> {
-  if (id === currentUserId) return 'self';
+  if (id === currentMemberId) return 'self';
 
-  const r = await db.query("DELETE FROM usuarios WHERE id = $1 AND role = 'admin' RETURNING id", [
-    id,
-  ]);
+  const r = await masterPool.query(
+    `DELETE FROM merchant_members
+     WHERE id = $1 AND merchant_id = $2 AND role = 'operator'
+     RETURNING id`,
+    [id, merchantId],
+  );
   if ((r.rowCount ?? 0) === 0) return 'not_found';
   return 'ok';
 }
