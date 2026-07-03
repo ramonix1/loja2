@@ -19,6 +19,7 @@ setup('autentica como comprador @smoke', async ({ browser }) => {
   );
   await page.getByTestId(testIds.auth.loginSubmit).click();
   await page.waitForURL((url) => !url.pathname.includes('/login'));
+  await expect(page.getByTestId(testIds.store.header)).toBeVisible();
 
   await context.storageState({ path: BUYER_FILE });
   await context.close();

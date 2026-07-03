@@ -136,13 +136,14 @@ test('sidebar NavUser abre com toggle de tema @smoke', async ({ page }) => {
 test('sidebar collapse no desktop @smoke', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await platformLogin(page);
-  const sidebar = page.locator('[data-slot="sidebar"][data-state]');
-  if ((await sidebar.getAttribute('data-state')) === 'collapsed') {
-    await page.getByTestId(testIds.platform.sidebarTrigger).click();
-    await expect(sidebar).toHaveAttribute('data-state', 'expanded');
-  }
+  await expect(page.getByTestId(testIds.platform.sidebarNav)).toBeVisible();
   await page.getByTestId(testIds.platform.sidebarTrigger).click();
-  await expect(sidebar).toHaveAttribute('data-state', 'collapsed');
+  await expect
+    .poll(async () => {
+      const cookies = await page.context().cookies();
+      return cookies.find((c) => c.name === 'sidebar_state')?.value;
+    })
+    .toBe('false');
 });
 
 test('logout via NavUser @smoke', async ({ page }) => {

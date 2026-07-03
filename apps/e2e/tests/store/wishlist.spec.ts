@@ -16,21 +16,20 @@ test('wishlist exige login @smoke', async ({ page }) => {
 });
 
 test('wishlist add/remove logado @smoke', async ({ page }) => {
-  await page.context().clearCookies();
-  await page.goto(storePath('/login'));
-  await page.getByTestId(testIds.auth.loginEmail).fill('comprador-test@loja.com');
-  await page.getByTestId(testIds.auth.loginPassword).fill('comprador123');
-  await page.getByTestId(testIds.auth.loginSubmit).click();
-  await expect(page.getByTestId(testIds.store.header)).toBeVisible();
-
   await page.goto(storePath());
+
   const card = page.locator('[data-testid^="store-home-product-card-"]').first();
+  await expect(card).toBeVisible();
   const productId = (await card.getAttribute('data-testid'))!.replace('store-home-product-card-', '');
 
   const wishBtn = page.getByTestId(testIds.store.wishlistBtn(productId));
   await expect(wishBtn).toBeEnabled({ timeout: 10_000 });
   await wishBtn.click();
-  await expect(page.getByTestId(testIds.store.headerWishlistBadge)).toBeVisible({ timeout: 5000 });
+  await expect(page.getByTestId(testIds.store.headerWishlist)).toHaveAttribute(
+    'aria-label',
+    /Favoritos, 1/,
+    { timeout: 10_000 },
+  );
 
   await page.goto(storePath('/wishlist'));
   await expect(page.getByTestId(testIds.store.wishlistPage)).toBeVisible();
