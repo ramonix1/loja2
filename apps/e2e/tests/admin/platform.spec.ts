@@ -137,7 +137,7 @@ test('sidebar collapse no desktop @smoke', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await platformLogin(page);
   await expect(page.getByTestId(testIds.platform.sidebarNav)).toBeVisible();
-  await page.getByTestId(testIds.platform.sidebarTrigger).click();
+  await page.getByTestId(testIds.platform.mobileMenuBtn).click();
   await expect
     .poll(async () => {
       const cookies = await page.context().cookies();
