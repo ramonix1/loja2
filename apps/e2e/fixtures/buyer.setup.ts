@@ -1,4 +1,4 @@
-import { test as setup } from '@playwright/test';
+import { expect, test as setup } from '@playwright/test';
 import { testIds } from '@lojao/test-utils/test-ids';
 
 import { storePath } from '../lib/store-path';
