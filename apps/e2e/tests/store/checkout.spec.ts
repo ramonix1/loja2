@@ -6,11 +6,17 @@ import { storePath } from '../../lib/store-path';
 test('checkout metodo teste @smoke', async ({ page }) => {
   await page.goto(storePath('/produto/1'));
   await page.getByTestId(testIds.store.productAddCartBtn).click();
+  await expect(page.getByTestId(testIds.store.addCartToast)).toBeVisible();
   await page.getByTestId(testIds.store.headerCart).click();
   await expect(page).toHaveURL(/\/store\/[^/]+\/cart/);
+  await expect(page.getByTestId(testIds.store.cartTable)).toBeVisible({ timeout: 15_000 });
 
-  await page.getByTestId(testIds.store.cartCheckoutBtn).click();
-  await expect(page).toHaveURL(/\/store\/[^/]+\/checkout/);
+  const checkoutBtn = page.getByTestId(testIds.store.cartCheckoutBtn);
+  await expect(checkoutBtn).toBeVisible();
+  await Promise.all([
+    page.waitForURL(/\/store\/[^/]+\/checkout/, { timeout: 15_000 }),
+    checkoutBtn.click(),
+  ]);
 
   const cepInput = page.getByText('CEP', { exact: true }).locator('..').locator('input');
   await cepInput.fill('01310100');
