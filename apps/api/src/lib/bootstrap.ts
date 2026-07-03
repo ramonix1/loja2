@@ -2,6 +2,7 @@ import pg from 'pg';
 import { runMigrations } from '@lojao/db';
 
 import { signupMerchantAccount } from '../modules/merchants/merchant-signup.service.js';
+import { migrateAllMerchantDatabases } from './merchant-provision.js';
 
 const sslEnabled =
   (process.env.NODE_ENV === 'production' || !!process.env.DATABASE_URL) &&
@@ -24,6 +25,8 @@ export async function bootstrapDatabase(): Promise<void> {
 
   console.log('[bootstrap] Aplicando migrations Drizzle (greenfield MA)...');
   await runMigrations(dbUrl);
+  console.log('[bootstrap] Aplicando migrations merchant (atacommerce_*)...');
+  await migrateAllMerchantDatabases();
   await seedDemoMerchantIfConfigured();
 }
 

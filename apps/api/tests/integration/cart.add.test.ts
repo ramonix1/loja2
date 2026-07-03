@@ -26,7 +26,7 @@ describe('Cart add', () => {
       payload: { produto_id: getTestProdutoId(), quantidade: 1 },
     });
     expect(res.statusCode).toBe(200);
-    expect(res.json().data.contagem).toBeGreaterThan(0);
+    expect(res.json().data.count).toBeGreaterThan(0);
 
     const cart = await app.inject({
       method: 'GET',

@@ -240,7 +240,8 @@ async function seedPrimaryMerchantDb(merchantSlug: string, storeId: number): Pro
     await ensureStoreSettings(mPool, storeId);
     const buyerId = await ensureBuyer(mPool, storeId);
     await ensureCheckoutFixtures(mPool, storeId);
-    await ensureTestOrder(mPool, storeId, buyerId);
+    await ensureTestOrder(mPool, storeId, buyerId, TEST_PRODUTO_ID);
+    await ensureReviewsWishlistFixtures(mPool, storeId);
   } finally {
     await mPool.end();
   }
@@ -319,13 +320,20 @@ async function ensureCheckoutFixtures(pool: pg.Pool, storeId: number): Promise<v
   }
 }
 
-async function ensureTestOrder(pool: pg.Pool, storeId: number, buyerId: number): Promise<void> {
+async function ensureTestOrder(
+  pool: pg.Pool,
+  storeId: number,
+  buyerId: number,
+  productId: number,
+): Promise<void> {
   const existing = await pool.query<{ id: number }>(
     'SELECT id FROM orders WHERE store_id = $1 AND buyer_id = $2 ORDER BY id LIMIT 1',
     [storeId, buyerId],
   );
   if (existing.rows[0]) {
     TEST_PEDIDO_ID = existing.rows[0].id;
+    await pool.query(`UPDATE orders SET status = 'delivered' WHERE id = $1`, [TEST_PEDIDO_ID]);
+    await ensureOrderItemWithProduct(pool, storeId, TEST_PEDIDO_ID, productId);
     return;
   }
 
@@ -336,7 +344,7 @@ async function ensureTestOrder(pool: pg.Pool, storeId: number, buyerId: number):
        shipping_postal_code, shipping_street, shipping_number, shipping_complement,
        shipping_district, shipping_city, shipping_state
      ) VALUES (
-       $1, $2, 'paid', 50, 10, 60, 'pix',
+       $1, $2, 'delivered', 50, 10, 60, 'pix',
        'Comprador Teste', $3, '11999999999', '12345678901',
        '01310100', 'Av Paulista', '1000', 'Apto 1', 'Bela Vista', 'São Paulo', 'SP'
      ) RETURNING id`,
@@ -347,9 +355,9 @@ async function ensureTestOrder(pool: pg.Pool, storeId: number, buyerId: number):
   TEST_PEDIDO_ID = pedidoId;
 
   await pool.query(
-    `INSERT INTO order_items (store_id, order_id, product_name, quantity, unit_price, subtotal)
-     VALUES ($1, $2, 'Produto Teste', 2, 25, 50)`,
-    [storeId, pedidoId],
+    `INSERT INTO order_items (store_id, order_id, product_id, product_name, quantity, unit_price, subtotal)
+     VALUES ($1, $2, $3, 'Produto Checkout Teste', 2, 25, 50)`,
+    [storeId, pedidoId, productId],
   );
 
   await pool.query(
@@ -357,6 +365,44 @@ async function ensureTestOrder(pool: pg.Pool, storeId: number, buyerId: number):
      VALUES ($1, $2, 'mp-test-1', 'paid', 'approved', 'pix', 60)`,
     [storeId, pedidoId],
   );
+}
+
+async function ensureOrderItemWithProduct(
+  pool: pg.Pool,
+  storeId: number,
+  orderId: number,
+  productId: number,
+): Promise<void> {
+  const existing = await pool.query<{ id: number }>(
+    'SELECT id FROM order_items WHERE order_id = $1 AND store_id = $2 ORDER BY id LIMIT 1',
+    [orderId, storeId],
+  );
+  if (existing.rows[0]) {
+    await pool.query(
+      `UPDATE order_items
+       SET product_id = $1, product_name = 'Produto Checkout Teste'
+       WHERE id = $2`,
+      [productId, existing.rows[0].id],
+    );
+    return;
+  }
+
+  await pool.query(
+    `INSERT INTO order_items (store_id, order_id, product_id, product_name, quantity, unit_price, subtotal)
+     VALUES ($1, $2, $3, 'Produto Checkout Teste', 2, 25, 50)`,
+    [storeId, orderId, productId],
+  );
+}
+
+/** Limpa reviews/wishlist de teste para specs idempotentes. */
+async function ensureReviewsWishlistFixtures(pool: pg.Pool, storeId: number): Promise<void> {
+  if (TEST_PRODUTO_ID > 0) {
+    await pool.query('DELETE FROM product_reviews WHERE store_id = $1 AND product_id = $2', [
+      storeId,
+      TEST_PRODUTO_ID,
+    ]);
+  }
+  await pool.query('DELETE FROM wishlist_items WHERE store_id = $1', [storeId]);
 }
 
 /** Billing master — plano com comissão para merchant primário (MA7/MA8). */

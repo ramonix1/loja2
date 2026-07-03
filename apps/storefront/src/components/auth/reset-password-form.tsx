@@ -1,5 +1,6 @@
 'use client';
 
+import { Button, Card, FieldInput, Label } from '@lojao/ui';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
@@ -7,10 +8,7 @@ import { useState, type FormEvent } from 'react';
 import { ApiError, resetPassword } from '@/lib/client-api';
 import {
   storeErrorTextClass,
-  storeInputClass,
-  storeLabelClass,
   storeLinkClass,
-  storePanelClass,
   storeSectionTitleClass,
 } from '@/lib/store-styles';
 import { useStoreHref } from '@/lib/use-store-href';
@@ -42,37 +40,43 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   }
 
   return (
-    <div className={storePanelClass('mx-auto max-w-md rounded-2xl p-8')}>
+    <Card surface="store" className="mx-auto max-w-md rounded-2xl p-8 shadow-sm">
       <h1 className={storeSectionTitleClass('mb-6')}>Nova senha</h1>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className={storeLabelClass()}>Nova senha</label>
-          <input
+          <Label className="mb-1 block text-[var(--store-text-muted)]">Nova senha</Label>
+          <FieldInput
+            surface="store"
             type="password"
             required
             minLength={8}
             value={senha}
             onChange={(e) => setSenha(e.target.value)}
-            className={storeInputClass()}
           />
         </div>
         <div>
-          <label className={storeLabelClass()}>Confirmar senha</label>
-          <input
+          <Label className="mb-1 block text-[var(--store-text-muted)]">Confirmar senha</Label>
+          <FieldInput
+            surface="store"
             type="password"
             required
             value={confirmacao}
             onChange={(e) => setConfirmacao(e.target.value)}
-            className={storeInputClass()}
           />
         </div>
 
         {error ? <p className={storeErrorTextClass('text-sm')}>{error}</p> : null}
 
-        <button type="submit" disabled={loading} className="btn-primary w-full py-2.5">
+        <Button
+          type="submit"
+          surface="store"
+          variant="primary"
+          disabled={loading}
+          className="w-full py-2.5"
+        >
           {loading ? 'Salvando…' : 'Redefinir senha'}
-        </button>
+        </Button>
       </form>
 
       <p className="mt-4 text-center text-sm">
@@ -80,6 +84,6 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           Voltar ao login
         </Link>
       </p>
-    </div>
+    </Card>
   );
 }

@@ -4,14 +4,16 @@ import { store as testIds } from '@lojao/test-utils/test-ids/store';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
+import { Button, Card } from '@lojao/ui';
 import { BRL } from '@/lib/api';
 import { fetchCheckoutResult, type CheckoutResult } from '@/lib/client-api';
 import {
   storeBodyClass,
+  storeButtonOutlinePillClass,
+  storeButtonPillClass,
   storeErrorTextClass,
   storeHeadingClass,
   storeMutedClass,
-  storePanelClass,
   storeSectionTitleClass,
   storeSubtleClass,
 } from '@/lib/store-styles';
@@ -60,19 +62,19 @@ export function CheckoutResultView({ pedidoId }: CheckoutResultViewProps) {
       </div>
 
       {data.pixInfo?.copia_cola ? (
-        <div className={storePanelClass('mt-6 text-left')}>
+        <Card surface="store" className="mt-6 p-6 text-left shadow-sm">
           <h2 className={storeHeadingClass()}>PIX copia e cola</h2>
           <p className={storeBodyClass('mt-2 break-all font-mono text-xs')}>{data.pixInfo.copia_cola}</p>
-        </div>
+        </Card>
       ) : null}
 
       <div className="mt-8 flex flex-wrap justify-center gap-3">
-        <Link href={pedidosHref} className="btn-primary px-6 py-2">
-          Meus pedidos
-        </Link>
-        <Link href={homeHref} className="btn-outline px-6 py-2">
-          Continuar comprando
-        </Link>
+        <Button surface="store" variant="primary" asChild className={storeButtonPillClass('px-6 py-2')}>
+          <Link href={pedidosHref}>Meus pedidos</Link>
+        </Button>
+        <Button surface="store" variant="secondary" asChild className={storeButtonOutlinePillClass('px-6 py-2')}>
+          <Link href={homeHref}>Continuar comprando</Link>
+        </Button>
       </div>
     </div>
   );

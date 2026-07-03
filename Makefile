@@ -138,6 +138,9 @@ seed-fresh: ## Recria dados [DEV] do zero (Docker ou híbrido)
 db-migrate: ## Roda migrations Drizzle (@lojao/db)
 	pnpm --filter @lojao/db db:migrate
 
+db-migrate-merchants: ## Migrations merchant (atacommerce_*) — reviews, wishlist, etc.
+	pnpm --filter @lojao/db db:migrate:merchants
+
 db-generate: ## Gera migration após alteração de schema
 	pnpm --filter @lojao/db db:generate
 

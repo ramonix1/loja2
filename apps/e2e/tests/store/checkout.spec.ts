@@ -6,7 +6,8 @@ import { storePath } from '../../lib/store-path';
 test('checkout metodo teste @smoke', async ({ page }) => {
   await page.goto(storePath('/produto/1'));
   await page.getByTestId(testIds.store.productAddCartBtn).click();
-  await expect(page).toHaveURL(/\/store\/[^/]+\/carrinho/);
+  await page.getByTestId(testIds.store.headerCart).click();
+  await expect(page).toHaveURL(/\/store\/[^/]+\/cart/);
 
   await page.getByTestId(testIds.store.cartCheckoutBtn).click();
   await expect(page).toHaveURL(/\/store\/[^/]+\/checkout/);

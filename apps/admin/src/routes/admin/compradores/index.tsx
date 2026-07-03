@@ -1,13 +1,13 @@
 import {
   Button,
   Card,
+  FieldInput,
   Table,
   TableCell,
   TableHead,
   TableHeaderCell,
   TableRow,
   adminEmptyStateClass,
-  adminInputClass,
   adminMutedClass,
   adminPageSubtitleClass,
   adminPageTitleClass,
@@ -114,13 +114,14 @@ export function CompradoresPage() {
       )}
 
       <form onSubmit={handleSearch} className="mb-6 flex flex-wrap gap-3">
-        <input
+        <FieldInput
+          surface="admin"
           type="text"
           value={buscaInput}
           onChange={(e) => setBuscaInput(e.target.value)}
           placeholder="Buscar por nome, e-mail, CPF ou telefone..."
           data-testid={testIds.adminCompradores.searchInput}
-          className={adminInputClass('min-w-0 flex-1 rounded-xl')}
+          className="min-w-0 flex-1 rounded-xl"
         />
         <Button type="submit" data-testid={testIds.adminCompradores.searchBtn}>
           Buscar

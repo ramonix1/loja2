@@ -1,6 +1,7 @@
 import {
   Button,
   Card,
+  FieldInput,
   Table,
   TableCell,
   TableHead,
@@ -8,7 +9,6 @@ import {
   TableRow,
   adminEmptyStateClass,
   adminFieldLabelClass,
-  adminInputClass,
   adminMutedClass,
   adminPageSubtitleClass,
   adminPageTitleClass,
@@ -185,26 +185,26 @@ export function PermissoesPage() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className={adminFieldLabelClass()}>Nome *</label>
-              <input
+              <FieldInput
+                surface="admin"
                 type="text"
                 required
                 value={nome}
                 placeholder="Nome completo"
                 data-testid={testIds.adminPermissoes.nomeInput}
                 onChange={(e) => setNome(e.target.value)}
-                className={adminInputClass()}
               />
             </div>
             <div>
               <label className={adminFieldLabelClass()}>Email *</label>
-              <input
+              <FieldInput
+                surface="admin"
                 type="email"
                 required
                 value={email}
                 placeholder="admin@email.com"
                 data-testid={testIds.adminPermissoes.emailInput}
                 onChange={(e) => setEmail(e.target.value)}
-                className={adminInputClass()}
               />
             </div>
           </div>
@@ -212,7 +212,8 @@ export function PermissoesPage() {
             <div>
               <label className={adminFieldLabelClass()}>Senha *</label>
               <div className="relative">
-                <input
+                <FieldInput
+                  surface="admin"
                   type={showSenha ? 'text' : 'password'}
                   required
                   minLength={8}
@@ -220,7 +221,7 @@ export function PermissoesPage() {
                   placeholder="Mínimo 8 caracteres"
                   data-testid={testIds.adminPermissoes.senhaInput}
                   onChange={(e) => setSenha(e.target.value)}
-                  className={adminInputClass('pr-10')}
+                  className="pr-10"
                 />
                 <button
                   type="button"
@@ -233,14 +234,14 @@ export function PermissoesPage() {
             </div>
             <div>
               <label className={adminFieldLabelClass()}>CPF</label>
-              <input
+              <FieldInput
+                surface="admin"
                 type="text"
                 value={cpf}
                 maxLength={14}
                 placeholder="000.000.000-00"
                 data-testid={testIds.adminPermissoes.cpfInput}
                 onChange={(e) => setCpf(mascaraCpf(e.target.value))}
-                className={adminInputClass()}
               />
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { Button } from '@lojao/ui';
+import { Button, FieldInput } from '@lojao/ui';
 import { testIds } from '@lojao/test-utils';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState, type FormEvent } from 'react';
@@ -8,7 +8,6 @@ import { PlatformUiThemeSwitch } from '../components/platform-ui-theme-switch';
 import {
   AtaLabsBrand,
   platformAuthCardClass,
-  platformAuthInputClass,
   platformAuthLabelClass,
   platformAuthShellClass,
 } from '../components/ata-brand';
@@ -23,13 +22,13 @@ export function PlatformLoginPage() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated && isPlatformAdmin) {
-      navigate('/platform/stores', { replace: true });
+      navigate('/platform/dashboard', { replace: true });
     }
   }, [isLoading, isAuthenticated, isPlatformAdmin, navigate]);
 
   const mutation = useMutation({
     mutationFn: () => platformLogin(email, senha),
-    onSuccess: () => navigate('/platform/stores', { replace: true }),
+    onSuccess: () => navigate('/platform/dashboard', { replace: true }),
   });
 
   const errorMessage =
@@ -58,7 +57,8 @@ export function PlatformLoginPage() {
             <label htmlFor="email" className={platformAuthLabelClass()}>
               E-mail
             </label>
-            <input
+            <FieldInput
+              surface="platform"
               id="email"
               type="email"
               autoComplete="username"
@@ -66,7 +66,6 @@ export function PlatformLoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               data-testid={testIds.platform.loginEmail}
-              className={platformAuthInputClass()}
             />
           </div>
 
@@ -74,7 +73,8 @@ export function PlatformLoginPage() {
             <label htmlFor="senha" className={platformAuthLabelClass()}>
               Senha
             </label>
-            <input
+            <FieldInput
+              surface="platform"
               id="senha"
               type="password"
               autoComplete="current-password"
@@ -82,7 +82,6 @@ export function PlatformLoginPage() {
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               data-testid={testIds.platform.loginPassword}
-              className={platformAuthInputClass()}
             />
           </div>
 

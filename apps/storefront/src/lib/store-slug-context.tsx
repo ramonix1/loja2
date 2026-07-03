@@ -13,6 +13,9 @@ export function StoreSlugProvider({
   slug: string;
   children: React.ReactNode;
 }) {
+  // Sincroniza antes dos filhos montarem — evita fetch com slug default `loja`.
+  setClientStoreSlug(slug);
+
   useEffect(() => {
     setClientStoreSlug(slug);
   }, [slug]);

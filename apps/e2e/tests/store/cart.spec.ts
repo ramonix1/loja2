@@ -9,8 +9,10 @@ test('add via UI exibe carrinho @smoke', async ({ page }) => {
   const card = page.locator('[data-testid="store-home-product-card-1"]');
   await expect(card).toBeVisible();
 
-  await card.getByRole('button', { name: 'Adicionar' }).click();
+  await card.getByRole('button', { name: /adicionar ao carrinho/i }).click();
+  await expect(page.getByTestId(testIds.store.addCartToast)).toBeVisible();
 
-  await expect(page).toHaveURL(/\/store\/[^/]+\/carrinho/);
+  await page.getByTestId(testIds.store.headerCart).click();
+  await expect(page).toHaveURL(/\/store\/[^/]+\/cart/);
   await expect(page.getByTestId(testIds.store.cartTable)).toBeVisible();
 });

@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 
 import { requireStoreScope } from '../../lib/store-scope.js';
-import { requireAuth } from '../../plugins/auth-guard.js';
+import { requireAuth, requireBuyer } from '../../plugins/auth-guard.js';
 import {
   addCartItem,
   countCartItems,
@@ -22,6 +22,7 @@ const updateItemSchema = z.object({
 
 export async function cartRoutes(app: FastifyInstance): Promise<void> {
   app.addHook('preHandler', requireAuth);
+  app.addHook('preHandler', requireBuyer);
 
   app.get('/cart', async (request, reply) => {
     const scope = requireStoreScope(request);
@@ -33,8 +34,8 @@ export async function cartRoutes(app: FastifyInstance): Promise<void> {
 
   app.get('/cart/count', async (request, reply) => {
     const scope = requireStoreScope(request);
-    const contagem = await countCartItems(scope, request.session.usuarioId!);
-    return reply.send({ data: { contagem } });
+    const count = await countCartItems(scope, request.session.usuarioId!);
+    return reply.send({ data: { count } });
   });
 
   app.post('/cart/items', async (request, reply) => {

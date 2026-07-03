@@ -14,6 +14,11 @@ import { merchantRoutes } from '../modules/merchants/merchant.routes.js';
 import { ordersRoutes } from '../modules/orders/orders.routes.js';
 import { produtosRoutes } from '../modules/produtos/produtos.routes.js';
 import { publicRoutes } from '../modules/public/public.routes.js';
+import {
+  adminReviewsRoutes,
+  publicReviewsRoutes,
+  reviewsRoutes,
+} from '../modules/reviews/reviews.routes.js';
 import { relatoriosRoutes } from '../modules/relatorios/relatorios.routes.js';
 import { shippingRoutes } from '../modules/shipping/shipping.routes.js';
 import { storeChatRoutes } from '../modules/store-chat/store-chat.routes.js';
@@ -23,6 +28,7 @@ import { chatRoutes } from '../modules/chat/chat.routes.js';
 import { diagnosticoRoutes } from '../modules/diagnostico/diagnostico.routes.js';
 import { platformRoutes } from '../modules/platform/platform.routes.js';
 import { storeRoutes } from '../modules/store/store.routes.js';
+import { wishlistRoutes } from '../modules/wishlist/wishlist.routes.js';
 import {
   publicStorePreHandler,
   softStorePreHandler,
@@ -63,6 +69,8 @@ function isPublicStore(path: string): boolean {
   if (path.includes('/auth/recover-password')) return true;
   if (path.includes('/auth/reset-password')) return true;
   if (path.endsWith('/store/config')) return true;
+  if (path.startsWith('/api/v1/wishlist')) return true;
+  if (/^\/api\/v1\/products\/\d+\/reviews$/.test(path)) return true;
   return false;
 }
 
@@ -91,6 +99,9 @@ export async function v1Routes(app: FastifyInstance): Promise<void> {
   await app.register(platformRoutes);
   await app.register(storeRoutes);
   await app.register(publicRoutes);
+  await app.register(publicReviewsRoutes);
+  await app.register(reviewsRoutes);
+  await app.register(wishlistRoutes);
   await app.register(merchantRoutes);
   await app.register(cartRoutes);
   await app.register(shippingRoutes);
@@ -99,6 +110,7 @@ export async function v1Routes(app: FastifyInstance): Promise<void> {
   await app.register(merchantBillingRoutes);
   await app.register(storeChatRoutes);
   await app.register(adminRoutes);
+  await app.register(adminReviewsRoutes);
   await app.register(categoriasRoutes);
   await app.register(bannersRoutes);
   await app.register(aparenciaRoutes);

@@ -159,6 +159,11 @@ export function BannerFormPage() {
       <form
         onSubmit={(e) => {
           e.preventDefault();
+          setError(null);
+          if (!isEdit && !imagemFile) {
+            setError('Selecione uma imagem para o banner.');
+            return;
+          }
           saveMutation.mutate();
         }}
         className="max-w-2xl space-y-6"
@@ -182,10 +187,12 @@ export function BannerFormPage() {
             <input
               type="file"
               accept="image/*"
-              required={!isEdit}
               data-testid={testIds.adminBanners.imagemInput}
               className="hidden"
-              onChange={(e) => setImagemFile(e.target.files?.[0] ?? null)}
+              onChange={(e) => {
+                setImagemFile(e.target.files?.[0] ?? null);
+                if (e.target.files?.[0]) setError(null);
+              }}
             />
           </label>
         </Card>

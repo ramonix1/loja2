@@ -56,8 +56,8 @@
   --secondary-foreground: var(--platform-text);
   --muted: var(--platform-surface-elevated);
   --muted-foreground: var(--platform-text-muted);
-  --accent: var(--platform-accent);
-  --accent-foreground: var(--ata-verde-conde);
+  --accent: var(--platform-sidebar-active-bg);
+  --accent-foreground: var(--platform-text);
   --destructive: var(--platform-error);
   --destructive-foreground: #ffffff;
   --border: var(--platform-border);
@@ -78,12 +78,45 @@
   --chart-5: var(--platform-text-muted);
 }
 
+/** Shell admin — sidebar + highlight sutil em portais (cmdk, dropdown, select). */
+[data-ui-surface='admin'] {
+  --background: var(--admin-bg);
+  --foreground: var(--admin-text);
+  --card: var(--admin-surface);
+  --card-foreground: var(--admin-text);
+  --popover: var(--admin-surface-elevated);
+  --popover-foreground: var(--admin-text);
+  --primary: var(--admin-accent);
+  --primary-foreground: #ffffff;
+  --secondary: var(--admin-surface-elevated);
+  --secondary-foreground: var(--admin-text);
+  --muted: var(--admin-surface-elevated);
+  --muted-foreground: var(--admin-text-muted);
+  --accent: var(--admin-sidebar-active-bg);
+  --accent-foreground: var(--admin-text);
+  --destructive: var(--admin-error);
+  --destructive-foreground: var(--admin-error-text);
+  --border: var(--admin-border);
+  --input: var(--admin-input-border);
+  --ring: var(--admin-focus-ring);
+  --sidebar: var(--admin-sidebar-bg);
+  --sidebar-foreground: var(--admin-sidebar-text);
+  --sidebar-primary: var(--admin-accent);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--admin-sidebar-active-bg);
+  --sidebar-accent-foreground: var(--admin-sidebar-text);
+  --sidebar-border: var(--admin-sidebar-border);
+  --sidebar-ring: var(--admin-focus-ring);
+}
+
 :root {
   --radius: 0.625rem;
 }
 
 [data-store-theme='escuro'],
-[data-store-theme='claro'] {
+[data-store-theme='claro'],
+/** Portais Radix (Select, Dropdown) fora do wrapper da vitrine. */
+[data-ui-surface='store'] {
   --background: var(--store-bg);
   --foreground: var(--store-text);
   --card: var(--store-surface);

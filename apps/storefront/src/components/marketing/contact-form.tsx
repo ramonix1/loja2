@@ -1,11 +1,15 @@
 'use client';
 
+import { FieldInput, FieldTextarea } from '@lojao/ui';
 import { marketing as testIds } from '@lojao/test-utils/test-ids/marketing';
 import { FormEvent } from 'react';
 
 interface ContactFormProps {
   className?: string;
 }
+
+const marketingInputClass =
+  'marketing-input w-full rounded-xl border border-cinza-areia bg-white px-4 py-3.5 text-sm text-verde-conde placeholder:text-cinza-areia/60';
 
 export function ContactForm({ className = '' }: ContactFormProps) {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -22,55 +26,60 @@ export function ContactForm({ className = '' }: ContactFormProps) {
         <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.18em] text-cinza-pedra">
           Nome
         </label>
-        <input
+        <FieldInput
+          surface="store"
           type="text"
           name="nome"
           placeholder="Seu nome completo"
-          className="marketing-input w-full rounded-xl border border-cinza-areia bg-white px-4 py-3.5 text-sm text-verde-conde placeholder:text-cinza-areia/60"
+          className={marketingInputClass}
         />
       </div>
       <div>
         <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.18em] text-cinza-pedra">
           E-mail
         </label>
-        <input
+        <FieldInput
+          surface="store"
           type="email"
           name="email"
           placeholder="seu@email.com"
-          className="marketing-input w-full rounded-xl border border-cinza-areia bg-white px-4 py-3.5 text-sm text-verde-conde placeholder:text-cinza-areia/60"
+          className={marketingInputClass}
         />
       </div>
       <div>
         <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.18em] text-cinza-pedra">
           Empresa
         </label>
-        <input
+        <FieldInput
+          surface="store"
           type="text"
           name="empresa"
           placeholder="Nome da empresa"
-          className="marketing-input w-full rounded-xl border border-cinza-areia bg-white px-4 py-3.5 text-sm text-verde-conde placeholder:text-cinza-areia/60"
+          className={marketingInputClass}
         />
       </div>
       <div>
         <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.18em] text-cinza-pedra">
           Telefone
         </label>
-        <input
+        <FieldInput
+          surface="store"
           type="tel"
           name="telefone"
           placeholder="(00) 00000-0000"
-          className="marketing-input w-full rounded-xl border border-cinza-areia bg-white px-4 py-3.5 text-sm text-verde-conde placeholder:text-cinza-areia/60"
+          className={marketingInputClass}
         />
       </div>
       <div className="md:col-span-2">
         <label className="mb-2 block text-[10px] font-semibold uppercase tracking-[0.18em] text-cinza-pedra">
           Mensagem
         </label>
-        <textarea
+        <FieldTextarea
+          surface="store"
           name="mensagem"
           rows={4}
           placeholder="Como podemos ajudar?"
-          className="marketing-textarea w-full resize-none rounded-xl border border-cinza-areia bg-white px-4 py-3.5 text-sm text-verde-conde placeholder:text-cinza-areia/60"
+          className={`marketing-textarea ${marketingInputClass} resize-none`}
         />
       </div>
       <div className="text-center md:col-span-2">

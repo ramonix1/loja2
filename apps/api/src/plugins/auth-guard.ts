@@ -13,6 +13,21 @@ export async function requireAuth(
 }
 
 /**
+ * preHandler que exige comprador autenticado (`role === 'usuario'`).
+ */
+export async function requireBuyer(
+  request: FastifyRequest,
+  reply: FastifyReply,
+): Promise<void> {
+  if (reply.sent) return;
+  if (request.session?.role !== 'usuario') {
+    await reply
+      .code(403)
+      .send({ error: 'Acesso restrito a compradores.', code: 'FORBIDDEN' });
+  }
+}
+
+/**
  * preHandler que exige sessão autenticada com papel de operador da loja (MA8).
  * Conta merchant: `memberId` + loja selecionada (`storeId`); roles owner/admin/operator.
  */

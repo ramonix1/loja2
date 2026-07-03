@@ -12,6 +12,8 @@ export interface CartItem {
 }
 
 export async function getCartItems(scope: StoreScope, buyerId: number): Promise<CartItem[]> {
+  await purgeOrphanedCartItems(scope, buyerId);
+
   const r = await scope.pool.query(
     `SELECT
        ci.id, ci.quantity AS quantidade, ci.unit_price AS preco_unitario,
@@ -35,12 +37,22 @@ export async function getCartItems(scope: StoreScope, buyerId: number): Promise<
   }));
 }
 
-export async function countCartItems(scope: StoreScope, buyerId: number): Promise<number> {
-  const r = await scope.pool.query(
-    'SELECT COALESCE(SUM(quantity), 0) AS total FROM cart_items WHERE buyer_id = $1 AND store_id = $2',
+/** Remove linhas cujo produto não existe mais (evita count > 0 com carrinho vazio na UI). */
+async function purgeOrphanedCartItems(scope: StoreScope, buyerId: number): Promise<void> {
+  await scope.pool.query(
+    `DELETE FROM cart_items ci
+     WHERE ci.buyer_id = $1 AND ci.store_id = $2
+       AND NOT EXISTS (
+         SELECT 1 FROM products p
+         WHERE p.id = ci.product_id AND p.store_id = ci.store_id
+       )`,
     [buyerId, scope.storeId],
   );
-  return parseInt(String(r.rows[0]?.total ?? 0), 10);
+}
+
+export async function countCartItems(scope: StoreScope, buyerId: number): Promise<number> {
+  const items = await getCartItems(scope, buyerId);
+  return items.reduce((sum, item) => sum + item.quantidade, 0);
 }
 
 export async function addCartItem(
@@ -48,7 +60,7 @@ export async function addCartItem(
   buyerId: number,
   produtoId: number,
   quantidade: number,
-): Promise<{ contagem: number } | { error: string; code: string; status: number }> {
+): Promise<{ count: number } | { error: string; code: string; status: number }> {
   const qtd = Math.max(1, quantidade);
 
   const prod = await scope.pool.query(
@@ -119,8 +131,8 @@ export async function addCartItem(
     [scope.storeId, buyerId, produtoId, qtd, prod.rows[0].valor],
   );
 
-  const contagem = await countCartItems(scope, buyerId);
-  return { contagem };
+  const count = await countCartItems(scope, buyerId);
+  return { count };
 }
 
 export async function updateCartItem(
@@ -128,7 +140,7 @@ export async function updateCartItem(
   buyerId: number,
   itemId: number,
   quantidade: number,
-): Promise<{ contagem: number; total: string; itens: CartItem[] }> {
+): Promise<{ count: number; total: string; itens: CartItem[] }> {
   if (!quantidade || quantidade < 1) {
     await scope.pool.query(
       'DELETE FROM cart_items WHERE id = $1 AND buyer_id = $2 AND store_id = $3',
@@ -143,21 +155,21 @@ export async function updateCartItem(
 
   const itens = await getCartItems(scope, buyerId);
   const total = itens.reduce((s, i) => s + i.subtotal, 0);
-  const contagem = itens.reduce((s, i) => s + i.quantidade, 0);
-  return { contagem, total: total.toFixed(2), itens };
+  const count = itens.reduce((s, i) => s + i.quantidade, 0);
+  return { count, total: total.toFixed(2), itens };
 }
 
 export async function removeCartItem(
   scope: StoreScope,
   buyerId: number,
   itemId: number,
-): Promise<{ contagem: number; total: string }> {
+): Promise<{ count: number; total: string }> {
   await scope.pool.query(
     'DELETE FROM cart_items WHERE id = $1 AND buyer_id = $2 AND store_id = $3',
     [itemId, buyerId, scope.storeId],
   );
   const itens = await getCartItems(scope, buyerId);
   const total = itens.reduce((s, i) => s + i.subtotal, 0);
-  const contagem = itens.reduce((s, i) => s + i.quantidade, 0);
-  return { contagem, total: total.toFixed(2) };
+  const count = itens.reduce((s, i) => s + i.quantidade, 0);
+  return { count, total: total.toFixed(2) };
 }

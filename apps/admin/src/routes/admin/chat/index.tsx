@@ -1,7 +1,8 @@
 import {
   Button,
   Card,
-  adminInputClass,
+  FieldInput,
+  FieldTextarea,
   adminMutedClass,
   adminPageSubtitleClass,
   adminPageTitleClass,
@@ -446,7 +447,8 @@ export function ChatPage() {
                 onSubmit={enviarMensagem}
               >
                 <div className="flex gap-3">
-                  <input
+                  <FieldInput
+                    surface="admin"
                     type="text"
                     value={mensagemInput}
                     disabled={inputDisabled}
@@ -455,7 +457,7 @@ export function ChatPage() {
                     }
                     data-testid={testIds.adminChat.input}
                     onChange={(e) => setMensagemInput(e.target.value)}
-                    className={adminInputClass('flex-1 rounded-xl disabled:opacity-50')}
+                    className="flex-1 rounded-xl disabled:opacity-50"
                   />
                   <Button
                     type="submit"
@@ -544,19 +546,20 @@ export function ChatPage() {
                   {botEditId ? 'Editando resposta' : '+ Nova resposta automática'}
                 </h3>
                 <div className="space-y-3">
-                  <input
+                  <FieldInput
+                    surface="admin"
                     type="text"
                     value={botKw}
                     placeholder="ex: preço, valor, quanto custa"
                     onChange={(e) => setBotKw(e.target.value)}
-                    className={adminInputClass()}
                   />
-                  <textarea
+                  <FieldTextarea
+                    surface="admin"
                     rows={3}
                     value={botResp}
                     placeholder="Digite a resposta automática..."
                     onChange={(e) => setBotResp(e.target.value)}
-                    className={adminInputClass('resize-none')}
+                    className="resize-none"
                   />
                   <div className="flex gap-2">
                     <Button

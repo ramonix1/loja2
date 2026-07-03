@@ -20,13 +20,18 @@ import { AgendaPage } from './routes/admin/agenda/index';
 import { PermissoesPage } from './routes/admin/permissoes/index';
 import { ChatPage } from './routes/admin/chat/index';
 import { DiagnosticoPage } from './routes/admin/diagnostico/index';
+import { AvaliacoesPage } from './routes/admin/avaliacoes/index';
 import { LoginPage } from './routes/login';
 import { MyStoresPage } from './routes/my-stores';
 import { PlatformLoginPage } from './routes/platform-login';
 import { PlatformLayout } from './routes/platform/layout';
+import { PlatformDashboardPage, PlatformSettingsPlaceholderPage } from './routes/platform/dashboard';
 import { PlatformStoresPage } from './routes/platform/stores/index';
 import { PlatformStoreNovoPage } from './routes/platform/stores/novo';
 import { PlatformStoreDetailPage } from './routes/platform/stores/detail';
+import { PlatformMerchantsPage } from './routes/platform/merchants/index';
+import { PlatformHealthPage } from './routes/platform/health/index';
+import { PlatformReportsPage } from './routes/platform/reports/index';
 import { RootRedirect } from './components/root-redirect';
 
 const router = createBrowserRouter([
@@ -44,10 +49,15 @@ const router = createBrowserRouter([
         path: '/platform',
         element: <PlatformLayout />,
         children: [
-          { index: true, element: <Navigate to="/platform/stores" replace /> },
+          { index: true, element: <Navigate to="/platform/dashboard" replace /> },
+          { path: 'dashboard', element: <PlatformDashboardPage /> },
+          { path: 'settings', element: <PlatformSettingsPlaceholderPage /> },
           { path: 'stores', element: <PlatformStoresPage /> },
           { path: 'stores/novo', element: <PlatformStoreNovoPage /> },
           { path: 'stores/:slug', element: <PlatformStoreDetailPage /> },
+          { path: 'merchants', element: <PlatformMerchantsPage /> },
+          { path: 'health', element: <PlatformHealthPage /> },
+          { path: 'reports', element: <PlatformReportsPage /> },
           { path: 'tenants', element: <Navigate to="/platform/stores" replace /> },
           { path: 'tenants/novo', element: <Navigate to="/platform/stores/novo" replace /> },
           { path: 'tenants/:slug', element: <Navigate to="/platform/stores" replace /> },
@@ -76,6 +86,7 @@ const router = createBrowserRouter([
           { path: 'produtos/:id', element: <ProdutoEditPage /> },
           { path: 'compradores', element: <CompradoresPage /> },
           { path: 'compradores/:id', element: <CompradorDetailPage /> },
+          { path: 'avaliacoes', element: <AvaliacoesPage /> },
           { path: 'configuracoes', element: <ConfiguracoesPage /> },
           { path: 'relatorios', element: <RelatoriosPage /> },
           { path: 'agenda', element: <AgendaPage /> },

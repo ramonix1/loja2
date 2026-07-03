@@ -12,6 +12,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   surface?: UiSurface;
   /** @deprecated Use `surface`. */
   theme?: SidebarTheme;
+  asChild?: boolean;
 }
 
 const SHADCN_VARIANT: Record<Variant, 'default' | 'secondary' | 'ghost'> = {
@@ -53,6 +54,7 @@ export function Button({
   surface,
   theme,
   className,
+  asChild = false,
   ...props
 }: ButtonProps) {
   const resolved = resolveSurface(surface, theme);
@@ -64,6 +66,7 @@ export function Button({
   return (
     <ShadcnButton
       variant={SHADCN_VARIANT[variant]}
+      asChild={asChild}
       className={cn(
         'min-h-[2.75rem] touch-manipulation rounded-lg px-4 py-2',
         variantClass,

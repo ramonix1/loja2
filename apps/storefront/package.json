@@ -18,7 +18,9 @@
     "@lojao/ui": "workspace:*",
     "next": "^15.1.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "swiper": "^14.0.1",
+    "tw-animate-css": "^1.2.5"
   },
   "devDependencies": {
     "@lojao/eslint-config": "workspace:*",

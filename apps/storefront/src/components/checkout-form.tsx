@@ -6,7 +6,14 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState, type FormEvent } from 'react';
 
-import { Button, FieldInput } from '@lojao/ui';
+import {
+  Button,
+  Card,
+  FieldInput,
+  FieldRadioGroup,
+  FieldRadioGroupItem,
+  Label,
+} from '@lojao/ui';
 import { BRL } from '@/lib/api';
 import { IS_DEV } from '@/lib/config';
 import {
@@ -22,11 +29,8 @@ import {
 import {
   storeErrorTextClass,
   storeHeadingClass,
-  storeLabelClass,
   storeLinkClass,
   storeMutedClass,
-  storeOptionRowClass,
-  storePanelClass,
 } from '@/lib/store-styles';
 import { useStoreSlug } from '@/lib/store-slug-context';
 import { useStoreHref, useStoreLoginHref } from '@/lib/use-store-href';
@@ -35,7 +39,7 @@ export function CheckoutForm() {
   const router = useRouter();
   const slug = useStoreSlug();
   const loginHref = useStoreLoginHref('/checkout');
-  const carrinhoHref = useStoreHref('/carrinho');
+  const cartHref = useStoreHref('/cart');
   const [preview, setPreview] = useState<CheckoutPreview | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -134,7 +138,7 @@ export function CheckoutForm() {
     return (
       <p className={storeMutedClass('text-center')}>
         Carrinho vazio.{' '}
-        <Link href={carrinhoHref} className={storeLinkClass()}>
+        <Link href={cartHref} className={storeLinkClass()}>
           Voltar
         </Link>
       </p>
@@ -146,11 +150,11 @@ export function CheckoutForm() {
   return (
     <form data-testid={testIds.checkoutForm} onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-3">
       <div className="space-y-6 lg:col-span-2">
-        <section className={storePanelClass()}>
+        <Card surface="store" className="p-6 shadow-sm">
           <h2 className={storeHeadingClass('mb-4')}>Dados de entrega</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label className={storeLabelClass()}>Nome</label>
+              <Label className="mb-1 block text-[var(--store-text-muted)]">Nome</Label>
               <FieldInput
                 surface="store"
                 required
@@ -159,7 +163,7 @@ export function CheckoutForm() {
               />
             </div>
             <div>
-              <label className={storeLabelClass()}>E-mail</label>
+              <Label className="mb-1 block text-[var(--store-text-muted)]">E-mail</Label>
               <FieldInput
                 surface="store"
                 required
@@ -169,7 +173,7 @@ export function CheckoutForm() {
               />
             </div>
             <div>
-              <label className={storeLabelClass()}>Telefone</label>
+              <Label className="mb-1 block text-[var(--store-text-muted)]">Telefone</Label>
               <FieldInput
                 surface="store"
                 value={form.telefone_entrega}
@@ -177,7 +181,7 @@ export function CheckoutForm() {
               />
             </div>
             <div>
-              <label className={storeLabelClass()}>CEP</label>
+              <Label className="mb-1 block text-[var(--store-text-muted)]">CEP</Label>
               <div className="flex gap-2">
                 <FieldInput
                   surface="store"
@@ -193,7 +197,7 @@ export function CheckoutForm() {
               </div>
             </div>
             <div>
-              <label className={storeLabelClass()}>Número</label>
+              <Label className="mb-1 block text-[var(--store-text-muted)]">Número</Label>
               <FieldInput
                 surface="store"
                 required
@@ -202,7 +206,7 @@ export function CheckoutForm() {
               />
             </div>
             <div className="sm:col-span-2">
-              <label className={storeLabelClass()}>Logradouro</label>
+              <Label className="mb-1 block text-[var(--store-text-muted)]">Logradouro</Label>
               <FieldInput
                 surface="store"
                 required
@@ -211,7 +215,7 @@ export function CheckoutForm() {
               />
             </div>
             <div>
-              <label className={storeLabelClass()}>Bairro</label>
+              <Label className="mb-1 block text-[var(--store-text-muted)]">Bairro</Label>
               <FieldInput
                 surface="store"
                 value={form.bairro}
@@ -219,7 +223,7 @@ export function CheckoutForm() {
               />
             </div>
             <div>
-              <label className={storeLabelClass()}>Cidade</label>
+              <Label className="mb-1 block text-[var(--store-text-muted)]">Cidade</Label>
               <FieldInput
                 surface="store"
                 required
@@ -228,7 +232,7 @@ export function CheckoutForm() {
               />
             </div>
             <div>
-              <label className={storeLabelClass()}>Estado</label>
+              <Label className="mb-1 block text-[var(--store-text-muted)]">Estado</Label>
               <FieldInput
                 surface="store"
                 required
@@ -238,87 +242,72 @@ export function CheckoutForm() {
               />
             </div>
           </div>
-        </section>
+        </Card>
 
         {freteOpcoes.length > 0 ? (
-          <section className={storePanelClass()}>
+          <Card surface="store" className="p-6 shadow-sm">
             <h2 className={storeHeadingClass('mb-4')}>Frete</h2>
-            <div className="space-y-2">
+            <FieldRadioGroup
+              value={freteSelecionado?.id ?? ''}
+              onValueChange={(id) =>
+                setFreteSelecionado(freteOpcoes.find((op) => op.id === id) ?? null)
+              }
+            >
               {freteOpcoes.map((op) => (
-                <label key={op.id} className={storeOptionRowClass()}>
-                  <span>
-                    <input
-                      type="radio"
-                      name="frete"
-                      checked={freteSelecionado?.id === op.id}
-                      onChange={() => setFreteSelecionado(op)}
-                      className="mr-2"
-                    />
-                    {op.nome} — {op.prazo}
-                  </span>
-                  <span className="font-semibold">{BRL.format(op.valor)}</span>
-                </label>
+                <FieldRadioGroupItem
+                  key={op.id}
+                  variant="row"
+                  value={op.id}
+                  label={
+                    <>
+                      {op.nome} — {op.prazo}
+                    </>
+                  }
+                  trailing={<span className="font-semibold">{BRL.format(op.valor)}</span>}
+                />
               ))}
-            </div>
-          </section>
+            </FieldRadioGroup>
+          </Card>
         ) : null}
 
-        <section className={storePanelClass()}>
+        <Card surface="store" className="p-6 shadow-sm">
           <h2 className={storeHeadingClass('mb-4')}>Pagamento</h2>
-          <div className="space-y-3">
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                name="metodo"
-                value="pix"
-                checked={metodo === 'pix'}
-                onChange={() => setMetodo('pix')}
-                data-testid={testIds.checkoutPayment('pix')}
-              />
-              PIX
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="radio"
-                name="metodo"
-                value="boleto"
-                checked={metodo === 'boleto'}
-                onChange={() => setMetodo('boleto')}
-                data-testid={testIds.checkoutPayment('boleto')}
-              />
-              Boleto
-            </label>
+          <FieldRadioGroup
+            value={metodo}
+            onValueChange={(value) =>
+              setMetodo(value as 'pix' | 'boleto' | 'cartao' | 'sumup_online' | 'teste')
+            }
+            className="gap-3"
+          >
+            <FieldRadioGroupItem
+              value="pix"
+              data-testid={testIds.checkoutPayment('pix')}
+              label="PIX"
+            />
+            <FieldRadioGroupItem
+              value="boleto"
+              data-testid={testIds.checkoutPayment('boleto')}
+              label="Boleto"
+            />
             {preview.sumup_habilitado ? (
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="metodo"
-                  value="sumup_online"
-                  checked={metodo === 'sumup_online'}
-                  onChange={() => setMetodo('sumup_online')}
-                  data-testid={testIds.checkoutPayment('sumup_online')}
-                />
-                SumUp
-              </label>
+              <FieldRadioGroupItem
+                value="sumup_online"
+                data-testid={testIds.checkoutPayment('sumup_online')}
+                label="SumUp"
+              />
             ) : null}
             {IS_DEV ? (
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="metodo"
-                  value="teste"
-                  checked={metodo === 'teste'}
-                  onChange={() => setMetodo('teste')}
-                  data-testid={testIds.checkoutPaymentTeste}
-                />
-                Pagamento teste (dev)
-              </label>
+              <FieldRadioGroupItem
+                value="teste"
+                data-testid={testIds.checkoutPaymentTeste}
+                label="Pagamento teste (dev)"
+              />
             ) : null}
-          </div>
-        </section>
+          </FieldRadioGroup>
+        </Card>
       </div>
 
-      <aside className={storePanelClass('h-fit')}>
+      <Card surface="store" className="h-fit p-6 shadow-sm">
         <h2 className={storeHeadingClass('mb-4')}>Resumo</h2>
         <ul className={storeMutedClass('mb-4 space-y-2 text-sm')}>
           {preview.itens.map((item) => (
@@ -337,15 +326,17 @@ export function CheckoutForm() {
 
         {error ? <p className={storeErrorTextClass('mt-4 text-sm')}>{error}</p> : null}
 
-        <button
+        <Button
           type="submit"
+          surface="store"
+          variant="primary"
           disabled={submitting}
           data-testid={testIds.checkoutSubmitBtn}
-          className="btn-primary mt-6 w-full py-3"
+          className="mt-6 w-full py-3"
         >
           {submitting ? 'Processando…' : 'Finalizar pedido'}
-        </button>
-      </aside>
+        </Button>
+      </Card>
     </form>
   );
 }

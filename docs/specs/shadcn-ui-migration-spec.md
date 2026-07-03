@@ -45,7 +45,6 @@ O kit atual `@lojao/ui` (`packages/ui`) cobre o essencial (Button, Card, Table, 
 | Item | Motivo |
 |------|--------|
 | Reescrever **ChartCard** / Recharts | Domínio específico; só estilizar com tokens |
-| **LayoutAdmin**, **Sidebar** estrutura | Layout de produto; evoluir com Sheet mobile, não substituir por template shadcn |
 | Toggle vitrine visitante | Decisão de produto fechada — [UX-PRINCIPLES.md](../design/UX-PRINCIPLES.md) |
 | Migrar marketing HTML/EJS legacy | Fora do monorepo TS |
 | Trocar Tailwind por outra stack | Tailwind 4 permanece |
@@ -220,8 +219,9 @@ Facilities públicas permanecem no export `"."` para não quebrar imports existe
 | `Card` | `card.tsx` | `card` | Facade: prop `title` → `CardHeader`+`CardTitle` interno | S1 |
 | `Switch` | `switch.tsx` | `switch` | Facade: `onChange(bool)`, `testId`, `surface` (classes track) | S1 |
 | `Table` + sub | `table.tsx` | `table` | Substituir markup; manter `surface` para cores de borda/hover | S2 |
-| `Sidebar` | `sidebar.tsx` | — + `scroll-area` | Manter `<aside>`; `<nav>` usa `ScrollArea` | S4 |
-| `LayoutAdmin` | `layout-admin.tsx` | — | Sem mudança estrutural; opcional `Sheet` mobile S4 | S4 |
+| `Sidebar` (legado) | `sidebar.tsx` | `scroll-area` | Painel interno; shell usa primitivo shadcn `sidebar` | S4 |
+| `AppShell` / `AppSidebar` | `shell/*` | `sidebar` (dashboard-01) | `SidebarProvider` + collapse icon + `NavUser`; tokens Ata via `--sidebar-*` | S4 ✓ |
+| `LayoutAdmin` | `layout-admin.tsx` | — | Facade sobre `AppShell` | S4 |
 | `ChartCard` | `chart-card.tsx` | `card` | Card shadcn por baixo; manter slot chart | S2 |
 | `chart-theme` | `chart-theme.ts` | — | Manter | — |
 | `admin-styles` | `admin-styles.ts` | `badge`, `skeleton` | Migrar badges → `Badge`; skeleton → `Skeleton` | S2 |

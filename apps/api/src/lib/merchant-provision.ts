@@ -86,3 +86,26 @@ export async function ensureMerchantDatabase(
   await runMerchantMigrations(url);
   return { dbName, url };
 }
+
+/** Aplica migrations merchant em todos os bancos `atacommerce_*` registrados no master. */
+export async function migrateAllMerchantDatabases(): Promise<void> {
+  const res = await masterPool.query<{ slug: string }>(
+    'SELECT slug FROM merchants ORDER BY slug',
+  );
+
+  if (res.rows.length === 0) {
+    console.log('[merchant] Nenhum merchant registrado — pulando migrations merchant.');
+    return;
+  }
+
+  for (const row of res.rows) {
+    const slug = row.slug;
+    const dbName = merchantDbName(slug);
+    if (!(await databaseExists(dbName))) {
+      console.warn(`[merchant] Banco ${dbName} ausente — pulando ${slug}.`);
+      continue;
+    }
+    console.log(`[merchant] Aplicando migrations em ${dbName}...`);
+    await runMerchantMigrations(merchantConnectionUrl(dbName));
+  }
+}

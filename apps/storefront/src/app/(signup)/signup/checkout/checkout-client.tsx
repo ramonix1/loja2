@@ -1,5 +1,6 @@
 'use client';
 
+import { FieldInput } from '@lojao/ui';
 import { signup as testIds } from '@lojao/test-utils/test-ids/signup';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -63,7 +64,7 @@ function Field({
   );
 }
 
-const inputClass =
+const signupInputClass =
   'w-full rounded-xl border border-azul-gelo bg-white px-4 py-3 text-sm text-azul-noite placeholder-azul-ceu/60 focus:outline-none focus:ring-2 focus:ring-azul-comercio';
 
 function useSlugCheck(slug: string, type: 'merchant' | 'store') {
@@ -241,8 +242,9 @@ export function CheckoutClient({ planSlug }: { planSlug: SignupPlanSlug }) {
                 <div className="space-y-5">
                   <h2 className="text-lg font-extrabold text-azul-noite">Conta e primeira loja</h2>
                   <Field label="Nome da conta (empresa)" error={errors.merchantNome}>
-                    <input
-                      className={inputClass}
+                    <FieldInput
+                      surface="store"
+                      className={signupInputClass}
                       value={merchantNome}
                       onChange={(e) => setMerchantNome(e.target.value)}
                       placeholder="Minha Empresa LTDA"
@@ -251,8 +253,9 @@ export function CheckoutClient({ planSlug }: { planSlug: SignupPlanSlug }) {
                   <Field label="Identificador da conta (slug)" error={errors.merchantSlug}>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-cinza-pedra">conta/</span>
-                      <input
-                        className={inputClass}
+                      <FieldInput
+                        surface="store"
+                        className={signupInputClass}
                         value={merchantSlug}
                         onChange={(e) => {
                           setMerchantSlugEdited(true);
@@ -265,8 +268,9 @@ export function CheckoutClient({ planSlug }: { planSlug: SignupPlanSlug }) {
                   </Field>
 
                   <Field label="Nome da loja" error={errors.storeNome}>
-                    <input
-                      className={inputClass}
+                    <FieldInput
+                      surface="store"
+                      className={signupInputClass}
                       value={storeNome}
                       onChange={(e) => setStoreNome(e.target.value)}
                       placeholder="Minha Loja"
@@ -275,9 +279,10 @@ export function CheckoutClient({ planSlug }: { planSlug: SignupPlanSlug }) {
                   <Field label="Endereço da loja (slug)" error={errors.storeSlug}>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-cinza-pedra">atalabs.com.br/store/</span>
-                      <input
+                      <FieldInput
+                        surface="store"
                         data-testid={testIds.checkoutSlugInput}
-                        className={inputClass}
+                        className={signupInputClass}
                         value={storeSlug}
                         onChange={(e) => {
                           setStoreSlugEdited(true);
@@ -295,17 +300,19 @@ export function CheckoutClient({ planSlug }: { planSlug: SignupPlanSlug }) {
                 <div className="space-y-5">
                   <h2 className="text-lg font-extrabold text-azul-noite">Sua conta de administrador</h2>
                   <Field label="Nome completo" error={errors.ownerNome}>
-                    <input
-                      className={inputClass}
+                    <FieldInput
+                      surface="store"
+                      className={signupInputClass}
                       value={ownerNome}
                       onChange={(e) => setOwnerNome(e.target.value)}
                       placeholder="Seu nome"
                     />
                   </Field>
                   <Field label="E-mail" error={errors.email}>
-                    <input
+                    <FieldInput
+                      surface="store"
                       type="email"
-                      className={inputClass}
+                      className={signupInputClass}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="voce@email.com"
@@ -313,18 +320,20 @@ export function CheckoutClient({ planSlug }: { planSlug: SignupPlanSlug }) {
                   </Field>
                   <div className="grid gap-5 md:grid-cols-2">
                     <Field label="Senha" error={errors.senha}>
-                      <input
+                      <FieldInput
+                        surface="store"
                         type="password"
-                        className={inputClass}
+                        className={signupInputClass}
                         value={senha}
                         onChange={(e) => setSenha(e.target.value)}
                         placeholder="mínimo 8 caracteres"
                       />
                     </Field>
                     <Field label="Confirmar senha" error={errors.confirmar}>
-                      <input
+                      <FieldInput
+                        surface="store"
                         type="password"
-                        className={inputClass}
+                        className={signupInputClass}
                         value={confirmar}
                         onChange={(e) => setConfirmar(e.target.value)}
                         placeholder="repita a senha"

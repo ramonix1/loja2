@@ -1,6 +1,6 @@
 'use client';
 
-import { FieldInput } from '@lojao/ui';
+import { Button, Card, FieldInput, Label } from '@lojao/ui';
 import { auth as testIds } from '@lojao/test-utils/test-ids/auth';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -10,9 +10,7 @@ import { ApiError, login } from '@/lib/client-api';
 import { adminDashboardUrl } from '@/lib/config';
 import {
   storeErrorTextClass,
-  storeLabelClass,
   storeLinkClass,
-  storePanelClass,
   storeSectionTitleClass,
   storeSubtleClass,
 } from '@/lib/store-styles';
@@ -50,15 +48,15 @@ export function LoginForm() {
   }
 
   return (
-    <div className={storePanelClass('mx-auto max-w-md rounded-2xl p-8')}>
+    <Card surface="store" className="mx-auto max-w-md rounded-2xl p-8 shadow-sm">
       <h1 className={storeSectionTitleClass('mb-1')}>Entrar</h1>
       <p className={storeSubtleClass('mb-6 text-sm')}>Acesse sua conta para comprar.</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="email" className={storeLabelClass()}>
+          <Label htmlFor="email" className="mb-1 block text-[var(--store-text-muted)]">
             E-mail
-          </label>
+          </Label>
           <FieldInput
             surface="store"
             id="email"
@@ -70,9 +68,9 @@ export function LoginForm() {
           />
         </div>
         <div>
-          <label htmlFor="senha" className={storeLabelClass()}>
+          <Label htmlFor="senha" className="mb-1 block text-[var(--store-text-muted)]">
             Senha
-          </label>
+          </Label>
           <FieldInput
             surface="store"
             id="senha"
@@ -95,14 +93,16 @@ export function LoginForm() {
           </p>
         ) : null}
 
-        <button
+        <Button
           type="submit"
+          surface="store"
+          variant="primary"
           disabled={loading}
           data-testid={testIds.loginSubmit}
-          className="btn-primary w-full py-2.5"
+          className="w-full py-2.5"
         >
           {loading ? 'Entrando…' : 'Entrar'}
-        </button>
+        </Button>
       </form>
 
       <p className={storeSubtleClass('mt-6 text-center text-sm')}>
@@ -116,6 +116,6 @@ export function LoginForm() {
           Esqueci minha senha
         </Link>
       </p>
-    </div>
+    </Card>
   );
 }

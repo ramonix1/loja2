@@ -300,3 +300,39 @@ export const chatBotReplies = pgTable('chat_bot_replies', {
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
+
+export const productReviews = pgTable(
+  'product_reviews',
+  {
+    id: serial('id').primaryKey(),
+    storeId: integer('store_id').notNull(),
+    productId: integer('product_id')
+      .notNull()
+      .references(() => products.id, { onDelete: 'cascade' }),
+    buyerId: integer('buyer_id')
+      .notNull()
+      .references(() => buyers.id, { onDelete: 'cascade' }),
+    rating: integer('rating').notNull(),
+    comment: text('comment'),
+    status: varchar('status', { length: 20 }).notNull().default('approved'),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+  },
+  (t) => [unique('uq_product_reviews_store_product_buyer').on(t.storeId, t.productId, t.buyerId)],
+);
+
+export const wishlistItems = pgTable(
+  'wishlist_items',
+  {
+    id: serial('id').primaryKey(),
+    storeId: integer('store_id').notNull(),
+    buyerId: integer('buyer_id')
+      .notNull()
+      .references(() => buyers.id, { onDelete: 'cascade' }),
+    productId: integer('product_id')
+      .notNull()
+      .references(() => products.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at').defaultNow(),
+  },
+  (t) => [unique('uq_wishlist_items_store_buyer_product').on(t.storeId, t.buyerId, t.productId)],
+);

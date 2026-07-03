@@ -1,13 +1,13 @@
 'use client';
 
-import { store as testIds } from '@lojao/test-utils/test-ids/store';
+import { Button } from '@lojao/ui';
 import { ActionIcons, NavIcons } from '@lojao/ui/icons';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import { fetchMe, logout, type AuthUser } from '@/lib/client-api';
 import { adminDashboardUrl } from '@/lib/config';
-import { storeShellClasses } from '@/lib/store-styles';
+import { storeButtonPillClass, storeShellClasses } from '@/lib/store-styles';
 import { useStoreHref } from '@/lib/use-store-href';
 
 interface StoreNavProps {
@@ -29,13 +29,13 @@ export function StoreNav({ onNavigate, stacked = false }: StoreNavProps) {
   const homeHref = useStoreHref('/');
   const loginHref = useStoreHref('/login');
   const cadastroHref = useStoreHref('/cadastro');
-  const carrinhoHref = useStoreHref('/carrinho');
   const pedidosHref = useStoreHref('/meus-pedidos');
+  const wishlistHref = useStoreHref('/wishlist');
   const linkClass = storeShellClasses().navLink;
   const itemClass = (extra?: string) => navItemClass(linkClass, stacked) + (extra ? ` ${extra}` : '');
 
-  const CartIcon = NavIcons.cart;
   const OrdersIcon = NavIcons.orders;
+  const WishlistIcon = NavIcons.wishlist;
   const LogoutIcon = ActionIcons.logout;
   const LoginIcon = ActionIcons.forward;
 
@@ -64,31 +64,30 @@ export function StoreNav({ onNavigate, stacked = false }: StoreNavProps) {
           <LoginIcon className="size-5 shrink-0" aria-hidden />
           Entrar
         </Link>
-        <Link href={cadastroHref} className="btn-primary text-sm" onClick={onNavigate}>
-          Cadastrar
-        </Link>
+        <Button surface="store" variant="primary" asChild className={storeButtonPillClass('text-sm')}>
+          <Link href={cadastroHref} onClick={onNavigate}>
+            Cadastrar
+          </Link>
+        </Button>
       </div>
     );
   }
 
   if (user.role === 'admin') {
     return (
-      <a href={adminDashboardUrl()} className="btn-primary text-sm" onClick={onNavigate}>
-        Painel admin
-      </a>
+      <Button surface="store" variant="primary" asChild className={storeButtonPillClass('text-sm')}>
+        <a href={adminDashboardUrl()} onClick={onNavigate}>
+          Painel admin
+        </a>
+      </Button>
     );
   }
 
   return (
     <div className={wrapClass}>
-      <Link
-        href={carrinhoHref}
-        data-testid={testIds.navCart}
-        className={itemClass()}
-        onClick={onNavigate}
-      >
-        <CartIcon className="size-5 shrink-0" aria-hidden />
-        Carrinho
+      <Link href={wishlistHref} className={itemClass()} onClick={onNavigate}>
+        <WishlistIcon className="size-5 shrink-0" aria-hidden />
+        Favoritos
       </Link>
       <Link href={pedidosHref} className={itemClass()} onClick={onNavigate}>
         <OrdersIcon className="size-5 shrink-0" aria-hidden />

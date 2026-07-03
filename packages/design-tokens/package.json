@@ -15,6 +15,7 @@
     "./store-ui-theme.css": "./src/store-ui-theme.css",
     "./platform-ui-theme.css": "./src/platform-ui-theme.css",
     "./tokens.css": "./src/tokens.css",
-    "./shadcn-bridge.css": "./src/shadcn-bridge.css"
+    "./shadcn-bridge.css": "./src/shadcn-bridge.css",
+    "./shell-tokens.css": "./src/shell-tokens.css"
   }
 }

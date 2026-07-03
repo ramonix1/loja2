@@ -44,10 +44,28 @@ Constantes: `testIds.merchantHub.*`.
 | `platform-login-password-input` | /platform/login | Input senha | F | admin/platform.spec.ts |
 | `platform-login-submit-btn` | /platform/login | Botão entrar | F | admin/platform.spec.ts |
 | `platform-login-error-msg` | /platform/login | Erro de credencial | F | — |
-| `platform-sidebar-nav` | layout | Nav lateral | F | — |
-| `platform-mobile-menu-btn` | layout | Hamburger menu (&lt; lg) | S4 | — |
+| `platform-sidebar-nav` | layout | Nav lateral (`SidebarContent`) | F / shell-v2 | admin/platform.spec.ts |
+| `platform-mobile-menu-btn` | layout | Alias legado do `SidebarTrigger` | S4 / shell-v2 | — |
+| `sidebar-trigger` | layout | Botão collapse/mobile (`SidebarTrigger`) | shell-v2 | admin/platform.spec.ts |
+| `sidebar-rail` | layout | Trilho collapse desktop | shell-v2 | — |
+| `sidebar-search-trigger` | layout | Busca ⌘K na sidebar | shell-v2 | — |
+| `app-sidebar` | layout | Root `Sidebar` shadcn | shell-v2 | — |
 | `platform-ui-theme-switch` | layout / login | Botão ícone sol/lua (`ThemeIconToggle`) | I2 | admin/theme.spec.ts |
-| `platform-stores-list` | /platform/stores | Lista de lojas | F | admin/platform.spec.ts |
+| `app-shell` | layout | Root do shell (sidebar + header) | shell-p1 | — |
+| `app-header` | layout | Header sticky desktop/mobile | shell-p1 | — |
+| `app-sidebar-nav` | layout | Nav lateral (alias `platform-sidebar-nav`) | shell-p1 | — |
+| `user-menu-trigger` | layout | Avatar menu perfil (`NavUser`) | shell-p1 / shell-v2 | admin/platform.spec.ts |
+| `user-menu-logout` | layout | Item Sair no dropdown NavUser | shell-v2 | admin/platform.spec.ts |
+| `kpi-strip` | /platform/dashboard | Faixa KPI unificada | shell-p1 | admin/platform.spec.ts |
+| `platform-dashboard-page` | /platform/dashboard | Página dashboard | shell-p1 | admin/platform.spec.ts |
+| `platform-stores-toolbar` | /platform/stores | Busca/filtro/toggle view | shell-p1 | — |
+| `platform-stores-search` | /platform/stores | Input busca lojas | shell-p1 | — |
+| `platform-stores-filter-status` | /platform/stores | Filtro status | shell-p1 | — |
+| `view-toggle` | /platform/stores | Toggle grid/lista | shell-p1 | — |
+| `platform-store-card-{slug}` | /platform/stores | Card loja (grid) | shell-p1 | admin/platform.spec.ts |
+| `pagination-bar` | /platform/stores | Paginação listagem | shell-p1 | — |
+| `nav-group-{id}` | layout | Grupo sidebar | shell-p1 | — |
+| `platform-stores-list` | /platform/stores | Lista/grid de lojas | F | admin/platform.spec.ts |
 | `platform-stores-empty-state` | /platform/stores | Lista vazia | F | — |
 | `platform-stores-row-{slug}` | /platform/stores | Linha de loja | F | admin/platform.spec.ts |
 | `platform-store-create-link` | /platform/stores | Link nova loja | F | admin/platform.spec.ts |
@@ -59,6 +77,34 @@ Constantes: `testIds.merchantHub.*`.
 | `platform-store-detail` | /platform/stores/:slug | Container detalhe | F | admin/platform.spec.ts |
 | `platform-store-toggle-ativo` | /platform/stores/:slug | Suspender/reativar | F | — |
 | `platform-store-save-nome` | /platform/stores/:slug | Salvar nome | F | — |
+| `platform-stores-filter-plano` | /platform/stores | Filtro plano (starter/professional/enterprise) | shell-p3 | admin/platform.spec.ts |
+| `command-palette` | layout (admin + platform) | Dialog busca rápida ⌘K/Ctrl+K | shell-p3 | admin/platform.spec.ts |
+| `command-palette-input` | layout | Input de busca da paleta | shell-p3 | admin/platform.spec.ts |
+| `command-palette-item-{id}` | layout | Item navegável/ação (id dinâmico) | shell-p3 | admin/platform.spec.ts |
+| `notifications-trigger` | layout (admin + platform) | Sino de notificações (header) | shell-p3 | admin/platform.spec.ts |
+| `notifications-list` | layout | Dropdown de notificações | shell-p3 | — |
+| `notifications-empty` | layout | Estado vazio (sem notificações) | shell-p3 | — |
+| `platform-merchants-page` | /platform/merchants | Container da página | shell-p3 | admin/platform.spec.ts |
+| `platform-merchants-toolbar` | /platform/merchants | Busca/filtro | shell-p3 | — |
+| `platform-merchants-search` | /platform/merchants | Input busca merchants | shell-p3 | — |
+| `platform-merchants-filter-status` | /platform/merchants | Filtro status | shell-p3 | — |
+| `platform-merchants-list` | /platform/merchants | Tabela de merchants | shell-p3 | admin/platform.spec.ts |
+| `platform-merchants-empty-state` | /platform/merchants | Lista vazia | shell-p3 | — |
+| `platform-merchants-row-{slug}` | /platform/merchants | Linha de merchant (dinâmico) | shell-p3 | — |
+| `platform-store-tab-overview` | /platform/stores/:slug | Tab visão geral | shell-p4 | admin/platform.spec.ts |
+| `platform-store-tab-merchant` | /platform/stores/:slug | Tab merchant | shell-p4 | admin/platform.spec.ts |
+| `platform-store-tab-billing` | /platform/stores/:slug | Tab billing | shell-p4 | admin/platform.spec.ts |
+| `platform-store-tab-acoes` | /platform/stores/:slug | Tab ações | shell-p4 | — |
+| `platform-store-metrics` | /platform/stores/:slug | Sidebar KPIs | shell-p4 | — |
+| `platform-health-page` | /platform/health | Container saúde | shell-p4 | admin/platform.spec.ts |
+| `platform-health-kpi-strip` | /platform/health | Faixa KPI saúde | shell-p4 | — |
+| `platform-health-list` | /platform/health | Tabela lojas atenção | shell-p4 | — |
+| `platform-health-empty-state` | /platform/health | Nenhuma loja fora de saúde | shell-p4 | — |
+| `platform-health-row-{slug}` | /platform/health | Linha (dinâmico) | shell-p4 | — |
+| `platform-reports-page` | /platform/reports | Container relatórios | shell-p4 | admin/platform.spec.ts |
+| `platform-reports-kpi-strip` | /platform/reports | Faixa KPI billing | shell-p4 | — |
+| `platform-reports-recent-stores` | /platform/reports | Tabela lojas recentes | shell-p4 | — |
+| `platform-settings-page` | /platform/settings | Container configurações | shell-p4 | — |
 
 Constantes: `@lojao/test-utils/test-ids` → `testIds.platform.*`.
 
@@ -68,10 +114,16 @@ Constantes: `@lojao/test-utils/test-ids` → `testIds.platform.*`.
 
 | data-testid | Página | Elemento | Fase | Spec |
 |-------------|--------|----------|------|------|
-| `admin-sidebar-nav` | layout | Nav lateral | 2 | admin/pedidos.spec.ts |
-| `admin-mobile-menu-btn` | layout | Hamburger menu (&lt; lg) | S4 | — |
+| `admin-sidebar-nav` | layout | Nav lateral (`SidebarContent`) | 2 / shell-v2 | admin/pedidos.spec.ts |
+| `admin-mobile-menu-btn` | layout | Alias legado do `SidebarTrigger` | S4 / shell-v2 | — |
+| `sidebar-trigger` | layout | Botão collapse/mobile (compartilhado admin/platform) | shell-v2 | — |
+| `sidebar-rail` | layout | Trilho collapse desktop | shell-v2 | — |
 | `admin-view-storefront-link` | layout | Link ver vitrine | E | — |
-| `admin-dashboard-stats` | dashboard | Container de cards | 2 | admin/login.spec.ts |
+| `app-shell` | layout | Root do shell (sidebar + header) | shell-p2 | — |
+| `app-header` | layout | Header sticky desktop/mobile | shell-p2 | — |
+| `user-menu-trigger` | layout | Avatar menu perfil | shell-p2 | — |
+| `nav-group-{id}` | layout | Grupos sidebar (`principal`, `catalogo`, `operacao`, `loja`) | shell-p2 | — |
+| `kpi-strip` | dashboard | Faixa KPI unificada (compartilhado com Platform) | shell-p2 | admin/login.spec.ts |
 | `admin-pedidos-table` | pedidos | Tabela | 2 | admin/pedidos.spec.ts |
 | `admin-pedidos-row-{id}` | pedidos | Linha (id dinâmico) | 2 | admin/pedidos.spec.ts |
 | `admin-pedidos-empty-state` | pedidos | Estado vazio | 2 | — |
@@ -89,6 +141,8 @@ Constantes: `@lojao/test-utils/test-ids` → `testIds.platform.*`.
 | `admin-dashboard-chart-empty` | dashboard | Empty state sem dados | 3* | — |
 
 \* Módulo 13 — gráficos Recharts (melhoria Fase 3, ver `phases/03-admin-modules.md`).
+
+`command-palette*` e `notifications-*` (shell-p3) são compartilhados com o Platform Hub — ver seção `platform` acima.
 
 Constantes: `@lojao/test-utils/test-ids` → `testIds.admin.*` (`pedidosRow(id)`, `pedidosViewBtn(id)`, `dashboardRecentRow(id)` são funções).
 
@@ -189,6 +243,17 @@ Constantes: `testIds.adminProdutos.*`.
 | `admin-compradores-detail-btn-{id}` | compradores | Link ver ficha | 3 | — |
 | `admin-compradores-detail-panel` | compradores/:id | Painel detalhe | 3 | — |
 | `admin-compradores-detail-back-btn` | compradores/:id | Voltar | 3 | — |
+
+### admin-avaliacoes (vitrine Onda 6)
+
+| data-testid | Página | Elemento | Fase | Spec |
+|-------------|--------|----------|------|------|
+| `admin-avaliacoes-panel` | avaliacoes | Container | vitrine refactor | — |
+| `admin-avaliacoes-table` | avaliacoes | Tabela | vitrine refactor | — |
+| `admin-avaliacoes-empty-state` | avaliacoes | Estado vazio | vitrine refactor | — |
+| `admin-avaliacoes-row-{id}` | avaliacoes | Linha (dinâmico) | vitrine refactor | — |
+| `admin-avaliacoes-reject-btn-{id}` | avaliacoes | Rejeitar review | vitrine refactor | — |
+| `admin-avaliacoes-filter-status` | avaliacoes | Filtros status | vitrine refactor | — |
 
 Constantes: `testIds.adminCompradores.*` (`row(id)`, `detailBtn(id)` são funções).
 
@@ -317,8 +382,17 @@ Constantes: `testIds.adminChat.*` (`filter`, `conversaItem` são funções).
 | data-testid | Página | Elemento | Fase | Spec |
 |-------------|--------|----------|------|------|
 | `store-slug-layout` | /store/{slug} | Container + `data-store-theme="claro"` fixo | I3 | store/vitrine.spec.ts |
-| `store-header-menu` | layout | Botão menu mobile (&lt; md) | I5 | store/icons.spec.ts |
-| `store-nav-cart` | layout nav | Link carrinho (comprador logado) | I5 | store/icons.spec.ts |
+| `store-header-menu` | layout | Botão menu mobile (&lt; lg) | I5 | store/icons.spec.ts |
+| `store-nav-cart` | layout nav | Link carrinho legado (removido da nav) | I5 | — |
+| `store-header-search` | layout | Busca pill | vitrine refactor | — |
+| `store-header-cart` | layout | Ícone carrinho + link | vitrine refactor | store/icons.spec.ts, store/cart.spec.ts |
+| `store-header-cart-badge` | layout | Badge contagem carrinho | vitrine refactor | — |
+| `store-header-category-{id}` | layout | Link categoria header | vitrine refactor | — |
+| `store-add-cart-toast` | global | Toast pós add carrinho | vitrine refactor | store/cart.spec.ts |
+| `store-filters-bar` | home | Barra filtros client-side | vitrine refactor | store/vitrine.spec.ts |
+| `store-filters-sort` | home | Select ordenação | vitrine refactor | store/vitrine.spec.ts |
+| `store-category-pill-{id}` | home | Chip categoria/filtro | vitrine refactor | store/vitrine.spec.ts |
+| `store-section-view-all-{id}` | home | Expandir seção para grid | vitrine refactor | — |
 
 Vitrine: **sem** toggle visitante — tema claro fixo; `data-store-theme` não vem de preferência do visitante.
 
@@ -343,6 +417,13 @@ Constantes: `testIds.adminDiagnostico.*` (`item(nome)` é função).
 | `store-product-title` | produto | Nome | 5 | store/vitrine.spec.ts |
 | `store-product-price` | produto | Preço | 5 | store/vitrine.spec.ts |
 | `store-product-add-cart-btn` | produto / card | Adicionar ao carrinho | 6 | store/vitrine.spec.ts, store/checkout.spec.ts |
+| `store-product-qty` | produto | Seletor quantidade (container) | vitrine refactor | store/variants-mock.spec.ts |
+| `store-product-qty-input` | produto | Input quantidade | vitrine refactor | store/vitrine.spec.ts |
+| `store-product-buy-now-btn` | produto | Comprar agora | vitrine refactor | store/variants-mock.spec.ts |
+| `store-product-trust` | produto | Bloco confiança | vitrine refactor | store/variants-mock.spec.ts |
+| `store-product-related` | produto | Produtos similares | vitrine refactor | — |
+| `store-product-variant-picker` | produto | Picker variantes mock | vitrine refactor | store/variants-mock.spec.ts |
+| `store-product-variant-{mockId}` | produto | Swatch variante mock | vitrine refactor | — |
 | `auth-login-email-input` | /login | E-mail | 6 | store/auth.spec.ts |
 | `auth-login-password-input` | /login | Senha | 6 | store/auth.spec.ts |
 | `auth-login-submit-btn` | /login | Entrar | 6 | store/auth.spec.ts |
@@ -357,6 +438,16 @@ Constantes: `testIds.adminDiagnostico.*` (`item(nome)` é função).
 | `store-checkout-success-msg` | /checkout/resultado | Mensagem sucesso | 6 | store/checkout.spec.ts |
 | `store-orders-table` | /meus-pedidos | Tabela pedidos | 6 | store/orders.spec.ts |
 | `store-order-row-{id}` | /meus-pedidos | Linha pedido (dinâmico) | 6 | store/orders.spec.ts |
+| `store-product-rating` | card / PDP | Estrelas + contagem | vitrine refactor | store/reviews.spec.ts |
+| `store-product-reviews` | produto | Seção avaliações | vitrine refactor | store/reviews.spec.ts |
+| `store-product-review-form` | produto | Formulário avaliação | vitrine refactor | store/reviews.spec.ts |
+| `store-product-review-star-{n}` | produto | Estrela interativa (1–5) | vitrine refactor | store/reviews.spec.ts |
+| `store-wishlist-btn-{productId}` | card / PDP | Botão favorito | vitrine refactor | store/wishlist.spec.ts |
+| `store-wishlist-page` | /favoritos | Página favoritos | vitrine refactor | store/wishlist.spec.ts |
+| `store-header-wishlist` | layout | Ícone favoritos | vitrine refactor | store/wishlist.spec.ts |
+| `store-header-wishlist-badge` | layout | Badge contagem favoritos | vitrine refactor | store/wishlist.spec.ts |
+
+Constantes admin avaliações: `testIds.adminAvaliacoes.*` — `admin/avaliacoes` (Onda 6).
 
 Constantes: `@lojao/test-utils/test-ids/store` → `testIds.store.*`; auth em `@lojao/test-utils/test-ids/auth`. **No storefront Next**, importar subpaths (não o barrel `test-ids/index` — quebra Webpack).
 

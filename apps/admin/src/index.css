@@ -4,6 +4,7 @@
 @import '../../../packages/design-tokens/src/platform-ui-theme.css';
 @import '@lojao/design-tokens/shadcn-bridge.css';
 @import '@lojao/ui/styles/shadcn.css';
+@import '../../../packages/design-tokens/src/shell-tokens.css';
 @import '../../../packages/design-tokens/src/components.css';
 @import 'tailwindcss';
 

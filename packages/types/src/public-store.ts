@@ -10,6 +10,12 @@ export const publicProductSchema = z.object({
   estoque: z.number().int().nullable(),
   categoria_id: z.number().int().nullable(),
   primeira_imagem: z.string().nullable(),
+  rating_summary: z
+    .object({
+      average: z.number(),
+      count: z.number().int().nonnegative(),
+    })
+    .optional(),
 });
 
 export type PublicProduct = z.infer<typeof publicProductSchema>;

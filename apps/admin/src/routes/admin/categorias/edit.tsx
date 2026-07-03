@@ -1,6 +1,7 @@
 import {
   Button,
   Card,
+  Checkbox,
   FieldInput,
   adminFieldLabelClass,
   adminMutedClass,
@@ -149,11 +150,9 @@ export function CategoriaEditPage() {
                   key={p.id}
                   className="flex cursor-pointer items-center gap-3 rounded-lg p-3 transition hover:bg-[var(--admin-table-row-hover)]"
                 >
-                  <input
-                    type="checkbox"
+                  <Checkbox
                     checked={selectedIds.has(p.id)}
-                    onChange={() => toggleProduto(p.id)}
-                    className="h-4 w-4 shrink-0 rounded accent-[var(--admin-accent)]"
+                    onCheckedChange={() => toggleProduto(p.id)}
                   />
                   <span className="flex-1 text-sm text-[var(--admin-text)]">{p.nome}</span>
                   {p.categoria_id != null && p.categoria_id !== data.id && (

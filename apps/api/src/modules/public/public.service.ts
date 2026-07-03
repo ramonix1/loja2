@@ -10,13 +10,20 @@ import { DEFAULT_STORE_THEME } from '@lojao/types/store-theme';
 
 import { settingKeyFromEn } from '../../lib/merchant-schema-map.js';
 import type { StoreScope } from '../../lib/store-scope.js';
+import {
+  getRatingSummariesByProductIds,
+  getRatingSummaryForProduct,
+} from '../reviews/reviews.service.js';
 
 function toNum(v: string | number | null | undefined): number {
   return Number(v ?? 0);
 }
 
-function mapProduct(row: Record<string, unknown>): PublicProduct {
-  return {
+function mapProduct(
+  row: Record<string, unknown>,
+  ratingMap?: Map<number, { average: number; count: number }>,
+): PublicProduct {
+  const product: PublicProduct = {
     id: Number(row.id),
     nome: String(row.nome),
     subtitulo: row.subtitulo == null ? null : String(row.subtitulo),
@@ -25,6 +32,19 @@ function mapProduct(row: Record<string, unknown>): PublicProduct {
     categoria_id: row.categoria_id == null ? null : Number(row.categoria_id),
     primeira_imagem: row.primeira_imagem == null ? null : String(row.primeira_imagem),
   };
+  const summary = ratingMap?.get(product.id);
+  if (summary) product.rating_summary = summary;
+  return product;
+}
+
+function attachRatingsToProducts(
+  products: PublicProduct[],
+  ratingMap: Map<number, { average: number; count: number }>,
+): PublicProduct[] {
+  return products.map((p) => {
+    const summary = ratingMap.get(p.id);
+    return summary ? { ...p, rating_summary: summary } : p;
+  });
 }
 
 /** Configs `store.*` + `inventory.enabled` — espelha legacy `getConfigs`. */
@@ -99,7 +119,14 @@ export async function getPublicCategoriesWithProducts(
     categoriaMap.get(catId)!.produtos.push(mapProduct(row));
   }
 
-  return [...categoriaMap.values()];
+  const categorias = [...categoriaMap.values()];
+  const productIds = categorias.flatMap((c) => c.produtos.map((p) => p.id));
+  const ratingMap = await getRatingSummariesByProductIds(scope, productIds);
+
+  return categorias.map((cat) => ({
+    ...cat,
+    produtos: attachRatingsToProducts(cat.produtos, ratingMap),
+  }));
 }
 
 export async function getPublicProductsWithoutCategory(scope: StoreScope): Promise<PublicProduct[]> {
@@ -113,7 +140,12 @@ export async function getPublicProductsWithoutCategory(scope: StoreScope): Promi
     [scope.storeId],
   );
 
-  return res.rows.map((row) => mapProduct(row as Record<string, unknown>));
+  const products = res.rows.map((row) => mapProduct(row as Record<string, unknown>));
+  const ratingMap = await getRatingSummariesByProductIds(
+    scope,
+    products.map((p) => p.id),
+  );
+  return attachRatingsToProducts(products, ratingMap);
 }
 
 export async function listPublicProducts(scope: StoreScope): Promise<PublicProduct[]> {
@@ -127,7 +159,12 @@ export async function listPublicProducts(scope: StoreScope): Promise<PublicProdu
     [scope.storeId],
   );
 
-  return res.rows.map((row) => mapProduct(row as Record<string, unknown>));
+  const products = res.rows.map((row) => mapProduct(row as Record<string, unknown>));
+  const ratingMap = await getRatingSummariesByProductIds(
+    scope,
+    products.map((p) => p.id),
+  );
+  return attachRatingsToProducts(products, ratingMap);
 }
 
 export async function getPublicStore(scope: StoreScope): Promise<PublicStoreData> {
@@ -161,8 +198,9 @@ export async function getPublicProductById(
   );
 
   const primeira = (imagensRes.rows[0] as { url?: string } | undefined)?.url ?? null;
+  const ratingSummary = await getRatingSummaryForProduct(scope, id);
 
-  return {
+  const detail: PublicProductDetail = {
     id: Number(row.id),
     nome: String(row.name),
     subtitulo: row.subtitle == null ? null : String(row.subtitle),
@@ -176,6 +214,8 @@ export async function getPublicProductById(
       url: img.url,
     })),
   };
+  if (ratingSummary) detail.rating_summary = ratingSummary;
+  return detail;
 }
 
 export async function listPublicBanners(scope: StoreScope): Promise<PublicBanner[]> {

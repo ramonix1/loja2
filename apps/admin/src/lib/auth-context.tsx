@@ -181,8 +181,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await endPlatformImpersonation();
         setSessionStoreSlug(null);
         resetStoreScopedQueries();
-        await queryClient.invalidateQueries({ queryKey: ME_KEY });
-        window.location.href = '/platform/stores';
+        queryClient.setQueryData(ME_KEY, null);
+        window.location.assign('/platform/stores');
       },
       logout: async () => {
         await apiFetch('/api/v1/auth/logout', { method: 'POST' });

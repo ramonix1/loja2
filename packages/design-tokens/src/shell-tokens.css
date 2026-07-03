@@ -1,0 +1,60 @@
+/**
+ * Tokens neutros do shell (sidebar + header + main).
+ * Mapeados por persona via data-ui-surface no AppShell.
+ */
+
+:root {
+  --shell-sidebar-width: 17rem;
+  --shell-header-height: 3.5rem;
+  --shell-content-padding-x: 1rem;
+  --shell-content-padding-y: 1rem;
+}
+
+@media (min-width: 640px) {
+  :root {
+    --shell-content-padding-x: 2rem;
+    --shell-content-padding-y: 2rem;
+  }
+}
+
+[data-ui-surface='admin'] {
+  --shell-bg: var(--admin-bg);
+  --shell-text: var(--admin-text);
+  --shell-text-muted: var(--admin-text-muted);
+  --shell-border: var(--admin-border);
+  --shell-surface: var(--admin-surface);
+  --shell-surface-elevated: var(--admin-surface-elevated);
+  --shell-sidebar-bg: var(--admin-sidebar-bg);
+  --shell-sidebar-border: var(--admin-sidebar-border);
+  --shell-sidebar-text: var(--admin-sidebar-text);
+  --shell-sidebar-muted: var(--admin-sidebar-muted);
+  --shell-sidebar-active-bg: var(--admin-sidebar-active-bg);
+  --shell-sidebar-hover-bg: var(--admin-sidebar-hover-bg);
+  --shell-accent: var(--admin-accent);
+  --shell-accent-hover: var(--admin-accent-hover);
+  --shell-focus-ring: var(--admin-focus-ring);
+  --shell-input-bg: var(--admin-input-bg);
+  --shell-input-border: var(--admin-input-border);
+  --shell-input-placeholder: var(--admin-input-placeholder);
+}
+
+[data-ui-surface='platform'] {
+  --shell-bg: var(--platform-bg);
+  --shell-text: var(--platform-text);
+  --shell-text-muted: var(--platform-text-muted);
+  --shell-border: var(--platform-border);
+  --shell-surface: var(--platform-surface);
+  --shell-surface-elevated: var(--platform-surface-elevated);
+  --shell-sidebar-bg: var(--platform-sidebar-bg);
+  --shell-sidebar-border: var(--platform-sidebar-border);
+  --shell-sidebar-text: var(--platform-sidebar-text);
+  --shell-sidebar-muted: var(--platform-sidebar-muted);
+  --shell-sidebar-active-bg: var(--platform-sidebar-active-bg);
+  --shell-sidebar-hover-bg: var(--platform-sidebar-hover-bg);
+  --shell-accent: var(--platform-accent);
+  --shell-accent-hover: var(--platform-accent-hover);
+  --shell-focus-ring: var(--platform-focus-ring);
+  --shell-input-bg: var(--platform-input-bg);
+  --shell-input-border: var(--platform-input-border);
+  --shell-input-placeholder: var(--platform-input-placeholder);
+}

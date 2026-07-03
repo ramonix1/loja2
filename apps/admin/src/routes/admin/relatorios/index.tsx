@@ -1,7 +1,7 @@
 import {
   Button,
+  FieldInput,
   adminFieldLabelClass,
-  adminInputClass,
   adminMutedClass,
   adminPageSubtitleClass,
   adminPageTitleClass,
@@ -177,22 +177,24 @@ export function RelatoriosPage() {
         >
           <div>
             <label className={adminFieldLabelClass('text-xs')}>Início</label>
-            <input
+            <FieldInput
+              surface="admin"
               type="date"
               value={inicioInput}
               onChange={(e) => setInicioInput(e.target.value)}
               data-testid={testIds.adminRelatorios.dateInicioInput}
-              className={adminInputClass('w-auto')}
+              className="w-auto"
             />
           </div>
           <div>
             <label className={adminFieldLabelClass('text-xs')}>Fim</label>
-            <input
+            <FieldInput
+              surface="admin"
               type="date"
               value={fimInput}
               onChange={(e) => setFimInput(e.target.value)}
               data-testid={testIds.adminRelatorios.dateFimInput}
-              className={adminInputClass('w-auto')}
+              className="w-auto"
             />
           </div>
           <Button type="submit" data-testid={testIds.adminRelatorios.dateFilterBtn}>

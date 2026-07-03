@@ -1,8 +1,8 @@
 import {
   Button,
   Card,
+  FieldInput,
   adminFieldLabelClass,
-  adminInputClass,
   adminMutedClass,
   adminPageSubtitleClass,
   adminPageTitleClass,
@@ -404,7 +404,8 @@ export function AgendaPage() {
                 <label className={adminFieldLabelClass('text-xs')}>
                   Vagas por dia (padrão)
                 </label>
-                <input
+                <FieldInput
+                  surface="admin"
                   type="number"
                   min={1}
                   value={config.capacidade_diaria}
@@ -415,14 +416,14 @@ export function AgendaPage() {
                       capacidade_diaria: parseInt(e.target.value, 10) || 1,
                     })
                   }
-                  className={adminInputClass()}
                 />
               </div>
               <div>
                 <label className={adminFieldLabelClass('text-xs')}>
                   Antecedência mínima (dias)
                 </label>
-                <input
+                <FieldInput
+                  surface="admin"
                   type="number"
                   min={0}
                   value={config.antecedencia_minima_dias}
@@ -433,14 +434,14 @@ export function AgendaPage() {
                       antecedencia_minima_dias: parseInt(e.target.value, 10) || 0,
                     })
                   }
-                  className={adminInputClass()}
                 />
               </div>
               <div>
                 <label className={adminFieldLabelClass('text-xs')}>
                   Antecedência máxima (dias)
                 </label>
-                <input
+                <FieldInput
+                  surface="admin"
                   type="number"
                   min={1}
                   value={config.antecedencia_maxima_dias}
@@ -451,7 +452,6 @@ export function AgendaPage() {
                       antecedencia_maxima_dias: parseInt(e.target.value, 10) || 1,
                     })
                   }
-                  className={adminInputClass()}
                 />
               </div>
               <Button
@@ -494,27 +494,27 @@ export function AgendaPage() {
                   <label className={adminFieldLabelClass('text-xs')}>
                     Capacidade especial
                   </label>
-                  <input
+                  <FieldInput
+                    surface="admin"
                     type="number"
                     min={0}
                     value={dayCapacidade}
                     placeholder="Vazio = padrão | 0 = fechar"
                     data-testid={testIds.adminAgenda.dayCapacidadeInput}
                     onChange={(e) => setDayCapacidade(e.target.value)}
-                    className={adminInputClass()}
                   />
                 </div>
                 <div>
                   <label className={adminFieldLabelClass('text-xs')}>
                     Motivo (opcional)
                   </label>
-                  <input
+                  <FieldInput
+                    surface="admin"
                     type="text"
                     value={dayMotivo}
                     placeholder="Ex: Feriado, Férias..."
                     data-testid={testIds.adminAgenda.dayMotivoInput}
                     onChange={(e) => setDayMotivo(e.target.value)}
-                    className={adminInputClass()}
                   />
                 </div>
                 <div className="flex gap-2">

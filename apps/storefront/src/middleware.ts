@@ -8,7 +8,10 @@ import {
 } from '@lojao/store-host';
 
 const LEGACY_EXACT = new Set([
+  '/cart',
   '/carrinho',
+  '/wishlist',
+  '/favoritos',
   '/checkout',
   '/login',
   '/cadastro',
@@ -16,6 +19,17 @@ const LEGACY_EXACT = new Set([
   '/recuperar-senha',
   '/dashboard/billing',
 ]);
+
+const LEGACY_STORE_PATH: Record<string, string> = {
+  carrinho: 'cart',
+  favoritos: 'wishlist',
+};
+
+function mapLegacyStorePath(subpath: string): string {
+  if (subpath === '/carrinho') return '/cart';
+  if (subpath === '/favoritos') return '/wishlist';
+  return subpath;
+}
 
 function defaultSlug(): string {
   return getDefaultStoreSlug({
@@ -26,7 +40,7 @@ function defaultSlug(): string {
 
 function legacyRedirect(request: NextRequest, subpath: string): NextResponse {
   const slug = defaultSlug();
-  const target = new URL(buildStorePath(slug, subpath), request.url);
+  const target = new URL(buildStorePath(slug, mapLegacyStorePath(subpath)), request.url);
   return NextResponse.redirect(target, 301);
 }
 
@@ -60,6 +74,16 @@ export function middleware(request: NextRequest) {
 
   if (LEGACY_EXACT.has(pathname)) {
     return legacyRedirect(request, pathname);
+  }
+
+  const storeLegacyMatch = pathname.match(/^\/store\/([^/]+)\/(carrinho|favoritos)\/?$/);
+  if (storeLegacyMatch) {
+    const [, slug, legacySegment] = storeLegacyMatch;
+    const target = new URL(
+      buildStorePath(slug!, `/${LEGACY_STORE_PATH[legacySegment!]}`),
+      request.url,
+    );
+    return NextResponse.redirect(target, 301);
   }
 
   const parsed = parseStorePath(pathname);

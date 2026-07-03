@@ -85,6 +85,8 @@ export class ApiError extends Error {
 
 /** Contexto de sessão pedido à API (`buyer` na vitrine, `merchant` no admin). */
 function authContextHeader(path: string): string {
+  // Durante impersonate a sessão ativa é merchant — não pedir swap para platform.
+  if (path.includes('/platform/end-impersonation')) return 'merchant';
   return path.startsWith('/api/v1/platform') ? 'platform' : 'merchant';
 }
 

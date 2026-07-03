@@ -39,17 +39,38 @@ export function storeLabelClass(className?: string) {
   );
 }
 
-export function storeInputClass(className?: string) {
-  return cn("ds-input", className);
-}
+/** @deprecated Prefer `FieldInput` com `surface="store"`. Reexportado de `@lojao/ui`. */
+export { storeInputClass } from '@lojao/ui';
 
+/** @deprecated Preferir `Card` de `@lojao/ui` com `surface="store"` na vitrine tenant. */
 export function storeCardClass(className?: string) {
   return cn(
-    "rounded-xl border border-[var(--store-border)] bg-[var(--store-surface)] text-[var(--store-text)]",
+    "rounded-[var(--store-radius-card)] border border-[var(--store-border)] bg-[var(--store-surface)] text-[var(--store-text)]",
     className,
   );
 }
 
+/** Preço tabular — cor primária da loja. */
+export function storePriceClass(className?: string) {
+  return cn(
+    "shrink-0 tabular-nums text-base font-extrabold text-[var(--cor-primaria)]",
+    className,
+  );
+}
+
+/** Container para foto de produto — fundo branco contínuo com o card (fotos PNG/JPG com fundo branco). */
+export function storeImageWellClass(className?: string) {
+  return cn(
+    "relative flex aspect-square items-center justify-center overflow-hidden bg-[var(--store-image-bg)]",
+    className,
+  );
+}
+
+export function storeWarningClass(className?: string) {
+  return cn("text-[var(--store-warning)]", className);
+}
+
+/** @deprecated Preferir `Card` de `@lojao/ui` com `surface="store"` na vitrine tenant. */
 export function storePanelClass(className?: string) {
   return cn(storeCardClass(), "p-6 shadow-sm", className);
 }
@@ -95,6 +116,21 @@ export function storeOptionRowClass(className?: string) {
 
 export function storeErrorTextClass(className?: string) {
   return cn("text-[var(--store-error)]", className);
+}
+
+/** Complemento pill para `Button` shadcn na vitrine. */
+export function storeButtonPillClass(className?: string) {
+  return cn("rounded-[var(--store-radius-pill)]", className);
+}
+
+/** Outline pill — hover/focus preenche com cor da loja. */
+export function storeButtonOutlinePillClass(className?: string) {
+  return cn(
+    storeButtonPillClass(),
+    "hover:border-[var(--cor-primaria)] hover:bg-[var(--cor-primaria)] hover:text-white",
+    "focus-visible:border-[var(--cor-primaria)] focus-visible:bg-[var(--cor-primaria)] focus-visible:text-white",
+    className,
+  );
 }
 
 /** Header/footer/nav — cores via `--store-*` (vitrine claro fixo; marca em --cor-primaria). */

@@ -31,6 +31,7 @@
     "db:generate": "drizzle-kit generate",
     "db:generate:merchant": "drizzle-kit generate --config=drizzle.merchant.config.ts",
     "db:migrate": "tsx src/migrate.ts",
+    "db:migrate:merchants": "tsx src/migrate-merchants.ts",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {

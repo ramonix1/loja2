@@ -12,6 +12,7 @@ import {
   HiOutlineArrowRightOnRectangle,
   HiOutlineArrowTopRightOnSquare,
   HiOutlineBars3,
+  HiOutlineBell,
   HiOutlineBuildingStorefront,
   HiOutlineCalendar,
   HiOutlineChartBar,
@@ -24,6 +25,7 @@ import {
   HiOutlineCube,
   HiOutlineEye,
   HiOutlineHome,
+  HiOutlineMagnifyingGlass,
   HiOutlineMinus,
   HiOutlineMoon,
   HiOutlinePaintBrush,
@@ -33,11 +35,13 @@ import {
   HiOutlineShieldCheck,
   HiOutlineShoppingBag,
   HiOutlineShoppingCart,
+  HiOutlineStar,
   HiOutlineSun,
   HiOutlineTag,
   HiOutlineTrash,
   HiOutlineUsers,
   HiOutlineXMark,
+  HiOutlineHeart,
 } from 'react-icons/hi2';
 
 export type { IconType };
@@ -48,6 +52,7 @@ export {
   HiOutlineArrowRightOnRectangle,
   HiOutlineArrowTopRightOnSquare,
   HiOutlineBars3,
+  HiOutlineBell,
   HiOutlineBuildingStorefront,
   HiOutlineCalendar,
   HiOutlineChartBar,
@@ -60,6 +65,7 @@ export {
   HiOutlineCube,
   HiOutlineEye,
   HiOutlineHome,
+  HiOutlineMagnifyingGlass,
   HiOutlineMinus,
   HiOutlineMoon,
   HiOutlinePaintBrush,
@@ -69,11 +75,13 @@ export {
   HiOutlineShieldCheck,
   HiOutlineShoppingBag,
   HiOutlineShoppingCart,
+  HiOutlineStar,
   HiOutlineSun,
   HiOutlineTag,
   HiOutlineTrash,
   HiOutlineUsers,
   HiOutlineXMark,
+  HiOutlineHeart,
 };
 
 /**
@@ -92,6 +100,7 @@ export const ActionIcons = {
   logout: HiOutlineArrowRightOnRectangle,
   externalLink: HiOutlineArrowTopRightOnSquare,
   menu: HiOutlineBars3,
+  search: HiOutlineMagnifyingGlass,
   themeLight: HiOutlineSun,
   themeDark: HiOutlineMoon,
   switchStore: HiOutlineBuildingStorefront,
@@ -99,6 +108,8 @@ export const ActionIcons = {
   next: HiOutlineChevronRight,
   minus: HiOutlineMinus,
   plus: HiOutlinePlus,
+  heart: HiOutlineHeart,
+  star: HiOutlineStar,
 } satisfies Record<string, IconType>;
 
 /** Ícones de navegação (sidebar admin/platform + store nav) — mapa §4.3. */
@@ -117,4 +128,7 @@ export const NavIcons = {
   compradores: HiOutlineUsers,
   cart: HiOutlineShoppingCart,
   orders: HiOutlineClipboardDocumentList,
+  wishlist: HiOutlineHeart,
+  avaliacoes: HiOutlineStar,
+  merchants: HiOutlineUsers,
 } satisfies Record<string, IconType>;

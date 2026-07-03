@@ -16,11 +16,14 @@ test.describe('ícones vitrine (I5) @smoke', () => {
     );
   });
 
-  test('comprador autenticado vê link carrinho com ícone', async ({ page }) => {
+  test('comprador autenticado vê ícone carrinho no header', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto(storePath());
 
-    await expect(page.getByTestId(testIds.store.navCart)).toBeVisible();
-    await expect(page.getByTestId(testIds.store.navCart)).toContainText('Carrinho');
+    await expect(page.getByTestId(testIds.store.headerCart)).toBeVisible();
+    await expect(page.getByTestId(testIds.store.headerCart)).toHaveAttribute(
+      'aria-label',
+      /carrinho/i,
+    );
   });
 });

@@ -43,7 +43,7 @@ describe('Cart update', () => {
       payload: { quantidade: 2 },
     });
     expect(res.statusCode).toBe(200);
-    expect(res.json().data.contagem).toBeGreaterThanOrEqual(2);
+    expect(res.json().data.count).toBeGreaterThanOrEqual(2);
   });
 
   it('PATCH quantidade 0 remove item', async () => {
@@ -54,6 +54,6 @@ describe('Cart update', () => {
       payload: { quantidade: 0 },
     });
     expect(res.statusCode).toBe(200);
-    expect(res.json().data.contagem).toBe(0);
+    expect(res.json().data.count).toBe(0);
   });
 });

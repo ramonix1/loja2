@@ -68,7 +68,21 @@ export {
   type CreatePlatformStoreInput,
   type UpdatePlatformStoreInput,
   type PlatformStore,
+  type PlatformDashboardStats,
+  type PlatformStoreListItem,
+  type PlatformStoreHealth,
 } from './platform.js';
+
+export {
+  platformDashboardChartsQuerySchema,
+  DASHBOARD_PERIODOS,
+  type DashboardPeriodo,
+  type PlatformDashboardChartsData,
+  type PlatformLojasPorDia,
+  type PlatformSaudeLojas,
+  type PlatformBillingStatus,
+  type PlatformLojasPorPlano,
+} from './platform-dashboard-charts.js';
 
 export {
   RESERVED_SLUGS,

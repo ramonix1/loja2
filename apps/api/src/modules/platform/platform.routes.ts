@@ -5,7 +5,8 @@ import {
   platformLoginSchema,
   updatePlatformStoreSchema,
 } from '@lojao/types/platform';
-import type { FastifyInstance, FastifyRequest } from 'fastify';
+import { platformDashboardChartsQuerySchema } from '@lojao/types';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 import { requirePlatformAdmin } from '../../plugins/auth-guard.js';
 import {
@@ -14,11 +15,19 @@ import {
   preservedStashes,
   applyPreservedStashes,
 } from '../../lib/session-persona.js';
+import { getPlatformDashboardCharts } from './platform-dashboard-charts.service.js';
 import {
   createPlatformStore,
   findStoreOwnerMember,
+  getPlatformDashboardStats,
+  getPlatformHealthSummary,
+  getPlatformReportsSummary,
+  getPlatformStoreBillingBySlug,
   getPlatformStoreBySlug,
+  getPlatformStoreMetricsBySlug,
+  listPlatformMerchantsQuery,
   listPlatformStores,
+  listPlatformStoresQuery,
   updatePlatformStore,
 } from './platform.service.js';
 
@@ -49,6 +58,36 @@ async function startPlatformSession(
   request.session.email = email;
   request.session.role = 'platform_admin';
   await request.session.save();
+}
+
+async function handleEndImpersonation(
+  request: FastifyRequest,
+  reply: FastifyReply,
+): Promise<void> {
+  if (!request.session.impersonation && !request.session.stashedPlatform) {
+    await reply.code(400).send({
+      error: 'Nenhuma impersonação ativa.',
+      code: 'NOT_IMPERSONATING',
+    });
+    return;
+  }
+
+  const platform = request.session.stashedPlatform;
+  request.session.impersonation = undefined;
+  request.session.stashedMerchant = undefined;
+  request.session.stashedBuyer = undefined;
+
+  if (platform) {
+    applyPlatformPersona(request.session, platform);
+    request.session.stashedPlatform = undefined;
+  } else {
+    await request.session.destroy();
+    await reply.send({ data: { ok: true } });
+    return;
+  }
+
+  await request.session.save();
+  await reply.send({ data: { ok: true } });
 }
 
 /**
@@ -86,12 +125,80 @@ export async function platformRoutes(app: FastifyInstance): Promise<void> {
     });
   });
 
+  /**
+   * Fora do guard `requirePlatformAdmin`: durante impersonate a sessão ativa é
+   * merchant (`owner`), mas `stashedPlatform` guarda o operador para restaurar.
+   */
+  app.post('/platform/end-impersonation', handleEndImpersonation);
+
   app.register(async (scoped) => {
     scoped.addHook('preHandler', requirePlatformAdmin);
 
-    scoped.get('/platform/stores', async (_request, reply) => {
-      const data = await listPlatformStores();
+    scoped.get('/platform/dashboard/stats', async (_request, reply) => {
+      const data = await getPlatformDashboardStats();
       return reply.send({ data });
+    });
+
+    scoped.get('/platform/dashboard/charts', async (request, reply) => {
+      const parsed = platformDashboardChartsQuerySchema.safeParse(request.query);
+      if (!parsed.success) {
+        return reply.code(400).send({
+          error: 'Parâmetros inválidos.',
+          code: 'VALIDATION_ERROR',
+          details: parsed.error.flatten().fieldErrors,
+        });
+      }
+      const data = await getPlatformDashboardCharts(parsed.data.periodo);
+      return reply.send({ data });
+    });
+
+    scoped.get('/platform/stores', async (request, reply) => {
+      const q = request.query as Record<string, string | undefined>;
+      const hasPagination =
+        q.page !== undefined || q.limit !== undefined || q.q || q.status || q.plano;
+
+      if (!hasPagination) {
+        const data = await listPlatformStores();
+        return reply.send({ data });
+      }
+
+      const page = q.page ? Number.parseInt(q.page, 10) : undefined;
+      const limit = q.limit ? Number.parseInt(q.limit, 10) : undefined;
+      const status =
+        q.status === 'active' || q.status === 'suspended' ? q.status : undefined;
+
+      const result = await listPlatformStoresQuery({
+        q: q.q,
+        status,
+        plano: q.plano,
+        page: Number.isFinite(page) ? page : undefined,
+        limit: Number.isFinite(limit) ? limit : undefined,
+      });
+
+      return reply.send({
+        data: result.items,
+        meta: { page: result.page, perPage: result.limit, total: result.total },
+      });
+    });
+
+    scoped.get('/platform/merchants', async (request, reply) => {
+      const q = request.query as Record<string, string | undefined>;
+      const page = q.page ? Number.parseInt(q.page, 10) : undefined;
+      const limit = q.limit ? Number.parseInt(q.limit, 10) : undefined;
+      const status =
+        q.status === 'active' || q.status === 'suspended' ? q.status : undefined;
+
+      const result = await listPlatformMerchantsQuery({
+        q: q.q,
+        status,
+        page: Number.isFinite(page) ? page : undefined,
+        limit: Number.isFinite(limit) ? limit : undefined,
+      });
+
+      return reply.send({
+        data: result.items,
+        meta: { page: result.page, perPage: result.limit, total: result.total },
+      });
     });
 
     scoped.post('/platform/stores', async (request, reply) => {
@@ -121,6 +228,34 @@ export async function platformRoutes(app: FastifyInstance): Promise<void> {
         return reply.code(404).send({ error: 'Loja não encontrada.', code: 'NOT_FOUND' });
       }
       return reply.send({ data: store });
+    });
+
+    scoped.get('/platform/stores/:slug/metrics', async (request, reply) => {
+      const slug = (request.params as { slug: string }).slug;
+      const metrics = await getPlatformStoreMetricsBySlug(slug);
+      if (!metrics) {
+        return reply.code(404).send({ error: 'Loja não encontrada.', code: 'NOT_FOUND' });
+      }
+      return reply.send({ data: metrics });
+    });
+
+    scoped.get('/platform/stores/:slug/billing', async (request, reply) => {
+      const slug = (request.params as { slug: string }).slug;
+      const billing = await getPlatformStoreBillingBySlug(slug);
+      if (!billing) {
+        return reply.code(404).send({ error: 'Loja não encontrada.', code: 'NOT_FOUND' });
+      }
+      return reply.send({ data: billing });
+    });
+
+    scoped.get('/platform/health', async (_request, reply) => {
+      const data = await getPlatformHealthSummary();
+      return reply.send({ data });
+    });
+
+    scoped.get('/platform/reports', async (_request, reply) => {
+      const data = await getPlatformReportsSummary();
+      return reply.send({ data });
     });
 
     scoped.patch('/platform/stores/:slug', async (request, reply) => {
@@ -183,31 +318,6 @@ export async function platformRoutes(app: FastifyInstance): Promise<void> {
           impersonation: request.session.impersonation,
         },
       });
-    });
-
-    scoped.post('/platform/end-impersonation', async (request, reply) => {
-      if (!request.session.impersonation && !request.session.stashedPlatform) {
-        return reply.code(400).send({
-          error: 'Nenhuma impersonação ativa.',
-          code: 'NOT_IMPERSONATING',
-        });
-      }
-
-      const platform = request.session.stashedPlatform;
-      request.session.impersonation = undefined;
-      request.session.stashedMerchant = undefined;
-      request.session.stashedBuyer = undefined;
-
-      if (platform) {
-        applyPlatformPersona(request.session, platform);
-        request.session.stashedPlatform = undefined;
-      } else {
-        await request.session.destroy();
-        return reply.send({ data: { ok: true } });
-      }
-
-      await request.session.save();
-      return reply.send({ data: { ok: true } });
     });
   });
 }

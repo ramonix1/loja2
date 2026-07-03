@@ -1,13 +1,14 @@
 import type { PedidoStatus } from '@lojao/types/pedidos';
 import { PEDIDO_STATUS } from '@lojao/types/pedidos';
 import {
+  FieldSelect,
+  FieldSelectItem,
   Table,
   TableCell,
   TableHead,
   TableHeaderCell,
   TableRow,
   adminEmptyStateClass,
-  adminInputClass,
   adminMutedClass,
   adminPageTitleClass,
   adminSubtleClass,
@@ -95,19 +96,20 @@ export function PedidosPage() {
     <div>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <h1 className={adminPageTitleClass()}>Pedidos</h1>
-        <select
+        <FieldSelect
+          surface="admin"
           data-testid={testIds.admin.pedidosFilterStatus}
           value={statusFilter}
-          onChange={(e) => handleFilterChange(e.target.value)}
-          className={adminInputClass('w-auto')}
+          emptyLabel="Todos os status"
+          triggerClassName="w-auto"
+          onValueChange={handleFilterChange}
         >
-          <option value="">Todos os status</option>
           {PEDIDO_STATUS.map((s) => (
-            <option key={s} value={s}>
+            <FieldSelectItem key={s} value={s}>
               {STATUS_LABEL[s]}
-            </option>
+            </FieldSelectItem>
           ))}
-        </select>
+        </FieldSelect>
       </div>
 
       {isError && (

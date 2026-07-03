@@ -287,20 +287,24 @@ export const sessionPlugin = fp(
 
     // Auto-persiste sessões modificadas implicitamente (sem chamar save()).
     app.addHook('onSend', async (request: FastifyRequest, reply: FastifyReply, payload) => {
+      const state = states.get(request);
+      const session = request.session;
+
+      // Persiste alterações da handler ANTES de reverter swap temporário de persona
+      // (ex.: POST /platform/end-impersonation — senão restore() desfaz o save).
+      if (state && session && !state.destroyed) {
+        const current = JSON.stringify(extractPersistedData(session));
+        if (current !== state.original && current !== '{}') {
+          await persist(store, reply, session, state);
+        }
+      }
+
       const restore = personaRestores.get(request);
       if (restore) {
         restore();
         personaRestores.delete(request);
       }
 
-      const state = states.get(request);
-      const session = request.session;
-      if (!state || !session || state.destroyed) return payload;
-
-      const current = JSON.stringify(extractPersistedData(session));
-      if (current !== state.original && current !== '{}') {
-        await persist(store, reply, session, state);
-      }
       return payload;
     });
 
