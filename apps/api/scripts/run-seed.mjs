@@ -12,7 +12,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const pkgRoot = join(here, '..');
 const repoRoot = findRepoRoot(pkgRoot);
 const tsxCli = join(resolvePnpmPackage(repoRoot, 'tsx'), 'dist/cli.mjs');
-const seedScript = join(here, 'seed-dev.mjs');
+const seedScript = join(here, 'seed-dev.ts');
 const args = process.argv.slice(2);
 
 const result = spawnSync(process.execPath, [tsxCli, seedScript, ...args], {
