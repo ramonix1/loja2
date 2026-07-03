@@ -24,6 +24,7 @@ test('trocar loja abre hub Minhas lojas @smoke', async ({ page }) => {
   await page.getByTestId(testIds.auth.loginSubmit).click();
   await expect(page.getByTestId(testIds.admin.dashboardStats)).toBeVisible();
 
+  await page.getByTestId('user-menu-trigger').click();
   await page.getByTestId(testIds.merchantHub.switchStore).click();
   await expect(page.getByTestId(testIds.merchantHub.page)).toBeVisible();
   await expect(page.getByTestId(testIds.merchantHub.storeList)).toBeVisible();

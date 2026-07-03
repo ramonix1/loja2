@@ -28,6 +28,7 @@ test('wishlist add/remove logado @smoke', async ({ page }) => {
   const productId = (await card.getAttribute('data-testid'))!.replace('store-home-product-card-', '');
 
   const wishBtn = page.getByTestId(testIds.store.wishlistBtn(productId));
+  await expect(wishBtn).toBeEnabled({ timeout: 10_000 });
   await wishBtn.click();
   await expect(page.getByTestId(testIds.store.headerWishlistBadge)).toBeVisible({ timeout: 5000 });
 

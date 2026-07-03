@@ -78,10 +78,12 @@ test('filtros de status e plano atualizam a query da listagem de lojas', async (
   await platformLogin(page);
   await page.goto('/platform/stores');
 
-  await page.getByTestId(testIds.platform.storesFilterStatus).selectOption('active');
+  await page.getByTestId(testIds.platform.storesFilterStatus).click();
+  await page.getByRole('option', { name: 'Ativas' }).click();
   await expect(page).toHaveURL(/status=active/);
 
-  await page.getByTestId(testIds.platform.storesFilterPlano).selectOption('starter');
+  await page.getByTestId(testIds.platform.storesFilterPlano).click();
+  await page.getByRole('option', { name: 'Starter' }).click();
   await expect(page).toHaveURL(/plano=starter/);
 });
 
@@ -134,8 +136,13 @@ test('sidebar NavUser abre com toggle de tema @smoke', async ({ page }) => {
 test('sidebar collapse no desktop @smoke', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
   await platformLogin(page);
+  const sidebar = page.locator('[data-slot="sidebar"][data-state]');
+  if ((await sidebar.getAttribute('data-state')) === 'collapsed') {
+    await page.getByTestId(testIds.platform.sidebarTrigger).click();
+    await expect(sidebar).toHaveAttribute('data-state', 'expanded');
+  }
   await page.getByTestId(testIds.platform.sidebarTrigger).click();
-  await expect(page.locator('[data-slot="sidebar"]').first()).toHaveAttribute('data-state', 'collapsed');
+  await expect(sidebar).toHaveAttribute('data-state', 'collapsed');
 });
 
 test('logout via NavUser @smoke', async ({ page }) => {
