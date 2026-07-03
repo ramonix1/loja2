@@ -32,7 +32,6 @@ docker run --rm \
   -e CI=true \
   -e DATABASE_URL=postgresql://postgres:postgres@db:5432/lojao \
   -e NODE_ENV=test \
-  -e TENANT_SLUG=loja \
   -e PGSSL=disable \
   -e SESSION_SECRET=ci-session-secret \
   node:24-alpine sh -ec '

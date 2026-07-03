@@ -6,6 +6,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+# shellcheck source=ci-env.sh
+source "$ROOT/scripts/ci-env.sh"
+
 COMPOSE="docker compose -f docker-compose.yml -f docker-compose.ci.yml"
 NODE_IMAGE="${CI_NODE_IMAGE:-node:24-bookworm}"
 PW_IMAGE="${CI_PLAYWRIGHT_IMAGE:-mcr.microsoft.com/playwright:v1.60.0-jammy}"
@@ -72,6 +75,13 @@ docker run --rm --network host -v "$ROOT:/app" -w /app \
   -e CI=true \
   -e E2E_BASE_URL=http://localhost:5173 \
   -e E2E_STORE_URL=http://localhost:3000 \
+  -e E2E_STORE_SLUG="$E2E_STORE_SLUG" \
+  -e E2E_ADMIN_EMAIL="$E2E_ADMIN_EMAIL" \
+  -e E2E_ADMIN_PASSWORD="$E2E_ADMIN_PASSWORD" \
+  -e E2E_BUYER_EMAIL="$E2E_BUYER_EMAIL" \
+  -e E2E_BUYER_PASSWORD="$E2E_BUYER_PASSWORD" \
+  -e E2E_MASTER_EMAIL="$E2E_MASTER_EMAIL" \
+  -e E2E_MASTER_PASSWORD="$E2E_MASTER_PASSWORD" \
   "$PW_IMAGE" sh -ec '
     corepack enable
     pnpm install --frozen-lockfile >/dev/null

@@ -2,18 +2,22 @@
 # Valida storefront + API como no GHA (falha se public/store não for 200).
 set -euo pipefail
 
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+# shellcheck source=ci-env.sh
+source "$ROOT/scripts/ci-env.sh"
+
 COMPOSE="${COMPOSE:-docker compose -f docker-compose.yml -f docker-compose.ci.yml}"
 
-echo "[verify-storefront] tenants.db_host (diagnóstico localhost vs db)..."
+echo "[verify-storefront] stores no master (diagnóstico)..."
 $COMPOSE exec -T db psql -U postgres -d lojao -t -c \
-  "SELECT slug, db_host FROM tenants WHERE slug = 'loja';" 2>/dev/null || true
+  "SELECT slug, merchant_id, active FROM stores WHERE slug = '${CI_STORE_SLUG}';" 2>/dev/null || true
 
 echo "[verify-storefront] GET /health..."
 curl -sf http://localhost:3000/health >/dev/null
 
 echo "[verify-storefront] API public/store (host → api:3001)..."
 API_STATUS=$(curl -s -o /tmp/ci-public-store.json -w '%{http_code}' \
-  -H 'X-Tenant-Slug: loja' http://localhost:3001/api/v1/public/store || echo "000")
+  -H "X-Store-Slug: ${CI_STORE_SLUG}" http://localhost:3001/api/v1/public/store || echo "000")
 if [ "$API_STATUS" != "200" ]; then
   echo "[verify-storefront] FALHOU: public/store HTTP $API_STATUS"
   cat /tmp/ci-public-store.json 2>/dev/null || true
@@ -23,7 +27,7 @@ fi
 
 echo "[verify-storefront] API direta de dentro do storefront..."
 $COMPOSE exec -T storefront node -e "
-  fetch('http://api:3001/api/v1/public/store', { headers: { 'X-Tenant-Slug': 'loja' } })
+  fetch('http://api:3001/api/v1/public/store', { headers: { 'X-Store-Slug': '${CI_STORE_SLUG}' } })
     .then(async (r) => {
       const body = await r.text();
       console.log('direct-api', r.status, body.slice(0, 120));

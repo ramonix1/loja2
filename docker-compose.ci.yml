@@ -33,7 +33,6 @@ services:
       SKIP_DOCKER_DEPS_SYNC: "true"
       API_URL: http://api:3001
       NEXT_PUBLIC_API_URL: http://localhost:3001
-      TENANT_SLUG: loja
       NEXT_PUBLIC_DEFAULT_STORE_SLUG: loja
     volumes: !override
       - .:/app

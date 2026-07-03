@@ -10,7 +10,8 @@ echo " CI GATE — espelha GitHub Actions"
 echo " Rode isto antes de git push"
 echo "=========================================="
 
-chmod +x scripts/ci-check-docker.sh scripts/ci-e2e-smoke-docker.sh
+chmod +x scripts/ci-check-docker.sh scripts/ci-e2e-smoke-docker.sh scripts/ci-guard-legacy.sh
+./scripts/ci-guard-legacy.sh
 ./scripts/ci-check-docker.sh
 ./scripts/ci-e2e-smoke-docker.sh
 

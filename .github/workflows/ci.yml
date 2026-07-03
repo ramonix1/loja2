@@ -30,7 +30,6 @@ jobs:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/lojao
       PGSSL: disable
       SESSION_SECRET: ci-session-secret
-      TENANT_SLUG: loja
       NODE_ENV: test
 
     steps:
@@ -90,6 +89,9 @@ jobs:
 
       # Ordem importa: deps + Playwright no host ANTES dos containers dev.
       # Containers CI usam node_modules da imagem (volumes anônimos), não do runner.
+      - name: Guard legacy CI patterns
+        run: chmod +x scripts/ci-guard-legacy.sh && ./scripts/ci-guard-legacy.sh
+
       - name: Start database
         run: |
           COMPOSE="docker compose -f docker-compose.yml -f docker-compose.ci.yml"
@@ -126,6 +128,13 @@ jobs:
         env:
           E2E_BASE_URL: http://localhost:5173
           E2E_STORE_URL: http://localhost:3000
+          E2E_STORE_SLUG: loja
+          E2E_ADMIN_EMAIL: admin@loja.com
+          E2E_ADMIN_PASSWORD: admin123
+          E2E_BUYER_EMAIL: comprador-test@loja.com
+          E2E_BUYER_PASSWORD: comprador123
+          E2E_MASTER_EMAIL: master@suaplataforma.com
+          E2E_MASTER_PASSWORD: troque-por-senha-forte-aqui
         run: node apps/e2e/scripts/run-playwright.mjs test --grep @smoke --pass-with-no-tests
 
       - name: Stop stack
