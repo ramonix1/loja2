@@ -5,7 +5,7 @@ import Fastify, { type FastifyInstance } from 'fastify';
 
 import { healthRoutes } from './routes/health.js';
 import { v1Routes } from './routes/v1.js';
-import { webhookRoutes } from './modules/webhooks/webhook.routes.js';
+import { webhookRouter } from './modules/webhooks/webhook.router.js';
 import { corsPluginOptions } from './lib/cors-config.js';
 import { sessionPlugin } from './plugins/session.js';
 import { registerSocketIO } from './plugins/socketio.js';
@@ -35,7 +35,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(healthRoutes);
   // Imagens legadas em disco (`/images/*`) — produção CDN redireciona; dev/proxy serve local ou R2.
   await registerStaticAssets(app);
-  await app.register(webhookRoutes);
+  await app.register(webhookRouter);
   await app.register(v1Routes, { prefix: '/api/v1' });
 
   if (process.env.NODE_ENV !== 'test') {

@@ -1,34 +1,34 @@
 import type { FastifyInstance } from 'fastify';
 
-import { adminRoutes } from '../modules/admin/admin.routes.js';
-import { aparenciaRoutes } from '../modules/aparencia/aparencia.routes.js';
-import { authRoutes } from '../modules/auth/auth.routes.js';
-import { bannersRoutes } from '../modules/banners/banners.routes.js';
-import { merchantBillingRoutes } from '../modules/billing/merchant-billing.routes.js';
-import { cartRoutes } from '../modules/cart/cart.routes.js';
-import { categoriasRoutes } from '../modules/categorias/categorias.routes.js';
-import { checkoutRoutes } from '../modules/checkout/checkout.routes.js';
-import { configuracoesRoutes } from '../modules/configuracoes/configuracoes.routes.js';
-import { compradoresRoutes } from '../modules/compradores/compradores.routes.js';
-import { merchantRoutes } from '../modules/merchants/merchant.routes.js';
-import { ordersRoutes } from '../modules/orders/orders.routes.js';
-import { produtosRoutes } from '../modules/produtos/produtos.routes.js';
-import { publicRoutes } from '../modules/public/public.routes.js';
+import { adminRouter } from '../modules/admin/admin.router.js';
+import { aparenciaRouter } from '../modules/aparencia/aparencia.router.js';
+import { authRouter } from '../modules/auth/auth.router.js';
+import { bannersRouter } from '../modules/banners/banners.router.js';
+import { merchantBillingRouter } from '../modules/billing/merchant-billing.router.js';
+import { cartRouter } from '../modules/cart/cart.router.js';
+import { categoriasRouter } from '../modules/categorias/categorias.router.js';
+import { checkoutRouter } from '../modules/checkout/checkout.router.js';
+import { configuracoesRouter } from '../modules/configuracoes/configuracoes.router.js';
+import { compradoresRouter } from '../modules/compradores/compradores.router.js';
+import { merchantRouter } from '../modules/merchants/merchant.router.js';
+import { ordersRouter } from '../modules/orders/orders.router.js';
+import { produtosRouter } from '../modules/produtos/produtos.router.js';
+import { publicRouter } from '../modules/public/public.router.js';
 import {
-  adminReviewsRoutes,
-  publicReviewsRoutes,
-  reviewsRoutes,
-} from '../modules/reviews/reviews.routes.js';
-import { relatoriosRoutes } from '../modules/relatorios/relatorios.routes.js';
-import { shippingRoutes } from '../modules/shipping/shipping.routes.js';
-import { storeChatRoutes } from '../modules/store-chat/store-chat.routes.js';
-import { agendaRoutes } from '../modules/agenda/agenda.routes.js';
-import { permissoesRoutes } from '../modules/permissoes/permissoes.routes.js';
-import { chatRoutes } from '../modules/chat/chat.routes.js';
-import { diagnosticoRoutes } from '../modules/diagnostico/diagnostico.routes.js';
-import { platformRoutes } from '../modules/platform/platform.routes.js';
-import { storeRoutes } from '../modules/store/store.routes.js';
-import { wishlistRoutes } from '../modules/wishlist/wishlist.routes.js';
+  adminReviewsRouter,
+  publicReviewsRouter,
+  reviewsRouter,
+} from '../modules/reviews/reviews.router.js';
+import { relatoriosRouter } from '../modules/relatorios/relatorios.router.js';
+import { shippingRouter } from '../modules/shipping/shipping.router.js';
+import { storeChatRouter } from '../modules/store-chat/store-chat.router.js';
+import { agendaRouter } from '../modules/agenda/agenda.router.js';
+import { permissoesRouter } from '../modules/permissoes/permissoes.router.js';
+import { chatRouter } from '../modules/chat/chat.router.js';
+import { diagnosticoRouter } from '../modules/diagnostico/diagnostico.router.js';
+import { platformRouter } from '../modules/platform/platform.router.js';
+import { storeRouter } from '../modules/store/store.router.js';
+import { wishlistRouter } from '../modules/wishlist/wishlist.router.js';
 import {
   publicStorePreHandler,
   softStorePreHandler,
@@ -95,31 +95,31 @@ export async function v1Routes(app: FastifyInstance): Promise<void> {
     return storePreHandler(request, reply);
   });
 
-  await app.register(authRoutes);
-  await app.register(platformRoutes);
-  await app.register(storeRoutes);
-  await app.register(publicRoutes);
-  await app.register(publicReviewsRoutes);
-  await app.register(reviewsRoutes);
-  await app.register(wishlistRoutes);
-  await app.register(merchantRoutes);
-  await app.register(cartRoutes);
-  await app.register(shippingRoutes);
-  await app.register(checkoutRoutes);
-  await app.register(ordersRoutes);
-  await app.register(merchantBillingRoutes);
-  await app.register(storeChatRoutes);
-  await app.register(adminRoutes);
-  await app.register(adminReviewsRoutes);
-  await app.register(categoriasRoutes);
-  await app.register(bannersRoutes);
-  await app.register(aparenciaRoutes);
-  await app.register(produtosRoutes);
-  await app.register(compradoresRoutes);
-  await app.register(configuracoesRoutes);
-  await app.register(relatoriosRoutes);
-  await app.register(agendaRoutes);
-  await app.register(permissoesRoutes);
-  await app.register(chatRoutes);
-  await app.register(diagnosticoRoutes);
+  await app.register(authRouter);
+  await app.register(platformRouter);
+  await app.register(storeRouter);
+  await app.register(publicRouter);
+  await app.register(publicReviewsRouter);
+  await app.register(reviewsRouter);
+  await app.register(wishlistRouter);
+  await app.register(merchantRouter);
+  await app.register(cartRouter);
+  await app.register(shippingRouter);
+  await app.register(checkoutRouter);
+  await app.register(ordersRouter);
+  await app.register(merchantBillingRouter);
+  await app.register(storeChatRouter);
+  await app.register(adminRouter);
+  await app.register(adminReviewsRouter);
+  await app.register(categoriasRouter);
+  await app.register(bannersRouter);
+  await app.register(aparenciaRouter);
+  await app.register(produtosRouter);
+  await app.register(compradoresRouter);
+  await app.register(configuracoesRouter);
+  await app.register(relatoriosRouter);
+  await app.register(agendaRouter);
+  await app.register(permissoesRouter);
+  await app.register(chatRouter);
+  await app.register(diagnosticoRouter);
 }

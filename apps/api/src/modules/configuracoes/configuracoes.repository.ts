@@ -1,0 +1,105 @@
+import type { ConfiguracoesConfig } from '@lojao/types/configuracoes';
+
+import { settingKeyFromEn, settingKeyToEn } from '../../lib/merchant-schema-map.js';
+import type { StoreScope } from '../../lib/store-scope.js';
+
+const CONFIG_KEYS = [
+  'controla_estoque',
+  'reservar_estoque_carrinho',
+  'modulo_agenda',
+  'habilitar_sumup',
+  'frete_cep_origem',
+  'frete_fixo',
+  'frete_gratis_acima',
+  'melhor_envio_token',
+  'melhor_envio_sandbox',
+  'frete_peso_padrao',
+  'frete_altura',
+  'frete_largura',
+  'frete_comprimento',
+] as const;
+
+const DEFAULTS: ConfiguracoesConfig = {
+  controla_estoque: false,
+  reservar_estoque_carrinho: false,
+  modulo_agenda: false,
+  habilitar_sumup: false,
+  frete_cep_origem: '',
+  frete_fixo: 0,
+  frete_gratis_acima: 0,
+  melhor_envio_token: '',
+  melhor_envio_sandbox: true,
+  frete_peso_padrao: 300,
+  frete_altura: 4,
+  frete_largura: 12,
+  frete_comprimento: 17,
+};
+
+function parseBool(value: string | null | undefined, fallback: boolean): boolean {
+  if (value == null || value === '') return fallback;
+  return value === 'true';
+}
+
+function formatCep(raw: string): string {
+  const digits = raw.replace(/\D/g, '');
+  return digits.replace(/^(\d{5})(\d{3})$/, '$1-$2');
+}
+
+function mapRowsToConfig(rows: { key: string; value: string | null }[]): ConfiguracoesConfig {
+  const cfg: Record<string, string | null> = {};
+  for (const row of rows) {
+    cfg[settingKeyFromEn(row.key)] = row.value;
+  }
+
+  return {
+    controla_estoque: parseBool(cfg.controla_estoque, DEFAULTS.controla_estoque),
+    reservar_estoque_carrinho: parseBool(
+      cfg.reservar_estoque_carrinho,
+      DEFAULTS.reservar_estoque_carrinho,
+    ),
+    modulo_agenda: parseBool(cfg.modulo_agenda, DEFAULTS.modulo_agenda),
+    habilitar_sumup: parseBool(cfg.habilitar_sumup, DEFAULTS.habilitar_sumup),
+    frete_cep_origem: cfg.frete_cep_origem ?? DEFAULTS.frete_cep_origem,
+    frete_fixo: Number.parseFloat(cfg.frete_fixo ?? String(DEFAULTS.frete_fixo)) || 0,
+    frete_gratis_acima:
+      Number.parseFloat(cfg.frete_gratis_acima ?? String(DEFAULTS.frete_gratis_acima)) || 0,
+    melhor_envio_token: cfg.melhor_envio_token ?? DEFAULTS.melhor_envio_token,
+    melhor_envio_sandbox: parseBool(cfg.melhor_envio_sandbox, DEFAULTS.melhor_envio_sandbox),
+    frete_peso_padrao:
+      Number.parseInt(cfg.frete_peso_padrao ?? String(DEFAULTS.frete_peso_padrao), 10) ||
+      DEFAULTS.frete_peso_padrao,
+    frete_altura: Number.parseFloat(cfg.frete_altura ?? String(DEFAULTS.frete_altura)) || 4,
+    frete_largura: Number.parseFloat(cfg.frete_largura ?? String(DEFAULTS.frete_largura)) || 12,
+    frete_comprimento:
+      Number.parseFloat(cfg.frete_comprimento ?? String(DEFAULTS.frete_comprimento)) || 17,
+  };
+}
+
+export async function findConfiguracoes({ pool, storeId }: StoreScope): Promise<ConfiguracoesConfig> {
+  try {
+    const enKeys = CONFIG_KEYS.map((k) => settingKeyToEn(k));
+    const r = await pool.query(
+      `SELECT key, value FROM store_settings WHERE store_id = $1 AND key = ANY($2::text[])`,
+      [storeId, enKeys],
+    );
+    return mapRowsToConfig(r.rows as { key: string; value: string | null }[]);
+  } catch {
+    return { ...DEFAULTS };
+  }
+}
+
+export async function upsertConfiguracoes(
+  { pool, storeId }: StoreScope,
+  pares: [string, string][],
+): Promise<void> {
+  for (const [chave, valor] of pares) {
+    const enKey = settingKeyToEn(chave);
+    await pool.query(
+      `INSERT INTO store_settings (store_id, key, value, updated_at) VALUES ($1, $2, $3, NOW())
+       ON CONFLICT (store_id, key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()`,
+      [storeId, enKey, valor],
+    );
+  }
+}
+
+export { formatCep };
