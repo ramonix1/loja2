@@ -95,6 +95,8 @@ make up-d
 make seed
 ```
 
+O entrypoint Docker (`docker/docker-entrypoint-dev.sh`) instala e compila `@lojao/db` / `@lojao/types` no start — esses packages exportam `dist/` (gitignored) e o bind mount `.:/app` não traz o JS compilado. `typescript` é devDependency; o install usa o package como raiz do filter para o `tsc` existir no `node_modules` do volume.
+
 ---
 
 ## Acessos (ambos os modos)

@@ -50,4 +50,19 @@ if [ "$SYNC" = true ]; then
   echo "[entrypoint] Deps OK."
 fi
 
+# dist/ é gitignored; o bind mount .:/app não traz o JS compilado.
+# tsx/Vite resolvem os exports do package.json (./dist/...), não o source .ts.
+# typescript é devDependency desses packages — precisa instalar o package como
+# raiz do filter (senão tsc não entra em packages/*/node_modules/.bin).
+if echo "$FILTER" | grep -q 'api'; then
+  echo "[entrypoint] Compilando @lojao/db e @lojao/types (exports apontam para dist/)..."
+  CI=true pnpm install --filter @lojao/db... --filter @lojao/types... --prefer-offline
+  pnpm --filter @lojao/db build
+  pnpm --filter @lojao/types build
+elif echo "$FILTER" | grep -qE 'admin|storefront'; then
+  echo "[entrypoint] Compilando @lojao/types (exports apontam para dist/)..."
+  CI=true pnpm install --filter @lojao/types... --prefer-offline
+  pnpm --filter @lojao/types build
+fi
+
 exec "$@"
